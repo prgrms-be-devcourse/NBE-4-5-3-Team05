@@ -8,6 +8,8 @@ import com.NBE_4_5_2.Team5.domain.user.entity.Users;
 import com.NBE_4_5_2.Team5.domain.user.service.UserService;
 import com.NBE_4_5_2.Team5.global.dto.RsData;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
@@ -31,27 +33,27 @@ public class ChatController {
     // 채팅방 생성
     @PostMapping("createRoom")
     @ResponseBody
-    public RsData<ChatRoom> createRoom(@RequestBody ChatRoomRequest request) {
+    public ResponseEntity<RsData<ChatRoom>> createRoom(@RequestBody ChatRoomRequest request) {
         Optional<Users> sender=userService.getUserByUsername(request.getSenderName());
         Optional<Users> receiver=userService.getUserByUsername(request.getReceiverName());
 
         if(sender.isPresent() && receiver.isPresent()) {
             ChatRoom chatRoom=chatService.createRoom(sender.get(),receiver.get());
-            return new RsData<>("200","success",chatRoom);
+            return ResponseEntity.ok(new RsData<>("200","success",chatRoom));
         }else{
-            return new RsData<>("400","user not found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new RsData<>("404","user not found"));
         }
 
     }
 
     @GetMapping("{roomId}")
-    public RsData<ChatRoom> getChatRoom(@PathVariable String roomId) {
+    public ResponseEntity<RsData<ChatRoom>> getChatRoom(@PathVariable String roomId) {
         ChatRoom chatRoom = chatService.findById(roomId);
-        if(chatRoom == null) {
-            return new RsData<>("404","채팅방없음");
+        if (chatRoom == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new RsData<>("404", "채팅방없음"));
         }
-        return new RsData<>("200","success",chatRoom);
-
+        return ResponseEntity.ok(new RsData<>("200", "success", chatRoom));
     }
 
     @MessageMapping("/send/{roomId}")
