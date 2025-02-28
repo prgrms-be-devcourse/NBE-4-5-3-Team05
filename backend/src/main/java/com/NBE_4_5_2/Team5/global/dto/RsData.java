@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @AllArgsConstructor
 public class RsData<T> {
-    private String message;
     private String code;
+    private String message;
     private T data;
 }

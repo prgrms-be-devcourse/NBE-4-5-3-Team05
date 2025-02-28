@@ -8,7 +8,6 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -39,10 +38,12 @@ public class ProductPost {
     private String image_urls; // 쉼표가 포함된 url 문자열
 
     @Column(nullable = false)
+    @Builder.Default
     private Integer likedCount = 0;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @Builder.Default
     private ProductStatus status = ProductStatus.FOR_SALE;
 
     @Column(nullable = false)
@@ -58,25 +59,28 @@ public class ProductPost {
     @LastModifiedDate
     private LocalDateTime modifiedAt;
 
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    private Member member;
+
     public static ProductPost create(String productName,
                                      Integer productPrice,
                                      String title,
                                      String content,
-                                     List<String> imageUrlList,
+                                     String image_urls,
                                      Float latitude,
                                      Float longitude) {
         return ProductPost
                 .builder()
                 .id("ppost-" + UUID.randomUUID())
                 .productName(productName)
+//                .member(member)
                 .productPrice(productPrice)
                 .title(title)
                 .content(content)
-                .image_urls(String.join(",", imageUrlList))
+                .image_urls(image_urls)
                 .latitude(latitude)
                 .longitude(longitude)
                 .build();
     }
-
 
 }
