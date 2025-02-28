@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chat Test</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+</head>
+<body>
+<div>
+    <h2>Chat Test</h2>
+    <input type="text" id="username" placeholder="Your Name" />
+    <input type="text" id="roomId" placeholder="Room ID" />
+    <input type="text" id="message" placeholder="Message" />
+    <button onclick="sendMessage()">Send</button>
+</div>
+<div id="messages"></div>
+
+<script>
+    const socket = new SockJS('/chat'); // WebSocket endpoint
+    const stompClient = Stomp.over(socket);
+
+    stompClient.connect({}, function(frame) {
+        console.log('Connected: ' + frame);
+
+        // 특정 채팅방 메시지 수신
+        stompClient.subscribe('/topic/messages/' + document.getElementById('roomId').value, function(message) {
+            const msg = JSON.parse(message.body);
+            document.getElementById('messages').innerHTML += `<p>${msg.sender}: ${msg.message}</p>`;
+        });
+    });
+
+    function sendMessage() {
+        const username = document.getElementById('username').value;
+        const roomId = document.getElementById('roomId').value;
+        const messageContent = document.getElementById('message').value;
+        const chatMessage = { sender: username, message: messageContent, chatRoomId: roomId };
+
+        stompClient.send(`/api/chatting/send/${roomId}`, {}, JSON.stringify(chatMessage));
+    }
+</script>
+</body>
+</html>
