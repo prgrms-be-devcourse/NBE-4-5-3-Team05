@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.NBE_4_5_2.Team5.domain.payment.dto.PaymentDto;
 import com.NBE_4_5_2.Team5.domain.payment.dto.PaymentMetaData;
 import com.NBE_4_5_2.Team5.domain.payment.service.PaymentService;
 import com.NBE_4_5_2.Team5.global.response.RsData;
@@ -38,8 +39,13 @@ public class PaymentController {
 		return new RsData<>("결제 메타데이터 저장 성공.", HttpStatus.OK.toString(), metadata);
 	}
 
-	@PostMapping("/payments")
-	public RsData<Void> purchaseItem(@RequestBody @NotNull PaymentMetaData paymentMetaData) {
+	public record PurchaseItemReqDto(String productId, Integer amount) {
+	}
 
+	@PostMapping("/payments")
+	public RsData<PaymentDto> purchaseItem(@RequestBody @NotNull PurchaseItemReqDto reqBody) {
+		PaymentDto purchased = paymentService.purchase(reqBody.productId(), reqBody.amount());
+
+		return new RsData<>("상품 구매 성공.", HttpStatus.OK.toString(), purchased);
 	}
 }
