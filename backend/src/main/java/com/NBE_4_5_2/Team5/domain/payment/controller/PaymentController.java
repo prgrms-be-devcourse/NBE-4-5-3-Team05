@@ -39,12 +39,12 @@ public class PaymentController {
 		return new RsData<>("결제 메타데이터 저장 성공.", HttpStatus.OK.toString(), metadata);
 	}
 
-	public record PurchaseItemReqDto(String productId, Integer amount) {
+	public record PurchaseItemReqDto(String productId) {
 	}
 
-	@PostMapping("/payments")
+	@PostMapping("")
 	public RsData<PaymentDto> purchaseItem(@RequestBody @NotNull PurchaseItemReqDto reqBody) {
-		PaymentDto purchased = paymentService.purchase(reqBody.productId(), reqBody.amount());
+		PaymentDto purchased = paymentService.purchase(reqBody.productId());
 
 		return new RsData<>("상품 구매 성공.", HttpStatus.OK.toString(), purchased);
 	}
