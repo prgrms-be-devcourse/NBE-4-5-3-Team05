@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.NBE_4_5_2.Team5.domain.member.entity.Member;
-import com.NBE_4_5_2.Team5.domain.member.repository.MemberRepository;
+import com.NBE_4_5_2.Team5.domain.member.entity.MemberRepository;
 
 import lombok.RequiredArgsConstructor;
 
