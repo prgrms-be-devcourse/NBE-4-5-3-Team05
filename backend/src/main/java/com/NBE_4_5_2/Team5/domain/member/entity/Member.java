@@ -2,6 +2,7 @@ package com.NBE_4_5_2.Team5.domain.member.entity;
 
 import java.util.UUID;
 
+import com.NBE_4_5_2.Team5.domain.product.dto.ProductStatus;
 import com.NBE_4_5_2.Team5.domain.product.entity.Product;
 import com.NBE_4_5_2.Team5.global.exception.payment.InsufficientPayMoneyException;
 
@@ -30,6 +31,7 @@ public class Member {
 	public void buy(Product product, Integer amount) {
 		pay(amount);
 		addToPurchasedProductList(product);
+		product.updateStatus(ProductStatus.PURCHASED);
 	}
 
 	//TODO : Member 객체의 구현에 따라 구매 상품을 담을 list에 업데이트 필요
@@ -65,6 +67,7 @@ public class Member {
 		if (!product.isAvailable()) {
 			throw new IllegalStateException("판매중인 상품이 아닙니다.");
 		}
+
 		return true;
 	}
 
