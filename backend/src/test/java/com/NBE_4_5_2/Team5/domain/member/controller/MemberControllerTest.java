@@ -1,7 +1,7 @@
 package com.NBE_4_5_2.Team5.domain.member.controller;
 
 import com.NBE_4_5_2.Team5.domain.member.entity.Member;
-import com.NBE_4_5_2.Team5.domain.member.service.MemberService;
+import com.NBE_4_5_2.Team5.domain.member.repository.MemberRepository;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -32,7 +32,7 @@ class MemberControllerTest {
     private MockMvc mvc;
 
     @Autowired
-    private MemberService memberService;
+    private MemberRepository memberRepository;
 
     private void checkUser(ResultActions resultActions, Member member) throws Exception {
         resultActions
@@ -85,7 +85,7 @@ class MemberControllerTest {
 
         ResultActions resultActions = signUpRequest(username, password, email, nickname, address, profileUrl);
 
-        Member member = memberService.findByUsername(username).get();
+        Member member = memberRepository.findByUsername(username).get();
         assertThat(member.getNickname()).isEqualTo(nickname);
         assertThat(member.getId()).startsWith("user-");
 
@@ -139,13 +139,13 @@ class MemberControllerTest {
                 .andExpect(status().isConflict())
                 .andExpect(handler().handlerType(MemberController.class))
                 .andExpect(handler().methodName("signUp"))
-                .andExpect(jsonPath("$.code").value("409-1"))
+                .andExpect(jsonPath("$.code").value("409-2"))
                 .andExpect(jsonPath("$.message").value("이미 사용중인 이메일입니다."));
 
     }
 
     @Test
-    @DisplayName("회원 가입3 - nickname 중복")
+    @DisplayName("회원 가입4 - nickname 중복")
     void signUp4() throws Exception {
 
         String username = "user4";
@@ -161,10 +161,9 @@ class MemberControllerTest {
                 .andExpect(status().isConflict())
                 .andExpect(handler().handlerType(MemberController.class))
                 .andExpect(handler().methodName("signUp"))
-                .andExpect(jsonPath("$.code").value("409-1"))
+                .andExpect(jsonPath("$.code").value("409-3"))
                 .andExpect(jsonPath("$.message").value("이미 사용중인 닉네임입니다."));
 
     }
-
 
 }
