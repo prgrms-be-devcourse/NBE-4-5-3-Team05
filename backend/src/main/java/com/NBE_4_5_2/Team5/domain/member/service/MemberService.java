@@ -13,12 +13,6 @@ import java.util.UUID;
 public class MemberService {
     private final MemberRepository memberRepository;
 
-
-
-    public Optional<Member> findByUsername(String username) {
-        return memberRepository.findByUsername(username);
-    }
-
     public Member signUp(String username, String password, String email,
                          String nickname, String address, String profileUrl) {
 
@@ -33,5 +27,21 @@ public class MemberService {
                 .build();
 
         return memberRepository.save(member);
+    }
+
+    public long count() {
+        return memberRepository.count();
+    }
+
+    public Optional<Member> findByUsername(String username) {
+        return memberRepository.findByUsername(username);
+    }
+
+    public Optional<Member> findByEmail(String email) {
+        return memberRepository.findByEmail(email);
+    }
+
+    public Optional<Member> findByNickname(String nickname) {
+        return memberRepository.findByNickname(nickname);
     }
 }

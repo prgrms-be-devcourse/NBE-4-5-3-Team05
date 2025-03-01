@@ -100,5 +100,71 @@ class MemberControllerTest {
 
     }
 
+    @Test
+    @DisplayName("회원 가입2 - username 중복")
+    void signUp2() throws Exception {
+
+        String username = "user1";
+        String password = "1234";
+        String email = "new@naver.com";
+        String nickname = "무명";
+        String address = "서울시 강남구";
+        String profileUrl = "https://example.com/default_profile.png";
+
+        ResultActions resultActions = signUpRequest(username, password, email, nickname, address, profileUrl);
+
+        resultActions
+                .andExpect(status().isConflict())
+                .andExpect(handler().handlerType(MemberController.class))
+                .andExpect(handler().methodName("signUp"))
+                .andExpect(jsonPath("$.code").value("409-1"))
+                .andExpect(jsonPath("$.message").value("이미 사용중인 아이디입니다."));
+
+    }
+
+    @Test
+    @DisplayName("회원 가입3 - email 중복")
+    void signUp3() throws Exception {
+
+        String username = "user4";
+        String password = "1234";
+        String email = "user1@gmail.com";
+        String nickname = "무명";
+        String address = "서울시 강남구";
+        String profileUrl = "https://example.com/default_profile.png";
+
+        ResultActions resultActions = signUpRequest(username, password, email, nickname, address, profileUrl);
+
+        resultActions
+                .andExpect(status().isConflict())
+                .andExpect(handler().handlerType(MemberController.class))
+                .andExpect(handler().methodName("signUp"))
+                .andExpect(jsonPath("$.code").value("409-1"))
+                .andExpect(jsonPath("$.message").value("이미 사용중인 이메일입니다."));
+
+    }
+
+    @Test
+    @DisplayName("회원 가입3 - nickname 중복")
+    void signUp4() throws Exception {
+
+        String username = "user4";
+        String password = "1234";
+        String email = "user4@gmail.com";
+        String nickname = "user1";
+        String address = "서울시 강남구";
+        String profileUrl = "https://example.com/default_profile.png";
+
+        ResultActions resultActions = signUpRequest(username, password, email, nickname, address, profileUrl);
+
+        resultActions
+                .andExpect(status().isConflict())
+                .andExpect(handler().handlerType(MemberController.class))
+                .andExpect(handler().methodName("signUp"))
+                .andExpect(jsonPath("$.code").value("409-1"))
+                .andExpect(jsonPath("$.message").value("이미 사용중인 닉네임입니다."));
+
+    }
+
 
 }
