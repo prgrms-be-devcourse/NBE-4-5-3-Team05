@@ -1,9 +1,10 @@
-package com.NBE_4_5_2.Team5.domain.member.entity;
+package com.NBE_4_5_2.Team5.domain.user.entity;
 
 import com.NBE_4_5_2.Team5.global.entity.BaseTime;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
+import jakarta.persistence.Table;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -15,7 +16,8 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @NoArgsConstructor
 @SuperBuilder
 @EntityListeners(AuditingEntityListener.class)
-public class Member extends BaseTime {
+@Table(name = "member")
+public class User extends BaseTime {
 
     @Column(length = 20, nullable = false, unique = true)
     private String username;
