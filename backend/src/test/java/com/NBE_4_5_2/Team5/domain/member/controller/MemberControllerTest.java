@@ -43,8 +43,9 @@ class MemberControllerTest {
                 .andExpect(jsonPath("$.data.nickname").value(member.getNickname()))
                 .andExpect(jsonPath("$.data.address").value(member.getAddress()))
                 .andExpect(jsonPath("$.data.profileUrl").value(member.getProfileUrl()))
-                .andExpect(jsonPath("$.data.createdDate").value(matchesPattern(member.getCreatedAt().toString().replaceAll("0+$", "") + ".*")))
-                .andExpect(jsonPath("$.data.modifiedDate").value(matchesPattern(member.getModifiedAt().toString().replaceAll("0+$", "") + ".*")));
+                .andExpect(jsonPath("$.data.role").value(member.getRole()))
+                .andExpect(jsonPath("$.data.createdAt").value(matchesPattern(member.getCreatedAt().toString().replaceAll("0+$", "") + ".*")))
+                .andExpect(jsonPath("$.data.modifiedAt").value(matchesPattern(member.getModifiedAt().toString().replaceAll("0+$", "") + ".*")));
     }
 
     private ResultActions signUpRequest(String username, String password, String email, String nickname,
@@ -91,9 +92,9 @@ class MemberControllerTest {
         resultActions
                 .andExpect(status().isCreated())
                 .andExpect(handler().handlerType(MemberController.class))
-                .andExpect(handler().methodName("signup"))
-                .andExpect(jsonPath("$.message").value("회원 가입이 완료되었습니다."))
-                .andExpect(jsonPath("$.code").value("201"));
+                .andExpect(handler().methodName("signUp"))
+                .andExpect(jsonPath("$.code").value("201-1"))
+                .andExpect(jsonPath("$.message").value("회원 가입이 완료되었습니다."));
 
         checkUser(resultActions, member);
 

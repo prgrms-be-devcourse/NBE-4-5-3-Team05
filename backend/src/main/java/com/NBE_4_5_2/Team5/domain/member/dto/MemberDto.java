@@ -7,25 +7,24 @@ import java.time.LocalDateTime;
 
 @Getter
 public class MemberDto {
-
+    private String id;
     private String username;
     private String email;
     private String nickname;
+    private String address;
     private String profileUrl;
     private Integer role;
-    private Boolean blocked;
-    private Integer blockedCount;
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
 
     public MemberDto(Member member) {
+        this.id = member.getId();
         this.username = member.getUsername();
         this.email = member.getEmail();
         this.nickname = member.getNickname();
+        this.address = member.getAddress();
         this.profileUrl = member.getProfileUrl();
         this.role = member.getRole();
-        this.blocked = member.getBlocked();
-        this.blockedCount = member.getBlockedCount();
         this.createdAt = member.getCreatedAt();
         this.modifiedAt = member.getModifiedAt();
     }

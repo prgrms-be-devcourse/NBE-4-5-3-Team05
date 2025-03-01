@@ -30,8 +30,8 @@ public class MemberController {
                 memberForm.nickname, memberForm.address, memberForm.profileUrl);
 
         return new RsData<>(
+                "201-1",
                 "회원 가입이 완료되었습니다.",
-                "201",
                 new MemberDto(member)
         );
     }
