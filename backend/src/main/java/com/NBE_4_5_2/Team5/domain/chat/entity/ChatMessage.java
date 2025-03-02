@@ -4,9 +4,11 @@ package com.NBE_4_5_2.Team5.domain.chat.entity;
 import lombok.Getter;
 import lombok.Setter;
 
+
 @Getter
 @Setter
 public class ChatMessage {
+
     // 메시지 타입 : 입장, 채팅
     public enum MessageType {
         ENTER, TALK
