@@ -1,0 +1,46 @@
+package com.NBE_4_5_2.Team5.domain.admin.entity;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
+
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+
+import com.NBE_4_5_2.Team5.domain.user.entity.User;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Table(name = "notice_post")
+@NoArgsConstructor
+@Getter
+public class Notice {
+	@Id
+	private final String id = "npost-" + UUID.randomUUID();
+
+	@ManyToOne
+	private User admin;
+
+	private String title;
+	private String content;
+
+	@CreatedDate
+	private LocalDateTime createdAt;
+
+	@LastModifiedDate
+	private LocalDateTime modifiedAt;
+
+	@Builder
+	public Notice(User admin, String title, String content) {
+		this.admin = admin;
+		this.title = title;
+		this.content = content;
+	}
+}
+
