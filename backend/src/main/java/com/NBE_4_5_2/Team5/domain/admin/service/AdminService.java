@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.NBE_4_5_2.Team5.domain.admin.dto.NoticeDto;
-import com.NBE_4_5_2.Team5.domain.admin.entity.Notice;
+import com.NBE_4_5_2.Team5.domain.admin.entity.NoticePost;
 import com.NBE_4_5_2.Team5.domain.admin.repository.NoticePostRepository;
 import com.NBE_4_5_2.Team5.domain.user.entity.Role;
 import com.NBE_4_5_2.Team5.domain.user.entity.User;
@@ -27,10 +27,10 @@ public class AdminService {
 
 		isAdmin(admin);
 
-		Notice notice = Notice.builder().title(title).content(content)
+		NoticePost noticePost = NoticePost.builder().title(title).content(content)
 			.admin(admin).build();
 
-		Notice saved = noticePostRepository.save(notice);
+		NoticePost saved = noticePostRepository.save(noticePost);
 
 		return NoticeDto.of(saved);
 

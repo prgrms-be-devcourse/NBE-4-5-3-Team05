@@ -21,7 +21,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "notice_post")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-public class Notice {
+public class NoticePost {
 	@Id
 	private final String id = "npost-" + UUID.randomUUID();
 
@@ -38,7 +38,7 @@ public class Notice {
 	private LocalDateTime modifiedAt;
 
 	@Builder
-	public Notice(User admin, String title, String content) {
+	public NoticePost(User admin, String title, String content) {
 		this.admin = admin;
 		this.title = title;
 		this.content = content;
