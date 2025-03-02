@@ -36,17 +36,42 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        String refreshToken = authorizationHeader.substring("Bearer ".length());
+        String authToken = authorizationHeader.substring("Bearer ".length());
 
-        Optional<User> opUser = userService.findByRefreshToken(refreshToken);
+        String[] tokenBits = authToken.split(" ", 2);
 
-        if(opUser.isEmpty()) {
+        if(tokenBits.length < 2) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        User actor = opUser.get();
-        rq.setLogin(actor.getUsername());
+        String refreshToken = tokenBits[0];
+        String accessToken = tokenBits[1];
+
+        Optional<User> opAccessUser = userService.getUserByAccessToken(accessToken);
+
+        if(opAccessUser.isEmpty()) {
+
+            Optional<User> opRefreshUser = userService.findByRefreshToken(refreshToken);
+
+            if(opRefreshUser.isEmpty()) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+
+            // accessToken 재발급
+            String newAuthToken = userService.getAuthToken(opRefreshUser.get());
+            response.addHeader("Authorization", "Bearer " + newAuthToken);
+
+            User actor = opRefreshUser.get();
+            rq.setLogin(actor);
+
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        User actor = opAccessUser.get();
+        rq.setLogin(actor);
 
         filterChain.doFilter(request, response);
     }

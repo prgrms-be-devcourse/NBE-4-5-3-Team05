@@ -6,6 +6,7 @@ import com.NBE_4_5_2.Team5.global.exception.ServiceException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -67,7 +68,30 @@ public class UserService {
         return userRepository.findByRefreshToken(refreshToken);
     }
 
-    public String getAccessToken(User user) {
-        return authTokenService.genAccessToken(user);
+    public Optional<User> getUserByAccessToken(String accessToken) {
+
+        Map<String, Object> payload = authTokenService.getPayload(accessToken);
+
+        if (payload == null) {
+            return Optional.empty();
+        }
+
+        String id = (String) payload.get("id");
+        String username = (String) payload.get("username");
+
+        return Optional.of(
+                User.builder()
+                        .id(id)
+                        .username(username)
+                        .build()
+        );
+    }
+
+    public String getAuthToken(User user) {
+        return user.getRefreshToken() + " " + authTokenService.generateAccessToken(user);
+    }
+
+    public String generateAccessToken(User member) {
+        return authTokenService.generateAccessToken(member);
     }
 }

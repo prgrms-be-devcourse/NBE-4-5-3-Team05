@@ -9,10 +9,7 @@ import com.NBE_4_5_2.Team5.global.exception.ServiceException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/users")
@@ -52,7 +49,7 @@ public class UserController {
             throw new ServiceException("401-2", "비밀번호가 일치하지 않습니다.");
         }
 
-        String accessToken = userService.getAccessToken(user);
+        String accessToken = userService.generateAccessToken(user);
 
         return new RsData<>(
                 "200-1",
@@ -64,6 +61,5 @@ public class UserController {
                 )
         );
     }
-
 
 }

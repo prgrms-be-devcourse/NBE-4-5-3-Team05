@@ -28,11 +28,11 @@ public class AuthTokenServiceTest {
     private String keyString;
 
     @Test
-    @DisplayName("accessToken 생성 성공")
+    @DisplayName("user1 - accessToken 생성 성공")
     void accessToken() {
 
         User user = userService.findByUsername("user1").get();
-        String accessToken = authTokenService.genAccessToken(user);
+        String accessToken = authTokenService.generateAccessToken(user);
 
         assertThat(accessToken).isNotBlank();
 
@@ -44,7 +44,7 @@ public class AuthTokenServiceTest {
     void checkValid() {
 
         User user = userService.findByUsername("user1").get();
-        String accessToken = authTokenService.genAccessToken(user); // accessToken 생성
+        String accessToken = authTokenService.generateAccessToken(user); // accessToken 생성
         boolean isValid = Ut.Jwt.isValidToken(keyString, accessToken);
         assertThat(isValid).isTrue();
 
@@ -53,6 +53,5 @@ public class AuthTokenServiceTest {
         assertThat(parsedPayload).containsAllEntriesOf(
                 Map.of("id", user.getId(), "username", user.getUsername()) // 정상 작동 확인
         );
-
     }
 }
