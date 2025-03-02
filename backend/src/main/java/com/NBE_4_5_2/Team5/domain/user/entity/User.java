@@ -25,6 +25,9 @@ public class User extends BaseTime {
     @Column(length = 255, nullable = false)
     private String password;
 
+    @Column(length = 100, unique = true)
+    private String refreshToken;
+
     @Column(length = 50, nullable = false, unique = true)
     private String email;
 
@@ -43,11 +46,11 @@ public class User extends BaseTime {
 
     @Column(nullable = false)
     @Builder.Default
-    private Boolean blocked = false; // 계정이 잠겼는지 여부
+    private Boolean blocked = false;
 
     @Column(name = "blocked_count", nullable = false)
     @Builder.Default
-    private Integer blockedCount = 0; // 계정 차단 횟수
+    private Integer blockedCount = 0;
 
     public boolean isAdmin() {
         return this.role == 0;
