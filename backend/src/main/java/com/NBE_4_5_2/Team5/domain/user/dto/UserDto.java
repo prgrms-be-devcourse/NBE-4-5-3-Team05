@@ -7,9 +7,11 @@ import com.NBE_4_5_2.Team5.domain.user.entity.User;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
 @AllArgsConstructor
+@NoArgsConstructor
 public class UserDto {
 	private String id;
 	private Role role; // 0 : admin 1: user
