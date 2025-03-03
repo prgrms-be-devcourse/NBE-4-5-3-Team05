@@ -26,7 +26,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/h2-console/**")
                         .permitAll()
-                        .requestMatchers("/api/**")
+                        .requestMatchers("/api/posts/**", "/api/comments/**", "/api/payments/**", "/api/admin/**", "/api/chat/**", "/api/chatting/**")
+                        .permitAll()
+                        .requestMatchers("/api/users/login", "/api/users/signup", "/api/users/logout")
                         .permitAll()
                         .anyRequest()
                         .authenticated()
