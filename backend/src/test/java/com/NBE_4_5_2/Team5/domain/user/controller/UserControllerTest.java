@@ -1,9 +1,10 @@
 package com.NBE_4_5_2.Team5.domain.user.controller;
 
 import com.NBE_4_5_2.Team5.domain.user.entity.User;
-import com.NBE_4_5_2.Team5.domain.user.repository.UserRepository;
+import com.NBE_4_5_2.Team5.domain.user.service.UserService;
 import jakarta.servlet.http.Cookie;
 import jakarta.transaction.Transactional;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -34,7 +36,16 @@ class UserControllerTest {
     private MockMvc mvc;
 
     @Autowired
-    private UserRepository userRepository;
+    private UserService userService;
+
+    private User loginedUser;
+    private String token;
+
+    @BeforeEach
+    void login() {
+        loginedUser = userService.findByUsername("user1").get();
+        token = userService.getAuthToken(loginedUser);
+    }
 
     private void checkUser(ResultActions resultActions, User user) throws Exception {
         resultActions
@@ -87,7 +98,7 @@ class UserControllerTest {
 
         ResultActions resultActions = signupRequest(username, password, email, nickname, address, profileUrl);
 
-        User user = userRepository.findByUsername(username).get();
+        User user = userService.findByUsername(username).get();
         assertThat(user.getNickname()).isEqualTo(nickname);
         assertThat(user.getId()).startsWith("user-");
 
@@ -250,7 +261,7 @@ class UserControllerTest {
         String password = "user11234@";
 
         ResultActions resultActions = loginRequest(username, password);
-        User user = userRepository.findByUsername(username).get();
+        User user = userService.findByUsername(username).get();
 
         resultActions
                 .andExpect(status().isOk())
@@ -395,6 +406,71 @@ class UserControllerTest {
                             assertThat(accessToken.getMaxAge()).isZero();
                         }
                 );
+
+    }
+
+    private ResultActions meRequest(String token) throws Exception {
+        return mvc
+                .perform(
+                        get("/api/users/me")
+                                .header("Authorization", "Bearer " + token)
+
+                )
+                .andDo(print());
+    }
+
+    @Test
+    @DisplayName("내 정보 조회 - 성공")
+    void me1() throws Exception {
+
+        String refreshToken = loginedUser.getRefreshToken();
+        String token = userService.getAuthToken(loginedUser);
+
+        ResultActions resultActions = meRequest(token);
+
+        resultActions
+                .andExpect(status().isOk())
+                .andExpect(handler().handlerType(UserController.class))
+                .andExpect(handler().methodName("me"))
+                .andExpect(jsonPath("$.code").value("200-1"))
+                .andExpect(jsonPath("$.message").value("내 정보 조회가 완료되었습니다."));
+
+        checkUser(resultActions, loginedUser);
+
+    }
+
+    @Test
+    @DisplayName("내 정보 조회 - 실패 - 잘못된 refreshToken")
+    void me2() throws Exception {
+
+        String refreshToken = "";
+
+        ResultActions resultActions = meRequest(refreshToken);
+
+        resultActions
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("401-1"))
+                .andExpect(jsonPath("$.message").value("잘못된 인증키입니다."));
+
+    }
+
+    @Test
+    @DisplayName("내 정보 조회 - 만료된 accessToken 사용")
+    void me3() throws Exception {
+
+        String refreshToken = loginedUser.getRefreshToken();
+        String expiredToken = refreshToken + " eyJhbGciOiJIUzUxMiJ9.eyJpZCI6InVzZXItNjVhYTMxMDUtMzYyNi00NzZlLThjMzgtZmU0OGVjNGQyMDNjIiwidXNlcm5hbWUiOiJ1c2VyMSIsImlhdCI6MTc0MDk5MTc2NCwiZXhwIjoxNzQwOTkxNzY5fQ.UypcRIORV4MyzY53-2W94z3jxP5VLbs5NGWOjJDZZ-O5yLxTHxhzDbU9LTNfcblQXaZAiypGU0m3EDq_RjHlsQ";
+
+        ResultActions resultActions = meRequest(expiredToken);
+
+        resultActions
+                .andExpect(status().isOk())
+                .andExpect(handler().handlerType(UserController.class))
+                .andExpect(handler().methodName("me"))
+                .andExpect(jsonPath("$.code").value("200-1"))
+                .andExpect(jsonPath("$.message").value("내 정보 조회가 완료되었습니다."));
+
+        checkUser(resultActions, loginedUser);
 
     }
 }
