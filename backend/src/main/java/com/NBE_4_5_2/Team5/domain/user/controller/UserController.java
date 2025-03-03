@@ -1,13 +1,11 @@
 package com.NBE_4_5_2.Team5.domain.user.controller;
 
-import com.NBE_4_5_2.Team5.domain.user.dto.LoginUserDto;
-import com.NBE_4_5_2.Team5.domain.user.dto.LoginUserForm;
-import com.NBE_4_5_2.Team5.domain.user.dto.SignUpUserForm;
-import com.NBE_4_5_2.Team5.domain.user.dto.UserDto;
+import com.NBE_4_5_2.Team5.domain.user.dto.*;
 import com.NBE_4_5_2.Team5.domain.user.entity.User;
 import com.NBE_4_5_2.Team5.domain.user.service.UserService;
 import com.NBE_4_5_2.Team5.global.Rq;
 import com.NBE_4_5_2.Team5.global.dto.RsData;
+import com.NBE_4_5_2.Team5.global.exception.ServiceException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -78,5 +76,25 @@ public class UserController {
                 new UserDto(user)
         );
     }
+
+    @PostMapping("/refresh")
+    public RsData<String> refresh(@RequestBody @Valid RefreshUserForm userForm) {
+
+        String refreshToken = userForm.refreshToken();
+
+        User user = userService.findByRefreshToken(refreshToken)
+                .orElseThrow(() -> new ServiceException("401-2", "유효하지 않은 RefreshToken입니다."));
+
+        String newAccessToken = userService.generateAccessToken(user);
+        rq.addCookie("accessToken", newAccessToken);
+        rq.addCookie("refreshToken", refreshToken);
+
+        return new RsData<>(
+                "200-1",
+                "AccessToken이 재발급되었습니다.",
+                newAccessToken
+        );
+    }
+
 
 }

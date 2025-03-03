@@ -63,7 +63,7 @@ public class UserService {
         return userRepository.findByRefreshToken(refreshToken);
     }
 
-    // AccessToken을 통해 DB 조회를 하지않고 id와 username 만을 가진 User 객체를 반환함
+    // AccessToken을 통해 DB 조회를 하지않고 id와 username 만을 가진 User 객체를 반환
     public Optional<User> getUserByAccessToken(String accessToken) {
 
         Map<String, Object> payload = authTokenService.getPayload(accessToken);
@@ -87,11 +87,12 @@ public class UserService {
         return user.getRefreshToken() + " " + authTokenService.generateAccessToken(user);
     }
 
-    public String generateAccessToken(User member) {
-        return authTokenService.generateAccessToken(member);
+    public String generateAccessToken(User user) {
+        return authTokenService.generateAccessToken(user);
     }
 
     public long count() {
         return userRepository.count();
     }
+
 }
