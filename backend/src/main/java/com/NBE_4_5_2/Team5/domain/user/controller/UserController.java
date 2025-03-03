@@ -70,4 +70,17 @@ public class UserController {
         return new RsData<>("200-1", "로그아웃 되었습니다.");
     }
 
+    @GetMapping("/me")
+    public RsData<UserDto> me() {
+
+        User userIdentity = rq.getUserIdentity();
+        User user = userService.findById(userIdentity.getId()).get();
+
+        return new RsData<>(
+                "200-1",
+                "내 정보 조회가 완료되었습니다.",
+                new UserDto(user)
+        );
+    }
+
 }

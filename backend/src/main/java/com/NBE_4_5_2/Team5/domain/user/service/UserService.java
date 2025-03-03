@@ -60,6 +60,10 @@ public class UserService {
         return userRepository.count();
     }
 
+    public Optional<User> findById(String id) {
+        return userRepository.findById(id);
+    }
+
     public Optional<User> findByUsername(String username) {
         return userRepository.findByUsername(username);
     }
@@ -68,6 +72,7 @@ public class UserService {
         return userRepository.findByRefreshToken(refreshToken);
     }
 
+    // AccessToken을 통해 DB 조회를 하지않고 id와 username 만을 가진 User 객체를 반환함
     public Optional<User> getUserByAccessToken(String accessToken) {
 
         Map<String, Object> payload = authTokenService.getPayload(accessToken);

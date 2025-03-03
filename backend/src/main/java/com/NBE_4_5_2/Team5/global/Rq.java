@@ -1,12 +1,14 @@
 package com.NBE_4_5_2.Team5.global;
 
 import com.NBE_4_5_2.Team5.domain.user.entity.User;
+import com.NBE_4_5_2.Team5.global.exception.ServiceException;
 import com.NBE_4_5_2.Team5.global.security.SecurityUser;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
@@ -32,12 +34,29 @@ public class Rq {
 
     }
 
-    public String getHeader(String name) {
-        return request.getHeader(name);
+    public User getUserIdentity() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if(authentication == null) {
+            throw new ServiceException("401-2", "로그인이 필요합니다.");
+        }
+
+        Object principal = authentication.getPrincipal();
+
+        if(!(principal instanceof SecurityUser)) {
+            throw new ServiceException("401-3", "잘못된 인증 정보입니다");
+        }
+
+        SecurityUser user = (SecurityUser) principal;
+
+        return User.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .build();
     }
 
-    public void setHeader(String name, String value) {
-        response.setHeader(name, value);
+    public String getHeader(String name) {
+        return request.getHeader(name);
     }
 
     public String getValueFromCookie(String name) {
