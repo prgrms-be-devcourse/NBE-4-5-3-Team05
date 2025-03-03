@@ -18,8 +18,9 @@ import java.util.List;
 public class ProductController {
     private final ProductService productService;
 
+    // 구매 내역 조회
     @GetMapping
-    RsData<List<ProductDto>> getProduct(@RequestParam String type) {
+    public RsData<List<ProductDto>> getProduct(@RequestParam String type) {
         if (!"purchased".equals(type)) {
             throw new ServiceException("400-INVALID_PARAM", "Invalid type parameter");
         }
@@ -27,25 +28,17 @@ public class ProductController {
         return new RsData<>("200-SUCCESS", "내 구매내역 조회 성공", products);
     }
 
-    //판매 내역 조회
+    // 판매 내역 조회
     @GetMapping("/sales")
-    public RsData<List<ProductDto>> getSalesHistory(@RequestParam(name = "type") String type, @RequestParam(name = "userId") String userId) {
-        if (!type.equals("sold") && !type.equals("selling") && !type.equals("reserved")) {
-            throw new ServiceException("400-INVALID_PARAM", "Invalid type parameter");
-        }
-        List<ProductDto> products = productService.getSalesHistory(userId, type);
+    public RsData<List<ProductDto>> getSalesHistory(@RequestParam String userId) {
+        List<ProductDto> products = productService.getSalesHistory(userId);
         return new RsData<>("200-SUCCESS", "내 판매내역 조회 성공", products);
     }
 
-    //찜한 게시글 조회
+    // 찜한 게시글 조회
     @GetMapping("/favorites")
-    public RsData<List<ProductDto>> getFavoriteProducts(@RequestParam(name = "type") String type, @RequestParam(name = "userId") String userId) {
-        if (!"favorite".equals(type)) {
-            throw new ServiceException("400-INVALID_PARAM", "Invalid type parameter");
-        }
+    public RsData<List<ProductDto>> getFavoriteProducts(@RequestParam String userId) {
         List<ProductDto> favoriteProducts = productService.getFavoriteProducts(userId);
         return new RsData<>("200-SUCCESS", "내가 찜한 내역 조회 성공", favoriteProducts);
     }
-
-
 }

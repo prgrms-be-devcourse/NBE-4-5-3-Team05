@@ -10,13 +10,13 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Service@RequiredArgsConstructor
+@Service
+@RequiredArgsConstructor
 public class ProductService {
     private final ProductRepository productRepository;
     private final LikedPostRepository likedPostRepository;
 
-
-    //구매 내역 조회
+    // 구매 내역 조회
     public List<ProductDto> getProduct() {
         List<Product> products = productRepository.findAllByStatus("purchased");
         return products.stream()
@@ -24,9 +24,9 @@ public class ProductService {
                 .collect(Collectors.toList());
     }
 
-    //판매 내역 조회
-    public List<ProductDto> getSalesHistory(String userId, String status) {
-        List<Product> products = productRepository.findAllBySellerIdAndStatus(userId, status);
+    // 판매 내역 조회 (판매 완료, 판매 중, 예약됨 모두 포함)
+    public List<ProductDto> getSalesHistory(String userId) {
+        List<Product> products = productRepository.findAllBySellerId(userId);
         return products.stream()
                 .map(ProductDto::fromEntity)
                 .collect(Collectors.toList());
@@ -35,9 +35,13 @@ public class ProductService {
     // 찜한 게시글 조회
     public List<ProductDto> getFavoriteProducts(String userId) {
         List<String> likedProductIds = likedPostRepository.findAllProductPostIdsByUserId(userId);
+        if (likedProductIds.isEmpty()) {
+            return List.of(); // 빈 리스트 반환
+        }
         List<Product> favoriteProducts = productRepository.findAllById(likedProductIds);
         return favoriteProducts.stream()
                 .map(ProductDto::fromEntity)
                 .collect(Collectors.toList());
     }
 }
+

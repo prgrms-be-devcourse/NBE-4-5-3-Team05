@@ -10,5 +10,5 @@ import java.util.List;
 public interface ProductRepository extends JpaRepository<Product, String> {
     List<Product> findAllByStatus(String status);
 
-    List<Product> findAllBySellerIdAndStatus(String sellerId, String status);
+    List<Product> findAllBySellerId(String sellerId);
 }
