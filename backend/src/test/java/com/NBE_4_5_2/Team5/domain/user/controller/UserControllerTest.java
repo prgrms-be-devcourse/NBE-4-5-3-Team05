@@ -383,6 +383,7 @@ class UserControllerTest {
     void logout() throws Exception {
         ResultActions resultActions = mvc.perform(
                 post("/api/users/logout")
+                        .header("Authorization", "Bearer " + token)
         );
 
         resultActions
@@ -472,4 +473,108 @@ class UserControllerTest {
         checkUser(resultActions, loginedUser);
 
     }
+
+    private ResultActions refreshRequest(String refreshToken) throws Exception {
+        return mvc
+                .perform(
+                        post("/api/users/refresh")
+                                .content("""
+                                        {
+                                          "refreshToken": "%s"
+                                        }
+                                        """
+                                        .formatted(refreshToken)
+                                        .stripIndent())
+                                .contentType(
+                                        new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8)
+                                )
+                )
+                .andDo(print());
+    }
+
+    @Test
+    @DisplayName("토큰 재발급 - 성공")
+    void refresh1() throws Exception {
+
+        String token = loginedUser.getRefreshToken();
+
+        ResultActions resultActions = refreshRequest(token);
+
+        resultActions
+                .andExpect(status().isOk())
+                .andExpect(handler().handlerType(UserController.class))
+                .andExpect(handler().methodName("refresh"))
+                .andExpect(jsonPath("$.code").value("200-1"))
+                .andExpect(jsonPath("$.message").value("AccessToken이 재발급되었습니다."))
+                .andExpect(jsonPath("$.data").exists());
+
+        resultActions
+                .andExpect(mvcResult -> {
+                    Cookie refreshToken = mvcResult.getResponse().getCookie("refreshToken");
+
+                    assertThat(refreshToken).isNotNull();
+                    assertThat(refreshToken.getName()).isEqualTo("refreshToken");
+                    assertThat(refreshToken.getValue()).isNotBlank();
+                    assertThat(refreshToken.getDomain()).isEqualTo("localhost");
+                    assertThat(refreshToken.getPath()).isEqualTo("/");
+                    assertThat(refreshToken.isHttpOnly()).isTrue();
+                    assertThat(refreshToken.getSecure()).isTrue();
+
+                    Cookie accessToken = mvcResult.getResponse().getCookie("accessToken");
+
+                    assertThat(accessToken).isNotNull();
+                    assertThat(accessToken.getName()).isEqualTo("accessToken");
+                    assertThat(accessToken.getValue()).isNotBlank();
+                    assertThat(accessToken.getDomain()).isEqualTo("localhost");
+                    assertThat(accessToken.getPath()).isEqualTo("/");
+                    assertThat(accessToken.isHttpOnly()).isTrue();
+                    assertThat(accessToken.getSecure()).isTrue();
+
+                });
+    }
+
+    @Test
+    @DisplayName("토큰 재발급 - 실패 - 요청 body 누락")
+    void refresh2() throws Exception {
+
+        ResultActions resultActions = mvc
+                .perform(
+                        post("/api/users/refresh")
+                                .contentType(
+                                        new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8)
+                                )
+                )
+                .andDo(print());
+
+        resultActions
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("400-1"))
+                .andExpect(jsonPath("$.message").value("refreshToken을 입력해주세요."));
+    }
+
+    @Test
+    @DisplayName("토큰 재발급 - 실패 - refreshToken이 빈 문자열")
+    void refresh3() throws Exception {
+        String token = " ";
+        ResultActions resultActions = refreshRequest(token);
+
+        resultActions
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("400-1"))
+                .andExpect(jsonPath("$.message").value("refreshToken : refreshToken을 입력해주세요."));
+    }
+
+    @Test
+    @DisplayName("토큰 재발급 - 실패 - 존재하지 않는 refreshToken")
+    void refresh4() throws Exception {
+        String fakeRefreshToken = "invalid_refresh_token";
+
+        ResultActions resultActions = refreshRequest(fakeRefreshToken);
+
+        resultActions
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("401-2"))
+                .andExpect(jsonPath("$.message").value("유효하지 않은 RefreshToken입니다."));
+    }
+
 }

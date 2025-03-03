@@ -78,7 +78,11 @@ public class UserController {
     }
 
     @PostMapping("/refresh")
-    public RsData<String> refresh(@RequestBody @Valid RefreshUserForm userForm) {
+    public RsData<String> refresh(@RequestBody(required = false) @Valid RefreshUserForm userForm) {
+
+        if (userForm == null) {
+            throw new ServiceException("400-1", "refreshToken을 입력해주세요.");
+        }
 
         String refreshToken = userForm.refreshToken();
 
