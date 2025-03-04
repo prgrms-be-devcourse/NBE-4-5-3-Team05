@@ -52,12 +52,14 @@ public class PaymentService {
 	public PaymentDto purchase(String productId) {
 
 		User loggedInUser = getLoggedInUser();
+
+		User loggedInUserEntity = userRepository.findById(loggedInUser.getId()).get();
 		Product product = productRepository.findById(productId)
 			.orElseThrow(() -> new ProductNotFoundException("id가 %s인 Payment를 찾을 수 없습니다.".formatted(productId)));
 
 		// 할인 등 product 가격과 총 결제 금액이 다를 수 있으므로 amount를 따로 받음.
-		loggedInUser.canBuy(product, product.getPrice());
-		loggedInUser.buy(product, product.getPrice());
+		loggedInUserEntity.canBuy(product, product.getPrice());
+		loggedInUserEntity.buy(product, product.getPrice());
 
 		Payment purchasedPayment = Payment.builder()
 			.id("payment-" + UUID.randomUUID())
