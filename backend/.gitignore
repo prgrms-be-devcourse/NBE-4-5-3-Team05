@@ -44,3 +44,5 @@ db_dev.trace.db
 gradle
 db.mv.db
 db.trace.db
+/*.mv.db
+/*.trace.db
