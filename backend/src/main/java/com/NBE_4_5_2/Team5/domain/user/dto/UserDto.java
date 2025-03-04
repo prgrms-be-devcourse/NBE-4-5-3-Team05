@@ -13,17 +13,17 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserDto {
-	private String id;
-	private Role role; // 0 : admin 1: user
-	private String username;
-	private String email;
-	private String nickname;
-	private String address;
-	private String profileUrl;
+    private String id;
+    private String username;
+    private String email;
+    private String nickname;
+    private String address;
+    private String profileUrl;
+    private Role role;
+    private LocalDateTime createdAt;
+    private LocalDateTime modifiedAt;
 	private boolean blocked;
 	private int blockedCount;
-	private LocalDateTime createdAt;
-	private LocalDateTime modifiedAt;
 
 	public UserDto(User admin) {
 		this.id = admin.getId();

@@ -1,53 +1,68 @@
 package com.NBE_4_5_2.Team5.domain.user.entity;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
+
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import com.NBE_4_5_2.Team5.global.entity.BaseTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.Id;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
-@Getter
-@NoArgsConstructor
 @Entity
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@SuperBuilder
+@EntityListeners(AuditingEntityListener.class)
 @Table(name = "member")
-public class User {
+public class User extends BaseTime {
 
-	@Id
-	@Column(length = 255)
-	private String id = "user-" + UUID.randomUUID();  // user-UUID
+    @Column(length = 20, nullable = false, unique = true)
+    private String username;
 
-	@Column(nullable = false)
-	private String username;
+    @Column(length = 255, nullable = false)
+    private String password;
 
-	@Column(nullable = false)
-	private String password;
+    @Column(length = 100, unique = true)
+    private String refreshToken;
 
-	@Column(nullable = false)
-	private String email;
+    @Column(length = 50, nullable = false, unique = true)
+    private String email;
 
-	@Column(nullable = false)
-	private String nickname;
+    @Column(length = 20, nullable = false, unique = true)
+    private String nickname;
 
-	private String address;
+    @Column(length = 255)
+    private String address;
 
-	@Column(name = "profile_url")
-	private String profileUrl;
+    @Column(name = "profile_url", length = 255)
+    private String profileUrl;
 
-	@Enumerated(EnumType.STRING)
-	private Role role; // 0: admin , 1: 일반 유저
+    @Column(nullable = false)
+    @Builder.Default
+    private Integer role = 1;  // 0: Admin, 1: 일반 유저
 
-	private boolean blocked;
-	private int blockedCount;
+    @Column(nullable = false)
+    @Builder.Default
+    private Boolean blocked = false;
 
-	private LocalDateTime createdAt;
-	private LocalDateTime modifiedAt;
+    @Column(name = "blocked_count", nullable = false)
+    @Builder.Default
+    private Integer blockedCount = 0;
 
+    public boolean isAdmin() {
+        return this.role == 0;
+    }
 	public User(String username, String password, String email, String nickname, String address, String profileUrl,
 		Role role,
 		LocalDateTime createdAt, LocalDateTime modifiedAt) {
