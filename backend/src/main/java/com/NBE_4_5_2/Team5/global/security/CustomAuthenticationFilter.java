@@ -40,9 +40,7 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
         }
 
         String refreshToken = tokens.refreshToken();
-        String accessToken = tokens.accessToken();
-
-        User actor = refreshAccessToken(refreshToken, accessToken);
+        User actor = refreshAccessToken(refreshToken);
 
         if (actor == null) {
             filterChain.doFilter(request, response);
@@ -97,13 +95,7 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
 
     }
 
-    private User refreshAccessToken(String refreshToken, String accessToken) {
-
-        Optional<User> opAccessUser = userService.getUserByAccessToken(accessToken);
-
-        if (opAccessUser.isPresent()) {
-            return opAccessUser.get();
-        }
+    private User refreshAccessToken(String refreshToken) {
 
         Optional<User> opRefreshUser = userService.findByRefreshToken(refreshToken);
 
