@@ -19,9 +19,9 @@ public class UserController {
     private final Rq rq;
 
     @PostMapping("/signup")
-    public RsData<UserDto> signup(@RequestBody @Valid SignUpUserForm userForm) {
+    public RsData<UserDto> createUser(@RequestBody @Valid SignUpUserForm userForm) {
 
-        User user = userService.signup(userForm.username(), userForm.password(), userForm.email(),
+        User user = userService.createUser(userForm.username(), userForm.password(), userForm.email(),
                 userForm.nickname(), userForm.address(), userForm.profileUrl());
 
         return new RsData<>(
@@ -32,9 +32,9 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public RsData<LoginUserDto> login(@RequestBody @Valid LoginUserForm userForm) {
+    public RsData<LoginUserDto> loginUser(@RequestBody @Valid LoginUserForm userForm) {
 
-        User user = userService.processUserAuthentication(userForm.username(), userForm.password());
+        User user = userService.loginUser(userForm.username(), userForm.password());
 
         String accessToken = userService.generateAccessToken(user);
         rq.addCookie("accessToken", accessToken);
@@ -52,10 +52,10 @@ public class UserController {
     }
 
     @PostMapping("/logout")
-    public RsData<Void> logout() {
+    public RsData<Void> logoutUser() {
 
         User userIdentity = rq.getUserIdentity();
-        userService.getRealActor(userIdentity);
+        userService.updateUserRefreshToken(userIdentity);
 
         // 사용자 인증 정보 제거
         rq.setLogout();
@@ -68,7 +68,7 @@ public class UserController {
     }
 
     @GetMapping("/me")
-    public RsData<UserDto> me() {
+    public RsData<UserDto> getCurrentUser() {
 
         User userIdentity = rq.getUserIdentity();
         User user = rq.getRealActor(userIdentity);
@@ -81,15 +81,14 @@ public class UserController {
     }
 
     @PostMapping("/refresh")
-    public RsData<String> refresh(@RequestBody(required = false) @Valid RefreshUserForm userForm) {
+    public RsData<String> refreshAccessToken(@RequestBody(required = false) @Valid RefreshUserForm userForm) {
 
         if (userForm == null) {
             throw new ServiceException("400-1", "refreshToken을 입력해주세요.");
         }
 
         String refreshToken = userForm.refreshToken();
-
-        User user = userService.findByRefreshToken(refreshToken)
+        User user = userService.getUserByRefreshToken(refreshToken)
                 .orElseThrow(() -> new ServiceException("401-2", "유효하지 않은 RefreshToken입니다."));
 
         String newAccessToken = userService.generateAccessToken(user);

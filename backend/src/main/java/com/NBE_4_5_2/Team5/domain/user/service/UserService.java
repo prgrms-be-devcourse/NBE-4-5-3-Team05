@@ -21,13 +21,13 @@ public class UserService {
     private final UserValidator userValidator;
     private final Rq rq;
 
-    public User signup(String username, String password, String email,
-                       String nickname, String address, String profileUrl) {
+    public User createUser(String username, String password, String email,
+                           String nickname, String address, String profileUrl) {
 
         userValidator.duplicate(username, email, nickname);
 
         User user = User.builder()
-                .id("user-" + UUID.randomUUID().toString())
+                .id("user-" + UUID.randomUUID())
                 .username(username)
                 .refreshToken(UUID.randomUUID().toString())
                 .password(passwordEncoder.encode(password))
@@ -40,30 +40,36 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public void logout(User user) {
-        String newRefreshToken = "user-" + UUID.randomUUID();
+    public User loginUser(String username, String password) {
+        return userValidator.credentials(username, password);
+    }
+
+    public void updateUserRefreshToken(User userIdentity) {
+
+        User user = rq.getRealActor(userIdentity);
+
+        String newRefreshToken = UUID.randomUUID().toString();
         user.setRefreshToken(newRefreshToken);
 
         userRepository.save(user);
     }
 
-    public User processUserAuthentication(String username, String password) {
-        return userValidator.credentials(username, password);
-    }
-
-    public Optional<User> findById(String id) {
+    public Optional<User> getUserById(String id) {
         return userRepository.findById(id);
     }
 
-    public Optional<User> findByUsername(String username) {
+    public Optional<User> getUserByUsername(String username) {
         return userRepository.findByUsername(username);
     }
 
-    public Optional<User> findByRefreshToken(String refreshToken) {
+    public Optional<User> getUserByRefreshToken(String refreshToken) {
         return userRepository.findByRefreshToken(refreshToken);
     }
 
-    // AccessToken을 통해 DB 조회를 하지않고 id와 username 만을 가진 User 객체를 반환
+    /*
+         이 메소드는 AccessToken payload에 저장된 id와 username만을 가진 User 객체를 반환합니다.
+         DB 조회를 하지 않기 때문에, 게시글 조회 등 사용자 id 혹은 username만 필요로 하는 경우에 효율적으로 사용할 수 있습니다.
+    */
     public Optional<User> getUserByAccessToken(String accessToken) {
 
         Map<String, Object> payload = authTokenService.getPayload(accessToken);

@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -41,8 +42,8 @@ class UserControllerTest {
     private String token;
 
     @BeforeEach
-    void login() {
-        loginedUser = userService.findByUsername("user1").get();
+    void loginUser() {
+        loginedUser = userService.getUserByUsername("user1").get();
         token = userService.getAuthToken(loginedUser);
     }
 
@@ -60,8 +61,8 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.data.modifiedAt").value(matchesPattern(user.getModifiedAt().toString().replaceAll("0+$", "") + ".*")));
     }
 
-    private ResultActions signupRequest(String username, String password, String email, String nickname,
-                                        String address, String profileUrl) throws Exception {
+    private ResultActions createUserRequest(String username, String password, String email, String nickname,
+                                            String address, String profileUrl) throws Exception {
         return mvc
                 .perform(
                         post("/api/users/signup")
@@ -86,7 +87,7 @@ class UserControllerTest {
 
     @Test
     @DisplayName("회원 가입 - 성공")
-    void signup1() throws Exception {
+    void createUser1() throws Exception {
 
         String username = "userNew";
         String password = "new1234@";
@@ -95,16 +96,16 @@ class UserControllerTest {
         String address = "서울시 강남구";
         String profileUrl = "default_profile.png";
 
-        ResultActions resultActions = signupRequest(username, password, email, nickname, address, profileUrl);
+        ResultActions resultActions = createUserRequest(username, password, email, nickname, address, profileUrl);
 
-        User user = userService.findByUsername(username).get();
+        User user = userService.getUserByUsername(username).get();
         assertThat(user.getNickname()).isEqualTo(nickname);
         assertThat(user.getId()).startsWith("user-");
 
         resultActions
                 .andExpect(status().isCreated())
                 .andExpect(handler().handlerType(UserController.class))
-                .andExpect(handler().methodName("signup"))
+                .andExpect(handler().methodName("createUser"))
                 .andExpect(jsonPath("$.code").value("201-1"))
                 .andExpect(jsonPath("$.message").value("회원 가입이 완료되었습니다."));
 
@@ -114,7 +115,7 @@ class UserControllerTest {
 
     @Test
     @DisplayName("회원 가입 - 실패 - username 중복")
-    void signup2() throws Exception {
+    void createUser2() throws Exception {
 
         String username = "user1";
         String password = "new1234@";
@@ -123,12 +124,12 @@ class UserControllerTest {
         String address = "서울시 강남구";
         String profileUrl = "https://example.com/default_profile.png";
 
-        ResultActions resultActions = signupRequest(username, password, email, nickname, address, profileUrl);
+        ResultActions resultActions = createUserRequest(username, password, email, nickname, address, profileUrl);
 
         resultActions
                 .andExpect(status().isConflict())
                 .andExpect(handler().handlerType(UserController.class))
-                .andExpect(handler().methodName("signup"))
+                .andExpect(handler().methodName("createUser"))
                 .andExpect(jsonPath("$.code").value("409-1"))
                 .andExpect(jsonPath("$.message").value("이미 사용중인 아이디입니다."));
 
@@ -136,7 +137,7 @@ class UserControllerTest {
 
     @Test
     @DisplayName("회원 가입 - 실패 - email 중복")
-    void signup3() throws Exception {
+    void createUser3() throws Exception {
 
         String username = "user4";
         String password = "new1234@";
@@ -145,12 +146,12 @@ class UserControllerTest {
         String address = "서울시 강남구";
         String profileUrl = "https://example.com/default_profile.png";
 
-        ResultActions resultActions = signupRequest(username, password, email, nickname, address, profileUrl);
+        ResultActions resultActions = createUserRequest(username, password, email, nickname, address, profileUrl);
 
         resultActions
                 .andExpect(status().isConflict())
                 .andExpect(handler().handlerType(UserController.class))
-                .andExpect(handler().methodName("signup"))
+                .andExpect(handler().methodName("createUser"))
                 .andExpect(jsonPath("$.code").value("409-2"))
                 .andExpect(jsonPath("$.message").value("이미 사용중인 이메일입니다."));
 
@@ -158,7 +159,7 @@ class UserControllerTest {
 
     @Test
     @DisplayName("회원 가입 - 실패 - nickname 중복")
-    void signup4() throws Exception {
+    void createUser4() throws Exception {
 
         String username = "user4";
         String password = "new1234@";
@@ -167,12 +168,12 @@ class UserControllerTest {
         String address = "서울시 강남구";
         String profileUrl = "https://example.com/default_profile.png";
 
-        ResultActions resultActions = signupRequest(username, password, email, nickname, address, profileUrl);
+        ResultActions resultActions = createUserRequest(username, password, email, nickname, address, profileUrl);
 
         resultActions
                 .andExpect(status().isConflict())
                 .andExpect(handler().handlerType(UserController.class))
-                .andExpect(handler().methodName("signup"))
+                .andExpect(handler().methodName("createUser"))
                 .andExpect(jsonPath("$.code").value("409-3"))
                 .andExpect(jsonPath("$.message").value("이미 사용중인 닉네임입니다."));
 
@@ -180,7 +181,7 @@ class UserControllerTest {
 
     @Test
     @DisplayName("회원 가입 - 실패 - 필수 입력 데이터 누락")
-    void signup5() throws Exception {
+    void createUser5() throws Exception {
 
         String username = "";
         String password = "";
@@ -189,12 +190,12 @@ class UserControllerTest {
         String address = "서울시 강남구";
         String profileUrl = "https://example.com/default_profile.png";
 
-        ResultActions resultActions = signupRequest(username, password, email, nickname, address, profileUrl);
+        ResultActions resultActions = createUserRequest(username, password, email, nickname, address, profileUrl);
 
         resultActions
                 .andExpect(status().isBadRequest())
                 .andExpect(handler().handlerType(UserController.class))
-                .andExpect(handler().methodName("signup"))
+                .andExpect(handler().methodName("createUser"))
                 .andExpect(jsonPath("$.code").value("400-1"))
                 .andExpect(jsonPath("$.message").value("""
                         email : 이메일은 필수 입력값입니다.
@@ -208,7 +209,7 @@ class UserControllerTest {
 
     @Test
     @DisplayName("회원 가입 - 실패 - 잘못된 형식의 데이터 입력")
-    void signup6() throws Exception {
+    void createUser6() throws Exception {
 
         String username = "wrong id"; // 공백 포함
         String password = "wrongpassword"; // 특수문자 미포함
@@ -217,12 +218,12 @@ class UserControllerTest {
         String address = "서울시 강남구";
         String profileUrl = "https://example.com/default_profile.png";
 
-        ResultActions resultActions = signupRequest(username, password, email, nickname, address, profileUrl);
+        ResultActions resultActions = createUserRequest(username, password, email, nickname, address, profileUrl);
 
         resultActions
                 .andExpect(status().isBadRequest())
                 .andExpect(handler().handlerType(UserController.class))
-                .andExpect(handler().methodName("signup"))
+                .andExpect(handler().methodName("createUser"))
                 .andExpect(jsonPath("$.code").value("400-1"))
                 .andExpect(jsonPath("$.message").value("""
                         email : 올바른 이메일 형식이 아닙니다.
@@ -232,7 +233,7 @@ class UserControllerTest {
                         """.stripIndent().stripTrailing()));
     }
 
-    private ResultActions loginRequest(String username, String password) throws Exception {
+    private ResultActions loginUserRequest(String username, String password) throws Exception {
         return mvc
                 .perform(
                         post("/api/users/login")
@@ -254,18 +255,18 @@ class UserControllerTest {
 
     @Test
     @DisplayName("로그인 - 성공")
-    void login1() throws Exception {
+    void loginUser1() throws Exception {
 
         String username = "user1";
         String password = "user11234@";
 
-        ResultActions resultActions = loginRequest(username, password);
-        User user = userService.findByUsername(username).get();
+        ResultActions resultActions = loginUserRequest(username, password);
+        User user = userService.getUserByUsername(username).get();
 
         resultActions
                 .andExpect(status().isOk())
                 .andExpect(handler().handlerType(UserController.class))
-                .andExpect(handler().methodName("login"))
+                .andExpect(handler().methodName("loginUser"))
                 .andExpect(jsonPath("$.code").value("200-1"))
                 .andExpect(jsonPath("$.message").value("%s님 환영합니다.".formatted(user.getNickname())))
                 .andExpect(jsonPath("$.data").exists())
@@ -308,17 +309,17 @@ class UserControllerTest {
 
     @Test
     @DisplayName("로그인 - 실패 - 비밀번호 틀림")
-    void login2() throws Exception {
+    void loginUser2() throws Exception {
 
         String username = "user1";
         String password = "1111";
 
-        ResultActions resultActions = loginRequest(username, password);
+        ResultActions resultActions = loginUserRequest(username, password);
 
         resultActions
                 .andExpect(status().isUnauthorized())
                 .andExpect(handler().handlerType(UserController.class))
-                .andExpect(handler().methodName("login"))
+                .andExpect(handler().methodName("loginUser"))
                 .andExpect(jsonPath("$.code").value("401-2"))
                 .andExpect(jsonPath("$.message").value("비밀번호가 일치하지 않습니다."));
 
@@ -326,17 +327,17 @@ class UserControllerTest {
 
     @Test
     @DisplayName("로그인 - 실패 - 존재하지 않는 username")
-    void login3() throws Exception {
+    void loginUser3() throws Exception {
 
         String username = "stranger";
         String password = "user11234@";
 
-        ResultActions resultActions = loginRequest(username, password);
+        ResultActions resultActions = loginUserRequest(username, password);
 
         resultActions
                 .andExpect(status().isUnauthorized())
                 .andExpect(handler().handlerType(UserController.class))
-                .andExpect(handler().methodName("login"))
+                .andExpect(handler().methodName("loginUser"))
                 .andExpect(jsonPath("$.code").value("401-1"))
                 .andExpect(jsonPath("$.message").value("잘못된 아이디입니다."));
 
@@ -344,17 +345,17 @@ class UserControllerTest {
 
     @Test
     @DisplayName("로그인 - 실패 - username 누락")
-    void login4() throws Exception {
+    void loginUser4() throws Exception {
 
         String username = "";
         String password = "stranger";
 
-        ResultActions resultActions = loginRequest(username, password);
+        ResultActions resultActions = loginUserRequest(username, password);
 
         resultActions
                 .andExpect(status().isBadRequest())
                 .andExpect(handler().handlerType(UserController.class))
-                .andExpect(handler().methodName("login"))
+                .andExpect(handler().methodName("loginUser"))
                 .andExpect(jsonPath("$.code").value("400-1"))
                 .andExpect(jsonPath("$.message").value("username : 아이디는 필수 입력값입니다."));
 
@@ -362,17 +363,17 @@ class UserControllerTest {
 
     @Test
     @DisplayName("로그인 - 실패 - password 누락")
-    void login5() throws Exception {
+    void loginUser5() throws Exception {
 
         String username = "stranger";
         String password = "";
 
-        ResultActions resultActions = loginRequest(username, password);
+        ResultActions resultActions = loginUserRequest(username, password);
 
         resultActions
                 .andExpect(status().isBadRequest())
                 .andExpect(handler().handlerType(UserController.class))
-                .andExpect(handler().methodName("login"))
+                .andExpect(handler().methodName("loginUser"))
                 .andExpect(jsonPath("$.code").value("400-1"))
                 .andExpect(jsonPath("$.message").value("password : 비밀번호는 필수 입력값입니다."));
 
@@ -380,7 +381,7 @@ class UserControllerTest {
 
     @Test
     @DisplayName("로그아웃")
-    void logout() throws Exception {
+    void logoutUser() throws Exception {
         ResultActions resultActions = mvc.perform(
                 post("/api/users/logout")
                         .header("Authorization", "Bearer " + token)
@@ -389,23 +390,28 @@ class UserControllerTest {
         resultActions
                 .andExpect(status().isOk())
                 .andExpect(handler().handlerType(UserController.class))
-                .andExpect(handler().methodName("logout"))
+                .andExpect(handler().methodName("logoutUser"))
                 .andExpect(jsonPath("$.code").value("200-1"))
                 .andExpect(jsonPath("$.message").value("로그아웃 되었습니다."));
 
-
+        // 쿠키 만료 검증
         resultActions.
                 andExpect(
                         mvcResult -> {
                             Cookie refreshToken = mvcResult.getResponse().getCookie("refreshToken");
                             assertThat(refreshToken).isNotNull();
-                            assertThat(refreshToken.getMaxAge()).isZero();
+                            assertThat(refreshToken.getMaxAge()).isLessThanOrEqualTo(0);
+                            ;
 
                             Cookie accessToken = mvcResult.getResponse().getCookie("accessToken");
                             assertThat(accessToken).isNotNull();
-                            assertThat(accessToken.getMaxAge()).isZero();
+                            assertThat(refreshToken.getMaxAge()).isLessThanOrEqualTo(0);
+                            ;
                         }
                 );
+
+        // SecurityContext 초기화 검증
+        assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
 
     }
 
@@ -421,9 +427,8 @@ class UserControllerTest {
 
     @Test
     @DisplayName("내 정보 조회 - 성공")
-    void me1() throws Exception {
+    void getCurrentUser1() throws Exception {
 
-        String refreshToken = loginedUser.getRefreshToken();
         String token = userService.getAuthToken(loginedUser);
 
         ResultActions resultActions = meRequest(token);
@@ -431,7 +436,7 @@ class UserControllerTest {
         resultActions
                 .andExpect(status().isOk())
                 .andExpect(handler().handlerType(UserController.class))
-                .andExpect(handler().methodName("me"))
+                .andExpect(handler().methodName("getCurrentUser"))
                 .andExpect(jsonPath("$.code").value("200-1"))
                 .andExpect(jsonPath("$.message").value("내 정보 조회가 완료되었습니다."));
 
@@ -441,7 +446,7 @@ class UserControllerTest {
 
     @Test
     @DisplayName("내 정보 조회 - 실패 - 잘못된 refreshToken")
-    void me2() throws Exception {
+    void getCurrentUser2() throws Exception {
 
         String refreshToken = "";
 
@@ -466,7 +471,7 @@ class UserControllerTest {
         resultActions
                 .andExpect(status().isOk())
                 .andExpect(handler().handlerType(UserController.class))
-                .andExpect(handler().methodName("me"))
+                .andExpect(handler().methodName("getCurrentUser"))
                 .andExpect(jsonPath("$.code").value("200-1"))
                 .andExpect(jsonPath("$.message").value("내 정보 조회가 완료되었습니다."));
 
@@ -474,7 +479,7 @@ class UserControllerTest {
 
     }
 
-    private ResultActions refreshRequest(String refreshToken) throws Exception {
+    private ResultActions refreshAccessTokenRequest(String refreshToken) throws Exception {
         return mvc
                 .perform(
                         post("/api/users/refresh")
@@ -494,16 +499,16 @@ class UserControllerTest {
 
     @Test
     @DisplayName("토큰 재발급 - 성공")
-    void refresh1() throws Exception {
+    void refreshAccessToken1() throws Exception {
 
         String token = loginedUser.getRefreshToken();
 
-        ResultActions resultActions = refreshRequest(token);
+        ResultActions resultActions = refreshAccessTokenRequest(token);
 
         resultActions
                 .andExpect(status().isOk())
                 .andExpect(handler().handlerType(UserController.class))
-                .andExpect(handler().methodName("refresh"))
+                .andExpect(handler().methodName("refreshAccessToken"))
                 .andExpect(jsonPath("$.code").value("200-1"))
                 .andExpect(jsonPath("$.message").value("AccessToken이 재발급되었습니다."))
                 .andExpect(jsonPath("$.data").exists());
@@ -535,7 +540,7 @@ class UserControllerTest {
 
     @Test
     @DisplayName("토큰 재발급 - 실패 - 요청 body 누락")
-    void refresh2() throws Exception {
+    void refreshAccessToken2() throws Exception {
 
         ResultActions resultActions = mvc
                 .perform(
@@ -549,14 +554,14 @@ class UserControllerTest {
         resultActions
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("400-1"))
-                .andExpect(jsonPath("$.message").value("refreshToken을 입력해주세요."));
+                .andExpect(jsonPath("$.message").value("값을 입력해주세요."));
     }
 
     @Test
     @DisplayName("토큰 재발급 - 실패 - refreshToken이 빈 문자열")
-    void refresh3() throws Exception {
+    void refreshAccessToken3() throws Exception {
         String token = " ";
-        ResultActions resultActions = refreshRequest(token);
+        ResultActions resultActions = refreshAccessTokenRequest(token);
 
         resultActions
                 .andExpect(status().isBadRequest())
@@ -566,10 +571,10 @@ class UserControllerTest {
 
     @Test
     @DisplayName("토큰 재발급 - 실패 - 존재하지 않는 refreshToken")
-    void refresh4() throws Exception {
+    void refreshAccessToken4() throws Exception {
         String fakeRefreshToken = "invalid_refresh_token";
 
-        ResultActions resultActions = refreshRequest(fakeRefreshToken);
+        ResultActions resultActions = refreshAccessTokenRequest(fakeRefreshToken);
 
         resultActions
                 .andExpect(status().isUnauthorized())

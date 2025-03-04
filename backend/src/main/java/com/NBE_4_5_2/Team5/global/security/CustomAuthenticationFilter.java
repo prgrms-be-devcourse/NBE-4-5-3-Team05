@@ -97,7 +97,7 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
 
     private User refreshAccessToken(String refreshToken) {
 
-        Optional<User> opRefreshUser = userService.findByRefreshToken(refreshToken);
+        Optional<User> opRefreshUser = userService.getUserByRefreshToken(refreshToken);
 
         if (opRefreshUser.isEmpty()) {
             return null;

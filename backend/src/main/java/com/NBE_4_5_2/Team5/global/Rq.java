@@ -66,7 +66,7 @@ public class Rq {
     }
 
     public User getRealActor(User actor) {
-        return userService.findById(actor.getId()).get();
+        return userService.getUserById(actor.getId()).get();
     }
 
     public String getValueFromCookie(String name) {
