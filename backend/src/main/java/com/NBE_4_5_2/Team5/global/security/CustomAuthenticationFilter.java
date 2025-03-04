@@ -62,8 +62,7 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
     }
 
 
-    record AuthToken(String refreshToken, String accessToken) {
-    }
+    record AuthToken(String refreshToken, String accessToken) {}
 
     private AuthToken getAuthTokenFromRequest() {
 
