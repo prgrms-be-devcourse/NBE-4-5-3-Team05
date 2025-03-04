@@ -5,8 +5,6 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.NBE_4_5_2.Team5.domain.member.entity.Member;
-import com.NBE_4_5_2.Team5.domain.member.repository.MemberRepository;
 import com.NBE_4_5_2.Team5.domain.payment.dto.PaymentDto;
 import com.NBE_4_5_2.Team5.domain.payment.dto.PaymentMetaData;
 import com.NBE_4_5_2.Team5.domain.payment.entity.Payment;
@@ -14,6 +12,9 @@ import com.NBE_4_5_2.Team5.domain.payment.enums.PaymentStatus;
 import com.NBE_4_5_2.Team5.domain.payment.repository.PaymentRepository;
 import com.NBE_4_5_2.Team5.domain.product.entity.Product;
 import com.NBE_4_5_2.Team5.domain.product.repository.ProductRepository;
+import com.NBE_4_5_2.Team5.domain.user.entity.User;
+import com.NBE_4_5_2.Team5.domain.user.repository.UserRepository;
+import com.NBE_4_5_2.Team5.domain.user.service.UserService;
 import com.NBE_4_5_2.Team5.global.exception.product.ProductNotFoundException;
 
 import jakarta.validation.constraints.NotNull;
@@ -27,13 +28,14 @@ import lombok.extern.slf4j.Slf4j;
 public class PaymentService {
 
 	private final PaymentRepository paymentRepository;
-	private final MemberRepository memberRepository;
 	private final ProductRepository productRepository;
 	// TODO : custom annotation으로 다른 PG사의 Adapter bean을 구분해서 가져오게 한다면?
 	private final PaymentProviderAdapter paymentProviderAdapter;
+	private final UserService userService;
+	private final UserRepository userRepository;
 
 	public PaymentMetaData saveMetaData(String paymentId, Integer amount) {
-		Member user = getUser();
+		User user = getLoggedInUser();
 		Payment saved = paymentRepository.save(Payment.builder()
 			.buyer(user)
 			.id(paymentId)
@@ -43,13 +45,13 @@ public class PaymentService {
 		return new PaymentMetaData(saved);
 	}
 
-	private Member getUser() {
-		return memberRepository.findAll().get(0);
+	private User getLoggedInUser() {
+		return userService.getUserIdentity();
 	}
 
 	public PaymentDto purchase(String productId) {
 
-		Member loggedInUser = getUser();
+		User loggedInUser = getLoggedInUser();
 		Product product = productRepository.findById(productId)
 			.orElseThrow(() -> new ProductNotFoundException("id가 %s인 Payment를 찾을 수 없습니다.".formatted(productId)));
 
@@ -72,7 +74,10 @@ public class PaymentService {
 	}
 
 	public void requestCharge(@NotNull String id, @NotNull String paymentKey, @NotNull Integer amount) {
-		Member loggedInUser = getUser();
+
+		User loggedInUser = getLoggedInUser();
+
+		User loggedInUserEntity = userRepository.findById(loggedInUser.getId()).get();
 		Payment payment = paymentRepository.findById(id)
 			.orElseThrow(() -> new IllegalArgumentException("Payment를 찾을 수 없습니다."));
 
@@ -85,7 +90,7 @@ public class PaymentService {
 		try {
 			paymentProviderAdapter.requestPayment(id, paymentKey, amount);
 
-			loggedInUser.chargeCash(amount);
+			loggedInUserEntity.chargeCash(amount);
 
 			payment.updateState(PaymentStatus.DONE);
 
