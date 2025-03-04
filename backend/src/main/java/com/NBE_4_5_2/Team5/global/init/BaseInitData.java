@@ -34,5 +34,8 @@ public class BaseInitData {
 		userRepository.save(
 			new User("admin", "password", "email", "nickname", "address", "profileUrl", Role.ADMIN, LocalDateTime.now(),
 				LocalDateTime.now()));
+		userRepository.save(
+			new User("user1", "password", "email", "nickname", "address", "profileUrl", Role.USER, LocalDateTime.now(),
+				LocalDateTime.now()));
 	}
 }
