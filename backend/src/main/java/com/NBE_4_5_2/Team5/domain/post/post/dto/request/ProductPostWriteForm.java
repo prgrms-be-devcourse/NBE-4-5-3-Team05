@@ -4,7 +4,7 @@ import org.springframework.lang.NonNull;
 
 import java.util.List;
 
-public record ProductPostWriteReqBody(
+public record ProductPostWriteForm(
         @NonNull String productName,
         @NonNull Integer productPrice,
         @NonNull String title,

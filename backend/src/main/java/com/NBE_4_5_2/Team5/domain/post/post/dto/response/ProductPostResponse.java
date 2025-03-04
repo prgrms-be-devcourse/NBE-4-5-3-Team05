@@ -11,6 +11,8 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class ProductPostResponse {
     private String id;
+    private String writerId;
+    private String writerName;
     private String productName;
     private Integer productPrice;
     private String title;
@@ -23,6 +25,8 @@ public class ProductPostResponse {
     public static ProductPostResponse fromEntity(ProductPost post) {
         return new ProductPostResponse(
                 post.getId(),
+                post.getWriter().getId(),
+                post.getWriter().getNickname(),
                 post.getProductName(),
                 post.getProductPrice(),
                 post.getTitle(),

@@ -2,12 +2,13 @@ package com.NBE_4_5_2.Team5.domain.post.post.service;
 
 import com.NBE_4_5_2.Team5.domain.category.entity.Category;
 import com.NBE_4_5_2.Team5.domain.category.repository.CategoryRepository;
-import com.NBE_4_5_2.Team5.domain.post.post.dto.request.ProductPostModifyReqBody;
-import com.NBE_4_5_2.Team5.domain.post.post.dto.request.ProductPostWriteReqBody;
+import com.NBE_4_5_2.Team5.domain.post.post.dto.request.ProductPostModifyForm;
+import com.NBE_4_5_2.Team5.domain.post.post.dto.request.ProductPostWriteForm;
 import com.NBE_4_5_2.Team5.domain.post.post.dto.response.ProductPostResponse;
 import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductCategory;
 import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductPost;
 import com.NBE_4_5_2.Team5.domain.post.post.repository.ProductPostRepository;
+import com.NBE_4_5_2.Team5.domain.user.entity.User;
 import com.NBE_4_5_2.Team5.global.dto.PageDto;
 import com.NBE_4_5_2.Team5.global.exception.ServiceException;
 import lombok.RequiredArgsConstructor;
@@ -27,16 +28,16 @@ public class ProductPostService {
     //    private final MemberRepository memberRepository;
     private final CategoryRepository categoryRepository;
 
-    public ProductPost write(ProductPostWriteReqBody body) {
+    public ProductPost write(User actor, ProductPostWriteForm body) {
         String imageUrlStr = String.join(",", body.imageUrlList());
 
         // 글 작성
         ProductPost productPost = ProductPost.create(
+                actor,
                 body.productName(),
                 body.productPrice(),
                 body.title(),
                 body.content(),
-//                writer,
                 imageUrlStr,
                 body.latitude(),
                 body.longitude()
@@ -66,7 +67,7 @@ public class ProductPostService {
         String likeKeyword = "%" + keyword + "%";
 
         if (keyword.isBlank()) {
-            postpage=productPostRepository.findAllWithCategories(pageable);
+            postpage = productPostRepository.findAllWithCategories(pageable);
         } else {
             postpage = productPostRepository.findByTitleLike(likeKeyword, pageable);
         }
@@ -87,7 +88,7 @@ public class ProductPostService {
     }
 
     @Transactional
-    public void modify(ProductPost post, ProductPostModifyReqBody body) {
+    public void modify(ProductPost post, ProductPostModifyForm body) {
         if (body.productName() != null) {
             post.setProductName(body.productName());
         }

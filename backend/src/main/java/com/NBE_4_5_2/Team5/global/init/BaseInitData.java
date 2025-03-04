@@ -6,6 +6,9 @@ import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductCategory;
 import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductPost;
 import com.NBE_4_5_2.Team5.domain.post.post.repository.ProductCategoryRepository;
 import com.NBE_4_5_2.Team5.domain.post.post.repository.ProductPostRepository;
+import com.NBE_4_5_2.Team5.domain.user.entity.User;
+import com.NBE_4_5_2.Team5.domain.user.repository.UserRepository;
+import com.NBE_4_5_2.Team5.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationRunner;
@@ -17,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import com.NBE_4_5_2.Team5.domain.user.service.UserService;
 
 @Configuration
 @RequiredArgsConstructor
@@ -26,10 +28,34 @@ public class BaseInitData {
     private final ProductPostRepository postRepository;
     private final ProductCategoryRepository productCategoryRepository;
     private final UserService userService;
+    private final UserRepository userRepository;
+
+    @Autowired
+    @Lazy
+    private BaseInitData self;
 
     @Bean
-    public ApplicationRunner applicationRunner() {
-        return args -> userInit();
+    @Order(1)
+    public ApplicationRunner applicationRunner1() {
+        return args -> {
+            self.userInit();
+        };
+    }
+
+    @Bean
+    @Order(2)
+    public ApplicationRunner applicationRunner2() {
+        return args -> {
+            self.categoryInit();
+        };
+    }
+
+    @Bean
+    @Order(3)
+    public ApplicationRunner applicationRunner3() {
+        return args -> {
+            self.postInit();
+        };
     }
 
     @Transactional
@@ -43,66 +69,6 @@ public class BaseInitData {
         userService.signup("user2", "user21234@", "user2@gmail.com", "user2", "서울시 강서구", "https://example.com/default_profile.png");
         userService.signup("user3", "user31234@", "user3@gmail.com", "user3", "서울시 광진구", "https://example.com/default_profile.png");
 
-    }
-    
-
-    @Autowired
-    @Lazy
-    private BaseInitData self;
-
-    @Bean
-    @Order(1)
-    public ApplicationRunner applicationRunner1() {
-        return args -> {
-            self.categoryInit();
-        };
-    }
-
-    @Bean
-    @Order(2)
-    public ApplicationRunner applicationRunner2() {
-        return args -> {
-            self.postInit();
-        };
-    }
-
-    @Transactional
-    public void postInit() {
-        if (postRepository.count() > 0) {
-            return;
-        }
-
-        // ✅ 카테고리 조회 (기본 10개 카테고리를 사용)
-        List<Category> categories = categoryRepository.findAll();
-
-        List<ProductPost> posts = new ArrayList<>();
-
-        for (int i = 1; i <= 50; i++) {
-            posts.add(ProductPost.create(
-                    "상품 " + i,
-                    (i * 10000) % 200000 + 10000, // 가격 랜덤화
-                    "제목 " + i,
-                    "이것은 테스트 상품 " + i + " 입니다.",
-                    "https://example.com/product" + i + "_1.jpg,https://example.com/product" + i + "_2.jpg",
-                    37.5f + (i % 10) * 0.01f, // 위치 랜덤화
-                    127.0f + (i % 10) * 0.01f
-            ));
-        }
-
-        postRepository.saveAll(posts);
-
-        // ✅ `ProductCategory` 생성하여 게시글과 랜덤 카테고리 연결
-        List<ProductCategory> productCategories = new ArrayList<>();
-
-        for (int i = 0; i < posts.size(); i++) {
-            Category randomCategory = categories.get(i % categories.size()); // ✅ 순환하면서 랜덤 카테고리 적용
-            productCategories.add(ProductCategory.builder()
-                    .productPost(posts.get(i))
-                    .category(randomCategory)
-                    .build());
-        }
-
-        productCategoryRepository.saveAll(productCategories);
     }
 
     @Transactional
@@ -131,4 +97,48 @@ public class BaseInitData {
 
         categoryRepository.saveAll(categories);
     }
+
+    @Transactional
+    public void postInit() {
+        if (postRepository.count() > 0) {
+            return;
+        }
+
+        List<User> users = userRepository.findAll();
+        System.out.println(users.size());
+        List<Category> categories = categoryRepository.findAll();
+
+        List<ProductPost> posts = new ArrayList<>();
+
+        // 0,1,2
+        for (int i = 1; i <= 50; i++) {
+            User writer = users.get((i - 1) % users.size());
+            posts.add(ProductPost.create(
+                    writer,
+                    "상품 " + i,
+                    (i * 10000) % 200000 + 10000, // 가격 랜덤화
+                    "제목 " + i,
+                    "이것은 테스트 상품 " + i + " 입니다.",
+                    "https://example.com/product" + i + "_1.jpg,https://example.com/product" + i + "_2.jpg",
+                    37.5f + (i % 10) * 0.01f, // 위치 랜덤화
+                    127.0f + (i % 10) * 0.01f
+            ));
+        }
+
+        postRepository.saveAll(posts);
+
+        // ✅ `ProductCategory` 생성하여 게시글과 랜덤 카테고리 연결
+        List<ProductCategory> productCategories = new ArrayList<>();
+
+        for (int i = 0; i < posts.size(); i++) {
+            Category randomCategory = categories.get(i % categories.size()); // ✅ 순환하면서 랜덤 카테고리 적용
+            productCategories.add(ProductCategory.builder()
+                    .productPost(posts.get(i))
+                    .category(randomCategory)
+                    .build());
+        }
+
+        productCategoryRepository.saveAll(productCategories);
+    }
+
 }

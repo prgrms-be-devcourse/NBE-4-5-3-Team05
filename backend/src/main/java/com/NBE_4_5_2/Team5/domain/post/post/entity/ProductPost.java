@@ -2,6 +2,8 @@ package com.NBE_4_5_2.Team5.domain.post.post.entity;
 
 import com.NBE_4_5_2.Team5.domain.category.entity.Category;
 import com.NBE_4_5_2.Team5.domain.post.post.enums.ProductStatus;
+import com.NBE_4_5_2.Team5.domain.user.entity.User;
+import com.NBE_4_5_2.Team5.global.exception.ServiceException;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -67,10 +69,11 @@ public class ProductPost {
     @Builder.Default
     private List<ProductCategory> productCategories = new ArrayList<>();
 
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    private Member member;
+    @ManyToOne(fetch = FetchType.LAZY)
+    private User writer;
 
-    public static ProductPost create(String productName,
+    public static ProductPost create(User writer,
+                                     String productName,
                                      Integer productPrice,
                                      String title,
                                      String content,
@@ -80,8 +83,8 @@ public class ProductPost {
         return ProductPost
                 .builder()
                 .id("ppost-" + UUID.randomUUID())
+                .writer(writer)
                 .productName(productName)
-//                .member(member)
                 .productPrice(productPrice)
                 .title(title)
                 .content(content)
@@ -102,4 +105,27 @@ public class ProductPost {
         this.productCategories.addAll(productCategories);
     }
 
+    public boolean canModify(User writer) {
+        if (writer == null) {
+            throw new ServiceException("401-1", "인증 정보가 없습니다.");
+        }
+
+        if (writer.isAdmin() || writer.equals(this.getWriter())) {
+            return true;
+        }
+
+        throw new ServiceException("403-1", "자신이 작성한 글만 수정 가능합니다.");
+    }
+
+    public boolean canDelete(User writer) {
+        if (writer == null) {
+            throw new ServiceException("401-1", "인증 정보가 없습니다.");
+        }
+
+        if (writer.isAdmin() || writer.equals(this.getWriter())) {
+            return true;
+        }
+
+        throw new ServiceException("403-1", "자신이 작성한 글만 삭제 가능합니다.");
+    }
 }

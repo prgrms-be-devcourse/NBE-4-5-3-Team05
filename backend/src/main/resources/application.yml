@@ -42,3 +42,8 @@ logging:
 
 springdoc:
   default-produces-media-type: application/json;charset=UTF-8
+
+custom:
+  jwt:
+    secret-key: abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqrstuvwxyz1234567890
+    expire-seconds: "#{60 * 30}"
