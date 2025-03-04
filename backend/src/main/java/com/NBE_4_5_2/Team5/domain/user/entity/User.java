@@ -64,4 +64,8 @@ public class User {
 		this.modifiedAt = modifiedAt;
 	}
 
+	public void ban() {
+		this.blocked = true;
+		this.blockedCount++;
+	}
 }
