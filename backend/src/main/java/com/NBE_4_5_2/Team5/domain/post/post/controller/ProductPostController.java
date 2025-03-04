@@ -54,6 +54,22 @@ public class ProductPostController {
         );
     }
 
+    @GetMapping("/my")
+    @Transactional(readOnly = true)
+    public RsData<PageDto<ProductPostResponse>> getMyPosts(@RequestParam(defaultValue = "1") int page,
+                                                           @RequestParam(defaultValue = "10") int pageSize,
+                                                           @RequestParam(defaultValue = "desc") String sort) {
+        User actor = rq.getUserIdentity();
+
+        PageDto<ProductPostResponse> postPage = productPostService.getMyPosts(actor, page, pageSize, sort);
+
+        return new RsData<>(
+                "200",
+                "내 글 목록 조회가 완료되었습니다.",
+                postPage
+        );
+    }
+
     @GetMapping("/{id}")
     @Transactional(readOnly = true)
     public RsData<ProductPostResponse> getPost(@PathVariable String id, Reader reader) {

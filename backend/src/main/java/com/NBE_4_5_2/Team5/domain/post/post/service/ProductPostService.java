@@ -77,6 +77,18 @@ public class ProductPostService {
         return new PageDto<>(mappedPosts);
     }
 
+    public PageDto<ProductPostResponse> getMyPosts(User actor, int page, int pageSize, String sort) {
+        Sort.Direction sortDirection = sort.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
+        Pageable pageable = PageRequest.of(page - 1, pageSize,
+                Sort.by(sortDirection, "createdAt"));
+
+        Page<ProductPost> postPage = productPostRepository.findByWriter(actor, pageable);
+
+        Page<ProductPostResponse> mappedMyPosts = postPage.map(ProductPostResponse::fromEntity);
+
+        return new PageDto<>(mappedMyPosts);
+    }
+
     public ProductPost getPost(String id) {
         return productPostRepository.findById(id).orElseThrow(
                 () -> new ServiceException("404", "해당 글은 존재하지 않습니다.")
@@ -127,4 +139,6 @@ public class ProductPostService {
 
 
     }
+
+
 }

@@ -1,6 +1,7 @@
 package com.NBE_4_5_2.Team5.domain.post.post.repository;
 
 import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductPost;
+import com.NBE_4_5_2.Team5.domain.user.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -19,4 +20,7 @@ public interface ProductPostRepository extends JpaRepository<ProductPost, String
     @EntityGraph(attributePaths = {"productCategories.category"})
     @Query("select p from ProductPost p")
     Page<ProductPost> findAllWithCategories(@NonNull Pageable pageable);
+
+    @EntityGraph(attributePaths = {"productCategories.category"})
+    Page<ProductPost> findByWriter(User writer, Pageable pageable);
 }
