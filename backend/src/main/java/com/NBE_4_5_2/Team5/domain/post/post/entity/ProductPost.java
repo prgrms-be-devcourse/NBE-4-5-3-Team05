@@ -50,7 +50,7 @@ public class ProductPost {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @Builder.Default
-    private ProductStatus status = ProductStatus.FOR_SALE;
+    private ProductStatus status = ProductStatus.AVAILABLE;
 
     @Column(nullable = false)
     private Float latitude;
