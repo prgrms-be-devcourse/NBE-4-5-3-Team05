@@ -41,6 +41,7 @@ public class AdminController {
 		@Valid @RequestBody BanReqBody reason) {
 		BanListDto res = adminService.banUser(userId, reason.reason());
 		return new RsData<>("200-1", "유저 정지 성공", new BanResBody(
+			res.getId(),
 			userId,
 			reason.reason(),
 			res.getUser().getBlockedCount(),

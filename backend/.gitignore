@@ -37,8 +37,11 @@ out/
 .vscode/
 /src/main/resources/application.properties
 gradle
+/src/main/resources/application.yml
 /src/main/resources/application-dev.yml
 /db.mv.db
 /db.trace.db
 /db_dev.mv.db
 /db_dev.trace.db
+/db_dev_test.mv.db
+/db_dev_test.trace.db

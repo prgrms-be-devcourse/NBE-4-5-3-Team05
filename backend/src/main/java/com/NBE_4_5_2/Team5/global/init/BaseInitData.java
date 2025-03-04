@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
 import com.NBE_4_5_2.Team5.domain.user.entity.Role;
 import com.NBE_4_5_2.Team5.domain.user.entity.User;
@@ -15,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 
 @Configuration
 @RequiredArgsConstructor
+@Profile("!test")
 public class BaseInitData {
 
 	private final UserRepository userRepository;

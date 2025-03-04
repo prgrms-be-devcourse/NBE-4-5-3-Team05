@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @AllArgsConstructor
 public class BanResBody {
+	private String banListId;
 	private String userId;
 	private String reason;
 	private Integer banCount;
