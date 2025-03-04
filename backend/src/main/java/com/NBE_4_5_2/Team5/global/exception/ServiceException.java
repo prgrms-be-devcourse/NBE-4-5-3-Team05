@@ -3,7 +3,7 @@ package com.NBE_4_5_2.Team5.global.exception;
 import com.NBE_4_5_2.Team5.global.dto.RsData;
 
 public class ServiceException extends RuntimeException {
-	private final RsData<?> rsData;
+    private final RsData<?> rsData;
 
 	public ServiceException(String code, String message) {
 		super(message);
