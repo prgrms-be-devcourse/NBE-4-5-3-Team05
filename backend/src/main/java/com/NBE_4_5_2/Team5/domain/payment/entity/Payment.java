@@ -6,8 +6,8 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import com.NBE_4_5_2.Team5.domain.member.entity.Member;
 import com.NBE_4_5_2.Team5.domain.payment.enums.PaymentStatus;
+import com.NBE_4_5_2.Team5.domain.user.entity.User;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
@@ -29,7 +29,7 @@ public class Payment {
 	private String id;
 	private String paymentKey;
 	@ManyToOne
-	private Member buyer;
+	private User buyer;
 
 	private int totalPrice;
 
@@ -43,7 +43,7 @@ public class Payment {
 	private PaymentStatus status;
 
 	@Builder
-	public Payment(String id, Member buyer, int totalPrice, PaymentStatus status) {
+	public Payment(String id, User buyer, int totalPrice, PaymentStatus status) {
 		this.id = id;
 		this.buyer = buyer;
 		this.totalPrice = totalPrice;
