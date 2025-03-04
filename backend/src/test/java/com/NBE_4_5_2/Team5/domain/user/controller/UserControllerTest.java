@@ -233,6 +233,24 @@ class UserControllerTest {
                         """.stripIndent().stripTrailing()));
     }
 
+    @Test
+    @DisplayName("회원 가입 - 실패 - 요청 body 누락")
+    void createUser7() throws Exception {
+
+        ResultActions resultActions = mvc
+                .perform(
+                        post("/api/users/signup")
+                )
+                .andDo(print());
+
+        resultActions
+                .andExpect(status().isBadRequest())
+                .andExpect(handler().handlerType(UserController.class))
+                .andExpect(handler().methodName("createUser"))
+                .andExpect(jsonPath("$.code").value("400-1"))
+                .andExpect(jsonPath("$.message").value("값을 입력해주세요."));
+    }
+
     private ResultActions loginUserRequest(String username, String password) throws Exception {
         return mvc
                 .perform(
@@ -251,7 +269,6 @@ class UserControllerTest {
                 )
                 .andDo(print());
     }
-
 
     @Test
     @DisplayName("로그인 - 성공")
@@ -380,7 +397,26 @@ class UserControllerTest {
     }
 
     @Test
-    @DisplayName("로그아웃")
+    @DisplayName("로그인 - 실패 - 요청 body 누락")
+    void loginUser6() throws Exception {
+
+        ResultActions resultActions = mvc
+                .perform(
+                        post("/api/users/login")
+                )
+                .andDo(print());
+
+        resultActions
+                .andExpect(status().isBadRequest())
+                .andExpect(handler().handlerType(UserController.class))
+                .andExpect(handler().methodName("loginUser"))
+                .andExpect(jsonPath("$.code").value("400-1"))
+                .andExpect(jsonPath("$.message").value("값을 입력해주세요."));
+
+    }
+
+    @Test
+    @DisplayName("로그아웃 - 성공")
     void logoutUser() throws Exception {
         ResultActions resultActions = mvc.perform(
                 post("/api/users/logout")
@@ -460,8 +496,8 @@ class UserControllerTest {
     }
 
     @Test
-    @DisplayName("내 정보 조회 - 만료된 accessToken 사용")
-    void me3() throws Exception {
+    @DisplayName("내 정보 조회 - 성공 - 만료된 accessToken 사용")
+    void getCurrentUser3() throws Exception {
 
         String refreshToken = loginedUser.getRefreshToken();
         String expiredToken = refreshToken + " eyJhbGciOiJIUzUxMiJ9.eyJpZCI6InVzZXItNjVhYTMxMDUtMzYyNi00NzZlLThjMzgtZmU0OGVjNGQyMDNjIiwidXNlcm5hbWUiOiJ1c2VyMSIsImlhdCI6MTc0MDk5MTc2NCwiZXhwIjoxNzQwOTkxNzY5fQ.UypcRIORV4MyzY53-2W94z3jxP5VLbs5NGWOjJDZZ-O5yLxTHxhzDbU9LTNfcblQXaZAiypGU0m3EDq_RjHlsQ";
