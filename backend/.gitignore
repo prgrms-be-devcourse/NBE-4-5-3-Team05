@@ -73,3 +73,6 @@ Dockerfile
 ### 💡 특정 데이터 폴더 무시 ###
 data/
 db_dev.mv.db  # H2 데이터베이스 파일도 무시
+gradle
+src/main/resources/application*.yml
+src/test/resources/application*.yml
