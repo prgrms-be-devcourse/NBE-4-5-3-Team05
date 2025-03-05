@@ -33,7 +33,8 @@ public class AdminController {
 	}
 
 	@DeleteMapping("/posts/{post-id}")
-	public RsData<Void> deletePost(@PathVariable Long postId) {
+	public RsData<Void> deletePost(@PathVariable(name = "post-id") String postId) {
 		adminService.deletePost(postId);
+		return new RsData<>("204-1", "게시글 삭제 성공.");
 	}
 }

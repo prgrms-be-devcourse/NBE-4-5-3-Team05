@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.NBE_4_5_2.Team5.domain.admin.dto.NoticeResBody;
 import com.NBE_4_5_2.Team5.domain.admin.entity.NoticePost;
 import com.NBE_4_5_2.Team5.domain.admin.repository.NoticePostRepository;
+import com.NBE_4_5_2.Team5.domain.post.post.repository.ProductPostRepository;
 import com.NBE_4_5_2.Team5.domain.user.entity.Role;
 import com.NBE_4_5_2.Team5.domain.user.entity.User;
 import com.NBE_4_5_2.Team5.domain.user.repository.UserRepository;
@@ -25,6 +26,7 @@ public class AdminService {
 	private final UserRepository userRepository;
 	private final NoticePostRepository noticePostRepository;
 	private final PasswordEncoder passwordEncoder;
+	private final ProductPostRepository productPostRepository;
 
 	public User signUpAdmin(String username, String password, String email) {
 		User admin = new User(username, passwordEncoder.encode(password), email, "admin", "addr", "profile",
@@ -56,5 +58,13 @@ public class AdminService {
 
 	private User getUser() {
 		return userRepository.findAllByRole(Role.ADMIN).get(0);
+	}
+
+	public void deletePost(String postId) {
+		User loggedInAdmin = getUser();
+
+		isAdmin(loggedInAdmin);
+
+		productPostRepository.deleteById(postId);
 	}
 }
