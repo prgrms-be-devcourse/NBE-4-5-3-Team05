@@ -36,7 +36,6 @@ out/
 ### VS Code ###
 .vscode/
 /src/main/resources/application.properties
-/src/main/resources/*.yml
 gradle
 /src/main/resources/application-dev.yml
 /db.mv.db
@@ -46,3 +45,4 @@ gradle
 /src/test/resources/application-secret.yml
 /db_test.mv.db
 /db_test.trace.db
+/src/main/resources/application-secret.yml
