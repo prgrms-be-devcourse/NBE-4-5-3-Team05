@@ -20,7 +20,6 @@ import java.util.UUID;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Builder
-@Setter
 @EntityListeners(AuditingEntityListener.class)
 public class ProductPost {
 
@@ -29,18 +28,23 @@ public class ProductPost {
     private String id;
 
     @Column(nullable = false)
+    @Setter
     private String productName;
 
     @Column(nullable = false)
+    @Setter
     private Integer productPrice;
 
     @Column(nullable = false)
+    @Setter
     private String title;
 
     @Column(nullable = false, columnDefinition = "TEXT")
+    @Setter
     private String content;
 
     @Column(nullable = false, columnDefinition = "TEXT")
+    @Setter
     private String image_urls; // 쉼표가 포함된 url 문자열
 
     @Column(nullable = false)
@@ -49,13 +53,16 @@ public class ProductPost {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @Setter
     @Builder.Default
     private ProductStatus status = ProductStatus.AVAILABLE;
 
     @Column(nullable = false)
+    @Setter
     private Float latitude;
 
     @Column(nullable = false)
+    @Setter
     private Float longitude;
 
     @CreatedDate
