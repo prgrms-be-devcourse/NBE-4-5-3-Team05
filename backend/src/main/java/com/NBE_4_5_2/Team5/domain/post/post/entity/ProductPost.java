@@ -1,6 +1,6 @@
 package com.NBE_4_5_2.Team5.domain.post.post.entity;
 
-import com.NBE_4_5_2.Team5.domain.category.entity.Category;
+import com.NBE_4_5_2.Team5.domain.post.category.entity.Category;
 import com.NBE_4_5_2.Team5.domain.post.post.enums.ProductStatus;
 import com.NBE_4_5_2.Team5.domain.user.entity.User;
 import com.NBE_4_5_2.Team5.global.exception.ServiceException;
