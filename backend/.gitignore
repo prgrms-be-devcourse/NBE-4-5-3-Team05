@@ -38,7 +38,8 @@ out/
 /src/main/resources/application.properties
 /src/main/resources/*.yml
 gradle
-
-### custom ###
-db_dev.mv.db
-db_dev.trace.db
+db.mv.db
+db.trace.db
+/*.mv.db
+/*.trace.db
+/src/test/resources/application-secret.yml
