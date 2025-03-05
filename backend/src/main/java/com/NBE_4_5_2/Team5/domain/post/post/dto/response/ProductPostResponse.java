@@ -26,7 +26,7 @@ public class ProductPostResponse {
         return new ProductPostResponse(
                 post.getId(),
                 post.getWriter().getId(),
-                post.getWriter().getNickname(),
+                post.getWriter().getUsername(),
                 post.getProductName(),
                 post.getProductPrice(),
                 post.getTitle(),

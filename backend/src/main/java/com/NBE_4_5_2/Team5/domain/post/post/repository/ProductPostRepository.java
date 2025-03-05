@@ -10,6 +10,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface ProductPostRepository extends JpaRepository<ProductPost, String> {
 
@@ -23,4 +25,6 @@ public interface ProductPostRepository extends JpaRepository<ProductPost, String
 
     @EntityGraph(attributePaths = {"productCategories.category"})
     Page<ProductPost> findByWriter(User writer, Pageable pageable);
+
+    List<ProductPost> findByIdIn(List<String> postIds);
 }
