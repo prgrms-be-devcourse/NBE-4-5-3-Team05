@@ -1,6 +1,9 @@
 package com.NBE_4_5_2.Team5.domain.admin.service;
 
+import java.util.UUID;
+
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +24,15 @@ import lombok.RequiredArgsConstructor;
 public class AdminService {
 	private final UserRepository userRepository;
 	private final NoticePostRepository noticePostRepository;
+	private final PasswordEncoder passwordEncoder;
+
+	public User signUpAdmin(String username, String password, String email) {
+		User admin = new User(username, passwordEncoder.encode(password), email, "admin", "addr", "profile",
+			Role.ADMIN);
+		admin.setRefreshToken(UUID.randomUUID().toString());
+
+		return userRepository.save(admin);
+	}
 
 	public NoticeResBody writeNotice(@NotEmpty String title, @NotEmpty String content) {
 		User admin = getUser();
