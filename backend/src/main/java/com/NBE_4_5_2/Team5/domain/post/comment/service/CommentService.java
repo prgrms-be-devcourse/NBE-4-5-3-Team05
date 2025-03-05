@@ -41,11 +41,11 @@ public class CommentService {
 	}
 
 	@Transactional
-	public CommentDto updateComment(String postId, String content) {
+	public CommentDto updateComment(String commentId, String content) {
 		User loggedInUser = getUser();
 
-		Comment comment = commentRepository.findById(postId)
-			.orElseThrow(() -> new EntityNotFoundException("id가 %s인 comment를 찾을 수 없습니다.".formatted(postId)));
+		Comment comment = commentRepository.findById(commentId)
+			.orElseThrow(() -> new EntityNotFoundException("id가 %s인 comment를 찾을 수 없습니다.".formatted(commentId)));
 
 		comment.isMine(loggedInUser);
 
