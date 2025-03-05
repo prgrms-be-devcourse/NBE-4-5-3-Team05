@@ -43,14 +43,5 @@ public class ChatController {
         chatService.sendChatMessage(message);
     }
 
-    @MessageMapping("/chat/sendImage")
-    public void sendImage(@Payload ChatMessage message, @Header("token") String token) {
-        String nickname = authTokenService.getUsernameFromToken(token);
-        System.out.println("name: " + nickname);
-
-        if (message.getType() == ChatMessage.MessageType.IMAGE) {
-            chatService.sendChatMessage(message); // 이미지 메시지 처리
-        }
-    }
 
 }
