@@ -21,7 +21,7 @@ import lombok.experimental.SuperBuilder;
 @Getter
 @EntityListeners(AuditingEntityListener.class)
 @SuperBuilder
-public class BaseTime {
+public class BaseTime extends BaseEntity {
 
 	@CreatedDate
 	@Setter(AccessLevel.PRIVATE)

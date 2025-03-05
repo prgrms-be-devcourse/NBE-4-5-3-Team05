@@ -27,8 +27,16 @@ public class AdminService {
 	private final PasswordEncoder passwordEncoder;
 
 	public User signUpAdmin(String username, String password, String email) {
-		User admin = new User(username, passwordEncoder.encode(password), email, "admin", "addr", "profile",
-			Role.ADMIN);
+		User admin = User.builder()
+			.id("user-" + UUID.randomUUID())
+			.username(username)
+			.password(passwordEncoder.encode(password))
+			.email(email)
+			.nickname("nickname")
+			.role(Role.ADMIN)
+			.address("addr")
+			.profileUrl("url")
+			.build();
 		admin.setRefreshToken(UUID.randomUUID().toString());
 
 		return userRepository.save(admin);

@@ -3,9 +3,9 @@ server:
 
 
 spring:
-  #  jackson:
-  #    serialization:
-  #      fail-on-empty-beans: false
+  jackson:
+    serialization:
+      fail-on-empty-beans: false
 
   output:
     ansi:
@@ -22,7 +22,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
     show-sql: false
     properties:
       hibernate:
@@ -31,8 +31,6 @@ spring:
         use_sql_comments: true
         default_batch_fetch_size: 100
     open-in-view: false
-  profiles:
-    include: secret
 
 logging:
   level:
@@ -44,3 +42,8 @@ logging:
 
 springdoc:
   default-produces-media-type: application/json;charset=UTF-8
+
+custom:
+  jwt:
+    secret-key: abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqrstuvwxyz1234567890
+    expire-seconds: "#{60 * 30}"
