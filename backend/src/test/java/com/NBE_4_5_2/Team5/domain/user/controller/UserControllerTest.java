@@ -40,11 +40,21 @@ class UserControllerTest {
 
     private User loginedUser;
     private String token;
+    private String validAccessToken;
+    private String validRefreshToken;
+    private String expiredAccessToken = "expiredAccessToken";
+    private String invalidRefreshToken = "invalidRefreshToken";
+
 
     @BeforeEach
     void loginUser() {
         loginedUser = userService.getUserByUsername("user1").get();
-        token = userService.getAuthToken(loginedUser);
+        validAccessToken = userService.generateAccessToken(loginedUser);
+        validRefreshToken = loginedUser.getRefreshToken();
+        token = validRefreshToken + " " + validAccessToken;
+
+        // 인증 정보가 초기화된 상태로 테스트 진행
+        SecurityContextHolder.clearContext();
     }
 
     private void checkUser(ResultActions resultActions, User user) throws Exception {
@@ -462,12 +472,16 @@ class UserControllerTest {
     }
 
     @Test
-    @DisplayName("내 정보 조회 - 성공")
+    @DisplayName("내 정보 조회 - 성공 - 쿠키 인증 - 유효한 AccessToken + 유효한 RefreshToken")
     void getCurrentUser1() throws Exception {
 
-        String token = userService.getAuthToken(loginedUser);
-
-        ResultActions resultActions = meRequest(token);
+        ResultActions resultActions = mvc
+                .perform(
+                        get("/api/users/me")
+                                .cookie(new Cookie("accessToken", validAccessToken))
+                                .cookie(new Cookie("refreshToken", validRefreshToken))
+                )
+                .andDo(print());
 
         resultActions
                 .andExpect(status().isOk())
@@ -477,32 +491,91 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.message").value("내 정보 조회가 완료되었습니다."));
 
         checkUser(resultActions, loginedUser);
-
     }
 
     @Test
-    @DisplayName("내 정보 조회 - 실패 - 잘못된 refreshToken")
+    @DisplayName("내 정보 조회 - 성공 - 쿠키 인증 - 만료된 AccessToken + 유효한 RefreshToken")
     void getCurrentUser2() throws Exception {
+        ResultActions resultActions = mvc
+                .perform(
+                        get("/api/users/me")
+                                .cookie(new Cookie("accessToken", expiredAccessToken))
+                                .cookie(new Cookie("refreshToken", validRefreshToken))
+                )
+                .andDo(print());
 
-        String refreshToken = "";
+        // refreshToken으로 accessToken 재발급 후 정상적으로 인증
+        resultActions
+                .andExpect(status().isOk())
+                .andExpect(handler().handlerType(UserController.class))
+                .andExpect(handler().methodName("getCurrentUser"))
+                .andExpect(jsonPath("$.code").value("200-1"))
+                .andExpect(jsonPath("$.message").value("내 정보 조회가 완료되었습니다."));
 
-        ResultActions resultActions = meRequest(refreshToken);
+        checkUser(resultActions, loginedUser);
+    }
+
+    @Test
+    @DisplayName("내 정보 조회 - 실패 - 쿠키 인증 - 유효한 AccessToken + 만료된 RefreshToken")
+        // TODO: 유효한 AccessToken에 대한 정상적인 처리 구현
+    void getCurrentUser3() throws Exception {
+        ResultActions resultActions = mvc
+                .perform(
+                        get("/api/users/me")
+                                .cookie(new Cookie("accessToken", validAccessToken))
+                                .cookie(new Cookie("refreshToken", invalidRefreshToken))
+                )
+                .andDo(print());
+
+        // accessToken이 유효하더라도 refreshToken이 만료되었다면 실패하고 있음
+        resultActions
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("401-1"))
+                .andExpect(jsonPath("$.message").value("잘못된 인증키입니다."));
+    }
+
+    @Test
+    @DisplayName("내 정보 조회 - 실패 - 쿠키 인증 - 만료된 AccessToken + 잘못된 RefreshToken")
+    void getCurrentUser4() throws Exception {
+        ResultActions resultActions = mvc
+                .perform(
+                        get("/api/users/me")
+                                .cookie(new Cookie("accessToken", expiredAccessToken))
+                                .cookie(new Cookie("refreshToken", invalidRefreshToken))
+                )
+                .andDo(print());
 
         resultActions
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.code").value("401-1"))
                 .andExpect(jsonPath("$.message").value("잘못된 인증키입니다."));
-
     }
 
     @Test
-    @DisplayName("내 정보 조회 - 성공 - 만료된 accessToken 사용")
-    void getCurrentUser3() throws Exception {
+    @DisplayName("내 정보 조회 - 실패 - 쿠키 인증 - 잘못된 형식 (잘못된 값이 들어오거나 하나의 토큰만 존재)")
+    void getCurrentUser5() throws Exception {
+        ResultActions resultActions = mvc
+                .perform(
+                        get("/api/users/me")
+                                .cookie(new Cookie("refreshToken", validRefreshToken))
+                )
+                .andDo(print());
 
-        String refreshToken = loginedUser.getRefreshToken();
-        String expiredToken = refreshToken + " eyJhbGciOiJIUzUxMiJ9.eyJpZCI6InVzZXItNjVhYTMxMDUtMzYyNi00NzZlLThjMzgtZmU0OGVjNGQyMDNjIiwidXNlcm5hbWUiOiJ1c2VyMSIsImlhdCI6MTc0MDk5MTc2NCwiZXhwIjoxNzQwOTkxNzY5fQ.UypcRIORV4MyzY53-2W94z3jxP5VLbs5NGWOjJDZZ-O5yLxTHxhzDbU9LTNfcblQXaZAiypGU0m3EDq_RjHlsQ";
+        resultActions
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("401-1"))
+                .andExpect(jsonPath("$.message").value("잘못된 인증키입니다."));
+    }
 
-        ResultActions resultActions = meRequest(expiredToken);
+    @Test
+    @DisplayName("내 정보 조회 - 성공 - 헤더 인증 - 유효한 RefreshToken + 유효한 AccessToken")
+    void getCurrentUser6() throws Exception {
+        ResultActions resultActions = mvc
+                .perform(
+                        get("/api/users/me")
+                                .header("Authorization", "Bearer " + validRefreshToken + " " + validAccessToken)
+                )
+                .andDo(print());
 
         resultActions
                 .andExpect(status().isOk())
@@ -512,7 +585,76 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.message").value("내 정보 조회가 완료되었습니다."));
 
         checkUser(resultActions, loginedUser);
+    }
 
+    @Test
+    @DisplayName("내 정보 조회 - 성공 - 헤더 인증 - 만료된 AccessToken + 유효한 RefreshToken")
+    void getCurrentUser7() throws Exception {
+        ResultActions resultActions = mvc
+                .perform(
+                        get("/api/users/me")
+                                .header("Authorization", "Bearer " + validRefreshToken + " " + expiredAccessToken)
+                )
+                .andDo(print());
+
+        // refreshToken을 통해 accessToken이 재발급되고 정상 인증됨
+        resultActions
+                .andExpect(status().isOk())
+                .andExpect(handler().handlerType(UserController.class))
+                .andExpect(handler().methodName("getCurrentUser"))
+                .andExpect(jsonPath("$.code").value("200-1"))
+                .andExpect(jsonPath("$.message").value("내 정보 조회가 완료되었습니다."));
+
+        checkUser(resultActions, loginedUser);
+    }
+
+    @Test
+    @DisplayName("내 정보 조회 - 실패 - 헤더 인증 - 유효한 AccessToken + 만료된 RefreshToken")
+    void getCurrentUser8() throws Exception {
+        ResultActions resultActions = mvc
+                .perform(
+                        get("/api/users/me")
+                                .header("Authorization", "Bearer " + invalidRefreshToken + " " + validAccessToken)
+                )
+                .andDo(print());
+
+        // RefreshToken이 만료되어 인증 실패
+        resultActions
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("401-1"))
+                .andExpect(jsonPath("$.message").value("잘못된 인증키입니다."));
+    }
+
+    @Test
+    @DisplayName("내 정보 조회 - 실패 - 헤더 인증 - 만료된 AccessToken + 만료된 RefreshToken")
+    void getCurrentUser9() throws Exception {
+        ResultActions resultActions = mvc
+                .perform(
+                        get("/api/users/me")
+                                .header("Authorization", "Bearer " + invalidRefreshToken + " " + expiredAccessToken)
+                )
+                .andDo(print());
+
+        resultActions
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("401-1"))
+                .andExpect(jsonPath("$.message").value("잘못된 인증키입니다."));
+    }
+
+    @Test
+    @DisplayName("내 정보 조회 - 실패 - 헤더 인증 - 잘못된 형식 (잘못된 값이 들어오거나 하나의 토큰만 존재)")
+    void getCurrentUser10() throws Exception {
+        ResultActions resultActions = mvc
+                .perform(
+                        get("/api/users/me")
+                                .header("Authorization", "Bearer " + validRefreshToken)
+                )
+                .andDo(print());
+
+        resultActions
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("401-1"))
+                .andExpect(jsonPath("$.message").value("잘못된 인증키입니다."));
     }
 
     private ResultActions refreshAccessTokenRequest(String refreshToken) throws Exception {

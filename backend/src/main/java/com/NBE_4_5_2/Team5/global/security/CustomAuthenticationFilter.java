@@ -23,7 +23,7 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
     private final UserService userService;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
         String url = request.getRequestURI();
 
@@ -79,6 +79,10 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
 
             String refreshToken = tokenBits[0];
             String accessToken = tokenBits[1];
+
+            if(refreshToken.isBlank() || accessToken.isBlank()) {
+                return null;
+            }
 
             return new AuthToken(refreshToken, accessToken);
         }
