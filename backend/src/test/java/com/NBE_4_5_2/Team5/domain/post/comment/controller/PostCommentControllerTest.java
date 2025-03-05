@@ -5,7 +5,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +22,8 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import com.NBE_4_5_2.Team5.TestConfig;
 import com.NBE_4_5_2.Team5.Util;
+import com.NBE_4_5_2.Team5.domain.post.comment.entity.Comment;
+import com.NBE_4_5_2.Team5.domain.post.comment.repository.CommentRepository;
 import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductPost;
 import com.NBE_4_5_2.Team5.domain.post.post.repository.ProductPostRepository;
 import com.NBE_4_5_2.Team5.domain.post.post.service.ProductPostService;
@@ -50,6 +54,8 @@ class PostCommentControllerTest {
 	private MockMvc mockMvc;
 	@Autowired
 	private ObjectMapper objectMapper;
+	@Autowired
+	private CommentRepository commentRepository;
 
 	@BeforeEach
 	void setUp() {
@@ -147,5 +153,48 @@ class PostCommentControllerTest {
 
 		return Map.of("accessToken", Objects.requireNonNull(response.getCookie("accessToken")),
 			"refreshToken", Objects.requireNonNull(response.getCookie("refreshToken")));
+	}
+
+	@Test
+	void deleteTest() throws Exception {
+		//given
+		// 로그인하고 Product Post 작성, comment 작성
+		User author = userService.signup("username", "password", "email", "nickname", "address", "url");
+
+		ProductPost productPost = productPostRepository.save(
+			ProductPost.create(author, "name", 5000, "title", "content", "url", 50F, 50F)
+		);
+
+		Map<String, Cookie> cookieMap = login();
+
+		String result = mockMvc.perform(post("/api/posts/%s/comments".formatted(productPost.getId()))
+				.contentType(MediaType.APPLICATION_JSON)
+				.cookie(cookieMap.get("accessToken"), cookieMap.get("refreshToken"))
+				.content("""
+					{
+						"content": "wow"
+					}"""))
+			.andExpect(status().isOk())
+			.andReturn().getResponse().getContentAsString();
+
+		String commentId = objectMapper.readTree(result).get("data").get("id").asText();
+
+		//when
+		// 삭제
+		ResultActions action = mockMvc.perform(
+			delete("/api/posts/%s/comments/%s".formatted(productPost.getId(), commentId))
+				.cookie(cookieMap.get("accessToken"), cookieMap.get("refreshToken")));
+
+		//then
+		// 204 return
+
+		action
+			.andExpect(status().isNoContent())
+			.andExpect(handler().handlerType(PostCommentController.class))
+			.andExpect(handler().methodName("deleteComment"))
+			.andExpect(jsonPath("$.code").value("204-1"));
+
+		Optional<Comment> byId = commentRepository.findById(commentId);
+		Assertions.assertThat(byId).isEmpty();
 	}
 }
