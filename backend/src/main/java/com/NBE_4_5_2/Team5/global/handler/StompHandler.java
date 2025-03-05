@@ -59,8 +59,9 @@ public class StompHandler implements ChannelInterceptor {
             chatRoomRepository.plusUserCount(roomId);
             // 클라이언트 입장 메시지를 채팅방에 발송한다.(redis publish)
 //            String nickname = authTokenService.getUsernameFromToken(jwtToken);
-            String nickname = Optional.ofNullable((Principal) message.getHeaders().get("simpUser")).map(Principal::getName).orElse("UnknownUser");
-            System.out.println("구독요청 ㅇㅇ"+nickname);
+            String name = Optional.ofNullable((Principal) message.getHeaders().get("simpUser")).map(Principal::getName).orElse("UnknownUser");
+            String nickname=authTokenService.getNicknameFromName(name);
+            System.out.println("구독: "+nickname);
             chatService.sendChatMessage(ChatMessage.builder()
                     .type(ChatMessage.MessageType.ENTER)
                     .roomId(roomId)
@@ -74,8 +75,9 @@ public class StompHandler implements ChannelInterceptor {
             // 채팅방의 인원수를 -1한다.
             chatRoomRepository.minusUserCount(roomId);
             // 클라이언트 퇴장 메시지를 채팅방에 발송한다.(redis publish)
-            String nickname = Optional.ofNullable((Principal) message.getHeaders().get("simpUser")).map(Principal::getName).orElse("UnknownUser");
-            System.out.println("구취 ㅇㅇ"+nickname);
+            String name = Optional.ofNullable((Principal) message.getHeaders().get("simpUser")).map(Principal::getName).orElse("UnknownUser");
+            String nickname=authTokenService.getNicknameFromName(name);
+            System.out.println("구취: "+nickname);
 //            String nickname = authTokenService.getUsernameFromToken(jwtToken);
             chatService.sendChatMessage(ChatMessage.builder().type(ChatMessage.MessageType.QUIT).roomId(roomId).sender(nickname).build());
             // 퇴장한 클라이언트의 roomId 맵핑 정보를 삭제한다.
