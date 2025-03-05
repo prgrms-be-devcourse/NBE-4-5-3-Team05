@@ -1,42 +1,45 @@
 package com.NBE_4_5_2.Team5.domain.user.service;
 
-import com.NBE_4_5_2.Team5.domain.user.entity.User;
-import com.NBE_4_5_2.Team5.global.standard.util.Ut;
-import lombok.RequiredArgsConstructor;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
+import com.NBE_4_5_2.Team5.domain.user.entity.Role;
+import com.NBE_4_5_2.Team5.domain.user.entity.User;
+import com.NBE_4_5_2.Team5.global.standard.util.Ut;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class AuthTokenService {
 
-    @Value("${custom.jwt.secret-key}")
-    private String keyString;
+	@Value("${custom.jwt.secret-key}")
+	private String keyString;
 
-    @Value("${custom.jwt.expire-seconds}")
-    private int expireSeconds;
+	@Value("${custom.jwt.expire-seconds}")
+	private int expireSeconds;
 
-    String generateAccessToken(User user) {
+	String generateAccessToken(User user) {
 
-        return Ut.Jwt.createToken(
-                keyString,
-                expireSeconds,
-                Map.of("id", user.getId(), "username", user.getUsername())
-        );
-    }
+		return Ut.Jwt.createToken(
+			keyString,
+			expireSeconds,
+			Map.of("id", user.getId(), "username", user.getUsername(), "role", user.getRole())
+		);
+	}
 
-    Map<String, Object> getPayload(String accessToken) {
+	Map<String, Object> getPayload(String accessToken) {
 
-        if(!Ut.Jwt.isValidToken(keyString, accessToken)) {
-            return null;
-        }
+		if (!Ut.Jwt.isValidToken(keyString, accessToken)) {
+			return null;
+		}
 
-        Map<String, Object> payload = Ut.Jwt.getPayload(keyString, accessToken);
-        String id = (String) payload.get("id");
-        String username = (String) payload.get("username");
+		Map<String, Object> payload = Ut.Jwt.getPayload(keyString, accessToken);
+		String id = (String)payload.get("id");
+		String username = (String)payload.get("username");
 
-        return Map.of("id", id, "username", username);
-    }
+		return Map.of("id", id, "username", username, "role", Role.valueOf(String.valueOf(payload.get("role"))));
+	}
 }
