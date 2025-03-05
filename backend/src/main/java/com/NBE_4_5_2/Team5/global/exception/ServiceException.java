@@ -1,6 +1,6 @@
 package com.NBE_4_5_2.Team5.global.exception;
 
-import com.NBE_4_5_2.Team5.global.response.RsData;
+import com.NBE_4_5_2.Team5.global.dto.RsData;
 
 public class ServiceException extends RuntimeException {
 	private final RsData<?> rsData;
