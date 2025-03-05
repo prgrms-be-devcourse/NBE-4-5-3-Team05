@@ -34,6 +34,9 @@ public class ProductPost {
     @Column(nullable = false)
     private Integer productPrice;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    private User buyer; // 구매자(NULL이면 아직 구매 안 된 상태)
+
     @Column(nullable = false)
     private String title;
 
@@ -92,6 +95,12 @@ public class ProductPost {
                 .latitude(latitude)
                 .longitude(longitude)
                 .build();
+    }
+
+    // 구매 처리 메서드
+    public void setBuyer(User buyer) {
+        this.buyer = buyer;
+        this.status = ProductStatus.PURCHASED;
     }
 
     public void addCategories(List<Category> categories) {
