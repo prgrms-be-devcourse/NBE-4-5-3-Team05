@@ -44,7 +44,6 @@ public class UserService {
 			.profileUrl(profileUrl)
 			.role(Role.USER)
 			.build();
-
 		return userRepository.save(user);
 	}
 

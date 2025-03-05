@@ -1,4 +1,4 @@
-package com.NBE_4_5_2.Team5.domain.category.controller;
+package com.NBE_4_5_2.Team5.domain.post.category.controller;
 
 import java.util.List;
 
@@ -6,8 +6,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.NBE_4_5_2.Team5.domain.category.entity.Category;
-import com.NBE_4_5_2.Team5.domain.category.service.CategoryService;
+import com.NBE_4_5_2.Team5.domain.post.category.entity.Category;
+import com.NBE_4_5_2.Team5.domain.post.category.service.CategoryService;
 import com.NBE_4_5_2.Team5.global.dto.RsData;
 
 import lombok.RequiredArgsConstructor;

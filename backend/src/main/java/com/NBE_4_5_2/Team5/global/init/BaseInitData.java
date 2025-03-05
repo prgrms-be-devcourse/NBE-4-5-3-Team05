@@ -3,15 +3,15 @@ package com.NBE_4_5_2.Team5.global.init;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.core.annotation.Order;
 
-import com.NBE_4_5_2.Team5.domain.admin.service.AdminService;
-import com.NBE_4_5_2.Team5.domain.category.entity.Category;
-import com.NBE_4_5_2.Team5.domain.category.repository.CategoryRepository;
+import com.NBE_4_5_2.Team5.domain.post.category.entity.Category;
+import com.NBE_4_5_2.Team5.domain.post.category.repository.CategoryRepository;
 import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductCategory;
 import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductPost;
 import com.NBE_4_5_2.Team5.domain.post.post.repository.ProductCategoryRepository;
@@ -20,25 +20,43 @@ import com.NBE_4_5_2.Team5.domain.user.entity.User;
 import com.NBE_4_5_2.Team5.domain.user.repository.UserRepository;
 import com.NBE_4_5_2.Team5.domain.user.service.UserService;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Configuration
 @RequiredArgsConstructor
-@Profile("!test")
 public class BaseInitData {
+	private final CategoryRepository categoryRepository;
+	private final ProductPostRepository postRepository;
+	private final ProductCategoryRepository productCategoryRepository;
 	private final UserService userService;
 	private final UserRepository userRepository;
-	private final AdminService adminService;
-	private final ProductPostRepository postRepository;
-	private final CategoryRepository categoryRepository;
-	private final ProductCategoryRepository productCategoryRepository;
+
+	@Autowired
+	@Lazy
+	private BaseInitData self;
 
 	@Bean
-	public ApplicationRunner applicationRunner() {
+	@Order(1)
+	public ApplicationRunner applicationRunner1() {
 		return args -> {
-			userInit();
-			categoryInit();
-			postInit();
+			self.userInit();
+		};
+	}
+
+	@Bean
+	@Order(2)
+	public ApplicationRunner applicationRunner2() {
+		return args -> {
+			self.categoryInit();
+		};
+	}
+
+	@Bean
+	@Order(3)
+	public ApplicationRunner applicationRunner3() {
+		return args -> {
+			self.postInit();
 		};
 	}
 
@@ -55,8 +73,6 @@ public class BaseInitData {
 			"https://example.com/default_profile.png");
 		userService.signup("user3", "user31234@", "user3@gmail.com", "user3", "서울시 광진구",
 			"https://example.com/default_profile.png");
-
-		adminService.signUpAdmin("admin", "password", "admin@gmail.com");
 
 	}
 
@@ -129,5 +145,4 @@ public class BaseInitData {
 
 		productCategoryRepository.saveAll(productCategories);
 	}
-
 }

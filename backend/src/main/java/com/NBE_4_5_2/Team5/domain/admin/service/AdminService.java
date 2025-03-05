@@ -29,8 +29,17 @@ public class AdminService {
 	private final ProductPostRepository productPostRepository;
 
 	public User signUpAdmin(String username, String password, String email) {
-		User admin = new User(username, passwordEncoder.encode(password), email, "admin", "addr", "profile",
-			Role.ADMIN);
+		User admin =
+			User.builder()
+				.id("user-" + UUID.randomUUID())
+				.role(Role.ADMIN)
+				.username(username)
+				.password(passwordEncoder.encode(password))
+				.email(email)
+				.nickname("admin")
+				.address("addr")
+				.profileUrl("url")
+				.build();
 		admin.setRefreshToken(UUID.randomUUID().toString());
 
 		return userRepository.save(admin);

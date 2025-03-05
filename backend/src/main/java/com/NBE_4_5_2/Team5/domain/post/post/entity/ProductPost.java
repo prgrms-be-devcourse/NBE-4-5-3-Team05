@@ -9,7 +9,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import com.NBE_4_5_2.Team5.domain.category.entity.Category;
+import com.NBE_4_5_2.Team5.domain.post.category.entity.Category;
 import com.NBE_4_5_2.Team5.domain.post.post.enums.ProductStatus;
 import com.NBE_4_5_2.Team5.domain.user.entity.User;
 import com.NBE_4_5_2.Team5.global.exception.ServiceException;
@@ -36,7 +36,6 @@ import lombok.Setter;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Builder
-@Setter
 @EntityListeners(AuditingEntityListener.class)
 public class ProductPost {
 
@@ -45,18 +44,26 @@ public class ProductPost {
 	private String id;
 
 	@Column(nullable = false)
+	@Setter
 	private String productName;
 
 	@Column(nullable = false)
+	@Setter
 	private Integer productPrice;
 
+	@ManyToOne(fetch = FetchType.LAZY)
+	private User buyer; // 구매자(NULL이면 아직 구매 안 된 상태)
+
 	@Column(nullable = false)
+	@Setter
 	private String title;
 
 	@Column(nullable = false, columnDefinition = "TEXT")
+	@Setter
 	private String content;
 
 	@Column(nullable = false, columnDefinition = "TEXT")
+	@Setter
 	private String image_urls; // 쉼표가 포함된 url 문자열
 
 	@Column(nullable = false)
@@ -65,13 +72,16 @@ public class ProductPost {
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
+	@Setter
 	@Builder.Default
 	private ProductStatus status = ProductStatus.AVAILABLE;
 
 	@Column(nullable = false)
+	@Setter
 	private Float latitude;
 
 	@Column(nullable = false)
+	@Setter
 	private Float longitude;
 
 	@CreatedDate
@@ -82,6 +92,7 @@ public class ProductPost {
 	private LocalDateTime modifiedAt;
 
 	@OneToMany(mappedBy = "productPost", cascade = CascadeType.ALL, orphanRemoval = true)
+	@Builder.Default
 	private List<ProductCategory> productCategories = new ArrayList<>();
 
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -100,6 +111,12 @@ public class ProductPost {
 			.latitude(latitude)
 			.longitude(longitude)
 			.build();
+	}
+
+	// 구매 처리 메서드
+	public void setBuyer(User buyer) {
+		this.buyer = buyer;
+		this.status = ProductStatus.PURCHASED;
 	}
 
 	public void addCategories(List<Category> categories) {
@@ -132,5 +149,13 @@ public class ProductPost {
 		}
 
 		throw new ServiceException("403-1", "자신이 작성한 글만 삭제 가능합니다.");
+	}
+
+	public boolean isAvailable() {
+		return status == ProductStatus.AVAILABLE;
+	}
+
+	public void updateStatus(ProductStatus status) {
+		this.status = status;
 	}
 }

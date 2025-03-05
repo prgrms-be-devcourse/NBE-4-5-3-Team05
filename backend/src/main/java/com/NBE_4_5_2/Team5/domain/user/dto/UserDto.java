@@ -13,15 +13,15 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserDto {
-    private String id;
-    private String username;
-    private String email;
-    private String nickname;
-    private String address;
-    private String profileUrl;
-    private Role role;
-    private LocalDateTime createdAt;
-    private LocalDateTime modifiedAt;
+	private String id;
+	private String username;
+	private String email;
+	private String nickname;
+	private String address;
+	private String profileUrl;
+	private Role role;
+	private LocalDateTime createdAt;
+	private LocalDateTime modifiedAt;
 	private boolean blocked;
 	private int blockedCount;
 
@@ -33,7 +33,7 @@ public class UserDto {
 		this.nickname = admin.getNickname();
 		this.address = admin.getAddress();
 		this.profileUrl = admin.getProfileUrl();
-		this.blocked = admin.isBlocked();
+		this.blocked = admin.getBlocked();
 		this.blockedCount = admin.getBlockedCount();
 		this.createdAt = admin.getCreatedAt();
 		this.modifiedAt = admin.getModifiedAt();

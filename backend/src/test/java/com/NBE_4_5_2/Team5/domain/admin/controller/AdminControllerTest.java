@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -18,11 +19,12 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 import com.NBE_4_5_2.Team5.TestConfig;
+import com.NBE_4_5_2.Team5.Util;
 import com.NBE_4_5_2.Team5.domain.admin.entity.NoticePost;
 import com.NBE_4_5_2.Team5.domain.admin.repository.NoticePostRepository;
 import com.NBE_4_5_2.Team5.domain.admin.service.AdminService;
-import com.NBE_4_5_2.Team5.domain.category.entity.Category;
-import com.NBE_4_5_2.Team5.domain.category.repository.CategoryRepository;
+import com.NBE_4_5_2.Team5.domain.post.category.entity.Category;
+import com.NBE_4_5_2.Team5.domain.post.category.repository.CategoryRepository;
 import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductPost;
 import com.NBE_4_5_2.Team5.domain.post.post.repository.ProductPostRepository;
 import com.NBE_4_5_2.Team5.domain.user.entity.User;
@@ -52,6 +54,13 @@ class AdminControllerTest {
 	private UserService userService;
 	@Autowired
 	private ProductPostRepository productPostRepository;
+	@Autowired
+	private Util util;
+
+	@BeforeEach
+	public void setUp() {
+		util.truncateAllTables();
+	}
 
 	@Test
 	void writeNotice() throws Exception {
@@ -114,7 +123,7 @@ class AdminControllerTest {
 	@Test
 	void deletePost() throws Exception {
 		//given
-		Category category = categoryRepository.save(new Category(1L, "cat1"));
+		Category category = categoryRepository.save(Category.builder().name("cat1").build());
 		User user = userService.signup("user1", "password", "email", "nickanme", "addr", "profile");
 		ProductPost post = productPostRepository.save(
 			ProductPost.create(user, "name", 5000, "title", "content", "url", 30F, 40F)
