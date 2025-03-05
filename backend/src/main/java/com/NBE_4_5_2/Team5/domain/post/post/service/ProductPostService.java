@@ -8,6 +8,7 @@ import com.NBE_4_5_2.Team5.domain.post.post.dto.response.PreviewPostResponse;
 import com.NBE_4_5_2.Team5.domain.post.post.dto.response.ProductPostResponse;
 import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductCategory;
 import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductPost;
+import com.NBE_4_5_2.Team5.domain.post.post.enums.ProductStatus;
 import com.NBE_4_5_2.Team5.domain.post.post.repository.LikedPostRepository;
 import com.NBE_4_5_2.Team5.domain.post.post.repository.ProductPostRepository;
 import com.NBE_4_5_2.Team5.domain.user.entity.User;
@@ -160,6 +161,38 @@ public class ProductPostService {
 
         return ProductPostResponse.fromEntity(post);
     }
+
+    // 특정 게시글을 로그인 유저가 구매 확정
+
+    public ProductPostResponse purchasePost(User buyer, String postId) {
+        ProductPost post = productPostRepository.findById(postId).orElseThrow(
+                () -> new ServiceException("404", "해당 글은 존재하지 않습니다.")
+        );
+
+        // 예: 이미 구매된 상품이면 예외 처리
+        if (post.getStatus() == ProductStatus.PURCHASED) {
+            throw new ServiceException("400", "이미 판매 완료된 상품입니다.");
+        }
+        // 예: 내가 쓴 글을 내가 구매하는 상황을 막고 싶으면 체크
+        if (post.getWriter().equals(buyer)) {
+            throw new ServiceException("400", "자신이 작성한 상품을 구매할 수 없습니다.");
+        }
+
+        post.setBuyer(buyer); // 여기서 status = PURCHASED 로 바뀜
+        productPostRepository.save(post);
+
+        return ProductPostResponse.fromEntity(post);
+    }
+
+    //내가 구매한 내역
+    @Transactional(readOnly = true)
+    public List<ProductPostResponse> getMyPurchases(User actor) {
+        List<ProductPost> purchasedPosts = productPostRepository.findByBuyer(actor);
+        return purchasedPosts.stream()
+                .map(ProductPostResponse::fromEntity)
+                .toList();
+    }
+
 
 
 
