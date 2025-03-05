@@ -97,11 +97,12 @@ class CustomAuthenticationFilterTest {
                 new UsernamePasswordAuthenticationToken("unknown_user", null, List.of())
         );
 
+        // 인증되지 않은 사용자가 인증이 필요한 api에 접속
         ResultActions resultActions = mvc
                 .perform(get("/api/users/me"))
                 .andDo(print());
 
-        // rq.getUserIdentity()에서 인증되지 않은 사용자를 예외 처리함
+        // CustomAuthenticationFilter에 의해 걸러지게 되어 SecurityConfig에서 예외 처리됨
         resultActions
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.code").value("401-2"))
@@ -112,7 +113,7 @@ class CustomAuthenticationFilterTest {
      * 예외 테스트 코드 (test4 ~ test6)
      * <p>
      * GlobalExceptionHandler에서 직접 처리하지 않은 예외 상황이 발생했을 때,
-     * Spring Boot의 기본 오류 처리 (`/error`)를 통해 정상적으로 응답이 반환되는지 검증하는 테스트입니다.
+     * Spring Boot의 기본 오류 처리 (`/error`)를 통해 정상적으로 응답이 반환되는지 검증하는 테스트
      */
     @Test
     @DisplayName("예외 - 존재하지 않는 URL 요청 시 404 반환")
