@@ -14,8 +14,10 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
+
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -41,6 +43,7 @@ public class User extends BaseTime {
 	private String password;
 
 	@Column(length = 100, unique = true)
+
 	@Setter
 	private String refreshToken;
 
@@ -56,6 +59,7 @@ public class User extends BaseTime {
 	@Column(name = "profile_url", length = 255)
 	private String profileUrl;
 
+
 	@Column(nullable = false)
 	@Enumerated(EnumType.ORDINAL)
 	private Role role; // 0: admin , 1: 일반 유저
@@ -64,6 +68,7 @@ public class User extends BaseTime {
 
 	@Column(nullable = false)
 	@Builder.Default
+
 	private Boolean blocked = false;
 
 	@Column(name = "blocked_count", nullable = false)
@@ -72,6 +77,7 @@ public class User extends BaseTime {
 
 	@OneToMany(mappedBy = "buyer", cascade = CascadeType.REMOVE)
 	private final List<ProductPost> purchasedProducts = new ArrayList<>();
+
 
 	/**
 	 * {@link User#cash cash}에 {@code totalAmount} 만큼 추가합니다.
@@ -151,5 +157,4 @@ public class User extends BaseTime {
 	public boolean isAdmin() {
 		return this.role.equals(Role.ADMIN);
 	}
-
 }
