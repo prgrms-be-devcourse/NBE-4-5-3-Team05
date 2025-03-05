@@ -1,13 +1,20 @@
 package com.NBE_4_5_2.Team5.domain.chat.entity;
 
 
-import lombok.Builder;
+import com.NBE_4_5_2.Team5.global.entity.BaseTime;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Getter
 @Setter
-public class ChatMessage {
+@SuperBuilder
+@NoArgsConstructor
+public class ChatMessage extends BaseTime {
 
     private MessageType type; // 메시지 타입
     private String roomId; // 방번호
@@ -15,19 +22,24 @@ public class ChatMessage {
     private String message; // 메시지
     private String image;
     private long userCount; // 채팅방 인원수, 채팅방 내에서 메시지가 전달될때 인원수 갱신시 사용
+    private String timestamp;
 
-    @Builder
-    public ChatMessage(MessageType type, String roomId, String sender, String message, String image,long userCount) {
+    public ChatMessage(MessageType type, String roomId, String sender, String message, String image,long userCount, String timestamp) {
         this.type = type;
         this.roomId = roomId;
         this.sender = sender;
         this.message = message;
         this.image=image;
         this.userCount = userCount;
+        this.timestamp = formatTimestamp(LocalDateTime.now());
     }
     // 메시지 타입 : 입장, 퇴장, 채팅, 이미지 추가
     public enum MessageType {
         ENTER, QUIT, TALK,IMAGE
+    }
 
+    public String formatTimestamp(LocalDateTime timestamp) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
+        return timestamp.format(formatter);
     }
 }

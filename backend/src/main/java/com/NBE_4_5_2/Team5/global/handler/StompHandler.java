@@ -21,6 +21,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.security.Principal;
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Optional;
 
@@ -79,7 +80,11 @@ public class StompHandler implements ChannelInterceptor {
             String nickname=authTokenService.getNicknameFromName(name);
             System.out.println("구취: "+nickname);
 //            String nickname = authTokenService.getUsernameFromToken(jwtToken);
-            chatService.sendChatMessage(ChatMessage.builder().type(ChatMessage.MessageType.QUIT).roomId(roomId).sender(nickname).build());
+            chatService.sendChatMessage(ChatMessage.builder()
+                    .type(ChatMessage.MessageType.QUIT)
+                    .roomId(roomId)
+                    .sender(nickname)
+                    .build());
             // 퇴장한 클라이언트의 roomId 맵핑 정보를 삭제한다.
             chatRoomRepository.removeUserEnterInfo(sessionId);
             log.info("DISCONNECTED {}, {}", sessionId, roomId);

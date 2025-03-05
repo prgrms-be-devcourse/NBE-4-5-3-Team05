@@ -40,6 +40,5 @@ public class HttpHandshakeInterceptor implements HandshakeInterceptor {
                                ServerHttpResponse response,
                                WebSocketHandler wsHandler,
                                Exception exception) {
-        // 필요할 경우 추가 설정이 가능합니다.
     }
 }

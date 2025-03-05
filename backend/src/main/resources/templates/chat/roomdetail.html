@@ -36,6 +36,7 @@
 
     <ul class="list-group mt-3">
         <li class="list-group-item" v-for="(messageItem, index) in messages" :key="index">
+            <span v-if="messageItem.timestamp">[{{ messageItem.timestamp }}] </span>
             <span v-if="messageItem.sender">{{ messageItem.sender }}: </span>
             <span v-if="messageItem.message">{{ messageItem.message }}</span>
             <img v-if="messageItem.image" :src="messageItem.image" style="max-width: 100px; max-height: 100px; display: block; margin-top: 5px;" />
@@ -126,7 +127,8 @@
                     type: recv.type,
                     sender: recv.sender,
                     message: recv.message || null,
-                    image: recv.image || null // 이미지가 있을 경우 URL 추가
+                    image: recv.image || null, // 이미지가 있을 경우 URL 추가
+                    timestamp: recv.timestamp || new Date().toLocaleTimeString()
                 });
 
                 console.log('Updated messages:', this.messages); // 업데이트된 메시지 배열 상태

@@ -7,6 +7,8 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+
 @RequiredArgsConstructor
 @Service
 public class ChatService {
@@ -40,6 +42,7 @@ public class ChatService {
         }else if (ChatMessage.MessageType.IMAGE.equals(chatMessage.getType())) {
             chatMessage.setMessage("");
         }
+        chatMessage.setTimestamp(chatMessage.formatTimestamp(LocalDateTime.now()));
         redisTemplate.convertAndSend(channelTopic.getTopic(), chatMessage);
     }
 
