@@ -71,4 +71,8 @@ public class User extends BaseTime {
 	public boolean isAdmin() {
 		return this.role == 0;
 	}
+
+	public void addWroteComments(Comment comment) {
+		wroteComments.add(comment);
+	}
 }

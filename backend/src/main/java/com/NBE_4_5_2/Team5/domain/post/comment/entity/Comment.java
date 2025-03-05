@@ -32,6 +32,8 @@ public class Comment {
 	public Comment(String content, ProductPost target, User author) {
 		this.content = content;
 		this.target = target;
+		target.addComment(this);
 		this.author = author;
+		author.addWroteComments(this);
 	}
 }

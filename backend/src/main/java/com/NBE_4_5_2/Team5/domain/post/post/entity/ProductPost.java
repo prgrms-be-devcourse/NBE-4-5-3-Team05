@@ -139,4 +139,8 @@ public class ProductPost {
 
 		throw new ServiceException("403-1", "자신이 작성한 글만 삭제 가능합니다.");
 	}
+
+	public void addComment(Comment comment) {
+		commentList.add(comment);
+	}
 }
