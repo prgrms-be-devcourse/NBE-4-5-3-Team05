@@ -4,6 +4,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.util.Arrays;
+import java.util.List;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -20,7 +21,12 @@ import com.NBE_4_5_2.Team5.TestConfig;
 import com.NBE_4_5_2.Team5.domain.admin.entity.NoticePost;
 import com.NBE_4_5_2.Team5.domain.admin.repository.NoticePostRepository;
 import com.NBE_4_5_2.Team5.domain.admin.service.AdminService;
+import com.NBE_4_5_2.Team5.domain.category.entity.Category;
+import com.NBE_4_5_2.Team5.domain.category.repository.CategoryRepository;
+import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductPost;
+import com.NBE_4_5_2.Team5.domain.post.post.repository.ProductPostRepository;
 import com.NBE_4_5_2.Team5.domain.user.entity.User;
+import com.NBE_4_5_2.Team5.domain.user.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.http.Cookie;
@@ -40,24 +46,17 @@ class AdminControllerTest {
 	private AdminService adminService;
 	@Autowired
 	private ObjectMapper objectMapper;
+	@Autowired
+	private CategoryRepository categoryRepository;
+	@Autowired
+	private UserService userService;
+	@Autowired
+	private ProductPostRepository productPostRepository;
 
 	@Test
 	void writeNotice() throws Exception {
 		//given
-		User admin = adminService.signUpAdmin("admin", "password", "admin@admin.com");
-
-		Cookie[] cookies = mockMvc.perform(post("/api/users/login")
-				.content("""
-					{
-						"username": "admin",
-						"password": "password"
-					}""")
-				.contentType(MediaType.APPLICATION_JSON))
-			.andExpect(status().isOk())
-			.andReturn().getResponse().getCookies();
-
-		Assertions.assertThat(Arrays.stream(cookies).map(Cookie::getName))
-			.contains("accessToken", "refreshToken");
+		LoginRes result = getLoginRes();
 
 		// when
 		ResultActions perform = mockMvc.perform(post("/api/admin/notices")
@@ -68,7 +67,7 @@ class AdminControllerTest {
 				}""")
 			.contentType("application/json")
 			.characterEncoding("utf-8")
-			.cookie(cookies[0], cookies[1]));
+			.cookie(result.cookies().get(0), result.cookies().get(1)));
 
 		String id = objectMapper.readTree(perform.andReturn().getResponse().getContentAsString())
 			.get("data").get("id").asText();
@@ -85,6 +84,50 @@ class AdminControllerTest {
 			.andExpect(jsonPath("$.data.id").value(noticePost.getId()))
 			.andExpect(jsonPath("$.data.title").value(noticePost.getTitle()))
 			.andExpect(jsonPath("$.data.content").value(noticePost.getContent()))
-			.andExpect(jsonPath("$.data.admin.id").value(admin.getId()));
+			.andExpect(jsonPath("$.data.admin.id").value(result.admin().getId()));
+	}
+
+	private LoginRes getLoginRes() throws Exception {
+		User admin = adminService.signUpAdmin("admin", "password", "admin@admin.com");
+
+		Cookie[] cookies = mockMvc.perform(post("/api/users/login")
+				.content("""
+					{
+						"username": "admin",
+						"password": "password"
+					}""")
+				.contentType(MediaType.APPLICATION_JSON))
+			.andExpect(status().isOk())
+			.andReturn().getResponse().getCookies();
+		List<Cookie> cookieList = Arrays.stream(cookies)
+			.filter(cookie -> cookie.getName().equals("accessToken") || cookie.getName().equals("refreshToken"))
+			.toList();
+		Assertions.assertThat(cookieList.stream().map(Cookie::getName))
+			.contains("accessToken", "refreshToken");
+		LoginRes result = new LoginRes(admin, cookieList);
+		return result;
+	}
+
+	private record LoginRes(User admin, List<Cookie> cookies) {
+	}
+
+	@Test
+	void deletePost() throws Exception {
+		//given
+		Category category = categoryRepository.save(new Category(1L, "cat1"));
+		User user = userService.signup("user1", "password", "email", "nickanme", "addr", "profile");
+		ProductPost post = productPostRepository.save(
+			ProductPost.create(user, "name", 5000, "title", "content", "url", 30F, 40F)
+		);
+
+		LoginRes result = getLoginRes();
+
+		//when
+		mockMvc.perform(delete("/api/admin/posts/%s".formatted(post.getId()))
+			.cookie(result.cookies()
+				.stream()
+				.map(cookie -> new Cookie(cookie.getName(), cookie.getValue()))
+				.toArray(Cookie[]::new)));
+
 	}
 }
