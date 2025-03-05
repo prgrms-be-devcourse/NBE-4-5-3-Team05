@@ -1,5 +1,7 @@
 package com.NBE_4_5_2.Team5.domain.admin.controller;
 
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,5 +30,10 @@ public class AdminController {
 		NoticeResBody data = adminService.writeNotice(body.title(), body.content());
 
 		return new RsData<>("200-1", "공지사항 등록 성공.", data);
+	}
+
+	@DeleteMapping("/posts/{post-id}")
+	public RsData<Void> deletePost(@PathVariable Long postId) {
+		adminService.deletePost(postId);
 	}
 }
