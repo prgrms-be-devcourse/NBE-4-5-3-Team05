@@ -2,19 +2,28 @@ package com.NBE_4_5_2.Team5.domain.chat.entity;
 
 
 import com.NBE_4_5_2.Team5.global.entity.BaseTime;
+import jakarta.persistence.Id;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
+import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.UUID;
 
 @Getter
 @Setter
 @SuperBuilder
 @NoArgsConstructor
-public class ChatMessage extends BaseTime {
+@Document(collection = "chat_messages")
+public class ChatMessage implements Serializable {
+    private static final long serialVersionUID = 123456789L;
+
+    @Id
+    private String messageId;
 
     private MessageType type; // 메시지 타입
     private String roomId; // 방번호
@@ -25,6 +34,7 @@ public class ChatMessage extends BaseTime {
     private String timestamp;
 
     public ChatMessage(MessageType type, String roomId, String sender, String message, String image,long userCount, String timestamp) {
+        this.messageId = UUID.randomUUID().toString();
         this.type = type;
         this.roomId = roomId;
         this.sender = sender;

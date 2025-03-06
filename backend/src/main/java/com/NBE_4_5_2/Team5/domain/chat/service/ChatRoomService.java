@@ -2,7 +2,6 @@ package com.NBE_4_5_2.Team5.domain.chat.service;
 
 
 import com.NBE_4_5_2.Team5.domain.chat.entity.ChatRoom;
-import com.NBE_4_5_2.Team5.domain.chat.repository.ChatRoomRepository;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.HashOperations;
@@ -18,6 +17,7 @@ import java.util.Optional;
 @Transactional
 public class ChatRoomService {
 //    private final ChatRoomRepository chatRoomRepository;
+
     // Redis CacheKeys
     private static final String CHAT_ROOMS = "CHAT_ROOM"; // 채팅룸 저장
     public static final String USER_COUNT = "USER_COUNT"; // 채팅룸에 입장한 클라이언트수 저장
@@ -40,10 +40,20 @@ public class ChatRoomService {
         return hashOpsChatRoom.get(CHAT_ROOMS, id);
     }
 
-    // 채팅방 생성 : 서버간 채팅방 공유를 위해 redis hash에 저장한다.
+//    // 채팅방 생성 : 서버간 채팅방 공유를 위해 redis hash에 저장한다.
+//    public ChatRoom createChatRoom(String name) {
+//        ChatRoom chatRoom = ChatRoom.create(name);
+//        hashOpsChatRoom.put(CHAT_ROOMS, chatRoom.getRoomId(), chatRoom);
+////        chatRoomRepository.save(chatRoom);  // db 저장
+//        return chatRoom;
+//    }
+
     public ChatRoom createChatRoom(String name) {
-        ChatRoom chatRoom = ChatRoom.create(name);
-        hashOpsChatRoom.put(CHAT_ROOMS, chatRoom.getRoomId(), chatRoom);
+//        ChatRoom chatRoom = ChatRoom.builder()
+//                .name(name)
+//                .build();
+        ChatRoom chatRoom = new ChatRoom(name);
+        hashOpsChatRoom.put(CHAT_ROOMS, chatRoom.getRoomId(), chatRoom);    // redis에 저장
         return chatRoom;
     }
 
