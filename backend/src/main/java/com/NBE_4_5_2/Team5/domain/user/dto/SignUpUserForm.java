@@ -27,5 +27,4 @@ public record SignUpUserForm(
 
         @Size(max = 255, message = "프로필 URL은 최대 255자까지 입력 가능합니다.")
         String profileUrl
-) {
-}
+) {}
