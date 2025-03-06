@@ -36,11 +36,7 @@ jobs:
       uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
 
     - name: env
-      env:
-        JWT_SECRET: ${{secrets.JWT_SECRET}}
-        TOSS_SECRET: ${{secrets.TOSS_SECRET}}
-        KAKAO_CLIENT_ID: ${{secrets.KAKAO_CLIENT_ID}}
-      run: "echo $JWT_SECRET"
+      run: echo ${{secrets.JWT_SECRET}}
           
     - name: Build with Gradle Wrapper
       
