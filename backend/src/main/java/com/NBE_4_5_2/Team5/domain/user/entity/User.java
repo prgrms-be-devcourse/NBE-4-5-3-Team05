@@ -49,9 +49,9 @@ public class User extends BaseTime {
 	@Setter
 	private String refreshToken;
 
-	@Column(length = 50, nullable = false, unique = true)
+    @Column(length = 50, nullable = false, unique = true)
 	@Setter
-	private String email;
+    private String email;
 
 	@Column(length = 20, nullable = false, unique = true)
 	@Setter
