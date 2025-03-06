@@ -1,9 +1,12 @@
 package com.NBE_4_5_2.Team5.domain.chat.service;
 
 
+import com.NBE_4_5_2.Team5.domain.chat.entity.ChatMessage;
 import com.NBE_4_5_2.Team5.domain.chat.entity.ChatRoom;
+import com.NBE_4_5_2.Team5.domain.chat.repository.MessageRepository;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
@@ -29,6 +32,8 @@ public class ChatRoomService {
     private HashOperations<String, String, String> hashOpsEnterInfo;
     @Resource(name = "redisTemplate")
     private ValueOperations<String, String> valueOps;
+    @Autowired
+    private MessageRepository messageRepository;
 
     // 모든 채팅방 조회
     public List<ChatRoom> findAllRoom() {
@@ -40,11 +45,22 @@ public class ChatRoomService {
         return hashOpsChatRoom.get(CHAT_ROOMS, id);
     }
 
+    // 메세지 조회
+    public List<ChatMessage> getMessagesByRoomId(String roomId) {
+        return messageRepository.findAllByRoomId(roomId);
+    }
+
+
     // 채팅방 생성
     public ChatRoom createChatRoom(String name) {
         ChatRoom chatRoom = new ChatRoom(name);
         hashOpsChatRoom.put(CHAT_ROOMS, chatRoom.getRoomId(), chatRoom);    // redis에 저장
         return chatRoom;
+    }
+
+    // 채팅방 삭제
+    public void deleteChatRoom(String roomId) {
+        hashOpsChatRoom.delete(CHAT_ROOMS, roomId);     // redis에서 삭제
     }
 
     // 유저가 입장한 채팅방ID와 유저 세션ID 맵핑 정보 저장
@@ -77,8 +93,4 @@ public class ChatRoomService {
         return Optional.ofNullable(valueOps.decrement(USER_COUNT + "_" + roomId)).filter(count -> count > 0).orElse(0L);
     }
 
-//    // 방 삭제
-//    public void delete(ChatRoom chatRoom) {
-//        chatRoomRepository.delete(chatRoom);
-//    }
 }

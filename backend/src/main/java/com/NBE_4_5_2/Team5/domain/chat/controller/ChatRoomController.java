@@ -53,12 +53,11 @@ public class ChatRoomController {
 //        return chatRoomRepository.createChatRoom(name);
     }
 
-//    @DeleteMapping("room")
-//    @ResponseBody
-//    public void deleteRoom(@RequestParam String roomId) {
-//        ChatRoom chatRoom=chatRoomService.findRoomById(roomId);
-//        chatRoomService.delete(chatRoom);
-//    }
+    @DeleteMapping("room")
+    @ResponseBody
+    public void deleteRoom(@RequestParam String roomId) {
+        chatRoomService.deleteChatRoom(roomId);
+    }
 
 
     @GetMapping("/room/enter/{roomId}")

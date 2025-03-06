@@ -9,6 +9,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -29,10 +34,18 @@ public class ChatController {
 
         // 로그인 회원 정보로 대화명 설정
         message.setSender(nickname);
+
         // 채팅방 인원수 세팅
         message.setUserCount(chatRoomService.getUserCount(message.getRoomId()));
+
         // Websocket에 발행된 메시지를 redis로 발행(publish)
         chatService.sendChatMessage(message);
+    }
+
+    @GetMapping("/api/chat/room/{roomId}/messages")
+    @ResponseBody
+    public List<ChatMessage> getMessagesByRoomId(@PathVariable String roomId) {
+        return chatRoomService.getMessagesByRoomId(roomId);
     }
 
 }
