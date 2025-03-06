@@ -7,7 +7,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.header.writers.frameoptions.XFrameOptionsHeaderWriter;
@@ -17,63 +16,44 @@ import org.springframework.security.web.header.writers.frameoptions.XFrameOption
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final CorsConfig corsConfig;
     private final CustomAuthenticationFilter customAuthenticationFilter;
-    private final CustomAuthorizationRequestResolver customAuthorizationRequestResolver;
-    private final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
 
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/h2-console/**").permitAll()
-                        .requestMatchers("/api/posts/**", "/api/comments/**", "/api/payments/**", "/api/admin/**", "/api/chat/**", "/api/chatting/**").permitAll()
-                        .requestMatchers("/api/users/login", "/api/users/signup", "/api/users/refresh").permitAll()
-                        .anyRequest().authenticated()
+                        .anyRequest()
+                        .permitAll()
                 )
-                .headers(headers -> headers
-                        .addHeaderWriter(new XFrameOptionsHeaderWriter(XFrameOptionsHeaderWriter.XFrameOptionsMode.SAMEORIGIN)))
+                .headers((headers) -> headers
+                        .addHeaderWriter(new XFrameOptionsHeaderWriter(
+                                XFrameOptionsHeaderWriter.XFrameOptionsMode.SAMEORIGIN)))
                 .csrf(csrf -> csrf.disable())
-                .sessionManagement(session -> {
-                    session.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-                })
-                .cors(cors -> cors.configurationSource(corsConfig))
-                .oauth2Login((oauth2) -> {
-                    oauth2.authorizationEndpoint(
-                            authorizationEndpoint -> authorizationEndpoint.authorizationRequestResolver(customAuthorizationRequestResolver)
-                    );
-                    oauth2.successHandler(customAuthenticationSuccessHandler);
-                })
                 .addFilterBefore(customAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .exceptionHandling(exceptionHandling -> exceptionHandling
-                        .authenticationEntryPoint((request, response, authException) -> {
-                            response.setContentType("application/json;charset=UTF-8");
-                            response.setStatus(401);
-
-                            // Authorization 헤더가 없으면 401-2 반환
-                            if (request.getHeader("Authorization") == null) {
-                                response.getWriter().write(
-                                        Ut.Json.toString(
-                                                new RsData("401-2", "로그인이 필요합니다.") // ✅ 수정: 401-2 반환
-                                        )
-                                );
-                            } else {
-                                response.getWriter().write(
-                                        Ut.Json.toString(
-                                                new RsData("401-1", "잘못된 인증키입니다.") // ✅ 기존 로직 유지
-                                        )
-                                );
-                            }
-                        })
-                        .accessDeniedHandler((request, response, authException) -> {
-                            response.setContentType("application/json;charset=UTF-8");
-                            response.setStatus(403);
-                            response.getWriter().write(
-                                    Ut.Json.toString(
-                                            new RsData("403-1", "접근 권한이 없습니다.")
-                                    )
-                            );
-                        })
+                .exceptionHandling(
+                        exceptionHandling -> exceptionHandling
+                                .authenticationEntryPoint(
+                                        (request, response, authException) -> {
+                                            response.setContentType("application/json;charset=UTF-8");
+                                            response.setStatus(401);
+                                            response.getWriter().write(
+                                                    Ut.Json.toString(
+                                                            new RsData("401-1", "잘못된 인증키입니다.")
+                                                    )
+                                            );
+                                        }
+                                )
+                                .accessDeniedHandler(
+                                        (request, response, authException) -> {
+                                            response.setContentType("application/json;charset=UTF-8");
+                                            response.setStatus(403);
+                                            response.getWriter().write(
+                                                    Ut.Json.toString(
+                                                            new RsData("403-1", "접근 권한이 없습니다.")
+                                                    )
+                                            );
+                                        }
+                                )
 
                 );
 

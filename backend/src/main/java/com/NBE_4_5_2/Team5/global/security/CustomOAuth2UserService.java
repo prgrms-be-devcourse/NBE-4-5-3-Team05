@@ -32,7 +32,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         String profileImage = (String) properties.get("profile_image");
         String username = providerType + "__" + oauthId;
 
-        Optional<User> opUser = userService.findByUsername(username);
+        Optional<User> opUser = userService.getUserByUsername(username);
 
         if (opUser.isPresent()) {
             User user = opUser.get();
@@ -42,7 +42,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         }
 
         // 회원가입 구현
-        User user = userService.signup(username, "", "", nickname, "", profileImage);
+        User user = userService.createUser(username, "", "", nickname, "", profileImage);
 
         return new SecurityUser(user);
     }

@@ -1,5 +1,6 @@
 package com.NBE_4_5_2.Team5.domain.user.dto;
 
+import com.NBE_4_5_2.Team5.domain.user.entity.Role;
 import com.NBE_4_5_2.Team5.domain.user.entity.User;
 import lombok.Getter;
 
@@ -13,7 +14,7 @@ public class UserDto {
     private String nickname;
     private String address;
     private String profileUrl;
-    private Integer role;
+    private Role role;
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
 
