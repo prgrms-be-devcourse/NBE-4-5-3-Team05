@@ -51,8 +51,6 @@ class CustomAuthenticationFilterTest {
         loginedUser = userService.getUserByUsername("user1").get();
         validAccessToken = userService.generateAccessToken(loginedUser);
         validRefreshToken = loginedUser.getRefreshToken();
-        // 인증 정보가 초기화된 상태로 테스트 진행
-        SecurityContextHolder.clearContext();
     }
 
     @Test
@@ -60,13 +58,13 @@ class CustomAuthenticationFilterTest {
     void test1() throws Exception {
 
         ResultActions resultActions = mvc
-                .perform(get("/api/users/me")) // 인증이 필요한 경로
+                .perform(get("/api/users/me"))
                 .andDo(print());
 
         resultActions
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.code").value("401-1"))
-                .andExpect(jsonPath("$.message").value("잘못된 인증키입니다."));
+                .andExpect(jsonPath("$.message").value("로그인이 필요합니다."));
     }
 
     @Test
@@ -86,7 +84,7 @@ class CustomAuthenticationFilterTest {
         resultActions
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.code").value("401-1"))
-                .andExpect(jsonPath("$.message").value("잘못된 인증키입니다."));
+                .andExpect(jsonPath("$.message").value("로그인이 필요합니다."));
     }
 
     @Test
@@ -97,7 +95,6 @@ class CustomAuthenticationFilterTest {
                 new UsernamePasswordAuthenticationToken("unknown_user", null, List.of())
         );
 
-        // 인증되지 않은 사용자가 인증이 필요한 api에 접속
         ResultActions resultActions = mvc
                 .perform(get("/api/users/me"))
                 .andDo(print());
@@ -110,13 +107,13 @@ class CustomAuthenticationFilterTest {
     }
 
     /**
-     * 예외 테스트 코드 (test4 ~ test6)
+     * 예외 테스트 코드 (test4 ~ test9)
      * <p>
      * GlobalExceptionHandler에서 직접 처리하지 않은 예외 상황이 발생했을 때,
      * Spring Boot의 기본 오류 처리 (`/error`)를 통해 정상적으로 응답이 반환되는지 검증하는 테스트
      */
     @Test
-    @DisplayName("예외 - 존재하지 않는 URL 요청 시 404 반환")
+    @DisplayName("예외 - 인증 o - 존재하지 않는 URL 요청 시 404 반환")
     void test4() throws Exception {
         mvc.perform(get("/api/non-existent-endpoint")
                         .cookie(new Cookie("accessToken", validAccessToken))
@@ -126,8 +123,16 @@ class CustomAuthenticationFilterTest {
     }
 
     @Test
-    @DisplayName("예외 - 잘못된 요청 시 400 반환")
-    void test5() {
+    @DisplayName("예외 - 인증 x - 존재하지 않는 URL 요청 시 404 반환")
+    void test5() throws Exception {
+        mvc.perform(get("/api/non-existent-endpoint"))
+                .andDo(print())
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("예외 - 인증 o - 잘못된 요청 시 400 반환")
+    void test6() {
         Assertions.assertThatThrownBy(() ->
                         mvc.perform(get("/api/test/bad-request")
                                         .cookie(new Cookie("accessToken", validAccessToken))
@@ -139,12 +144,34 @@ class CustomAuthenticationFilterTest {
     }
 
     @Test
-    @DisplayName("예외 - api 접속 중 NullPointerException 발생")
-    void test6() {
+    @DisplayName("예외 - 인증 x - 잘못된 요청 시 400 반환")
+    void test7() {
+        Assertions.assertThatThrownBy(() ->
+                        mvc.perform(get("/api/test/bad-request"))
+                                .andDo(print())
+                ).isInstanceOf(ServletException.class)
+                .cause()
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    @DisplayName("예외 - 인증 o - api 접속 중 NullPointerException 발생")
+    void test8() {
         Assertions.assertThatThrownBy(() ->
                         mvc.perform(get("/api/test/nullPointer-error")
                                         .cookie(new Cookie("accessToken", validAccessToken))
                                         .cookie(new Cookie("refreshToken", validRefreshToken)))
+                                .andDo(print())
+                ).isInstanceOf(ServletException.class)
+                .cause()
+                .isInstanceOf(NullPointerException.class);
+    }
+
+    @Test
+    @DisplayName("예외 - 인증 x - api 접속 중 NullPointerException 발생")
+    void test9() {
+        Assertions.assertThatThrownBy(() ->
+                        mvc.perform(get("/api/test/nullPointer-error"))
                                 .andDo(print())
                 ).isInstanceOf(ServletException.class)
                 .cause()

@@ -516,8 +516,7 @@ class UserControllerTest {
 	}
 
 	@Test
-	@DisplayName("내 정보 조회 - 실패 - 쿠키 인증 - 유효한 AccessToken + 만료된 RefreshToken")
-		// TODO: 유효한 AccessToken에 대한 정상적인 처리 구현
+	@DisplayName("내 정보 조회 - 성공 - 쿠키 인증 - 유효한 AccessToken + 만료된 RefreshToken")
 	void getCurrentUser3() throws Exception {
 		ResultActions resultActions = mvc
 				.perform(
@@ -527,11 +526,15 @@ class UserControllerTest {
 				)
 				.andDo(print());
 
-		// accessToken이 유효하더라도 refreshToken이 만료되었다면 실패하고 있음
+		// RefreshToken이 만료되었더라도 accessToken을 통한 정상적 인증
 		resultActions
-				.andExpect(status().isUnauthorized())
-				.andExpect(jsonPath("$.code").value("401-1"))
-				.andExpect(jsonPath("$.message").value("잘못된 인증키입니다."));
+				.andExpect(status().isOk())
+				.andExpect(handler().handlerType(UserController.class))
+				.andExpect(handler().methodName("getCurrentUser"))
+				.andExpect(jsonPath("$.code").value("200-1"))
+				.andExpect(jsonPath("$.message").value("내 정보 조회가 완료되었습니다."));
+
+		checkUser(resultActions, loginedUser);
 	}
 
 	@Test
@@ -548,7 +551,7 @@ class UserControllerTest {
 		resultActions
 				.andExpect(status().isUnauthorized())
 				.andExpect(jsonPath("$.code").value("401-1"))
-				.andExpect(jsonPath("$.message").value("잘못된 인증키입니다."));
+				.andExpect(jsonPath("$.message").value("로그인이 필요합니다."));
 	}
 
 	@Test
@@ -564,7 +567,7 @@ class UserControllerTest {
 		resultActions
 				.andExpect(status().isUnauthorized())
 				.andExpect(jsonPath("$.code").value("401-1"))
-				.andExpect(jsonPath("$.message").value("잘못된 인증키입니다."));
+				.andExpect(jsonPath("$.message").value("로그인이 필요합니다."));
 	}
 
 	@Test
@@ -609,7 +612,7 @@ class UserControllerTest {
 	}
 
 	@Test
-	@DisplayName("내 정보 조회 - 실패 - 헤더 인증 - 유효한 AccessToken + 만료된 RefreshToken")
+	@DisplayName("내 정보 조회 - 성공 - 헤더 인증 - 유효한 AccessToken + 만료된 RefreshToken")
 	void getCurrentUser8() throws Exception {
 		ResultActions resultActions = mvc
 				.perform(
@@ -618,11 +621,15 @@ class UserControllerTest {
 				)
 				.andDo(print());
 
-		// RefreshToken이 만료되어 인증 실패
 		resultActions
-				.andExpect(status().isUnauthorized())
-				.andExpect(jsonPath("$.code").value("401-1"))
-				.andExpect(jsonPath("$.message").value("잘못된 인증키입니다."));
+				.andExpect(status().isOk())
+				.andExpect(handler().handlerType(UserController.class))
+				.andExpect(handler().methodName("getCurrentUser"))
+				.andExpect(jsonPath("$.code").value("200-1"))
+				.andExpect(jsonPath("$.message").value("내 정보 조회가 완료되었습니다."));
+
+		checkUser(resultActions, loginedUser);
+
 	}
 
 	@Test
@@ -638,7 +645,7 @@ class UserControllerTest {
 		resultActions
 				.andExpect(status().isUnauthorized())
 				.andExpect(jsonPath("$.code").value("401-1"))
-				.andExpect(jsonPath("$.message").value("잘못된 인증키입니다."));
+				.andExpect(jsonPath("$.message").value("로그인이 필요합니다."));
 	}
 
 	@Test
@@ -654,7 +661,7 @@ class UserControllerTest {
 		resultActions
 				.andExpect(status().isUnauthorized())
 				.andExpect(jsonPath("$.code").value("401-1"))
-				.andExpect(jsonPath("$.message").value("잘못된 인증키입니다."));
+				.andExpect(jsonPath("$.message").value("로그인이 필요합니다."));
 	}
 
 	private ResultActions refreshAccessTokenRequest(String refreshToken) throws Exception {
