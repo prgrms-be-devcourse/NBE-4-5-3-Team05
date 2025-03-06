@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserDto {
+
 	private String id;
 	private String username;
 	private String email;
@@ -37,5 +38,9 @@ public class UserDto {
 		this.blockedCount = admin.getBlockedCount();
 		this.createdAt = admin.getCreatedAt();
 		this.modifiedAt = admin.getModifiedAt();
+	}
+
+	public static UserDto fromEntity(User user) {
+		return new UserDto(user);
 	}
 }

@@ -15,31 +15,43 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AuthTokenService {
 
-	@Value("${custom.jwt.secret-key}")
-	private String keyString;
+    @Value("${custom.jwt.secret-key}")
+    private String keyString;
 
-	@Value("${custom.jwt.expire-seconds}")
-	private int expireSeconds;
+    @Value("${custom.jwt.expire-seconds}")
+    private int expireSeconds;
 
-	String generateAccessToken(User user) {
+    // id, username, role 정보를 담은 accessToken 생성
+    String generateAccessToken(User user) {
 
-		return Ut.Jwt.createToken(
-			keyString,
-			expireSeconds,
-			Map.of("id", user.getId(), "username", user.getUsername(), "role", user.getRole())
-		);
-	}
+        return Ut.Jwt.createToken(
+                keyString,
+                expireSeconds,
+                Map.of(
+                        "id", user.getId(),
+                        "username", user.getUsername(),
+                        "role", user.getRole().name()
+                )
+        );
+    }
 
-	Map<String, Object> getPayload(String accessToken) {
+    Map<String, Object> getPayload(String accessToken) {
 
-		if (!Ut.Jwt.isValidToken(keyString, accessToken)) {
-			return null;
-		}
+        if (!Ut.Jwt.isValidToken(keyString, accessToken)) {
+            return null;
+        }
 
-		Map<String, Object> payload = Ut.Jwt.getPayload(keyString, accessToken);
-		String id = (String)payload.get("id");
-		String username = (String)payload.get("username");
+        Map<String, Object> payload = Ut.Jwt.getPayload(keyString, accessToken);
 
-		return Map.of("id", id, "username", username, "role", Role.valueOf(String.valueOf(payload.get("role"))));
-	}
+        String id = (String) payload.get("id");
+        String username = (String) payload.get("username");
+        String roleStr = (String) payload.get("role");
+        Role role = Role.valueOf(roleStr);
+
+        return Map.of(
+                "id", id,
+                "username", username,
+                "role", role
+        );
+    }
 }
