@@ -1,22 +1,18 @@
 package com.NBE_4_5_2.Team5.domain.user.entity;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductPost;
-import com.NBE_4_5_2.Team5.domain.post.post.enums.ProductStatus;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import com.NBE_4_5_2.Team5.domain.post.comment.entity.Comment;
+import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductPost;
+import com.NBE_4_5_2.Team5.domain.post.post.enums.ProductStatus;
 import com.NBE_4_5_2.Team5.global.entity.BaseTime;
 import com.NBE_4_5_2.Team5.global.exception.payment.InsufficientPayMoneyException;
-
-import jakarta.persistence.CascadeType;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -24,7 +20,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
@@ -70,7 +65,8 @@ public class User extends BaseTime {
 
 	@Column(nullable = false)
 	@Builder.Default
-	private Integer role = 1;  // 0: Admin, 1: 일반 유저
+	@Enumerated(EnumType.ORDINAL)
+	private Role role = Role.USER;
 
 	@Column(nullable = false)
 	@Builder.Default
@@ -83,12 +79,19 @@ public class User extends BaseTime {
 	@OneToMany(mappedBy = "buyer", cascade = CascadeType.REMOVE)
 	private final List<ProductPost> purchasedProducts = new ArrayList<>();
 
+	@OneToMany(mappedBy = "writer", cascade = CascadeType.REMOVE)
+	private final List<ProductPost> writtenProducts = new ArrayList<>();
+
 	public boolean isAdmin() {
-		return this.role == 0;
+		return role.equals(Role.ADMIN);
 	}
+
+	@OneToMany(mappedBy = "author", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, orphanRemoval = true)
+	private final List<Comment> wroteComments = new ArrayList<>();
 
 	/**
 	 * {@link User#cash cash}에 {@code totalAmount} 만큼 추가합니다.
+	 *
 	 * @param totalAmount 충전할 금액
 	 */
 	public void chargeCash(Integer totalAmount) {
@@ -105,6 +108,7 @@ public class User extends BaseTime {
 
 	/**
 	 * 유저의 구매 이력에 {@link ProductPost}를 추가하는 메서드
+	 *
 	 * @param product 구매 이력에 추가할 구매한 상품 객체
 	 */
 	private void addToPurchasedProductList(ProductPost product) {
@@ -117,14 +121,13 @@ public class User extends BaseTime {
 	/**
 	 * {@link ProductPost product}를 {@link Integer amount}로 구매할 수 있는지 판단하는 메서드.
 	 *
-	 * @throws InsufficientPayMoneyException 총 결제 가격 {@code amount}보다 가지고 있는 잔액인 {@code cash}가 적을 경우 발생
-	 * @throws IllegalArgumentException 상품의 판매 상태가
-	 * {@link com.NBE_4_5_2.Team5.domain.post.post.enums.ProductStatus#AVAILABLE ProductStatus.AVAILABLE}이<br/>
-	 * 아닌 경우 발생
-	 *
 	 * @param product 구매할 상품 객체
-	 * @param amount 결제할 총 가격
+	 * @param amount  결제할 총 가격
 	 * @return 상품을 해당 유저가 구매 가능하다면 {@code true}를 반환한다.
+	 * @throws InsufficientPayMoneyException 총 결제 가격 {@code amount}보다 가지고 있는 잔액인 {@code cash}가 적을 경우 발생
+	 * @throws IllegalArgumentException      상품의 판매 상태가
+	 *                                       {@link com.NBE_4_5_2.Team5.domain.post.post.enums.ProductStatus#AVAILABLE ProductStatus.AVAILABLE}이<br/>
+	 *                                       아닌 경우 발생
 	 */
 	public boolean canBuy(ProductPost product, Integer amount) {
 		if (!this.hasEnoughPayMoney(amount)) {
@@ -138,6 +141,10 @@ public class User extends BaseTime {
 		return true;
 	}
 
+	public void addWroteComments(Comment comment) {
+		wroteComments.add(comment);
+	}
+
 	/**
 	 * 해당 유저가 페이머니가 충분한지 검사하는 메서드.
 	 *
@@ -147,10 +154,29 @@ public class User extends BaseTime {
 	private boolean hasEnoughPayMoney(Integer amount) {
 		return cash >= amount;
 	}
-	@OneToMany(mappedBy = "author", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, orphanRemoval = true)
-	private final List<Comment> wroteComments = new ArrayList<>();
 
-	public void addWroteComments(Comment comment) {
-		wroteComments.add(comment);
+	public void update(String nickname) {
+		this.nickname = nickname;
+	}
+
+	public Collection<? extends GrantedAuthority> getAuthorities() {
+
+		return getMemberAuthoritiesAsString().stream().map(SimpleGrantedAuthority::new).toList();
+
+	}
+
+	public List<String> getMemberAuthoritiesAsString() {
+
+		List<String> authorities = new ArrayList<>();
+
+		if (isAdmin()) {
+			authorities.add("ROLE_ADMIN");
+		}
+
+		return authorities;
+	}
+
+	public void addWrittenPost(ProductPost saved) {
+		this.purchasedProducts.add(saved);
 	}
 }

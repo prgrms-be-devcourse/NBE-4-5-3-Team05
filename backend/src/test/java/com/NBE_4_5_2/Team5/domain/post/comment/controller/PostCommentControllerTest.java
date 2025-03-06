@@ -65,7 +65,7 @@ class PostCommentControllerTest {
 	@Test
 	void writeComment() throws Exception {
 		// given
-		User author = userService.signup("username", "password", "email", "nickname", "address", "url");
+		User author = userService.createUser("username", "password", "email", "nickname", "address", "url");
 
 		ProductPost productPost = productPostRepository.save(
 			ProductPost.create(author, "name", 5000, "title", "content", "url", 50F, 50F)
@@ -97,7 +97,7 @@ class PostCommentControllerTest {
 	void updateTest() throws Exception {
 		//given
 
-		User author = userService.signup("username", "password", "email", "nickname", "address", "url");
+		User author = userService.createUser("username", "password", "email", "nickname", "address", "url");
 
 		ProductPost productPost = productPostRepository.save(
 			ProductPost.create(author, "name", 5000, "title", "content", "url", 50F, 50F)
@@ -159,7 +159,7 @@ class PostCommentControllerTest {
 	void deleteTest() throws Exception {
 		//given
 		// 로그인하고 Product Post 작성, comment 작성
-		User author = userService.signup("username", "password", "email", "nickname", "address", "url");
+		User author = userService.createUser("username", "password", "email", "nickname", "address", "url");
 
 		ProductPost productPost = productPostRepository.save(
 			ProductPost.create(author, "name", 5000, "title", "content", "url", 50F, 50F)
