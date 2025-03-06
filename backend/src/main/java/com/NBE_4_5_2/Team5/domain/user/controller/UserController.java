@@ -1,5 +1,6 @@
 package com.NBE_4_5_2.Team5.domain.user.controller;
 
+import jakarta.servlet.http.HttpSession;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -51,7 +52,7 @@ public class UserController {
 	}
 
 	@PostMapping("/logout")
-	public RsData<Void> logout() {
+	public RsData<Void> logout(HttpSession session) {
 
 		User userIdentity = rq.getUserIdentity();
 		User user = rq.getRealActor(userIdentity);
