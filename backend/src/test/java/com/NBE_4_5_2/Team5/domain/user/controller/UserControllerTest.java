@@ -19,8 +19,7 @@ import java.nio.charset.StandardCharsets;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.matchesPattern;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -431,7 +430,7 @@ class UserControllerTest {
         resultActions
                 .andExpect(status().isOk())
                 .andExpect(handler().handlerType(UserController.class))
-                .andExpect(handler().methodName("me"))
+                .andExpect(handler().methodName("getMyProfile"))
                 .andExpect(jsonPath("$.code").value("200-1"))
                 .andExpect(jsonPath("$.message").value("내 정보 조회가 완료되었습니다."));
 
@@ -466,7 +465,7 @@ class UserControllerTest {
         resultActions
                 .andExpect(status().isOk())
                 .andExpect(handler().handlerType(UserController.class))
-                .andExpect(handler().methodName("me"))
+                .andExpect(handler().methodName("getMyProfile"))
                 .andExpect(jsonPath("$.code").value("200-1"))
                 .andExpect(jsonPath("$.message").value("내 정보 조회가 완료되었습니다."));
 
@@ -576,6 +575,106 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.code").value("401-2"))
                 .andExpect(jsonPath("$.message").value("유효하지 않은 RefreshToken입니다."));
     }
+    @Test
+    @DisplayName("내 정보 수정 - 성공")
+    void updateProfile1() throws Exception {
+        String newNickname = "새로운닉네임";
+        String newAddress = "서울시 서초구";
+        String newEmail = "newemail@example.com";
+
+        ResultActions resultActions = mvc.perform(
+                put("/api/users/me")
+                        .header("Authorization", "Bearer " + token)
+                        .content("""
+                            {
+                              "nickname": "%s",
+                              "address": "%s",
+                              "email": "%s"
+                            }
+                            """.formatted(newNickname, newAddress, newEmail))
+                        .contentType(MediaType.APPLICATION_JSON)
+        );
+
+        resultActions
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.message").value("사용자 정보가 성공적으로 수정되었습니다."));
+
+        // 변경 사항 확인
+        User updatedUser = userService.findByUsername(loginedUser.getUsername()).get();
+        assertThat(updatedUser.getNickname()).isEqualTo(newNickname);
+        assertThat(updatedUser.getAddress()).isEqualTo(newAddress);
+        assertThat(updatedUser.getEmail()).isEqualTo(newEmail);
+    }
+
+    @Test
+    @DisplayName("내 정보 수정 - 실패 (이메일 중복)")
+    void updateProfile2() throws Exception {
+        String duplicateEmail = "user2@gmail.com"; // 이미 존재하는 이메일
+
+        ResultActions resultActions = mvc.perform(
+                put("/api/users/me")
+                        .header("Authorization", "Bearer " + token)
+                        .content("""
+                            {
+                              "email": "%s"
+                            }
+                            """.formatted(duplicateEmail))
+                        .contentType(MediaType.APPLICATION_JSON)
+        );
+
+        resultActions
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("400-EMAIL-ALREADY-EXISTS"))
+                .andExpect(jsonPath("$.message").value("이미 사용 중인 이메일입니다."));
+    }
+
+    @Test
+    @DisplayName("회원 탈퇴 - 성공")
+    void deleteProfile1() throws Exception {
+        ResultActions resultActions = mvc.perform(
+                delete("/api/users/me")
+                        .header("Authorization", "Bearer " + token)
+        );
+
+        resultActions
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.message").value("회원 탈퇴 성공"));
+
+        // 회원이 실제로 삭제되었는지 확인
+        assertThat(userService.findByUsername(loginedUser.getUsername())).isEmpty();
+    }
+
+    @Test
+    @DisplayName("회원 탈퇴 - 실패 (토큰 없음)")
+    void deleteProfile2() throws Exception {
+        ResultActions resultActions = mvc.perform(delete("/api/users/me"));
+
+        resultActions
+                .andDo(print())
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("401-2"))
+                .andExpect(jsonPath("$.message").value("로그인이 필요합니다."));
+    }
+
+    @Test
+    @DisplayName("회원 탈퇴 - 실패 (잘못된 토큰)")
+    void deleteProfile3() throws Exception {
+        ResultActions resultActions = mvc.perform(
+                delete("/api/users/me")
+                        .header("Authorization", "Bearer wrong-token")
+        );
+
+        resultActions
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("401-1"))
+                .andExpect(jsonPath("$.message").value("잘못된 인증키입니다."));
+    }
+
+
+
+
 
 
 }
