@@ -8,6 +8,7 @@ import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @RequiredArgsConstructor
 @Service
@@ -34,6 +35,7 @@ public class ChatService {
      */
     public void sendChatMessage(ChatMessage chatMessage) {
         chatMessage.setUserCount(chatRoomService.getUserCount(chatMessage.getRoomId()));
+
         // 입장
         if (ChatMessage.MessageType.ENTER.equals(chatMessage.getType())) {
             chatMessage.setMessage(chatMessage.getSender() + "님이 방에 입장했습니다.");
@@ -61,12 +63,30 @@ public class ChatService {
             redisTemplate.convertAndSend(channelTopic.getTopic(), chatMessage);
 
         } else if (ChatMessage.MessageType.TALK.equals(chatMessage.getType())) {
-            // 타임스탬프 설정
-            chatMessage.setTimestamp(chatMessage.formatTimestamp(LocalDateTime.now()));
             // redis로 메세지 발송
             redisTemplate.convertAndSend(channelTopic.getTopic(), chatMessage);
-            // DB에 저장
-            messageRepository.save(chatMessage);
+
+            // 현재 방에 참가중인 참여자 조회
+            List<String> participants=chatRoomService.getParticipants(chatMessage.getRoomId());
+
+            // 각 클라이언트의 개별 저장소
+            for(String participant:participants){
+
+                ChatMessage message=ChatMessage.builder()
+                        .type(ChatMessage.MessageType.TALK)
+                        .roomId(chatMessage.getRoomId())
+                        .client(participant)        // client 개별 저장
+                        .sender(chatMessage.getSender())
+                        .message(chatMessage.getMessage())
+                        .userCount(chatRoomService.getUserCount(chatMessage.getRoomId()))
+                        .image(chatMessage.getImage())
+                        .timestamp(chatMessage.formatTimestamp(LocalDateTime.now()))
+                        .build();
+
+                // DB에 저장
+                messageRepository.save(message);
+            }
+
         }
     }
 

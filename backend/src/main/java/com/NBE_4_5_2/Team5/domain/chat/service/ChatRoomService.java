@@ -12,7 +12,9 @@ import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -93,4 +95,23 @@ public class ChatRoomService {
         return Optional.ofNullable(valueOps.decrement(USER_COUNT + "_" + roomId)).filter(count -> count > 0).orElse(0L);
     }
 
+    // 현재 방에 참가중인 사용자 조회
+    public List<String> getParticipants(String roomId) {
+        List<String> participants = new ArrayList<>();
+
+        // 모든 사용자의 세션 Id
+        Map<String,String> entries = hashOpsEnterInfo.entries(ENTER_INFO);
+
+        for(Map.Entry<String,String> entry:entries.entrySet()){
+            if(entry.getValue().equals(roomId)){    // 탐색중인 방
+                participants.add(entry.getKey());   // 참가자의 세션 ID
+            }
+        }
+        return participants;
+    }
+
+    // 클라이언트별 개별 저장소 조회
+    public List<ChatMessage> getMessagesByClientAndRoom(String client,String roomId) {
+        return messageRepository.findAllByClientAndRoomId(client,roomId);
+    }
 }
