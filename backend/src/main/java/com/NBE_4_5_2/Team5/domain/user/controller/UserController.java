@@ -1,16 +1,9 @@
 package com.NBE_4_5_2.Team5.domain.user.controller;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.NBE_4_5_2.Team5.domain.user.dto.*;
+import com.NBE_4_5_2.Team5.global.dto.Empty;
+import org.springframework.web.bind.annotation.*;
 
-import com.NBE_4_5_2.Team5.domain.user.dto.LoginUserDto;
-import com.NBE_4_5_2.Team5.domain.user.dto.LoginUserForm;
-import com.NBE_4_5_2.Team5.domain.user.dto.RefreshUserForm;
-import com.NBE_4_5_2.Team5.domain.user.dto.SignUpUserForm;
-import com.NBE_4_5_2.Team5.domain.user.dto.UserDto;
 import com.NBE_4_5_2.Team5.domain.user.entity.User;
 import com.NBE_4_5_2.Team5.domain.user.service.UserService;
 import com.NBE_4_5_2.Team5.global.Rq;
@@ -90,5 +83,24 @@ public class UserController {
 
 		return new RsData<>("200-1", "AccessToken이 재발급되었습니다.", newAccessToken);
 	}
+	//  내 정보 수정
+	@PutMapping("/me")
+	public RsData<UserDto> updateMyProfile(@RequestBody @Valid UserUpdateRequest updateRequest) {
+		User userIdentity = rq.getUserIdentity();
+		User user = rq.getRealActor(userIdentity);
+		UserDto updatedUser = userService.updateMyProfile(user, updateRequest); // `userId` 대신 객체 전달
+		return new RsData<>("200", "사용자 정보가 성공적으로 수정되었습니다.", updatedUser);
+	}
+
+	// 회원 탈퇴
+	@DeleteMapping("/me")
+	public RsData<?> deleteMyProfile() {
+		User userIdentity = rq.getUserIdentity();
+		User user = rq.getRealActor(userIdentity);
+		userService.deleteMyProfile(user);
+		return new RsData<>("200", "회원 탈퇴 성공", new Empty());
+	}
+
+
 
 }
