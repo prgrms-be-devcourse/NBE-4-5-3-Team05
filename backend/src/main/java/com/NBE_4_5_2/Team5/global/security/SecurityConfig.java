@@ -22,20 +22,14 @@ public class SecurityConfig {
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/h2-console/**")
-                        .permitAll()
-                        .requestMatchers("/api/posts/**", "/api/comments/**", "/api/payments/**", "/api/admin/**", "/api/chat/**", "/api/chatting/**")
-                        .permitAll()
-                        .requestMatchers("/api/users/login", "/api/users/signup", "/api/users/refresh")
-                        .permitAll()
                         .anyRequest()
-                        .authenticated()
+                        .permitAll()
                 )
                 .headers((headers) -> headers
                         .addHeaderWriter(new XFrameOptionsHeaderWriter(
                                 XFrameOptionsHeaderWriter.XFrameOptionsMode.SAMEORIGIN)))
                 .csrf(csrf -> csrf.disable())
-            .addFilterBefore(customAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(customAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(
                         exceptionHandling -> exceptionHandling
                                 .authenticationEntryPoint(
