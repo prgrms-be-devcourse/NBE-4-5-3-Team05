@@ -56,6 +56,7 @@ public class UserController {
 		return new RsData<>("200-1", "로그아웃 되었습니다.");
 	}
 
+	//내 정보 조회
 	@GetMapping("/me")
 	public RsData<UserDto> me() {
 

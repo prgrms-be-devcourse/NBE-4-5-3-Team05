@@ -60,6 +60,34 @@ log/
 debug.log
 error.log
 
+
+### custom ###
+gradlew
+db_dev.mv.db
+db_dev.trace.db
+/src/main/resources/application.yml
+/src/main/resources/application-dev.yml
+/src/main/resources/application-prod.yml
+/src/main/resources/application-local.yml
+
+### 🚀 데이터베이스 관련 ###
+*.db
+*.sqlite
+*.s3db
+*.h2.db
+*.mv.db  # H2 데이터베이스 무시
+*.trace.db
+
+### 📝 로그 파일 ###
+logs/
+*.log
+*.log.*
+log/
+debug.log
+error.log
+
+=======
+
 ### 🌍 OS 관련 불필요한 파일 ###
 .DS_Store
 Thumbs.db
@@ -76,3 +104,4 @@ db_dev.mv.db  # H2 데이터베이스 파일도 무시
 gradle
 src/main/resources/application*.yml
 src/test/resources/application*.yml
+

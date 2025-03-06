@@ -1,9 +1,10 @@
 package com.NBE_4_5_2.Team5.domain.post.post.service;
 
-import com.NBE_4_5_2.Team5.domain.category.entity.Category;
-import com.NBE_4_5_2.Team5.domain.category.repository.CategoryRepository;
+import com.NBE_4_5_2.Team5.domain.post.category.entity.Category;
+import com.NBE_4_5_2.Team5.domain.post.category.repository.CategoryRepository;
 import com.NBE_4_5_2.Team5.domain.post.post.dto.request.ProductPostModifyForm;
 import com.NBE_4_5_2.Team5.domain.post.post.dto.request.ProductPostWriteForm;
+import com.NBE_4_5_2.Team5.domain.post.post.dto.response.PreviewPostResponse;
 import com.NBE_4_5_2.Team5.domain.post.post.dto.response.ProductPostResponse;
 import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductCategory;
 import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductPost;
@@ -61,7 +62,7 @@ public class ProductPostService {
     }
 
 
-    public PageDto<ProductPostResponse> getPosts(int page, int pageSize, String keyword, String sort) {
+    public PageDto<PreviewPostResponse> getPosts(int page, int pageSize, String keyword, String sort) {
         Sort.Direction sortDirection = sort.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
         Pageable pageable = PageRequest.of(page - 1, pageSize,
                 Sort.by(sortDirection, "createdAt"));
@@ -75,19 +76,19 @@ public class ProductPostService {
             postpage = productPostRepository.findByTitleLike(likeKeyword, pageable);
         }
 
-        Page<ProductPostResponse> mappedPosts = postpage.map(ProductPostResponse::fromEntity);
+        Page<PreviewPostResponse> mappedPosts = postpage.map(PreviewPostResponse::fromEntity);
 
         return new PageDto<>(mappedPosts);
     }
 
-    public PageDto<ProductPostResponse> getMyPosts(User actor, int page, int pageSize, String sort) {
+    public PageDto<PreviewPostResponse> getMyPosts(User actor, int page, int pageSize, String sort) {
         Sort.Direction sortDirection = sort.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
         Pageable pageable = PageRequest.of(page - 1, pageSize,
                 Sort.by(sortDirection, "createdAt"));
 
         Page<ProductPost> postPage = productPostRepository.findByWriter(actor, pageable);
 
-        Page<ProductPostResponse> mappedMyPosts = postPage.map(ProductPostResponse::fromEntity);
+        Page<PreviewPostResponse> mappedMyPosts = postPage.map(PreviewPostResponse::fromEntity);
 
         return new PageDto<>(mappedMyPosts);
     }

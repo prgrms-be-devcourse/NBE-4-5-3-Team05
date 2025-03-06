@@ -1,4 +1,4 @@
-package com.NBE_4_5_2.Team5.domain.category.entity;
+package com.NBE_4_5_2.Team5.domain.post.category.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
