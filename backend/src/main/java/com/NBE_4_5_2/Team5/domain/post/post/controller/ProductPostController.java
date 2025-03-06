@@ -2,6 +2,7 @@ package com.NBE_4_5_2.Team5.domain.post.post.controller;
 
 import java.util.List;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,6 +38,7 @@ public class ProductPostController {
 	private final RecentlyViewedService recentlyViewedService;
 	private final Rq rq;
 
+	@PreAuthorize("isAuthenticated()")
 	@PostMapping
 	public RsData<ProductPostResponse> createPost(@Valid @RequestBody ProductPostWriteForm body) {
 
@@ -65,6 +67,7 @@ public class ProductPostController {
 		);
 	}
 
+	@PreAuthorize("isAuthenticated()")
 	@GetMapping("/my")
 	@Transactional(readOnly = true)
 	public RsData<PageDto<PreviewPostResponse>> getMyPosts(@RequestParam(defaultValue = "1") int page,
@@ -95,6 +98,7 @@ public class ProductPostController {
 		);
 	}
 
+	@PreAuthorize("isAuthenticated()")
 	@GetMapping("/recently-viewed")
 	@Transactional(readOnly = true)
 	public RsData<List<PreviewPostResponse>> getRecentlyViewPosts() {
@@ -109,6 +113,7 @@ public class ProductPostController {
 		);
 	}
 
+	@PreAuthorize("isAuthenticated()")
 	@PutMapping("/{id}")
 	@Transactional
 	public RsData<ProductPostResponse> modify(
@@ -125,6 +130,7 @@ public class ProductPostController {
 		);
 	}
 
+	@PreAuthorize("isAuthenticated()")
 	@DeleteMapping("/{id}")
 	@Transactional
 	public RsData<Empty> delete(@PathVariable String id) {
@@ -139,6 +145,7 @@ public class ProductPostController {
 	}
 
 	//게시글 구매하기
+	@PreAuthorize("isAuthenticated()")
 	@PatchMapping("/{id}/purchase")
 	public RsData<ProductPostResponse> purchase(@PathVariable String id) {
 		User actor = rq.getUserIdentity();
@@ -154,6 +161,7 @@ public class ProductPostController {
 	}
 
 	// 내가 구매한 내역 조회
+	@PreAuthorize("isAuthenticated()")
 	@GetMapping("/my/purchases")
 	public RsData<List<ProductPostResponse>> getMyPurchases() {
 		User actor = rq.getUserIdentity();
@@ -168,6 +176,7 @@ public class ProductPostController {
 	}
 
 	// 내가 판매한 내역
+	@PreAuthorize("isAuthenticated()")
 	@GetMapping("/my/sales")
 	public RsData<List<ProductPostResponse>> getMySales() {
 		User actor = rq.getUserIdentity();
@@ -181,6 +190,7 @@ public class ProductPostController {
 	}
 
 	// 내가 찜한 내역
+	@PreAuthorize("isAuthenticated()")
 	@GetMapping("/my/favorites")
 	public RsData<List<ProductPostResponse>> getMyFavorites() {
 		User actor = rq.getUserIdentity();
@@ -192,5 +202,4 @@ public class ProductPostController {
 			favorites
 		);
 	}
-
 }

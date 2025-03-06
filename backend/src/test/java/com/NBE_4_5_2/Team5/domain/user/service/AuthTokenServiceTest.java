@@ -31,7 +31,7 @@ public class AuthTokenServiceTest {
     @DisplayName("user1 - accessToken 생성 성공")
     void accessToken() {
 
-        User user = userService.findByUsername("user1").get();
+        User user = userService.getUserByUsername("user1").get();
         String accessToken = authTokenService.generateAccessToken(user);
 
         assertThat(accessToken).isNotBlank();
@@ -43,7 +43,7 @@ public class AuthTokenServiceTest {
     @DisplayName("jwt 유효성 체크")
     void checkValid() {
 
-        User user = userService.findByUsername("user1").get();
+        User user = userService.getUserByUsername("user1").get();
         String accessToken = authTokenService.generateAccessToken(user); // accessToken 생성
         boolean isValid = Ut.Jwt.isValidToken(keyString, accessToken);
         assertThat(isValid).isTrue();

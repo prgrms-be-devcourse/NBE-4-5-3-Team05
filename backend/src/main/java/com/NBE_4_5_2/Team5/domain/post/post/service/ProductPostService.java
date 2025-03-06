@@ -48,7 +48,6 @@ public class ProductPostService {
 			body.latitude(),
 			body.longitude()
 		);
-		productPostRepository.save(productPost);
 
 		// 상품글에 카테고리 체크 및 추가
 		List<Long> reqCategoryIdList = body.categoryIds();
@@ -58,7 +57,9 @@ public class ProductPostService {
 		}
 		productPost.addCategories(realCategoryList);
 
-		productPostRepository.save(productPost);
+		ProductPost saved = productPostRepository.save(productPost);
+
+		actor.addWrittenPost(saved);
 
 		return ProductPostResponse.fromEntity(productPost);
 	}
@@ -205,9 +206,8 @@ public class ProductPostService {
 	// 내가 찜한 내역
 	public List<ProductPostResponse> getMyFavorites(User actor) {
 		List<String> postIds = likedPostRepository.findAllProductPostIdsByUserId(actor.getId());
-		if (postIds.isEmpty()) {
+		if (postIds.isEmpty())
 			return List.of();
-		}
 
 		List<ProductPost> favoritePosts = productPostRepository.findAllById(postIds);
 		return favoritePosts.stream()

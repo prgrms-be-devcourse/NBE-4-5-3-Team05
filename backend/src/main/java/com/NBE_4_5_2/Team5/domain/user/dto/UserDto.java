@@ -33,9 +33,13 @@ public class UserDto {
 		this.nickname = admin.getNickname();
 		this.address = admin.getAddress();
 		this.profileUrl = admin.getProfileUrl();
-		this.blocked = admin.isBlocked();
+		this.blocked = admin.getBlocked();
 		this.blockedCount = admin.getBlockedCount();
 		this.createdAt = admin.getCreatedAt();
 		this.modifiedAt = admin.getModifiedAt();
+	}
+
+	public static UserDto fromEntity(User user) {
+		return new UserDto(user);
 	}
 }
