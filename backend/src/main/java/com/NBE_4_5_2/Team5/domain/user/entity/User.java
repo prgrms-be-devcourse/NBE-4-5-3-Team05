@@ -14,6 +14,8 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -58,7 +60,8 @@ public class User extends BaseTime {
 
 	@Column(nullable = false)
 	@Builder.Default
-	private Integer role = 1;  // 0: Admin, 1: 일반 유저
+	@Enumerated(EnumType.ORDINAL)
+	private Role role = Role.USER;  // 0: Admin, 1: 일반 유저
 
 	@Column(nullable = false)
 	@Builder.Default
@@ -72,7 +75,7 @@ public class User extends BaseTime {
 	private final List<ProductPost> purchasedProducts = new ArrayList<>();
 
 	public boolean isAdmin() {
-		return this.role == 0;
+		return role.equals(Role.ADMIN);
 	}
 
 	/**
