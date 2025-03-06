@@ -178,7 +178,7 @@ class AdminControllerTest {
 			.andExpect(jsonPath("$.data.reason").value(banList.getReason()))
 			.andExpect(jsonPath("$.data.userId").value(banList.getBannedUser().getId()))
 			.andExpect(jsonPath("$.data.banCount").value(foundedUser.get().getBlockedCount()));
-		Assertions.assertThat(foundedUser.get().isBlocked()).isTrue();
+		Assertions.assertThat(foundedUser.get().getBlocked()).isTrue();
 		Assertions.assertThat(foundedUser.get().getBlockedCount()).isEqualTo(user.getBlockedCount() + 1);
 	}
 }
