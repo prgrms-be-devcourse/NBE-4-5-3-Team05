@@ -1,5 +1,6 @@
 package com.NBE_4_5_2.Team5.domain.user.controller;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -57,6 +58,7 @@ public class UserController {
 	}
 
 
+	@PreAuthorize("isAuthenticated()")
     @PostMapping("/logout")
     public RsData<Void> logoutUser() {
 
@@ -72,8 +74,9 @@ public class UserController {
 	}
 
 
-    @GetMapping("/me")
-    public RsData<UserDto> getCurrentUser() {
+	@PreAuthorize("isAuthenticated()")
+	@GetMapping("/me")
+	public RsData<UserDto> getCurrentUser() {
 
 		User userIdentity = rq.getUserIdentity();
 		User user = rq.getRealActor(userIdentity);
@@ -84,6 +87,7 @@ public class UserController {
 
     record RefreshUserForm(@NotBlank(message = "refreshToken을 입력해주세요.") String refreshToken) {}
 
+    @PreAuthorize("isAuthenticated()")
     @PostMapping("/refresh")
     public RsData<String> refreshAccessToken(@RequestBody @Valid RefreshUserForm userForm) {
 
