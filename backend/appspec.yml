@@ -2,7 +2,7 @@ version: 0.0
 os: linux
 files:
   # Copy deploy.zip from the bundle to the target directory
-  - source: backend
+  - source: /
     destination: /home/ec2-user/app
 
 hooks:

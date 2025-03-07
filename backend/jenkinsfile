@@ -17,19 +17,13 @@ pipeline {
                 }
             }
         }
-//         stage('make zip'){
-//             steps{
-//                 dir('backend'){
-//                     sh 'tar -czvf deploy.tar.gz ./appspec.yml ./build/libs/*.jar ./scripts/*.sh'
-//                 }
-//             }
-//         }
-//         stage('Deploy') {
-//             steps {
-//                 // Use the CodeDeploy publisher plugin (or any custom script) and point it to your deploy.zip
-//                 // Example for AWS CodeDeploy publisher:
-//                 codedeployDeploy revisionType: 'S3', bucket: 'team5-deploy-123', key: '#${env.BUILD_NUMBER}-deploy.tar.gz', applicationName: 'team5', deploymentGroupName: 'backend-deploy'
-//             }
-//         }
+        stage('zip') {
+            steps {
+                // backend 폴더로 이동한 후, Gradle Wrapper를 이용하여 빌드 실행
+                dir('backend') {
+                    sh 'tar -czvf deploy.tar.gz appspec.yml scripts/ build/libs/*.jar'
+                }
+            }
+        }
     }
 }
