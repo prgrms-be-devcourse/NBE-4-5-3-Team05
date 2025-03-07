@@ -20,10 +20,20 @@ public class ChatRoom implements Serializable {
     private String roomId;
 
     private String name;
+    private String sender;  // 나
+    private String receiver;    // 상대
     private long userCount; // 채팅방 인원수
 
-    public ChatRoom(String name) {
+    public ChatRoom(String sender, String receiver) {
         this.roomId = UUID.randomUUID().toString();
-        this.name = name;
+        this.sender = sender;
+        this.receiver = receiver;
+    }
+
+    public boolean canAccess(String username){
+        if (sender == null || receiver == null) {
+            return false; // sender나 receiver가 null이면 접근 권한이 없다고 간주
+        }
+        return sender.equals(username) || receiver.equals(username);
     }
 }

@@ -1,6 +1,7 @@
 package com.NBE_4_5_2.Team5.domain.chat.controller;
 
 
+import com.NBE_4_5_2.Team5.domain.chat.entity.ChatMessage;
 import com.NBE_4_5_2.Team5.domain.chat.entity.ChatRoom;
 import com.NBE_4_5_2.Team5.domain.chat.entity.LoginInfo;
 import com.NBE_4_5_2.Team5.domain.chat.service.ChatRoomService;
@@ -28,7 +29,7 @@ public class ChatRoomController {
 //        return "/chat/room";
 //    }
 
-    @GetMapping("/room")
+    @GetMapping("/all/room")
     public String rooms(HttpServletRequest request) {
         String token = authTokenService.getAccessTokenFromCookies(request.getCookies());
         if (token == null || authTokenService.getPayload(token) == null) {
@@ -37,7 +38,7 @@ public class ChatRoomController {
         return "/chat/room";
     }
 
-    @GetMapping("/rooms")
+    @GetMapping("/all/rooms")
     @ResponseBody
     public List<ChatRoom> room() {
         List<ChatRoom> chatRooms = chatRoomService.findAllRoom();
@@ -47,10 +48,30 @@ public class ChatRoomController {
 
     @PostMapping("/room")
     @ResponseBody
-    public ChatRoom createRoom(@RequestParam String name) {
-        ChatRoom chatRoom = chatRoomService.createChatRoom(name);
+    public ChatRoom createRoom(@RequestParam String receiver,HttpServletRequest request) {
+        String token = authTokenService.getAccessTokenFromCookies(request.getCookies());
+        String sender = authTokenService.getUsernameFromToken(token);
+        ChatRoom chatRoom = chatRoomService.createChatRoom(sender,receiver);
         return chatRoom;
-//        return chatRoomRepository.createChatRoom(name);
+    }
+
+    @GetMapping("/rooms")
+    @ResponseBody
+    public List<ChatRoom> getUserRooms(HttpServletRequest request) {
+        String token = authTokenService.getAccessTokenFromCookies(request.getCookies());
+        System.out.println("token: " + token);
+        String username = authTokenService.getUsernameFromToken(token);
+        System.out.println("이름이름이름이름이름이름이름이름이름이름이름이름이름이름이름이름이름ㅍ:"+username);
+        return chatRoomService.getRoomByUser(username);
+    }
+
+    @GetMapping("/room")
+    @ResponseBody
+    public List<ChatMessage> getMessages(HttpServletRequest request, @RequestParam String roomId) {
+        String token = authTokenService.getAccessTokenFromCookies(request.getCookies());
+        String username = authTokenService.getUsernameFromToken(token);
+        System.out.println("현재 사용자:"+username);
+        return chatRoomService.getMessagesByUser(roomId,username);
     }
 
     @DeleteMapping("room")
@@ -59,12 +80,6 @@ public class ChatRoomController {
         chatRoomService.deleteChatRoom(roomId);
     }
 
-
-    @GetMapping("/room/enter/{roomId}")
-    public String roomDetail(Model model, @PathVariable String roomId) {
-        model.addAttribute("roomId", roomId);
-        return "/chat/roomdetail";
-    }
 
     @GetMapping("/room/{roomId}")
     @ResponseBody

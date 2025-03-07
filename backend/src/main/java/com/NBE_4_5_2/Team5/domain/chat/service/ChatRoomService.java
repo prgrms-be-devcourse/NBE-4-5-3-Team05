@@ -54,11 +54,46 @@ public class ChatRoomService {
 
 
     // 채팅방 생성
-    public ChatRoom createChatRoom(String name) {
-        ChatRoom chatRoom = new ChatRoom(name);
+    public ChatRoom createChatRoom(String sender, String receiver) {
+        ChatRoom chatRoom = new ChatRoom(sender,receiver);
         hashOpsChatRoom.put(CHAT_ROOMS, chatRoom.getRoomId(), chatRoom);    // redis에 저장
+
+        // 채팅방에 참가하는 유저의 세션 ID와 방 ID 매핑을 저장
+        setUserEnterInfo(sender, chatRoom.getRoomId()); // 발신자 추가
+        setUserEnterInfo(receiver, chatRoom.getRoomId()); // 수신자 추가
+
         return chatRoom;
     }
+
+    // 접근 검증
+    public boolean canAccess(String roomId, String username) {
+        ChatRoom chatRoom = hashOpsChatRoom.get(CHAT_ROOMS, roomId);
+        System.out.println("사용자:"+username);
+        System.out.println("조회하려는 방: "+roomId);
+        return chatRoom !=null && chatRoom.canAccess(username);
+    }
+
+    // 참가한 채팅방 목록 조회
+    public List<ChatRoom> getRoomByUser(String username) {
+        List<ChatRoom> chatRooms = new ArrayList<>();
+
+        for(ChatRoom chatRoom : findAllRoom()) {
+            // 접근 권한 확인
+            if(chatRoom.canAccess(username)) {
+                chatRooms.add(chatRoom);
+            }
+        }
+        return chatRooms;
+    }
+
+    public List<ChatMessage> getMessagesByUser(String roomId,String username) {
+        if(!canAccess(roomId,username)) {
+            throw new IllegalStateException("접근 권한 없는 채팅방");
+        }
+        return messageRepository.findAllByRoomId(roomId);
+    }
+
+
 
     // 채팅방 삭제
     public void deleteChatRoom(String roomId) {
