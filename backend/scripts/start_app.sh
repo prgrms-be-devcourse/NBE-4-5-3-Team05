@@ -3,7 +3,7 @@
 
 PID_FILE="application.pid"
 
-pwd
+cd /home/ubuntu/app
 
 # PID 파일이 존재하면 처리하고, 없으면 그냥 exit 0
 if [ -f "$PID_FILE" ]; then
@@ -25,7 +25,7 @@ else
   echo "PID 파일이 없으므로 종료할 프로세스가 없습니다."
 fi
 
-cd /home/ubuntu/app
+
 
 # Example: pass secrets as environment variables
 # (You can store these in CodeDeploy environment configuration,
