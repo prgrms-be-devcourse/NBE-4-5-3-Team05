@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -19,6 +20,10 @@ public class AuthTokenService {
     @Value("${custom.jwt.expire-seconds}")
     private int expireSeconds;
 
+    String generateRefreshToken() {
+        return UUID.randomUUID().toString();
+    }
+
     // id, username, role 정보를 담은 accessToken 생성
     String generateAccessToken(User user) {
 
@@ -28,6 +33,7 @@ public class AuthTokenService {
                 Map.of(
                         "id", user.getId(),
                         "username", user.getUsername(),
+                        "nickname", user.getNickname(),
                         "role", user.getRole().name()
                 )
         );
@@ -43,12 +49,14 @@ public class AuthTokenService {
 
         String id = (String) payload.get("id");
         String username = (String) payload.get("username");
+        String nickname = (String) payload.get("nickname");
         String roleStr = (String) payload.get("role");
         Role role = Role.valueOf(roleStr);
 
         return Map.of(
                 "id", id,
                 "username", username,
+                "nickname", nickname,
                 "role", role
         );
     }

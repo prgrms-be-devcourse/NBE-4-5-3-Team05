@@ -1,5 +1,6 @@
 package com.NBE_4_5_2.Team5.domain.user.service;
 
+import com.NBE_4_5_2.Team5.domain.user.dto.AuthToken;
 import com.NBE_4_5_2.Team5.domain.user.dto.UserDto;
 import com.NBE_4_5_2.Team5.domain.user.dto.UserUpdateRequest;
 import com.NBE_4_5_2.Team5.domain.user.entity.Role;
@@ -25,10 +26,12 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final AuthTokenService authTokenService;
+    private final RedisService redisService;
     private final PasswordEncoder passwordEncoder;
     private final UserValidator userValidator;
     private final Rq rq;
 
+    // TODO: refreshToken redis 이동 후 제거
     public User createUser(String username, String password, String email,
                            String nickname, String address, String profileUrl) {
 
@@ -48,9 +51,16 @@ public class UserService {
         return userRepository.save(user);
     }
 
-
+    /**
+     * 로그인 검증
+     * @param username 사용자 아이디
+     * @param password 사용자 비밀번호
+     * @return 검증된 User 객체
+     * */
     public User loginUser(String username, String password) {
+
         return userValidator.credentials(username, password);
+
     }
 
     public void logoutUser(User user) {
@@ -58,6 +68,29 @@ public class UserService {
         user.setRefreshToken(newRefreshToken);
 
         userRepository.save(user);
+    }
+
+    /**
+     * RedisRepository에 refreshToken 저장
+     * */
+    public void saveRefreshToken(User user, String refreshToken) {
+        redisService.saveRefreshToken(user, refreshToken);
+
+    }
+
+    public AuthToken generateAuthtoken(User user) {
+        String refreshToken = generateRefreshToken();
+        String accessToken = generateAccessToken(user);
+
+        return new AuthToken(refreshToken, accessToken);
+    }
+
+    public String generateRefreshToken() {
+        return authTokenService.generateRefreshToken();
+    }
+
+    public String generateAccessToken(User user) {
+        return authTokenService.generateAccessToken(user);
     }
 
     public Optional<User> getUserById(String id) {
@@ -68,6 +101,7 @@ public class UserService {
         return userRepository.findByUsername(username);
     }
 
+    // TODO: refreshToken redis 이동 후 제거
     public Optional<User> getUserByRefreshToken(String refreshToken) {
         return userRepository.findByRefreshToken(refreshToken);
     }
@@ -99,12 +133,9 @@ public class UserService {
         );
     }
 
+    // TODO: refreshToken redis 이동 후 수정
     public String getAuthToken(User user) {
         return user.getRefreshToken() + " " + authTokenService.generateAccessToken(user);
-    }
-
-    public String generateAccessToken(User user) {
-        return authTokenService.generateAccessToken(user);
     }
 
     public long count() {

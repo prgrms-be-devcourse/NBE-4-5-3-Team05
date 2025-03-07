@@ -1,5 +1,6 @@
 package com.NBE_4_5_2.Team5.domain.user.controller;
 
+import com.NBE_4_5_2.Team5.domain.user.dto.AuthToken;
 import com.NBE_4_5_2.Team5.domain.user.dto.SignUpUserForm;
 import com.NBE_4_5_2.Team5.domain.user.dto.UserDto;
 import com.NBE_4_5_2.Team5.domain.user.dto.UserUpdateRequest;
@@ -45,12 +46,14 @@ public class UserController {
 
         User user = userService.loginUser(userForm.username(), userForm.password());
 
-        String accessToken = userService.generateAccessToken(user);
-        rq.addCookie("accessToken", accessToken);
-        rq.addCookie("refreshToken", user.getRefreshToken());
+        AuthToken authToken = userService.generateAuthtoken(user);
+        rq.addCookie("accessToken", authToken.accessToken());
+        rq.addCookie("refreshToken", authToken.refreshToken());
+
+        userService.saveRefreshToken(user, authToken.refreshToken());
 
         return new RsData<>("200-1", "%s님 환영합니다.".formatted(user.getNickname()),
-                new LoginUserDto(accessToken, user.getRefreshToken(), new UserDto(user)));
+                new LoginUserDto(authToken.accessToken(), authToken.refreshToken(), new UserDto(user)));
     }
 
 
