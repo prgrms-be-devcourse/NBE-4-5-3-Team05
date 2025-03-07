@@ -39,27 +39,8 @@ nbdist/
 
 ### 🛠 환경 설정 파일 ###
 /src/main/resources/application.properties
-/src/main/resources/application.yml
-/src/main/resources/application-dev.yml
-/src/main/resources/application-prod.yml
-/src/main/resources/application-local.yml
-
-### 🚀 데이터베이스 관련 ###
-*.db
-*.sqlite
-*.s3db
-*.h2.db
-*.mv.db  # H2 데이터베이스 무시
-*.trace.db
-
-### 📝 로그 파일 ###
-logs/
-*.log
-*.log.*
-log/
-debug.log
-error.log
-
+/src/main/resources/*.yml
+gradle
 
 ### custom ###
 gradlew

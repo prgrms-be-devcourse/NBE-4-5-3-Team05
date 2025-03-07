@@ -1,17 +1,16 @@
 server:
   port: 8080
 
-
 spring:
   jackson:
     serialization:
       fail-on-empty-beans: false
-  
+
   output:
     ansi:
       enabled: always
-  
-  
+
+
   datasource:
     url: jdbc:h2:./db_dev;MODE=MySQL
     username: sa
@@ -19,7 +18,7 @@ spring:
     driver-class-name: org.h2.Driver
     hikari:
       auto-commit: false
-  
+
   jpa:
     hibernate:
       ddl-auto: create-drop
@@ -53,8 +52,7 @@ spring:
       org.hibernate.orm.jdbc.bind: TRACE
       org.hibernate.orm.jdbc.extract: TRACE
       org.springframework.transaction.interceptor: TRACE
-  
-  
+
+
   springdoc:
     default-produces-media-type: application/json;charset=UTF-8
-

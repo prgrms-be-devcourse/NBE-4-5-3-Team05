@@ -43,46 +43,46 @@ public class ProductPost {
 	@Column(updatable = false, nullable = false)
 	private String id;
 
-    @Column(nullable = false)
-    @Setter
-    private String productName;
+	@Column(nullable = false)
+	@Setter
+	private String productName;
 
-    @Column(nullable = false)
-    @Setter
-    private Integer productPrice;
+	@Column(nullable = false)
+	@Setter
+	private Integer productPrice;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    private User buyer; // 구매자(NULL이면 아직 구매 안 된 상태)
+	@ManyToOne(fetch = FetchType.LAZY)
+	private User buyer; // 구매자(NULL이면 아직 구매 안 된 상태)
 
-    @Column(nullable = false)
-    @Setter
-    private String title;
+	@Column(nullable = false)
+	@Setter
+	private String title;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
-    @Setter
-    private String content;
+	@Column(nullable = false, columnDefinition = "TEXT")
+	@Setter
+	private String content;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
-    @Setter
-    private String image_urls; // 쉼표가 포함된 url 문자열
+	@Column(nullable = false, columnDefinition = "TEXT")
+	@Setter
+	private String image_urls; // 쉼표가 포함된 url 문자열
 
 	@Column(nullable = false)
 	@Builder.Default
 	private Integer likedCount = 0;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    @Setter
-    @Builder.Default
-    private ProductStatus status = ProductStatus.AVAILABLE;
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	@Setter
+	@Builder.Default
+	private ProductStatus status = ProductStatus.AVAILABLE;
 
-    @Column(nullable = false)
-    @Setter
-    private Float latitude;
+	@Column(nullable = false)
+	@Setter
+	private Float latitude;
 
-    @Column(nullable = false)
-    @Setter
-    private Float longitude;
+	@Column(nullable = false)
+	@Setter
+	private Float longitude;
 
 	@CreatedDate
 	@Column(updatable = false)
@@ -113,19 +113,16 @@ public class ProductPost {
 			.build();
 	}
 
-    // 구매 처리 메서드
-    public void setBuyer(User buyer) {
-        this.buyer = buyer;
-        this.status = ProductStatus.PURCHASED;
-    }
+	// 구매 처리 메서드
+	public void setBuyer(User buyer) {
+		this.buyer = buyer;
+		this.status = ProductStatus.PURCHASED;
+	}
 
-    public void addCategories(List<Category> categories) {
-        List<ProductCategory> productCategories = categories.stream()
-                .map(category -> ProductCategory.builder()
-                        .productPost(this)
-                        .category(category)
-                        .build())
-                .toList();
+	public void addCategories(List<Category> categories) {
+		List<ProductCategory> productCategories = categories.stream()
+			.map(category -> ProductCategory.builder().productPost(this).category(category).build())
+			.toList();
 
 		this.productCategories.addAll(productCategories);
 	}

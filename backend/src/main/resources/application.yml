@@ -26,7 +26,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create-drop
     show-sql: false
     properties:
       hibernate:
@@ -35,6 +35,8 @@ spring:
         use_sql_comments: true
         default_batch_fetch_size: 100
     open-in-view: false
+  profiles:
+    include: secret
 
   security:
     oauth2:

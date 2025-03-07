@@ -1,5 +1,14 @@
 package com.NBE_4_5_2.Team5.domain.user.service;
 
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
 import com.NBE_4_5_2.Team5.domain.user.dto.UserDto;
 import com.NBE_4_5_2.Team5.domain.user.dto.UserUpdateRequest;
 import com.NBE_4_5_2.Team5.domain.user.entity.Role;
@@ -8,16 +17,9 @@ import com.NBE_4_5_2.Team5.domain.user.repository.UserRepository;
 import com.NBE_4_5_2.Team5.global.Rq;
 import com.NBE_4_5_2.Team5.global.exception.ServiceException;
 import com.NBE_4_5_2.Team5.global.security.SecurityUser;
+
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -34,19 +36,19 @@ public class UserService {
 
         userValidator.duplicate(username, email, nickname);
 
-        User user = User.builder()
-                .id("user-" + UUID.randomUUID())
-                .username(username)
-                .refreshToken(UUID.randomUUID().toString())
-                .password(passwordEncoder.encode(password))
-                .email(email)
-                .nickname(nickname)
-                .address(address)
-                .profileUrl(profileUrl)
-                .build();
-
-        return userRepository.save(user);
-    }
+		User user = User.builder()
+			.id("user-" + UUID.randomUUID().toString())
+			.username(username)
+			.refreshToken(UUID.randomUUID().toString())
+			.password(passwordEncoder.encode(password))
+			.email(email)
+			.nickname(nickname)
+			.address(address)
+			.profileUrl(profileUrl)
+			.role(Role.USER)
+			.build();
+		return userRepository.save(user);
+	}
 
 
     public User loginUser(String username, String password) {
@@ -126,11 +128,12 @@ public class UserService {
 
         SecurityUser user = (SecurityUser) principal;
 
-        return User.builder()
-                .id(user.getId())
-                .username(user.getUsername())
-                .build();
-    }
+		return User.builder()
+			.id(user.getId())
+			.username(user.getUsername())
+			.role(user.getRole())
+			.build();
+	}
 
     // 내 프로필 수정
     @Transactional

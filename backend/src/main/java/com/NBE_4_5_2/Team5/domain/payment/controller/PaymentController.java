@@ -29,7 +29,6 @@ public class PaymentController {
 		return new RsData<>("201-1", "결제 메타데이터 저장 성공.", metadata);
 	}
 
-
 	@GetMapping("/request")
 	public RsData<Void> requestPayment(@RequestParam(name = "orderId") @NotNull String id,
 		@RequestParam(name = "paymentKey") @NotNull String paymentKey,
@@ -38,7 +37,6 @@ public class PaymentController {
 
 		return new RsData<>("200-1", "페이 충전 결제 요청 성공.");
 	}
-
 
 	public record PurchaseItemReqDto(String productId) {
 	}
