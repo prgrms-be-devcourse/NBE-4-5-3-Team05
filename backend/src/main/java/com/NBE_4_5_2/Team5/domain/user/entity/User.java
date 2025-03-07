@@ -85,6 +85,19 @@ public class User extends BaseTime {
 		return role.equals(Role.ADMIN);
 	}
 
+	public void ban() {
+		this.blocked = true;
+		this.blockedCount++;
+	}
+
+	public void unBan() {
+
+		if (!this.blocked) {
+			return;
+		}
+		blocked = false;
+	}
+
 	/**
 	 * {@link User#cash cash}에 {@code totalAmount} 만큼 추가합니다.
 	 *
@@ -173,5 +186,18 @@ public class User extends BaseTime {
 
 	public void addWrittenPost(ProductPost saved) {
 		this.purchasedProducts.add(saved);
+	}
+
+	public User(String username, String password, String email, String nickname, String address, String profileUrl,
+		Role role) {
+		this.username = username;
+		this.password = password;
+		this.email = email;
+		this.blocked = false;
+		this.blockedCount = 0;
+		this.nickname = nickname;
+		this.address = address;
+		this.profileUrl = profileUrl;
+		this.role = role;
 	}
 }

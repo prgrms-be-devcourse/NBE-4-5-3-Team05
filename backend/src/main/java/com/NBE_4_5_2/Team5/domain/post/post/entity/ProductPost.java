@@ -121,7 +121,10 @@ public class ProductPost {
 
 	public void addCategories(List<Category> categories) {
 		List<ProductCategory> productCategories = categories.stream()
-			.map(category -> ProductCategory.builder().productPost(this).category(category).build())
+			.map(category -> ProductCategory.builder()
+				.productPost(this)
+				.category(category)
+				.build())
 			.toList();
 
 		this.productCategories.addAll(productCategories);
