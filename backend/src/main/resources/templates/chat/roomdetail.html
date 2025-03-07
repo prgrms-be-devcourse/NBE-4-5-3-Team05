@@ -50,7 +50,6 @@
 <script src="/webjars/sockjs-client/1.1.2/sockjs.min.js"></script>
 <script src="/webjars/stomp-websocket/2.3.3-1/stomp.min.js"></script>
 <script>
-    // WebSocket 및 STOMP 초기화
     var sock = new SockJS("/ws-stomp");
     var ws = Stomp.over(sock);
     var vm = new Vue({
@@ -68,6 +67,7 @@
             this.roomName = localStorage.getItem('wschat.roomName');
 
             var _this = this;
+            // 현재 사용자 정보를 요청하여 토큰을 가져옵니다.
             axios.get('/api/chat/user').then(response => {
                 _this.token = response.data.data.token; // 토큰 할당
                 console.log('Received token:', _this.token);
@@ -77,8 +77,8 @@
                     ws.subscribe("/sub/chat/room/" + _this.roomId, function(message) {
                         var recv = JSON.parse(message.body);
                         _this.recvMessage(recv); // 메시지 수신 처리
-
                     });
+
                     // 페이지 로드 시 기존 메시지 요청
                     axios.get('/api/chat/message', {
                         params: { roomId: _this.roomId }
@@ -129,6 +129,7 @@
                 console.log("Sending message:", payload); // 전송할 메시지 로그
                 ws.send("/pub/chat/message", {"token": this.token}, JSON.stringify(payload));
                 this.message = ''; // 텍스트 메시지 전송 후 입력 공간 비우기
+                this.refreshMessages();
             },
             recvMessage(recv) {
                 console.log('Received message:', recv); // 수신한 메시지 로그
@@ -156,6 +157,29 @@
                     })
                     .catch(error => {
                         console.error("채팅방 비우기 중 오류 발생:", error);
+                    });
+            },
+            refreshMessages() {
+                var _this = this;
+                axios.get('/api/chat/message', {
+                    params: { roomId: this.roomId }
+                })
+                    .then(response => {
+                        _this.messages = response.data; // 기존 메시지 데이터 새로 고침
+                    })
+                    .catch(error => {
+                        console.error("Error fetching messages:", error);
+                    });
+            },
+            logout() {
+                axios.post('/api/users/logout') // 로그아웃 API 호출
+                    .then(response => {
+                        alert(response.msg); // 성공 메시지 표시
+                        location.href = "/api/users/login"; // 로그인 페이지로 리다이렉트
+                    })
+                    .catch(error => {
+                        console.error("로그아웃 실패:", error);
+                        alert("로그아웃에 실패하였습니다.");
                     });
             }
         }

@@ -49,7 +49,7 @@ public class ChatController {
         String username = authTokenService.getUsernameFromToken(token);
         System.out.println("nickname: " + username);
 
-        chatRoomService.deleteChatRoom(username,roomId);
+        chatRoomService.deleteChatRoom(roomId,username);
     }
 
 }
