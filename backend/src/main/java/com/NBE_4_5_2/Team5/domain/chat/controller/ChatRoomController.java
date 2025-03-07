@@ -23,13 +23,8 @@ public class ChatRoomController {
     private final ChatRoomService chatRoomService;
     private final AuthTokenService authTokenService;
 
-//
-//    @GetMapping("/room")
-//    public String rooms() {
-//        return "/chat/room";
-//    }
-
-    @GetMapping("/all/room")
+    // 모든 방 조회
+    @GetMapping("/room")
     public String rooms(HttpServletRequest request) {
         String token = authTokenService.getAccessTokenFromCookies(request.getCookies());
         if (token == null || authTokenService.getPayload(token) == null) {
@@ -38,6 +33,18 @@ public class ChatRoomController {
         return "/chat/room";
     }
 
+    // 채팅방 상세 페이지로 이동 (HTML 반환)
+    @GetMapping("/room/{roomId}/show")
+    public String showRoomDetailPage(@PathVariable String roomId, HttpServletRequest request) {
+        String token = authTokenService.getAccessTokenFromCookies(request.getCookies());
+        if (token == null || authTokenService.getPayload(token) == null) {
+            return "redirect:/api/users/login"; // 로그인 페이지로 리다이렉트
+        }
+        // roomId를 이용해 추가적인 방 정보 검증이나 처리 로직 추가 가능
+        return "/chat/roomdetail"; // 채팅방 상세 페이지 반환
+    }
+
+    //    모든 방 조회
     @GetMapping("/all/rooms")
     @ResponseBody
     public List<ChatRoom> room() {
@@ -46,6 +53,7 @@ public class ChatRoomController {
         return chatRooms;
     }
 
+    // 채팅방 생성
     @PostMapping("/room")
     @ResponseBody
     public ChatRoom createRoom(@RequestParam String receiver,HttpServletRequest request) {
@@ -55,6 +63,7 @@ public class ChatRoomController {
         return chatRoom;
     }
 
+    // 클라이언트가 참여한 채팅방 조회
     @GetMapping("/rooms")
     @ResponseBody
     public List<ChatRoom> getUserRooms(HttpServletRequest request) {
@@ -65,7 +74,8 @@ public class ChatRoomController {
         return chatRoomService.getRoomByUser(username);
     }
 
-    @GetMapping("/room")
+    // 채팅방 메세지 조회
+    @GetMapping("/message")
     @ResponseBody
     public List<ChatMessage> getMessages(HttpServletRequest request, @RequestParam String roomId) {
         String token = authTokenService.getAccessTokenFromCookies(request.getCookies());
@@ -74,13 +84,16 @@ public class ChatRoomController {
         return chatRoomService.getMessagesByUser(roomId,username);
     }
 
+
+    // 채팅방 삭제
     @DeleteMapping("room")
     @ResponseBody
     public void deleteRoom(@RequestParam String roomId) {
         chatRoomService.deleteChatRoom(roomId);
     }
 
-
+    // roomId로 채팅방 검색
+    // 추후 이름검색으로 변경
     @GetMapping("/room/{roomId}")
     @ResponseBody
     public ChatRoom roomInfo(@PathVariable String roomId) {
@@ -88,7 +101,7 @@ public class ChatRoomController {
     }
 
 
-    // 사용자 정보
+    // 사용자 정보 조회
     @GetMapping("/user")
     @ResponseBody
     public RsData<LoginInfo> getUserInfo(HttpServletRequest request) {

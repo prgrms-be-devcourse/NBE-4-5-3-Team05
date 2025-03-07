@@ -43,10 +43,5 @@ public class ChatController {
         chatService.sendChatMessage(message);
     }
 
-    @GetMapping("/api/chat/room/messages")
-    @ResponseBody
-    public List<ChatMessage> getMessagesByRoomId(@RequestParam String roomId) {
-        return chatRoomService.getMessagesByRoomId(roomId);
-    }
 
 }

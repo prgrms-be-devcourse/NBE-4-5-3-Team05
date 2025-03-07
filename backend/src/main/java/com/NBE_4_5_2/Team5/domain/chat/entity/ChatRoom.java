@@ -28,6 +28,7 @@ public class ChatRoom implements Serializable {
         this.roomId = UUID.randomUUID().toString();
         this.sender = sender;
         this.receiver = receiver;
+        this.name = sender+"와 "+receiver+"의 채팅방";
     }
 
     public boolean canAccess(String username){
