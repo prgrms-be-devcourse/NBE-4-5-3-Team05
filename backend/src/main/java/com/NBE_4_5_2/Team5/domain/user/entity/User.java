@@ -8,6 +8,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
+import com.NBE_4_5_2.Team5.domain.post.comment.entity.Comment;
 import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductPost;
 import com.NBE_4_5_2.Team5.domain.post.post.enums.ProductStatus;
 import com.NBE_4_5_2.Team5.global.entity.BaseTime;
@@ -19,6 +20,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -86,6 +88,9 @@ public class User extends BaseTime {
 	@OneToMany(mappedBy = "writer", cascade = CascadeType.REMOVE)
 	private final List<ProductPost> writtenProducts = new ArrayList<>();
 
+	@OneToMany(mappedBy = "author", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, orphanRemoval = true)
+	private final List<Comment> wroteComments = new ArrayList<>();
+
 	public boolean isAdmin() {
 		return role.equals(Role.ADMIN);
 	}
@@ -137,13 +142,12 @@ public class User extends BaseTime {
 	 *
 	 * @param product 구매할 상품 객체
 	 * @param amount  결제할 총 가격
-	 * @return 상품을 해당 유저가 구매 가능하다면 {@code true}를 반환한다.
 	 * @throws InsufficientPayMoneyException 총 결제 가격 {@code amount}보다 가지고 있는 잔액인 {@code cash}가 적을 경우 발생
 	 * @throws IllegalArgumentException      상품의 판매 상태가
 	 *                                       {@link com.NBE_4_5_2.Team5.domain.post.post.enums.ProductStatus#AVAILABLE ProductStatus.AVAILABLE}이<br/>
 	 *                                       아닌 경우 발생
 	 */
-	public boolean canBuy(ProductPost product, Integer amount) {
+	public void canBuy(ProductPost product, Integer amount) {
 		if (!this.hasEnoughPayMoney(amount)) {
 			throw new InsufficientPayMoneyException("잔액이 부족합니다.");
 		}
@@ -151,8 +155,10 @@ public class User extends BaseTime {
 		if (!product.isAvailable()) {
 			throw new IllegalStateException("판매중인 상품이 아닙니다.");
 		}
+	}
 
-		return true;
+	public void addWroteComments(Comment comment) {
+		wroteComments.add(comment);
 	}
 
 	/**

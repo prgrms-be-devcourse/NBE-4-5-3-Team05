@@ -10,6 +10,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.NBE_4_5_2.Team5.domain.post.category.entity.Category;
+import com.NBE_4_5_2.Team5.domain.post.comment.entity.Comment;
 import com.NBE_4_5_2.Team5.domain.post.post.enums.ProductStatus;
 import com.NBE_4_5_2.Team5.domain.user.entity.User;
 import com.NBE_4_5_2.Team5.global.exception.ServiceException;
@@ -98,6 +99,10 @@ public class ProductPost {
 	@ManyToOne(fetch = FetchType.LAZY)
 	private User writer;
 
+	@OneToMany(mappedBy = "target", cascade = CascadeType.REMOVE, orphanRemoval = true)
+	@Builder.Default
+	private final List<Comment> commentList = new ArrayList<>();
+
 	public static ProductPost create(User writer, String productName, Integer productPrice, String title,
 		String content, String image_urls, Float latitude, Float longitude) {
 		return ProductPost.builder()
@@ -160,5 +165,8 @@ public class ProductPost {
 
 	public void updateStatus(ProductStatus status) {
 		this.status = status;
+	}
+	public void addComment(Comment comment) {
+		commentList.add(comment);
 	}
 }
