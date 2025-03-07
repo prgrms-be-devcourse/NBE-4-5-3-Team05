@@ -6,7 +6,7 @@ files:
     destination: /home/ubuntu/app
 
 permissions:
-  - object: /home/ec2-user/app/scripts/start_app.sh
+  - object: /home/ubuntu/app/scripts/start_app.sh
     owner: ubuntu
     group: ubuntu
     mode: 755
@@ -15,6 +15,6 @@ permissions:
 
 hooks:
   ApplicationStart:
-    - location: scripts/start_app.sh
+    - location: /home/ubuntu/app/scripts/start_app.sh
       timeout: 300
       runas: ubuntu
