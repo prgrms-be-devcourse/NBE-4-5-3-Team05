@@ -1,23 +1,25 @@
 package com.NBE_4_5_2.Team5.domain.user.service;
 
-import com.NBE_4_5_2.Team5.domain.user.entity.Role;
-import com.NBE_4_5_2.Team5.domain.user.entity.User;
-import com.NBE_4_5_2.Team5.global.standard.util.Ut;
-import lombok.RequiredArgsConstructor;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
+import com.NBE_4_5_2.Team5.domain.user.entity.Role;
+import com.NBE_4_5_2.Team5.domain.user.entity.User;
+import com.NBE_4_5_2.Team5.global.standard.util.Ut;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class AuthTokenService {
 
-    @Value("${custom.jwt.secret-key}")
-    private String keyString;
+	@Value("${custom.jwt.secret-key}")
+	private String keyString;
 
-    @Value("${custom.jwt.expire-seconds}")
-    private int expireSeconds;
+	@Value("${custom.jwt.expire-seconds}")
+	private int expireSeconds;
 
     // id, username, role 정보를 담은 accessToken 생성
     String generateAccessToken(User user) {
@@ -33,7 +35,7 @@ public class AuthTokenService {
         );
     }
 
-    Map<String, Object> getPayload(String accessToken) {
+	Map<String, Object> getPayload(String accessToken) {
 
         if (!Ut.Jwt.isValidToken(keyString, accessToken)) {
             return null;

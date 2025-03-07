@@ -22,16 +22,16 @@ import lombok.NoArgsConstructor;
 @Builder
 public class ProductCategory {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_post_id", nullable = false)
-    private ProductPost productPost;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "product_post_id", nullable = false)
+	private ProductPost productPost;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id", nullable = false)
-    private Category category;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "category_id", nullable = false)
+	private Category category;
 
 }

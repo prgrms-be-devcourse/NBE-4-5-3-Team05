@@ -47,6 +47,7 @@ public class User extends BaseTime {
 	private String password;
 
 	@Column(length = 100, unique = true)
+	@Setter
 	private String refreshToken;
 
 	@Column(length = 50, nullable = false, unique = true)
@@ -82,12 +83,25 @@ public class User extends BaseTime {
 	@OneToMany(mappedBy = "writer", cascade = CascadeType.REMOVE)
 	private final List<ProductPost> writtenProducts = new ArrayList<>();
 
+	@OneToMany(mappedBy = "author", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, orphanRemoval = true)
+	private final List<Comment> wroteComments = new ArrayList<>();
+
 	public boolean isAdmin() {
 		return role.equals(Role.ADMIN);
 	}
 
-	@OneToMany(mappedBy = "author", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, orphanRemoval = true)
-	private final List<Comment> wroteComments = new ArrayList<>();
+	public void ban() {
+		this.blocked = true;
+		this.blockedCount++;
+	}
+
+	public void unBan() {
+
+		if (!this.blocked) {
+			return;
+		}
+		blocked = false;
+	}
 
 	/**
 	 * {@link User#cash cash}에 {@code totalAmount} 만큼 추가합니다.
@@ -123,13 +137,12 @@ public class User extends BaseTime {
 	 *
 	 * @param product 구매할 상품 객체
 	 * @param amount  결제할 총 가격
-	 * @return 상품을 해당 유저가 구매 가능하다면 {@code true}를 반환한다.
 	 * @throws InsufficientPayMoneyException 총 결제 가격 {@code amount}보다 가지고 있는 잔액인 {@code cash}가 적을 경우 발생
 	 * @throws IllegalArgumentException      상품의 판매 상태가
 	 *                                       {@link com.NBE_4_5_2.Team5.domain.post.post.enums.ProductStatus#AVAILABLE ProductStatus.AVAILABLE}이<br/>
 	 *                                       아닌 경우 발생
 	 */
-	public boolean canBuy(ProductPost product, Integer amount) {
+	public void canBuy(ProductPost product, Integer amount) {
 		if (!this.hasEnoughPayMoney(amount)) {
 			throw new InsufficientPayMoneyException("잔액이 부족합니다.");
 		}
@@ -137,8 +150,6 @@ public class User extends BaseTime {
 		if (!product.isAvailable()) {
 			throw new IllegalStateException("판매중인 상품이 아닙니다.");
 		}
-
-		return true;
 	}
 
 	public void addWroteComments(Comment comment) {
@@ -161,7 +172,10 @@ public class User extends BaseTime {
 
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 
-		return getMemberAuthoritiesAsString().stream().map(SimpleGrantedAuthority::new).toList();
+		return getMemberAuthoritiesAsString()
+			.stream()
+			.map(SimpleGrantedAuthority::new)
+			.toList();
 
 	}
 
@@ -178,5 +192,18 @@ public class User extends BaseTime {
 
 	public void addWrittenPost(ProductPost saved) {
 		this.purchasedProducts.add(saved);
+	}
+
+	public User(String username, String password, String email, String nickname, String address, String profileUrl,
+		Role role) {
+		this.username = username;
+		this.password = password;
+		this.email = email;
+		this.blocked = false;
+		this.blockedCount = 0;
+		this.nickname = nickname;
+		this.address = address;
+		this.profileUrl = profileUrl;
+		this.role = role;
 	}
 }
