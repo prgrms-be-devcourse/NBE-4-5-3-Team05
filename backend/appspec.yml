@@ -5,14 +5,6 @@ files:
   - source: /
     destination: /home/ubuntu/app
 
-permissions:
-  - object: scripts/start_app.sh
-    owner: ubuntu
-    group: ubuntu
-    mode: 755
-    type:
-      - file
-
 hooks:
   ApplicationStart:
     - location: scripts/start_app.sh
