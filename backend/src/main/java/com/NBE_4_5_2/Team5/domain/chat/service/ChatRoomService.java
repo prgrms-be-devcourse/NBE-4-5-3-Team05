@@ -87,10 +87,11 @@ public class ChatRoomService {
     }
 
     public List<ChatMessage> getMessagesByUser(String roomId,String username) {
+
         if(!canAccess(roomId,username)) {
             throw new IllegalStateException("접근 권한 없는 채팅방");
         }
-        return messageRepository.findAllByRoomId(roomId);
+        return messageRepository.findAllByClientAndRoomId(username,roomId);
     }
 
 

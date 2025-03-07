@@ -1,7 +1,6 @@
 package com.NBE_4_5_2.Team5.domain.chat.entity;
 
-
-import jakarta.persistence.Id;
+import org.springframework.data.annotation.Id;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -18,8 +17,7 @@ import java.util.UUID;
 @SuperBuilder
 @NoArgsConstructor
 @Document(collection = "chat_messages")
-public class ChatMessage implements Serializable {
-    private static final long serialVersionUID = 123456789L;
+public class ChatMessage {
 
     @Id
     private String messageId;

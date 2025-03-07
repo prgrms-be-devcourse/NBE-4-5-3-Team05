@@ -4,15 +4,13 @@ import com.NBE_4_5_2.Team5.domain.chat.entity.ChatMessage;
 import com.NBE_4_5_2.Team5.domain.chat.service.ChatRoomService;
 import com.NBE_4_5_2.Team5.domain.chat.service.ChatService;
 import com.NBE_4_5_2.Team5.domain.user.service.AuthTokenService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -43,5 +41,15 @@ public class ChatController {
         chatService.sendChatMessage(message);
     }
 
+    // 메세지 삭제(개별저장소)
+    @DeleteMapping("api/chat/message")
+    @ResponseBody
+    public void deleteMessage(@RequestParam String roomId, HttpServletRequest request) {
+        String token=authTokenService.getAccessTokenFromCookies(request.getCookies());
+        String username = authTokenService.getUsernameFromToken(token);
+        System.out.println("nickname: " + username);
+
+        chatService.deleteMessageByClient(username,roomId);
+    }
 
 }

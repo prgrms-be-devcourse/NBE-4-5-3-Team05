@@ -43,6 +43,8 @@
             v-bind:key="item.roomId"
             @click="enterRoom(item.roomId)">
             <h6>{{ item.name }} <span class="badge badge-info badge-pill">{{ item.userCount }}</span></h6>
+            <!-- 채팅방 비우기 버튼 추가 -->
+            <button class="btn btn-warning btn-sm" @click.stop="clearChat(item.roomId)">채팅방 비우기</button>
         </li>
     </ul>
 </div>
@@ -113,6 +115,19 @@
             enterRoom: function(roomId) {
                 localStorage.setItem('wschat.roomId', roomId); // 방 ID 저장
                 location.href = "/api/chat/room/" + roomId + "/show"; // 채팅방 상세 페이지로 이동
+            },
+            clearChat: function(roomId) {
+                if (confirm("채팅방을 비우겠습니까?")) {
+                    axios.delete('/api/chat/message', { params: { roomId: roomId } }) // 메시지 삭제 API 호출
+                        .then(response => {
+                            alert("채팅방이 비워졌습니다."); // 성공 메시지 표시
+                            this.findUserRooms(); // 방 목록 새로 고침
+                        })
+                        .catch(error => {
+                            console.error("채팅방 비우기 실패:", error);
+                            alert("채팅방 비우기에 실패하였습니다.");
+                        });
+                }
             },
             logout: function() {
                 axios.post('/api/users/logout') // 로그아웃 API 호출

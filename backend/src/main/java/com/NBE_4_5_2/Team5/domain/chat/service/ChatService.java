@@ -88,5 +88,18 @@ public class ChatService {
         }
     }
 
+    // 개별 저장소 메세지 삭제
+    public void deleteMessageByClient(String username, String roomId) {
+        List<ChatMessage> messages=messageRepository.findAllByClientAndRoomId(username,roomId);
+        System.out.println("삭제할 메세지들:"+messages);
+        if (messages != null && !messages.isEmpty()) {
+            System.out.println("삭제전");
+            messageRepository.deleteAll(messages);
+            System.out.println("삭제후");
+        } else {
+            System.out.println("삭제할 메시지가 없습니다.");
+        }
+    }
+
 
 }
