@@ -2,12 +2,11 @@ version: 0.0
 os: linux
 files:
   # Copy deploy.zip from the bundle to the target directory
-  - source: deploy.zip
+  - source: backend
     destination: /home/ec2-user/app
 
 hooks:
-
   ApplicationStart:
     - location: scripts/start_app.sh
       timeout: 300
-      runas: ec2-user
+      runas: ubuntu

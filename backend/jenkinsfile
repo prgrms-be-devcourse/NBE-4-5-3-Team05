@@ -17,5 +17,19 @@ pipeline {
                 }
             }
         }
+//         stage('make zip'){
+//             steps{
+//                 dir('backend'){
+//                     sh 'tar -czvf deploy.tar.gz ./appspec.yml ./build/libs/*.jar ./scripts/*.sh'
+//                 }
+//             }
+//         }
+//         stage('Deploy') {
+//             steps {
+//                 // Use the CodeDeploy publisher plugin (or any custom script) and point it to your deploy.zip
+//                 // Example for AWS CodeDeploy publisher:
+//                 codedeployDeploy revisionType: 'S3', bucket: 'team5-deploy-123', key: '#${env.BUILD_NUMBER}-deploy.tar.gz', applicationName: 'team5', deploymentGroupName: 'backend-deploy'
+//             }
+//         }
     }
 }
