@@ -5,6 +5,7 @@ server:
 spring:
 
   profiles:
+    active: dev
     include: secret
 
   jackson:
