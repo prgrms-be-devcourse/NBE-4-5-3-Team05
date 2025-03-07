@@ -30,7 +30,6 @@ import lombok.experimental.SuperBuilder;
 
 @Entity
 @Getter
-@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
@@ -39,25 +38,31 @@ import lombok.experimental.SuperBuilder;
 public class User extends BaseTime {
 
 	@Column(length = 20, nullable = false, unique = true)
+	@Setter
 	private String username;
 
 	@Column(length = 255, nullable = false)
+	@Setter
 	private String password;
 
 	@Column(length = 100, unique = true)
 	@Setter
 	private String refreshToken;
 
-	@Column(length = 50, nullable = false, unique = true)
-	private String email;
+    @Column(length = 50, nullable = false, unique = true)
+	@Setter
+    private String email;
 
 	@Column(length = 20, nullable = false, unique = true)
+	@Setter
 	private String nickname;
 
 	@Column(length = 255)
+	@Setter
 	private String address;
 
 	@Column(name = "profile_url", length = 255)
+	@Setter
 	private String profileUrl;
 
 	private int cash;
@@ -117,10 +122,10 @@ public class User extends BaseTime {
 
 	/**
 	 * 유저의 구매 이력에 {@link ProductPost}를 추가하는 메서드
-	 *
 	 * @param product 구매 이력에 추가할 구매한 상품 객체
 	 */
 	private void addToPurchasedProductList(ProductPost product) {
+		purchasedProducts.add(product);
 	}
 
 	private void pay(Integer amount) {

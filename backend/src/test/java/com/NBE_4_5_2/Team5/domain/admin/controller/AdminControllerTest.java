@@ -54,7 +54,7 @@ class AdminControllerTest {
 	@Autowired
 	private NoticePostRepository noticePostRepository;
 	@Autowired
-	private UserRepository userRepository;
+	private AdminService adminService;
 	@Autowired
 	private ObjectMapper objectMapper;
 	@Autowired
@@ -68,7 +68,7 @@ class AdminControllerTest {
 	@Autowired
 	private PasswordEncoder passwordEncoder;
 	@Autowired
-	private AdminService adminService;
+	private UserRepository userRepository;
 
 	@BeforeEach
 	public void setUp() throws Exception {

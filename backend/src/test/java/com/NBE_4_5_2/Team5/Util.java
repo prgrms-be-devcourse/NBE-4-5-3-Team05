@@ -29,5 +29,4 @@ public class Util {
 		// 외래키 제약조건 재활성화
 		entityManager.createNativeQuery("SET REFERENTIAL_INTEGRITY TRUE").executeUpdate();
 	}
-
 }
