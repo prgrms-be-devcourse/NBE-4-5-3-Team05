@@ -2,6 +2,8 @@
 # stop_app.sh
 PID_FILE="application.pid"
 
+pwd
+
 # PID 파일이 존재하면 처리하고, 없으면 그냥 exit 0
 if [ -f "$PID_FILE" ]; then
   PID=$(cat "$PID_FILE")
