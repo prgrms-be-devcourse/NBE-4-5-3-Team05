@@ -1,10 +1,14 @@
 package com.NBE_4_5_2.Team5.domain.user.entity;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
+import com.NBE_4_5_2.Team5.domain.post.comment.entity.Comment;
 import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductPost;
 import com.NBE_4_5_2.Team5.domain.post.post.enums.ProductStatus;
 import com.NBE_4_5_2.Team5.global.entity.BaseTime;
@@ -14,6 +18,9 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -25,7 +32,6 @@ import lombok.experimental.SuperBuilder;
 
 @Entity
 @Getter
-@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
@@ -34,31 +40,39 @@ import lombok.experimental.SuperBuilder;
 public class User extends BaseTime {
 
 	@Column(length = 20, nullable = false, unique = true)
+	@Setter
 	private String username;
 
 	@Column(length = 255, nullable = false)
+	@Setter
 	private String password;
 
 	@Column(length = 100, unique = true)
+	@Setter
 	private String refreshToken;
 
-	@Column(length = 50, nullable = false, unique = true)
-	private String email;
+    @Column(length = 50, nullable = false, unique = true)
+	@Setter
+    private String email;
 
 	@Column(length = 20, nullable = false, unique = true)
+	@Setter
 	private String nickname;
 
 	@Column(length = 255)
+	@Setter
 	private String address;
 
 	@Column(name = "profile_url", length = 255)
+	@Setter
 	private String profileUrl;
 
 	private int cash;
 
 	@Column(nullable = false)
 	@Builder.Default
-	private Integer role = 1;  // 0: Admin, 1: 일반 유저
+	@Enumerated(EnumType.ORDINAL)
+	private Role role = Role.USER;
 
 	@Column(nullable = false)
 	@Builder.Default
@@ -71,12 +85,32 @@ public class User extends BaseTime {
 	@OneToMany(mappedBy = "buyer", cascade = CascadeType.REMOVE)
 	private final List<ProductPost> purchasedProducts = new ArrayList<>();
 
+	@OneToMany(mappedBy = "writer", cascade = CascadeType.REMOVE)
+	private final List<ProductPost> writtenProducts = new ArrayList<>();
+
+	@OneToMany(mappedBy = "author", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, orphanRemoval = true)
+	private final List<Comment> wroteComments = new ArrayList<>();
+
 	public boolean isAdmin() {
-		return this.role == 0;
+		return role.equals(Role.ADMIN);
+	}
+
+	public void ban() {
+		this.blocked = true;
+		this.blockedCount++;
+	}
+
+	public void unBan() {
+
+		if (!this.blocked) {
+			return;
+		}
+		blocked = false;
 	}
 
 	/**
 	 * {@link User#cash cash}에 {@code totalAmount} 만큼 추가합니다.
+	 *
 	 * @param totalAmount 충전할 금액
 	 */
 	public void chargeCash(Integer totalAmount) {
@@ -96,6 +130,7 @@ public class User extends BaseTime {
 	 * @param product 구매 이력에 추가할 구매한 상품 객체
 	 */
 	private void addToPurchasedProductList(ProductPost product) {
+		purchasedProducts.add(product);
 	}
 
 	private void pay(Integer amount) {
@@ -105,16 +140,14 @@ public class User extends BaseTime {
 	/**
 	 * {@link ProductPost product}를 {@link Integer amount}로 구매할 수 있는지 판단하는 메서드.
 	 *
-	 * @throws InsufficientPayMoneyException 총 결제 가격 {@code amount}보다 가지고 있는 잔액인 {@code cash}가 적을 경우 발생
-	 * @throws IllegalArgumentException 상품의 판매 상태가
-	 * {@link com.NBE_4_5_2.Team5.domain.post.post.enums.ProductStatus#AVAILABLE ProductStatus.AVAILABLE}이<br/>
-	 * 아닌 경우 발생
-	 *
 	 * @param product 구매할 상품 객체
-	 * @param amount 결제할 총 가격
-	 * @return 상품을 해당 유저가 구매 가능하다면 {@code true}를 반환한다.
+	 * @param amount  결제할 총 가격
+	 * @throws InsufficientPayMoneyException 총 결제 가격 {@code amount}보다 가지고 있는 잔액인 {@code cash}가 적을 경우 발생
+	 * @throws IllegalArgumentException      상품의 판매 상태가
+	 *                                       {@link com.NBE_4_5_2.Team5.domain.post.post.enums.ProductStatus#AVAILABLE ProductStatus.AVAILABLE}이<br/>
+	 *                                       아닌 경우 발생
 	 */
-	public boolean canBuy(ProductPost product, Integer amount) {
+	public void canBuy(ProductPost product, Integer amount) {
 		if (!this.hasEnoughPayMoney(amount)) {
 			throw new InsufficientPayMoneyException("잔액이 부족합니다.");
 		}
@@ -122,8 +155,10 @@ public class User extends BaseTime {
 		if (!product.isAvailable()) {
 			throw new IllegalStateException("판매중인 상품이 아닙니다.");
 		}
+	}
 
-		return true;
+	public void addWroteComments(Comment comment) {
+		wroteComments.add(comment);
 	}
 
 	/**
@@ -134,5 +169,46 @@ public class User extends BaseTime {
 	 **/
 	private boolean hasEnoughPayMoney(Integer amount) {
 		return cash >= amount;
+	}
+
+	public void update(String nickname) {
+		this.nickname = nickname;
+	}
+
+	public Collection<? extends GrantedAuthority> getAuthorities() {
+
+		return getMemberAuthoritiesAsString()
+			.stream()
+			.map(SimpleGrantedAuthority::new)
+			.toList();
+
+	}
+
+	public List<String> getMemberAuthoritiesAsString() {
+
+		List<String> authorities = new ArrayList<>();
+
+		if (isAdmin()) {
+			authorities.add("ROLE_ADMIN");
+		}
+
+		return authorities;
+	}
+
+	public void addWrittenPost(ProductPost saved) {
+		this.purchasedProducts.add(saved);
+	}
+
+	public User(String username, String password, String email, String nickname, String address, String profileUrl,
+		Role role) {
+		this.username = username;
+		this.password = password;
+		this.email = email;
+		this.blocked = false;
+		this.blockedCount = 0;
+		this.nickname = nickname;
+		this.address = address;
+		this.profileUrl = profileUrl;
+		this.role = role;
 	}
 }

@@ -9,12 +9,27 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.NBE_4_5_2.Team5.domain.user.dto.UserDto;
+import com.NBE_4_5_2.Team5.domain.user.dto.UserUpdateRequest;
+import com.NBE_4_5_2.Team5.domain.user.entity.Role;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+
+import com.NBE_4_5_2.Team5.domain.user.entity.Role;
 import com.NBE_4_5_2.Team5.domain.user.entity.User;
 import com.NBE_4_5_2.Team5.domain.user.repository.UserRepository;
 import com.NBE_4_5_2.Team5.global.Rq;
 import com.NBE_4_5_2.Team5.global.exception.ServiceException;
 import com.NBE_4_5_2.Team5.global.security.SecurityUser;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -27,7 +42,7 @@ public class UserService {
 	private final UserValidator userValidator;
 	private final Rq rq;
 
-	public User signup(String username, String password, String email,
+	public User createUser(String username, String password, String email,
 		String nickname, String address, String profileUrl) {
 
 		userValidator.duplicate(username, email, nickname);
@@ -41,35 +56,40 @@ public class UserService {
 			.nickname(nickname)
 			.address(address)
 			.profileUrl(profileUrl)
+			.role(Role.USER)
 			.build();
-
 		return userRepository.save(user);
 	}
 
-	public void logout(User user) {
+	public User loginUser(String username, String password) {
+		return userValidator.credentials(username, password);
+	}
+
+	public void logoutUser(User user) {
 		String newRefreshToken = "user-" + UUID.randomUUID();
 		user.setRefreshToken(newRefreshToken);
 
 		userRepository.save(user);
 	}
 
-	public User processUserAuthentication(String username, String password) {
-		return userValidator.credentials(username, password);
-	}
-
-	public Optional<User> findById(String id) {
+	public Optional<User> getUserById(String id) {
 		return userRepository.findById(id);
 	}
 
-	public Optional<User> findByUsername(String username) {
+	public Optional<User> getUserByUsername(String username) {
 		return userRepository.findByUsername(username);
 	}
 
-	public Optional<User> findByRefreshToken(String refreshToken) {
+	public Optional<User> getUserByRefreshToken(String refreshToken) {
 		return userRepository.findByRefreshToken(refreshToken);
 	}
 
-	// AccessToken을 통해 DB 조회를 하지않고 id와 username 만을 가진 User 객체를 반환
+	/**
+	 * 이 메소드는 AccessToken payload에 저장된 id와 username, role만을 가진 User 객체를 반환합니다.
+	 * DB 조회를 하지 않기 때문에, 관리자 페이지, 게시글 조회 등 사용자 id 혹은 role을 필요로 하는 경우에 사용할 수 있습니다.
+	 * <p>
+	 * CustomAuthenticationFilter에서 accessToken을 검증하고 setLogin 하는 과정에 사용됩니다.
+	 */
 	public Optional<User> getUserByAccessToken(String accessToken) {
 
 		Map<String, Object> payload = authTokenService.getPayload(accessToken);
@@ -80,11 +100,13 @@ public class UserService {
 
 		String id = (String)payload.get("id");
 		String username = (String)payload.get("username");
+		Role role = (Role)payload.get("role");
 
 		return Optional.of(
 			User.builder()
 				.id(id)
 				.username(username)
+				.role(role)
 				.build()
 		);
 	}
@@ -119,6 +141,43 @@ public class UserService {
 		return User.builder()
 			.id(user.getId())
 			.username(user.getUsername())
+			.role(user.getRole())
 			.build();
 	}
+
+	// 내 프로필 수정
+	@Transactional
+	public UserDto updateMyProfile(User user, UserUpdateRequest updateRequest) {
+		// 닉네임 변경
+		if (updateRequest.getNickname() != null) {
+			user.setNickname(updateRequest.getNickname());
+		}
+
+		// 주소 변경
+		if (updateRequest.getAddress() != null) {
+			user.setAddress(updateRequest.getAddress());
+		}
+
+		// 프로필 이미지 변경
+		if (updateRequest.getProfileUrl() != null) {
+			user.setProfileUrl(updateRequest.getProfileUrl());
+		}
+
+		// 이메일 변경 시 중복 체크
+		if (updateRequest.getEmail() != null && !updateRequest.getEmail().equals(user.getEmail())) {
+			if (userRepository.existsByEmail(updateRequest.getEmail())) {
+				throw new ServiceException("400-EMAIL-ALREADY-EXISTS", "이미 사용 중인 이메일입니다.");
+			}
+			user.setEmail(updateRequest.getEmail());
+		}
+
+		return UserDto.fromEntity(user);
+	}
+
+	// 회원 탈퇴
+	@Transactional
+	public void deleteMyProfile(User user) {
+		userRepository.delete(user);
+	}
+
 }
