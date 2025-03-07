@@ -1,7 +1,7 @@
 #!/bin/bash
 # start_app.sh
 
-cd /home/ec2-user/app
+cd /home/ubuntu/app
 
 # Example: pass secrets as environment variables
 # (You can store these in CodeDeploy environment configuration,
