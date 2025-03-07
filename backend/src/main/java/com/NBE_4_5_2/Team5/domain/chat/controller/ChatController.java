@@ -10,9 +10,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -49,7 +49,7 @@ public class ChatController {
         String username = authTokenService.getUsernameFromToken(token);
         System.out.println("nickname: " + username);
 
-        chatService.deleteMessageByClient(username,roomId);
+        chatRoomService.deleteChatRoom(username,roomId);
     }
 
 }

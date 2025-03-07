@@ -63,7 +63,7 @@ public class ChatRoomController {
         return chatRoom;
     }
 
-    // 클라이언트가 참여한 채팅방 조회
+    // 클라이언트의 채팅방 조회
     @GetMapping("/rooms")
     @ResponseBody
     public List<ChatRoom> getUserRooms(HttpServletRequest request) {
@@ -88,16 +88,10 @@ public class ChatRoomController {
     // 채팅방 삭제
     @DeleteMapping("room")
     @ResponseBody
-    public void deleteRoom(@RequestParam String roomId) {
-        chatRoomService.deleteChatRoom(roomId);
-    }
-
-    // roomId로 채팅방 검색
-    // 추후 이름검색으로 변경
-    @GetMapping("/room/{roomId}")
-    @ResponseBody
-    public ChatRoom roomInfo(@PathVariable String roomId) {
-        return chatRoomService.findRoomById(roomId);
+    public void deleteRoom(@RequestParam String roomId,HttpServletRequest request) {
+        String token = authTokenService.getAccessTokenFromCookies(request.getCookies());
+        String username = authTokenService.getUsernameFromToken(token);
+        chatRoomService.deleteChatRoom(roomId,username);
     }
 
 
@@ -115,4 +109,17 @@ public class ChatRoomController {
                 .build();
         return new RsData<>("200","success",loginInfo);
     }
+
+
+    // 특정 roomId에 대한 채팅방 조회
+    @GetMapping("/{roomId}")
+    @ResponseBody
+    public List<ChatRoom> getChatRoomsByRoomId(@PathVariable String roomId) {
+        List<ChatRoom> chatRooms = chatRoomService.findByRoomId(roomId);
+        if (chatRooms.isEmpty()) {
+            throw new RuntimeException("없음");
+        }
+        return chatRooms;
+    }
+
 }
