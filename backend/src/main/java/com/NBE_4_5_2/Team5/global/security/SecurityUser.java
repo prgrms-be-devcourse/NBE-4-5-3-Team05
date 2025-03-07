@@ -1,13 +1,15 @@
 package com.NBE_4_5_2.Team5.global.security;
 
-import com.NBE_4_5_2.Team5.domain.user.entity.Role;
-import lombok.Getter;
+import java.util.Collection;
+import java.util.Map;
+
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
-import java.util.Collection;
-import java.util.Map;
+import com.NBE_4_5_2.Team5.domain.user.entity.Role;
+
+import lombok.Getter;
 
 public class SecurityUser extends User implements OAuth2User {
 

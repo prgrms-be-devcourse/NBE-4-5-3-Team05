@@ -1,7 +1,6 @@
 server:
   port: 8080
 
-
 spring:
   jackson:
     serialization:
@@ -47,14 +46,13 @@ spring:
             token-uri: https://kauth.kakao.com/oauth/token
             user-info-uri: https://kapi.kakao.com/v2/user/me
             user-name-attribute: id
-  logging:
-    level:
-      org.hibernate.SQL: DEBUG
-      org.hibernate.orm.jdbc.bind: TRACE
-      org.hibernate.orm.jdbc.extract: TRACE
-      org.springframework.transaction.interceptor: TRACE
-  
-  
-  springdoc:
-    default-produces-media-type: application/json;charset=UTF-8
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.orm.jdbc.bind: TRACE
+    org.hibernate.orm.jdbc.extract: TRACE
+    org.springframework.transaction.interceptor: TRACE
 
+
+springdoc:
+  default-produces-media-type: application/json;charset=UTF-8

@@ -6,7 +6,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -29,6 +28,7 @@ import com.NBE_4_5_2.Team5.global.dto.RsData;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
 
 @RestController
 @RequestMapping("/api/posts")
@@ -144,27 +144,10 @@ public class ProductPostController {
 		);
 	}
 
-	//게시글 구매하기
-	@PreAuthorize("isAuthenticated()")
-	@PatchMapping("/{id}/purchase")
-	public RsData<ProductPostResponse> purchase(@PathVariable String id) {
-		User actor = rq.getUserIdentity();
-
-		// 구매 확정
-		ProductPostResponse postResponse = productPostService.purchasePost(actor, id);
-
-		return new RsData<>(
-			"200",
-			"구매가 완료되었습니다.",
-			postResponse
-		);
-	}
-
-	// 내가 구매한 내역 조회
-	@PreAuthorize("isAuthenticated()")
-	@GetMapping("/my/purchases")
-	public RsData<List<ProductPostResponse>> getMyPurchases() {
-		User actor = rq.getUserIdentity();
+    // 내가 구매한 내역 조회
+    @GetMapping("/my/purchases")
+    public RsData<List<ProductPostResponse>> getMyPurchases() {
+        User actor = rq.getUserIdentity();
 
 		List<ProductPostResponse> myPurchases = productPostService.getMyPurchases(actor);
 
