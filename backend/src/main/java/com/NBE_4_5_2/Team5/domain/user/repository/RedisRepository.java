@@ -4,4 +4,5 @@ import com.NBE_4_5_2.Team5.domain.user.entity.RefreshToken;
 import org.springframework.data.repository.CrudRepository;
 
 public interface RedisRepository extends CrudRepository<RefreshToken, String> {
+    void deleteByRefreshToken(String refreshToken);
 }

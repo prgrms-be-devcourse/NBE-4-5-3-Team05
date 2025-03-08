@@ -17,10 +17,11 @@ import org.springframework.data.redis.core.index.Indexed;
 public class RefreshToken {
 
     @Id
-    private String refreshToken;
-
-    @Indexed
     private String userId;
+
+    // refreshToken으로 조회할 수 있도록 인덱스 추가
+    @Indexed
+    private String refreshToken;
 
     @TimeToLive
     private Long expiration;

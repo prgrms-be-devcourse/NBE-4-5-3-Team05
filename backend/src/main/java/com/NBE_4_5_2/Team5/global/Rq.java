@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.annotation.RequestScope;
 
 import java.util.List;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -66,6 +67,16 @@ public class Rq {
 
     public String getHeader(String name) {
         return request.getHeader(name);
+    }
+
+    public Optional<String> getRefreshToken() {
+        String refreshToken = getValueFromCookie("refreshToken");
+
+        if (refreshToken == null) {
+            return Optional.empty();
+        }
+
+        return Optional.of(refreshToken);
     }
 
     public User getRealActor(User actor) {

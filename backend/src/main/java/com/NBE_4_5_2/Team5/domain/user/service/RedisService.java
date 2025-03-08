@@ -17,44 +17,52 @@ public class RedisService {
 
     private final RedisRepository redisRepository;
 
-    @Value("${custom.refreshToken.expire-seconds}")
+    //    @Value("${custom.refreshToken.expire-seconds}")
+    @Value("20")
     private Long expireSeconds;
 
     /**
-     * RefreshToken을 저장 (expireSeconds 적용)
+     * redis에 RefreshToken을 저장 (expireSeconds 적용)
      */
     public void saveRefreshToken(User user, String refreshToken) {
+        String key = REFRESH_TOKEN_KEY + user.getId();
+
         RefreshToken token = RefreshToken.builder()
-                .refreshToken(generateRefreshTokenKey(refreshToken))
-                .userId(user.getId())
+                .userId(key)
+                .refreshToken(refreshToken)
                 .expiration(expireSeconds)
                 .build();
-        redisRepository.save(token);
 
+        redisRepository.save(token);
     }
 
     /**
      * redis에 refreshToken 조회
      */
-    public Optional<RefreshToken> getRefreshToken(String refreshToken) {
-        String key = generateRefreshTokenKey(refreshToken);
+    public Optional<RefreshToken> getRefreshToken(String userId) {
+        String key = REFRESH_TOKEN_KEY + userId;
         return redisRepository.findById(key);
     }
 
     /**
      * redis에 refreshToken 삭제
+     * @param userId 삭제할 userId
+     * @return 삭제 성공 여부
      */
-    public void deleteRefreshToken(String refreshToken) {
-        String key = generateRefreshTokenKey(refreshToken);
-        redisRepository.deleteById(key);
+    public boolean deleteByUserId(String userId) {
+        if (redisRepository.existsById(userId)) {
+            redisRepository.deleteById(userId);
+            return true;
+        }
+        return false;
     }
 
     /**
-     * RefreshToken 키 생성
-     *
-     * @return redis key
+     * redis에 Refresh Token 삭제
+     * @param refreshToken 삭제할 Refresh Token
      */
-    private String generateRefreshTokenKey(String refreshToken) {
-        return REFRESH_TOKEN_KEY + refreshToken;
+    public void deleteByRefreshToken(String refreshToken) {
+        redisRepository.deleteByRefreshToken(refreshToken);
     }
+
 }

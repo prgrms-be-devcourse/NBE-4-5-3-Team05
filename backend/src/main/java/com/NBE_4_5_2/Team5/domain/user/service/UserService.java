@@ -53,40 +53,43 @@ public class UserService {
 
     /**
      * 로그인 검증
+     *
      * @param username 사용자 아이디
      * @param password 사용자 비밀번호
      * @return 검증된 User 객체
-     * */
+     */
     public User loginUser(String username, String password) {
-
         return userValidator.credentials(username, password);
-
     }
 
-    public void logoutUser(User user) {
-        String newRefreshToken = "user-" + UUID.randomUUID();
-        user.setRefreshToken(newRefreshToken);
+    /**
+     * 로그아웃 처리 (redis에서 refreshToken 제거)
+     *
+     * redis에 저장된 refreshToken을 제거합니다.
+     * 로그인된 authentication의 UserId를 기반으로 삭제합니다.
+     * 삭제 실패 시 사용자가 보유한 refreshToken을 기반으로 다시 삭제합니다.
+     */
+    public void logoutUser(User userIdentity) {
+        boolean isDeleted = redisService.deleteByUserId(userIdentity.getId());
 
-        userRepository.save(user);
+        // 삭제가 실패했다면 refreshToken을 가져와서 다시 삭제 시도
+        if (!isDeleted) {
+            rq.getRefreshToken().ifPresent(redisService::deleteByRefreshToken);
+        }
     }
 
     /**
      * RedisRepository에 refreshToken 저장
-     * */
+     */
     public void saveRefreshToken(User user, String refreshToken) {
         redisService.saveRefreshToken(user, refreshToken);
-
     }
 
     public AuthToken generateAuthtoken(User user) {
-        String refreshToken = generateRefreshToken();
-        String accessToken = generateAccessToken(user);
+        String refreshToken = authTokenService.generateRefreshToken();
+        String accessToken = authTokenService.generateAccessToken(user);
 
         return new AuthToken(refreshToken, accessToken);
-    }
-
-    public String generateRefreshToken() {
-        return authTokenService.generateRefreshToken();
     }
 
     public String generateAccessToken(User user) {
