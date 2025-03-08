@@ -47,10 +47,10 @@ public class UserController {
         User user = userService.loginUser(userForm.username(), userForm.password());
 
         AuthToken authToken = userService.generateAuthtoken(user);
+        userService.saveRefreshToken(user, authToken.refreshToken());
+
         rq.addCookie("accessToken", authToken.accessToken());
         rq.addCookie("refreshToken", authToken.refreshToken());
-
-        userService.saveRefreshToken(user, authToken.refreshToken());
 
         return new RsData<>("200-1", "%s님 환영합니다.".formatted(user.getNickname()),
                 new LoginUserDto(authToken.accessToken(), authToken.refreshToken(), new UserDto(user)));

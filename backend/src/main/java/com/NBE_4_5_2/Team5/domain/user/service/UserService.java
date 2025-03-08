@@ -79,9 +79,16 @@ public class UserService {
     }
 
     /**
-     * RedisRepository에 refreshToken 저장
+     * 로그인 시 Redis에 refreshToken 저장
+     *
+     * @param user 로그인한 사용자
+     * @param refreshToken 저장할 refreshToken
+     * redis에 userId로 된 refreshToken이 존재할 경우 삭제 후 저장합니다.
      */
     public void saveRefreshToken(User user, String refreshToken) {
+        String userId = user.getId();
+
+        redisService.deleteByUserId(userId);
         redisService.saveRefreshToken(user, refreshToken);
     }
 

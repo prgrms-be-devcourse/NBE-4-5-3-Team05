@@ -50,8 +50,10 @@ public class RedisService {
      * @return 삭제 성공 여부
      */
     public boolean deleteByUserId(String userId) {
-        if (redisRepository.existsById(userId)) {
-            redisRepository.deleteById(userId);
+        String key = REFRESH_TOKEN_KEY + userId;
+
+        if (redisRepository.existsById(key)) {
+            redisRepository.deleteById(key);
             return true;
         }
         return false;
