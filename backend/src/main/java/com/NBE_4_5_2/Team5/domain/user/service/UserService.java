@@ -3,6 +3,7 @@ package com.NBE_4_5_2.Team5.domain.user.service;
 import com.NBE_4_5_2.Team5.domain.user.dto.AuthToken;
 import com.NBE_4_5_2.Team5.domain.user.dto.UserDto;
 import com.NBE_4_5_2.Team5.domain.user.dto.UserUpdateRequest;
+import com.NBE_4_5_2.Team5.domain.user.entity.RefreshToken;
 import com.NBE_4_5_2.Team5.domain.user.entity.Role;
 import com.NBE_4_5_2.Team5.domain.user.entity.User;
 import com.NBE_4_5_2.Team5.domain.user.repository.UserRepository;
@@ -31,7 +32,6 @@ public class UserService {
     private final UserValidator userValidator;
     private final Rq rq;
 
-    // TODO: refreshToken redis 이동 후 제거
     public User createUser(String username, String password, String email,
                            String nickname, String address, String profileUrl) {
 
@@ -40,7 +40,6 @@ public class UserService {
         User user = User.builder()
                 .id("user-" + UUID.randomUUID())
                 .username(username)
-                .refreshToken(UUID.randomUUID().toString())
                 .password(passwordEncoder.encode(password))
                 .email(email)
                 .nickname(nickname)
@@ -79,7 +78,7 @@ public class UserService {
     }
 
     /**
-     * 로그인 시 Redis에 refreshToken 저장
+     * Redis에 refreshToken 저장
      *
      * @param user 로그인한 사용자
      * @param refreshToken 저장할 refreshToken
@@ -111,10 +110,19 @@ public class UserService {
         return userRepository.findByUsername(username);
     }
 
-    // TODO: refreshToken redis 이동 후 제거
-    public Optional<User> getUserByRefreshToken(String refreshToken) {
-        return userRepository.findByRefreshToken(refreshToken);
-    }
+//    /**
+//     * userId로 refreshToken을 조회하여 가져옴
+//     * @param userId 조회할 userId
+//     * @return userId에 해당하는 refreshToken
+//     * @throws ServiceException userId에 해당하는 refreshToken이 존재하지 않을 경우
+//     * */
+//    public String getRefreshTokenByUserId(String userId) {
+//        return redisService.getRefreshToken(userId)
+//                .map(RefreshToken::getRefreshToken)
+//                .orElseThrow(
+//                        () -> new ServiceException("401-1", "로그인이 필요합니다.")
+//                );
+//    }
 
     /**
      * 이 메소드는 AccessToken payload에 저장된 id와 username, role만을 가진 User 객체를 반환합니다.
