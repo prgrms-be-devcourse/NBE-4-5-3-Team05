@@ -27,11 +27,11 @@ public class DevInitData {
         List<String> commands;
         if (SystemUtils.IS_OS_WINDOWS) {
             commands = List.of("cmd.exe", "/c",
-                    "npx --package typescript --package openapi-typescript --package punycode openapi-typescript api.json -o C:/NBE-4-5-2-Team05/frontend/src/lib/backend/api/schema.d.ts");
+                    "npx --package typescript --package openapi-typescript --package punycode openapi-typescript api.json -o ../frontend/src/lib/backend/api/schema.d.ts");
         }
         else {
             commands = List.of("ls", "-l",
-                    "npx --package typescript --package openapi-typescript --package punycode openapi-typescript api.json -o C:/NBE-4-5-2-Team05/frontend/src/lib/backend/api/schema.d.ts\n");
+                    "npx --package typescript --package openapi-typescript --package punycode openapi-typescript api.json -o ../frontend/src/lib/backend/api/schema.d.ts\n");
         }
         return args -> {
             genApiJsonFile("http://localhost:8080/v3/api-docs/api", "api.json");
