@@ -18,7 +18,6 @@ import java.util.*;
 @Service
 @Transactional
 public class ChatRoomService {
-//    private final ChatRoomRepository chatRoomRepository;
 
     // Redis CacheKeys
     private static final String CHAT_ROOMS = "CHAT_ROOM"; // 채팅룸 저장
@@ -51,12 +50,6 @@ public class ChatRoomService {
 
         return chatRooms;
     }
-
-    // 메세지 조회
-    public List<ChatMessage> getMessagesByRoomId(String roomId) {
-        return messageRepository.findAllByRoomId(roomId);
-    }
-
 
     // 채팅방 생성
     public ChatRoom createChatRoom(String sender, String receiver) {

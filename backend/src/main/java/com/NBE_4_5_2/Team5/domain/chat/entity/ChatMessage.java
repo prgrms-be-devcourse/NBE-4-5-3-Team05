@@ -1,13 +1,12 @@
 package com.NBE_4_5_2.Team5.domain.chat.entity;
 
-import org.springframework.data.annotation.Id;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
@@ -44,7 +43,7 @@ public class ChatMessage {
     }
     // 메시지 타입 : 입장, 퇴장, 채팅, 이미지 추가
     public enum MessageType {
-        ENTER, QUIT, TALK,IMAGE
+        TALK,IMAGE
     }
 
     public String formatTimestamp(LocalDateTime timestamp) {

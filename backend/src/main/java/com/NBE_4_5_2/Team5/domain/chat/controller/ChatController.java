@@ -41,15 +41,4 @@ public class ChatController {
         chatService.sendChatMessage(message);
     }
 
-    // 메세지 삭제(개별저장소)
-    @DeleteMapping("api/chat/message")
-    @ResponseBody
-    public void deleteMessage(@RequestParam String roomId, HttpServletRequest request) {
-        String token=authTokenService.getAccessTokenFromCookies(request.getCookies());
-        String username = authTokenService.getUsernameFromToken(token);
-        System.out.println("nickname: " + username);
-
-        chatRoomService.deleteChatRoom(roomId,username);
-    }
-
 }

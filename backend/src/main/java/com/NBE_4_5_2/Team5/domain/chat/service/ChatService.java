@@ -50,26 +50,24 @@ public class ChatService {
         }
 
         for(ChatRoom chatRoom : chatRooms) {
-            // 입장
-            if (ChatMessage.MessageType.ENTER.equals(chatMessage.getType())) {
-//                chatMessage.setMessage(chatMessage.getSender() + "님이 방에 입장했습니다.");
-//                chatMessage.setSender("[알림]");
-//                // 타임스탬프 설정
-//                chatMessage.setTimestamp(chatMessage.formatTimestamp(LocalDateTime.now()));
-//                // redis로 메세지 발송
-//                redisTemplate.convertAndSend(channelTopic.getTopic(), chatMessage);
+            if (ChatMessage.MessageType.TALK.equals(chatMessage.getType())) {
 
-                // 퇴장
-            } else if (ChatMessage.MessageType.QUIT.equals(chatMessage.getType())) {
-//                chatMessage.setMessage(chatMessage.getSender() + "님이 방에서 나갔습니다.");
-//                chatMessage.setSender("[알림]");
-//                // 타임스탬프 설정
-//                chatMessage.setTimestamp(chatMessage.formatTimestamp(LocalDateTime.now()));
-//                // redis로 메세지 발송
-//                redisTemplate.convertAndSend(channelTopic.getTopic(), chatMessage);
-//
-                // 이미지
-            } else if (ChatMessage.MessageType.IMAGE.equals(chatMessage.getType())) {
+                // redis로 메세지 발송
+                redisTemplate.convertAndSend(channelTopic.getTopic(), chatMessage);
+                ChatMessage message=ChatMessage.builder()
+                        .type(ChatMessage.MessageType.TALK)
+                        .roomId(chatRoom.getRoomId()) // 동일한 roomId 사용
+                        .client(chatRoom.getId()) // 클라이언트에 맞춰 설정
+                        .sender(chatMessage.getSender()) // 원 메시지의 발신자
+                        .message(chatMessage.getMessage()) // 원 메시지 내용
+                        .userCount(chatMessage.getUserCount())
+                        .image(chatMessage.getImage())
+                        .timestamp(chatMessage.formatTimestamp(LocalDateTime.now()))
+                        .build();
+                // DB에 저장
+                messageRepository.save(message);
+
+            }else if (ChatMessage.MessageType.IMAGE.equals(chatMessage.getType())) {
                 chatMessage.setMessage("");
 
                 ChatMessage message=ChatMessage.builder()
@@ -85,23 +83,6 @@ public class ChatService {
 
                 // redis로 메세지 발송
                 redisTemplate.convertAndSend(channelTopic.getTopic(), message);
-                messageRepository.save(message);
-
-            } else if (ChatMessage.MessageType.TALK.equals(chatMessage.getType())) {
-
-                // redis로 메세지 발송
-                redisTemplate.convertAndSend(channelTopic.getTopic(), chatMessage);
-                ChatMessage message=ChatMessage.builder()
-                        .type(ChatMessage.MessageType.TALK)
-                        .roomId(chatRoom.getRoomId()) // 동일한 roomId 사용
-                        .client(chatRoom.getId()) // 클라이언트에 맞춰 설정
-                        .sender(chatMessage.getSender()) // 원 메시지의 발신자
-                        .message(chatMessage.getMessage()) // 원 메시지 내용
-                        .userCount(chatMessage.getUserCount())
-                        .image(chatMessage.getImage())
-                        .timestamp(chatMessage.formatTimestamp(LocalDateTime.now()))
-                        .build();
-                // DB에 저장
                 messageRepository.save(message);
 
             }

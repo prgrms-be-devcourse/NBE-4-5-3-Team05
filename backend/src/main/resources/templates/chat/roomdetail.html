@@ -19,8 +19,8 @@
         </div>
         <div class="col-md-6 text-right">
             <a class="btn btn-primary btn-sm" href="/logout">로그아웃</a>
-            <a class="btn btn-info btn-sm" href="/api/chat/room">채팅방 나가기</a>
-            <button class="btn btn-warning btn-sm" @click="clearChat(roomId)">채팅방 비우기</button>
+            <a class="btn btn-info btn-sm" href="/api/chat/room">home</a>
+            <button class="btn btn-warning btn-sm" @click="clearChat(roomId)">채팅방 나가기</button>
         </div>
     </div>
     <div class="input-group mb-3">
@@ -155,10 +155,10 @@
                     .then(response => {
                         _this.messages = []; // 화면에서 메시지 비우기
                         location.href = "/api/chat/room";
-                        console.log("채팅방이 비워졌습니다."); // 성공 메시지 출력
+                        console.log("성공"); // 성공 메시지 출력
                     })
                     .catch(error => {
-                        console.error("채팅방 비우기 중 오류 발생:", error);
+                        console.error("채팅방 나가기 중 오류 발생:", error);
                     });
             },
             refreshMessages() {
