@@ -70,7 +70,7 @@ public class ChatRoomController {
         String token = authTokenService.getAccessTokenFromCookies(request.getCookies());
         System.out.println("token: " + token);
         String username = authTokenService.getUsernameFromToken(token);
-        System.out.println("이름이름이름이름이름이름이름이름이름이름이름이름이름이름이름이름이름ㅍ:"+username);
+        System.out.println("이름:"+username);
         return chatRoomService.getRoomByUser(username);
     }
 
@@ -120,6 +120,21 @@ public class ChatRoomController {
             throw new RuntimeException("없음");
         }
         return chatRooms;
+    }
+
+    // 특정 사용자들이 사용중인 채팅방 존재여부 검증
+    @GetMapping()
+    @ResponseBody
+    public RsData<String> getChatRooms(HttpServletRequest request,@RequestParam String receiver) {
+        String token = authTokenService.getAccessTokenFromCookies(request.getCookies());
+        String username = authTokenService.getUsernameFromToken(token);
+        String roomId=chatRoomService.findByRoomIdByUsers(username,receiver);
+        if(roomId==null) {
+            return new RsData<>("200","success",null);
+        }
+        else{
+            return new RsData<>("200","success",roomId);
+        }
     }
 
 }

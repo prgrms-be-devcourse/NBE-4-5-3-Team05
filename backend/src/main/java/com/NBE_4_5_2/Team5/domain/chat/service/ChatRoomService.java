@@ -60,23 +60,38 @@ public class ChatRoomService {
 
     // 채팅방 생성
     public ChatRoom createChatRoom(String sender, String receiver) {
-        String roomId = UUID.randomUUID().toString();
+        String roomId=findByRoomIdByUsers(sender, receiver);
+        // 방이 이미 존재
+        if(roomId!=null) {
+            ChatRoom chatRoom1 = new ChatRoom(sender,receiver);
+            chatRoom1.setRoomId(roomId);
+            chatRoom1.setClient(sender);
+            hashOpsChatRoom.put(CHAT_ROOMS, roomId+"_"+sender, chatRoom1);  // redis에 저장(sender)
 
-        ChatRoom chatRoom1 = new ChatRoom(sender,receiver);
-        chatRoom1.setRoomId(roomId);
-        chatRoom1.setClient(sender);
-        hashOpsChatRoom.put(CHAT_ROOMS, roomId+"_"+sender, chatRoom1);  // redis에 저장(sender)
+            setUserEnterInfo(sender, roomId+"_"+sender); // 발신자 추가
+            return chatRoom1;
 
-        ChatRoom chatRoom2 = new ChatRoom(sender,receiver);
-        chatRoom2.setRoomId(roomId);    // 동일한 roomId
-        chatRoom2.setClient(receiver);
-        hashOpsChatRoom.put(CHAT_ROOMS, roomId+"_"+receiver, chatRoom2);    // redis에 저장(receiver)
+        }else{
+            // 새로운 roomId 할당
+            roomId = UUID.randomUUID().toString();
 
-        // 채팅방에 참가하는 유저의 세션 ID와 방 ID 매핑을 저장
-        setUserEnterInfo(sender, roomId+"_"+sender); // 발신자 추가
-        setUserEnterInfo(receiver, roomId+"_"+receiver); // 수신자 추가
 
-        return chatRoom1;
+            ChatRoom chatRoom1 = new ChatRoom(sender,receiver);
+            chatRoom1.setRoomId(roomId);
+            chatRoom1.setClient(sender);
+            hashOpsChatRoom.put(CHAT_ROOMS, roomId+"_"+sender, chatRoom1);  // redis에 저장(sender)
+
+            ChatRoom chatRoom2 = new ChatRoom(sender,receiver);
+            chatRoom2.setRoomId(roomId);    // 동일한 roomId
+            chatRoom2.setClient(receiver);
+            hashOpsChatRoom.put(CHAT_ROOMS, roomId+"_"+receiver, chatRoom2);    // redis에 저장(receiver)
+
+            // 채팅방에 참가하는 유저의 세션 ID와 방 ID 매핑을 저장
+            setUserEnterInfo(sender, roomId+"_"+sender); // 발신자 추가
+            setUserEnterInfo(receiver, roomId+"_"+receiver); // 수신자 추가
+
+            return chatRoom1;
+        }
     }
 
     // 접근 검증
@@ -172,6 +187,20 @@ public class ChatRoomService {
         }
 
         return participants;
+    }
+
+
+    // 현재 두 사용자가 사용중인 roomId
+    public String findByRoomIdByUsers(String sender, String receiver) {
+        for(String key:hashOpsEnterInfo.keys(CHAT_ROOMS)) {
+            ChatRoom chatRoom= hashOpsChatRoom.get(CHAT_ROOMS,key);
+
+            if(chatRoom.getSender().equals(sender) && chatRoom.getReceiver().equals(receiver)
+            || chatRoom.getSender().equals(receiver) && chatRoom.getReceiver().equals(sender)) {
+                return chatRoom.getRoomId();
+            }
+        }
+        return null;
     }
 
 }
