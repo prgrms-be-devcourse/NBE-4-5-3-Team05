@@ -17,14 +17,13 @@ public class RedisService {
 
     private final RedisRepository redisRepository;
 
-    //    @Value("${custom.refreshToken.expire-seconds}")
-    @Value("20")
+    @Value("${custom.refreshToken.expire-seconds}")
     private Long expireSeconds;
 
     /**
-     * redis에 RefreshToken을 저장 (expireSeconds 적용)
+     * redis에 userId와 refreshToken 저장 (expireSeconds 적용)
      */
-    public void saveRefreshToken(User user, String refreshToken) {
+    public void createToken(User user, String refreshToken) {
         String key = REFRESH_TOKEN_KEY + user.getId();
 
         RefreshToken token = RefreshToken.builder()
@@ -37,11 +36,18 @@ public class RedisService {
     }
 
     /**
-     * redis에 refreshToken 조회
+     * userId로 Token 조회
      */
-    public Optional<RefreshToken> getRefreshTokenByUserId(String userId) {
+    public Optional<RefreshToken> getTokenByUserId(String userId) {
         String key = REFRESH_TOKEN_KEY + userId;
         return redisRepository.findById(key);
+    }
+
+    /**
+     * refreshToken으로 Token 조회
+     */
+    public Optional<RefreshToken> getTokenByRefreshToken(String refreshToken) {
+        return redisRepository.findByRefreshToken(refreshToken);
     }
 
     /**
@@ -49,21 +55,22 @@ public class RedisService {
      * @param userId 삭제할 userId
      * @return 삭제 성공 여부
      */
-    public boolean deleteByUserId(String userId) {
+    public boolean deleteTokenByUserId(String userId) {
         String key = REFRESH_TOKEN_KEY + userId;
 
-        if (redisRepository.existsById(key)) {
-            redisRepository.deleteById(key);
-            return true;
+        if (!redisRepository.existsById(key)) {
+            return false;
         }
-        return false;
+
+        redisRepository.deleteById(key);
+        return true;
     }
 
     /**
      * Refresh Token 삭제
      * @param refreshToken 삭제할 Refresh Token
      */
-    public void deleteByRefreshToken(String refreshToken) {
+    public void deleteTokenByRefreshToken(String refreshToken) {
         redisRepository.deleteByRefreshToken(refreshToken);
     }
 

@@ -65,14 +65,14 @@ public class UserService {
      * 로그아웃 처리 (redis에서 refreshToken 제거)
      *
      * redis에 저장된 refreshToken을 제거합니다.
-     * 먼저 로그인된 authentication의 UserId를 기반으로 삭제합니다.
-     * 삭제 실패 시 사용자가 보유한 refreshToken을 기반으로 다시 삭제합니다.
+     * 1. 로그인된 authentication의 UserId를 기반으로 삭제합니다.
+     * 2. 삭제 실패 시 사용자가 보유한 refreshToken을 기반으로 다시 삭제합니다.
      */
     public void logoutUser(User userIdentity) {
-        boolean isDeleted = redisService.deleteByUserId(userIdentity.getId());
+        boolean isDeleted = redisService.deleteTokenByUserId(userIdentity.getId());
 
         if (!isDeleted) {
-            rq.getRefreshToken().ifPresent(redisService::deleteByRefreshToken);
+            rq.getRefreshToken().ifPresent(redisService::deleteTokenByRefreshToken);
         }
     }
 
@@ -116,7 +116,7 @@ public class UserService {
      *                     기존에 userId로 저장된 refreshToken이 존재할 경우 덮어 씌웁니다.
      */
     public void saveRefreshToken(User user, String refreshToken) {
-        redisService.saveRefreshToken(user, refreshToken);
+        redisService.createToken(user, refreshToken);
     }
 
     /**
@@ -129,7 +129,7 @@ public class UserService {
     public void validateRefreshToken(User user, String refreshToken) {
         String userId = user.getId();
 
-        String storedRefreshToken = redisService.getRefreshTokenByUserId(userId)
+        String storedRefreshToken = redisService.getTokenByUserId(userId)
                 .map(RefreshToken::getRefreshToken)
                 .orElseThrow(() -> new ServiceException("401-1", "로그인이 필요합니다."));
 
@@ -163,6 +163,26 @@ public class UserService {
     public String generateAuthTokenAsString(User user) {
         AuthToken authToken = generateAuthtoken(user);
         return authToken.refreshToken() + " " + authToken.accessToken();
+    }
+
+    public String getRefreshTokenByUserId(String userId){
+        return redisService.getTokenByUserId(userId)
+                .map(RefreshToken::getRefreshToken)
+                .orElseThrow(() -> new ServiceException("401-1", "로그인이 필요합니다."));
+    }
+
+    /**
+     * refreshToken을 기반으로 User 객체를 반환
+     *
+     * @param refreshToken 검증할 refreshToken
+     *                     redis에 존재하지 않을 경우 Optional.empty() 반환
+     * @return refreshToken을 기반으로 찾은 User 객체
+     * */
+    public Optional<User> getUserByRefreshToken(String refreshToken){
+        Optional<String> UserId = redisService.getTokenByRefreshToken(refreshToken)
+                .map(RefreshToken::getUserId);
+
+        return UserId.flatMap(userRepository::findById);
     }
 
     public long count() {
