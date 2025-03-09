@@ -9,11 +9,12 @@ import com.NBE_4_5_2.Team5.domain.post.post.repository.ProductPostRepository;
 import com.NBE_4_5_2.Team5.domain.post.post.service.ProductPostService;
 import com.NBE_4_5_2.Team5.domain.user.entity.User;
 import com.NBE_4_5_2.Team5.domain.user.repository.UserRepository;
-import com.NBE_4_5_2.Team5.domain.user.service.RedisService;
 import com.NBE_4_5_2.Team5.domain.user.service.UserService;
+import com.NBE_4_5_2.Team5.global.config.RedisTestContainerConfig;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,9 +24,10 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.Map;
 import java.util.Objects;
@@ -37,11 +39,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-@Import(TestConfig.class)
+@Import({TestConfig.class, RedisTestContainerConfig.class})
+@Testcontainers
+@TestPropertySource(properties = "custom.refreshToken.expire-seconds=3600")
 class PostCommentControllerTest {
 
-	@MockitoBean
-	private RedisService redisService;
 	@Autowired
 	private Util util;
 	@Autowired
@@ -62,6 +64,11 @@ class PostCommentControllerTest {
 	@BeforeEach
 	void setUp() {
 		util.truncateAllTables();
+	}
+
+	@AfterAll
+	static void stopRedisContainer() {
+		RedisTestContainerConfig.stopContainer();
 	}
 
 	@Test

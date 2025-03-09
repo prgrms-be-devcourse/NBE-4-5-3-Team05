@@ -6,19 +6,22 @@ import com.NBE_4_5_2.Team5.domain.post.post.repository.LikedPostRepository;
 import com.NBE_4_5_2.Team5.domain.post.post.repository.ProductPostRepository;
 import com.NBE_4_5_2.Team5.domain.post.post.service.ProductPostService;
 import com.NBE_4_5_2.Team5.domain.user.entity.User;
-import com.NBE_4_5_2.Team5.domain.user.service.RedisService;
 import com.NBE_4_5_2.Team5.domain.user.service.UserService;
+import com.NBE_4_5_2.Team5.global.config.RedisTestContainerConfig;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import static org.hamcrest.Matchers.hasItem;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -33,10 +36,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
 @Transactional
+@Import(RedisTestContainerConfig.class)
+@Testcontainers
+@TestPropertySource(properties = "custom.refreshToken.expire-seconds=3600")
 public class ProductPostControllerTest {
-
-    @MockitoBean
-    private RedisService redisService;
 
     @Autowired
     private MockMvc mvc;
@@ -67,6 +70,11 @@ public class ProductPostControllerTest {
         // JWT 토큰 발급
         sellerToken = userService.generateAuthTokenAsString(seller);
         buyerToken = userService.generateAuthTokenAsString(buyer);
+    }
+
+    @AfterAll
+    static void stopRedisContainer() {
+        RedisTestContainerConfig.stopContainer();
     }
 
     @Test

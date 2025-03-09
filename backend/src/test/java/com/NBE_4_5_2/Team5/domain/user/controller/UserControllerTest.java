@@ -2,20 +2,24 @@ package com.NBE_4_5_2.Team5.domain.user.controller;
 
 import com.NBE_4_5_2.Team5.domain.user.dto.AuthToken;
 import com.NBE_4_5_2.Team5.domain.user.entity.User;
-import com.NBE_4_5_2.Team5.domain.user.service.RedisService;
 import com.NBE_4_5_2.Team5.domain.user.service.UserService;
+import com.NBE_4_5_2.Team5.global.config.RedisTestContainerConfig;
 import jakarta.servlet.http.Cookie;
 import jakarta.transaction.Transactional;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.nio.charset.StandardCharsets;
 
@@ -28,6 +32,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
+@ActiveProfiles("test")
+@Import(RedisTestContainerConfig.class)
+@Testcontainers
+@TestPropertySource(properties = "custom.refreshToken.expire-seconds=3600")
 class UserControllerTest {
 
     @Autowired
@@ -36,9 +44,6 @@ class UserControllerTest {
     @Autowired
     private UserService userService;
 
-    @MockitoBean
-    private RedisService redisService;
-
     private User loginedUser;
     private String validToken;
     private String validAccessToken;
@@ -46,6 +51,10 @@ class UserControllerTest {
     private String expiredAccessToken = "expiredAccessToken";
     private String invalidRefreshToken = "invalidRefreshToken";
 
+    @AfterAll
+    static void stopRedisContainer() {
+        RedisTestContainerConfig.stopContainer();
+    }
 
     @BeforeEach
     void setUp() {
@@ -299,7 +308,7 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.message").value("%s님 환영합니다.".formatted(user.getNickname())))
                 .andExpect(jsonPath("$.data").exists())
                 .andExpect(jsonPath("$.data.accessToken").exists())
-                .andExpect(jsonPath("$.data.refreshToken").value(validToken))
+                .andExpect(jsonPath("$.data.refreshToken").value(refreshToken))
                 .andExpect(jsonPath("$.data.item.id").value(user.getId()))
                 .andExpect(jsonPath("$.data.item.username").value(user.getUsername()))
                 .andExpect(jsonPath("$.data.item.email").value(user.getEmail()))
