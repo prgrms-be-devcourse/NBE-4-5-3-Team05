@@ -52,7 +52,7 @@ public class Rq {
         Object principal = authentication.getPrincipal();
 
         if (!(principal instanceof SecurityUser)) {
-            throw new ServiceException("401-2", "잘못된 인증 정보입니다");
+            throw new ServiceException("", "잘못된 인증 정보입니다");
         }
 
         SecurityUser user = (SecurityUser) principal;

@@ -45,6 +45,7 @@ public class UserService {
                 .nickname(nickname)
                 .address(address)
                 .profileUrl(profileUrl)
+                .role(Role.USER)
                 .build();
 
         return userRepository.save(user);
@@ -63,7 +64,7 @@ public class UserService {
 
     /**
      * 로그아웃 처리 (redis에서 refreshToken 제거)
-     *
+     * <p>
      * redis에 저장된 refreshToken을 제거합니다.
      * 1. 로그인된 authentication의 UserId를 기반으로 삭제합니다.
      * 2. 삭제 실패 시 사용자가 보유한 refreshToken을 기반으로 다시 삭제합니다.
@@ -158,7 +159,7 @@ public class UserService {
      *
      * @param user 로그인한 사용자
      * @return refreshToken, accessToken을 공백으로 구분한 문자열
-     *        refreshToken은 redis에 저장됨
+     * refreshToken은 redis에 저장됨
      */
     public String generateAuthTokenAsString(User user) {
         AuthToken authToken = generateAuthtoken(user);
@@ -213,6 +214,7 @@ public class UserService {
         return User.builder()
                 .id(user.getId())
                 .username(user.getUsername())
+                .role(user.getRole())
                 .build();
     }
 

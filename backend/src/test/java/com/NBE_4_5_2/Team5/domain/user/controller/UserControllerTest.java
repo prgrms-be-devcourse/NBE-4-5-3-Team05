@@ -2,6 +2,7 @@ package com.NBE_4_5_2.Team5.domain.user.controller;
 
 import com.NBE_4_5_2.Team5.domain.user.dto.AuthToken;
 import com.NBE_4_5_2.Team5.domain.user.entity.User;
+import com.NBE_4_5_2.Team5.domain.user.service.RedisService;
 import com.NBE_4_5_2.Team5.domain.user.service.UserService;
 import jakarta.servlet.http.Cookie;
 import jakarta.transaction.Transactional;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
@@ -34,6 +36,8 @@ class UserControllerTest {
     @Autowired
     private UserService userService;
 
+    @MockitoBean
+    private RedisService redisService;
 
     private User loginedUser;
     private String validToken;
@@ -280,8 +284,8 @@ class UserControllerTest {
     @DisplayName("로그인 - 성공")
     void loginUser1() throws Exception {
 
-        String username = "user1";
-        String password = "user11234@";
+        String username = "user2";
+        String password = "user21234@";
 
         ResultActions resultActions = loginUserRequest(username, password);
         User user = userService.getUserByUsername(username).get();
