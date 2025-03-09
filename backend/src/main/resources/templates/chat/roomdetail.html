@@ -129,9 +129,7 @@
                 console.log("Sending message:", payload); // 전송할 메시지 로그
                 ws.send("/pub/chat/message", {"token": this.token}, JSON.stringify(payload));
                 this.message = ''; // 텍스트 메시지 전송 후 입력 공간 비우기
-                if (type === 'TALK') {
-                    this.refreshMessages();
-                }
+                this.refreshMessages();
             },
             recvMessage(recv) {
                 console.log('Received message:', recv); // 수신한 메시지 로그
@@ -146,6 +144,7 @@
                     timestamp: recv.timestamp || new Date().toLocaleTimeString()
                 });
 
+                this.refreshMessages();
                 console.log('Updated messages:', this.messages); // 업데이트된 메시지 배열 상태
             },
             clearChat(roomId) {
@@ -155,6 +154,7 @@
                 })
                     .then(response => {
                         _this.messages = []; // 화면에서 메시지 비우기
+                        location.href = "/api/chat/room";
                         console.log("채팅방이 비워졌습니다."); // 성공 메시지 출력
                     })
                     .catch(error => {

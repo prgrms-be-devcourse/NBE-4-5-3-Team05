@@ -84,17 +84,6 @@ public class ChatRoomController {
         return chatRoomService.getMessagesByUser(roomId,username);
     }
 
-
-    // 채팅방 삭제
-    @DeleteMapping("room")
-    @ResponseBody
-    public void deleteRoom(@RequestParam String roomId,HttpServletRequest request) {
-        String token = authTokenService.getAccessTokenFromCookies(request.getCookies());
-        String username = authTokenService.getUsernameFromToken(token);
-        chatRoomService.deleteChatRoom(roomId,username);
-    }
-
-
     // 사용자 정보 조회
     @GetMapping("/user")
     @ResponseBody

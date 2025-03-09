@@ -61,20 +61,25 @@ public class ChatRoomService {
     // 채팅방 생성
     public ChatRoom createChatRoom(String sender, String receiver) {
         String roomId=findByRoomIdByUsers(sender, receiver);
+        List<ChatRoom> chatRooms=findByRoomId(roomId);
         // 방이 이미 존재
-        if(roomId!=null) {
-            ChatRoom chatRoom1 = new ChatRoom(sender,receiver);
-            chatRoom1.setRoomId(roomId);
-            chatRoom1.setClient(sender);
-            hashOpsChatRoom.put(CHAT_ROOMS, roomId+"_"+sender, chatRoom1);  // redis에 저장(sender)
+        if(roomId!=null && chatRooms.size()==1) {
+            // 클라이언트
+            String client=chatRooms.get(0).getClient();
+            // 상대방
+            String other=findOther(roomId, client);
 
-            setUserEnterInfo(sender, roomId+"_"+sender); // 발신자 추가
+            ChatRoom chatRoom1 = new ChatRoom(other,client);
+            chatRoom1.setRoomId(roomId);
+            chatRoom1.setClient(other);
+            hashOpsChatRoom.put(CHAT_ROOMS, roomId+"_"+other, chatRoom1);  // redis에 저장(sender)
+
+            setUserEnterInfo(sender, roomId+"_"+other); // 발신자 추가
             return chatRoom1;
 
         }else{
             // 새로운 roomId 할당
             roomId = UUID.randomUUID().toString();
-
 
             ChatRoom chatRoom1 = new ChatRoom(sender,receiver);
             chatRoom1.setRoomId(roomId);
@@ -179,16 +184,17 @@ public class ChatRoomService {
     }
 
     // 현재 방에 참가중인 사용자 조회
-    public List<String> getParticipants(String roomId) {
-        List<String> participants = new ArrayList<>();
-
+    public String findOther(String roomId,String username) {
         for(ChatRoom chatRoom : findByRoomId(roomId)) {
-            participants.add(chatRoom.getClient());
+            if(username.equals(chatRoom.getSender())) {
+                return chatRoom.getReceiver();
+            } else if (username.equals(chatRoom.getReceiver())) {
+                return chatRoom.getSender();
+            }
         }
 
-        return participants;
+        return null;
     }
-
 
     // 현재 두 사용자가 사용중인 roomId
     public String findByRoomIdByUsers(String sender, String receiver) {

@@ -121,6 +121,7 @@
                     axios.delete('/api/chat/message', { params: { roomId: roomId } }) // 메시지 삭제 API 호출
                         .then(response => {
                             alert("채팅방이 비워졌습니다."); // 성공 메시지 표시
+                            location.href = "/api/chat/room";
                             this.findUserRooms(); // 방 목록 새로 고침
                         })
                         .catch(error => {

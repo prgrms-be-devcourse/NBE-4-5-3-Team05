@@ -37,27 +37,37 @@ public class ChatService {
      */
     public void sendChatMessage(ChatMessage chatMessage) {
         chatMessage.setUserCount(chatRoomService.getUserCount(chatMessage.getRoomId()));
-        
         List<ChatRoom> chatRooms=chatRoomService.findByRoomId(chatMessage.getRoomId());
+
+        // roomId에 해당하는 방이 하나만 존재
+        if(chatRooms.size()==1){
+            String receiver = chatRoomService.findOther(chatMessage.getRoomId(), chatMessage.getSender());
+            String sender = chatMessage.getSender();
+            System.out.println("메세지전송자(클라이언트측): "+sender);
+            System.out.println("새로운 클라리언트: "+receiver);
+            ChatRoom chatRoom=chatRoomService.createChatRoom(receiver,sender);
+            chatRooms.add(chatRoom);
+        }
+
         for(ChatRoom chatRoom : chatRooms) {
             // 입장
             if (ChatMessage.MessageType.ENTER.equals(chatMessage.getType())) {
-                chatMessage.setMessage(chatMessage.getSender() + "님이 방에 입장했습니다.");
-                chatMessage.setSender("[알림]");
-                // 타임스탬프 설정
-                chatMessage.setTimestamp(chatMessage.formatTimestamp(LocalDateTime.now()));
-                // redis로 메세지 발송
-                redisTemplate.convertAndSend(channelTopic.getTopic(), chatMessage);
+//                chatMessage.setMessage(chatMessage.getSender() + "님이 방에 입장했습니다.");
+//                chatMessage.setSender("[알림]");
+//                // 타임스탬프 설정
+//                chatMessage.setTimestamp(chatMessage.formatTimestamp(LocalDateTime.now()));
+//                // redis로 메세지 발송
+//                redisTemplate.convertAndSend(channelTopic.getTopic(), chatMessage);
 
                 // 퇴장
             } else if (ChatMessage.MessageType.QUIT.equals(chatMessage.getType())) {
-                chatMessage.setMessage(chatMessage.getSender() + "님이 방에서 나갔습니다.");
-                chatMessage.setSender("[알림]");
-                // 타임스탬프 설정
-                chatMessage.setTimestamp(chatMessage.formatTimestamp(LocalDateTime.now()));
-                // redis로 메세지 발송
-                redisTemplate.convertAndSend(channelTopic.getTopic(), chatMessage);
-
+//                chatMessage.setMessage(chatMessage.getSender() + "님이 방에서 나갔습니다.");
+//                chatMessage.setSender("[알림]");
+//                // 타임스탬프 설정
+//                chatMessage.setTimestamp(chatMessage.formatTimestamp(LocalDateTime.now()));
+//                // redis로 메세지 발송
+//                redisTemplate.convertAndSend(channelTopic.getTopic(), chatMessage);
+//
                 // 이미지
             } else if (ChatMessage.MessageType.IMAGE.equals(chatMessage.getType())) {
                 chatMessage.setMessage("");
