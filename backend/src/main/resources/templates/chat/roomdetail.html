@@ -67,10 +67,12 @@
             this.roomName = localStorage.getItem('wschat.roomName');
 
             var _this = this;
-            // 현재 사용자 정보를 요청하여 토큰을 가져옵니다.
+            // 현재 사용자 정보를 요청하여 토큰과 사용자 이름을 가져옵니다.
             axios.get('/api/chat/user').then(response => {
                 _this.token = response.data.data.token; // 토큰 할당
+                localStorage.setItem('username', response.data.data.name); // 사용자 이름을 로컬 스토리지에 저장
                 console.log('Received token:', _this.token);
+                console.log('Username stored in localStorage:', response.data.data.name);
 
                 // WebSocket 연결 설정
                 ws.connect({"token": _this.token}, function(frame) {
@@ -84,7 +86,7 @@
                         params: { roomId: _this.roomId }
                     })
                         .then(response => {
-                            _this.messages = response.data; // 기존 메시지 데이터
+                            _this.messages = response.data.data; // 기존 메시지 데이터
                         })
                         .catch(error => {
                             console.error("Error fetching messages:", error);
@@ -118,12 +120,15 @@
                 }
             },
             sendMessage(type = 'TALK', imageUrl = null) {
+                const sender = localStorage.getItem('username'); // 사용자 이름을 로컬 스토리지에서 가져옴
+                console.log("Sender fetched from localStorage:", sender); // 추가된 로그
+
                 const payload = {
                     type: type,
                     roomId: this.roomId,
-                    message: type === 'TALK' ? this.message : null, // TALK일 때만 메시지 내용 포함
-                    image: type === 'IMAGE' ? imageUrl : null, // IMAGE일 때는 이미지 URL 포함
-                    sender: localStorage.getItem('username') // 사용자 이름을 로컬 스토리지에서 가져옴
+                    message: type === 'TALK' ? this.message : null,
+                    image: type === 'IMAGE' ? imageUrl : null,
+                    sender: sender // sender 값을 할당
                 };
 
                 console.log("Sending message:", payload); // 전송할 메시지 로그
@@ -143,7 +148,6 @@
                     image: recv.image || null, // 이미지가 있을 경우 URL 추가
                     timestamp: recv.timestamp || new Date().toLocaleTimeString()
                 });
-
                 this.refreshMessages();
                 console.log('Updated messages:', this.messages); // 업데이트된 메시지 배열 상태
             },
@@ -167,7 +171,7 @@
                     params: { roomId: this.roomId }
                 })
                     .then(response => {
-                        _this.messages = response.data; // 서버로부터 가져온 메시지 갱신
+                        _this.messages = response.data.data; // 서버로부터 가져온 메시지 갱신
                     })
                     .catch(error => {
                         console.error("Error fetching messages:", error);

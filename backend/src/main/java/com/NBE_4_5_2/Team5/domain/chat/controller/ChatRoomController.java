@@ -1,11 +1,14 @@
 package com.NBE_4_5_2.Team5.domain.chat.controller;
 
 
+import com.NBE_4_5_2.Team5.domain.chat.dto.ChatRoomDto;
+import com.NBE_4_5_2.Team5.domain.chat.dto.MessageDto;
 import com.NBE_4_5_2.Team5.domain.chat.entity.ChatMessage;
 import com.NBE_4_5_2.Team5.domain.chat.entity.ChatRoom;
 import com.NBE_4_5_2.Team5.domain.chat.entity.AccessProvider;
 import com.NBE_4_5_2.Team5.domain.chat.service.ChatRoomService;
 import com.NBE_4_5_2.Team5.domain.post.post.dto.response.ProductPostResponse;
+import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductPost;
 import com.NBE_4_5_2.Team5.domain.post.post.service.ProductPostService;
 import com.NBE_4_5_2.Team5.domain.user.service.AuthTokenService;
 import com.NBE_4_5_2.Team5.global.dto.RsData;
@@ -26,6 +29,9 @@ public class ChatRoomController {
     private final AuthTokenService authTokenService;
     private final ProductPostService productPostService;
 
+    /*
+    테스트용 HTML(임시)
+     */
     // 모든 방 조회
     @GetMapping("/room")
     public String rooms(HttpServletRequest request) {
@@ -47,7 +53,7 @@ public class ChatRoomController {
         return "/chat/roomdetail"; // 채팅방 상세 페이지 반환
     }
 
-    // 사용자 정보 조회
+    // 사용자 토큰 조회
     @GetMapping("/user")
     @ResponseBody
     public RsData<AccessProvider> getUserInfo(HttpServletRequest request) {
@@ -75,46 +81,66 @@ public class ChatRoomController {
         return new RsData<>("200",receiver+"와의 채팅방",chatRoom);
     }
 
-    // 클라이언트의 채팅방 조회
+    // 채팅방 조회
     @GetMapping("/rooms")
     @ResponseBody
-    public List<ChatRoom> getUserRooms(HttpServletRequest request) {
+    public RsData<List<ChatRoomDto>> getUserRooms(HttpServletRequest request) {
         String token = authTokenService.getAccessTokenFromCookies(request.getCookies());
         String username = authTokenService.getUsernameFromToken(token);
-        return chatRoomService.findRoomByUser(username);
+        List<ChatRoom> chatRoomsList=chatRoomService.findRoomByUser(username);
+
+        List<ChatRoomDto> response=chatRoomsList.stream()
+                .map(chatRoom -> new ChatRoomDto(
+                        chatRoom.getId(),
+                        chatRoom.getRoomId(),
+                        chatRoom.getName(),
+                        chatRoom.getUserCount()))
+                .toList();
+
+
+        return new RsData<>("200","채팅방 목록",response);
     }
 
     // 채팅방 메세지 조회
     @GetMapping("/message")
     @ResponseBody
-    public List<ChatMessage> getMessages(HttpServletRequest request, @RequestParam String roomId) {
+    public RsData<List<MessageDto>> getMessages(HttpServletRequest request, @RequestParam String roomId) {
         String token = authTokenService.getAccessTokenFromCookies(request.getCookies());
         String username = authTokenService.getUsernameFromToken(token);
-        return chatRoomService.getMessagesByUser(roomId,username);
+        List<ChatMessage> messages= chatRoomService.getMessagesByUser(roomId,username);
+        List<MessageDto> response=messages.stream()
+                .map(chatMessage -> new MessageDto(
+                        chatMessage.getSender(),
+                        chatMessage.getMessage(),
+                        chatMessage.getImage(),
+                        chatMessage.getTimestamp()))
+                .toList();
+        return new RsData<>("200",roomId+"의 대화 목록",response);
     }
 
     // 채팅방 삭제
     @DeleteMapping("/message")
     @ResponseBody
-    public void deleteRoom(@RequestParam String roomId,HttpServletRequest request) {
+    public RsData<String> deleteRoom(@RequestParam String roomId,HttpServletRequest request) {
         String token = authTokenService.getAccessTokenFromCookies(request.getCookies());
         String username = authTokenService.getUsernameFromToken(token);
         chatRoomService.deleteChatRoom(roomId,username);
+        return new RsData<>("200","삭제 완료");
     }
 
-    // 특정 사용자들이 사용중인 채팅방 존재여부 검증
-    @GetMapping()
+    // 특정 사용자와의 채팅방 검색
+    @GetMapping("/search")
     @ResponseBody
-    public RsData<String> getChatRooms(HttpServletRequest request,@RequestParam String receiver) {
+    public RsData<String> findChatRooms(HttpServletRequest request,@RequestParam String receiver) {
         String token = authTokenService.getAccessTokenFromCookies(request.getCookies());
         String username = authTokenService.getUsernameFromToken(token);
-        String roomId=chatRoomService.findByRoomIdByUsers(username,receiver);
-        if(roomId==null) {
-            return new RsData<>("200","success",null);
+        System.out.println("name:"+username);
+        String roomId=chatRoomService.findByRoomIdByClients(username,receiver);
+
+        if (roomId == null) {
+            return new RsData<>("404", "존재하지 않는 대화방입니다.");
         }
-        else{
-            return new RsData<>("200","success",roomId);
-        }
+        return new RsData<>("200","success","roomId: "+roomId);
     }
 
 }

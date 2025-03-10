@@ -85,26 +85,37 @@
                     });
             },
             findUserRooms: function() {
-                axios.get('/api/chat/rooms').then(response => {
-                    if (Array.isArray(response.data)) {
-                        this.chatrooms = response.data; // 참여 가능한 방만 리스트에 업데이트
-                    }
-                }).catch(error => {
-                    console.error("참여 가능한 채팅방 조회 실패:", error);
-                });
+                axios.get('/api/chat/rooms') // 채팅방 목록 요청
+                    .then(response => {
+                        // 서버의 RsData 형식에서 data 필드를 추출하여 chatrooms에 설정
+                        if (response.data.code === "200") { // 성공 응답 확인
+                            this.chatrooms = response.data.data; // 참여 가능한 방만 리스트에 업데이트
+                        } else {
+                            console.error("채팅방 목록 조회 실패: " + response.data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error("참여 가능한 채팅방 조회 실패:", error);
+                    });
             },
             createRoom: function() {
                 if (!this.selectedPostId) {
                     alert("대화할 게시글 ID를 입력해 주세요.");
                     return;
                 } else {
+                    console.log("선택한 게시글 ID:", this.selectedPostId); // 게시글 ID 확인용 로그 추가
                     var params = new URLSearchParams();
                     params.append("postId", this.selectedPostId); // 입력한 게시글 ID 설정
+
                     axios.post('/api/chat/room', params)
                         .then(response => {
-                            alert(response.data.message); // 성공 메시지
-                            this.selectedPostId = ''; // 입력 필드 초기화
-                            this.findUserRooms(); // 방 목록 새로 고침
+                            if (response.data.code === "200") {
+                                alert(response.data.message); // 성공 메시지
+                                this.selectedPostId = ''; // 입력 필드 초기화
+                                this.findUserRooms(); // 방 목록 새로 고침
+                            } else {
+                                alert("채팅방 개설에 실패하였습니다: " + response.data.message);
+                            }
                         })
                         .catch(error => {
                             alert("채팅방 개설에 실패하였습니다.");

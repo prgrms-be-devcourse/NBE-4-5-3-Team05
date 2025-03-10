@@ -58,6 +58,7 @@ public class ChatRoomService {
     public ChatRoom createChatRoom(String sender, String receiver) {
         String roomId=findByRoomIdByUsers(sender, receiver);
         List<ChatRoom> chatRooms=findByRoomId(roomId);
+        System.out.println("roomId:"+roomId);
         // 방이 이미 존재
         if(roomId!=null && chatRooms.size()==1) {
             // 클라이언트
@@ -73,7 +74,7 @@ public class ChatRoomService {
             setUserEnterInfo(sender, roomId+"_"+other); // 발신자 추가
             return chatRoom1;
 
-        }else{
+        } else{
             // 새로운 roomId 할당
             roomId = UUID.randomUUID().toString();
 
@@ -144,6 +145,7 @@ public class ChatRoomService {
         String client=chatRoom.getId();
         hashOpsChatRoom.delete(CHAT_ROOMS, roomId + "_" + username);     // redis에서 삭제
         messageRepository.deleteAllByClient(client);
+
     }
 
     // 유저가 입장한 채팅방ID와 유저 세션ID 맵핑 정보 저장
@@ -193,13 +195,33 @@ public class ChatRoomService {
     public String findByRoomIdByUsers(String sender, String receiver) {
         for(String key:hashOpsEnterInfo.keys(CHAT_ROOMS)) {
             ChatRoom chatRoom= hashOpsChatRoom.get(CHAT_ROOMS,key);
-            if(chatRoom!=null){
-                if(chatRoom.getSender().equals(sender) && chatRoom.getReceiver().equals(receiver)
-                        || chatRoom.getSender().equals(receiver) && chatRoom.getReceiver().equals(sender)) {
+
+            if (chatRoom == null) {
+                continue;
+            }
+
+            if(chatRoom.getSender().equals(sender) && chatRoom.getReceiver().equals(receiver)
+                    || chatRoom.getSender().equals(receiver) && chatRoom.getReceiver().equals(sender)) {
+                return chatRoom.getRoomId();
+            }
+        }
+        return null;
+    }
+
+    // 현재 두 사용자가 사용중인 roodId(개별저장소)
+    public String findByRoomIdByClients(String sender, String receiver) {
+        for(String key:hashOpsEnterInfo.keys(CHAT_ROOMS)) {
+            ChatRoom chatRoom= hashOpsChatRoom.get(CHAT_ROOMS,key);
+
+            if (chatRoom == null) {
+                continue;
+            }
+
+            if(chatRoom.getSender().equals(sender) && chatRoom.getReceiver().equals(receiver)
+                    || chatRoom.getSender().equals(receiver) && chatRoom.getReceiver().equals(sender)) {
+                if(chatRoom.getClient().equals(sender)) {
                     return chatRoom.getRoomId();
                 }
-            }else {
-                break;
             }
         }
         return null;
