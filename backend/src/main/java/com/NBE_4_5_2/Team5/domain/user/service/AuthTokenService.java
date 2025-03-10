@@ -73,19 +73,11 @@ public class AuthTokenService {
     }
 
     public String getNicknameFromName(String username) {
+
         Optional<User> optionalUser = userRepository.findByUsername(username);
         if(optionalUser.isPresent()) {
             User user = optionalUser.get();
             return user.getNickname();
-        }
-        return null;
-    }
-
-    public String getAccessTokenFromCookies(Cookie[] cookies) {
-        for (Cookie cookie : cookies) {
-            if ("accessToken".equals(cookie.getName())) {
-                return cookie.getValue();
-            }
         }
         return null;
     }

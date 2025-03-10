@@ -4,6 +4,13 @@ package com.NBE_4_5_2.Team5.domain.chat.service;
 import com.NBE_4_5_2.Team5.domain.chat.entity.ChatMessage;
 import com.NBE_4_5_2.Team5.domain.chat.entity.ChatRoom;
 import com.NBE_4_5_2.Team5.domain.chat.repository.MessageRepository;
+import com.NBE_4_5_2.Team5.domain.post.post.dto.response.ProductPostResponse;
+import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductPost;
+import com.NBE_4_5_2.Team5.domain.post.post.service.ProductPostService;
+import com.NBE_4_5_2.Team5.domain.user.entity.User;
+import com.NBE_4_5_2.Team5.domain.user.service.UserService;
+import com.NBE_4_5_2.Team5.global.Rq;
+import com.NBE_4_5_2.Team5.global.exception.ServiceException;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +39,12 @@ public class ChatRoomService {
     private ValueOperations<String, String> valueOps;
     @Autowired
     private MessageRepository messageRepository;
+    @Autowired
+    private ProductPostService productPostService;
+    @Autowired
+    private Rq rq;
+    @Autowired
+    private UserService userService;
 
     // 모든 채팅방 조회
     public List<ChatRoom> findAllRoom() {
@@ -56,6 +69,7 @@ public class ChatRoomService {
 
     // 채팅방 생성
     public ChatRoom createChatRoom(String sender, String receiver) {
+
         String roomId=findByRoomIdByUsers(sender, receiver);
         List<ChatRoom> chatRooms=findByRoomId(roomId);
         System.out.println("roomId:"+roomId);

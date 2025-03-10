@@ -37,10 +37,10 @@
 
     <ul class="list-group mt-3">
         <li class="list-group-item" v-for="(messageItem, index) in messages" :key="index">
-            <span v-if="messageItem.timestamp">[{{ messageItem.timestamp }}] </span>
+            <span v-if="messageItem.timestamp">[{{ messageItem.timestamp }}]</span>
             <span v-if="messageItem.sender">{{ messageItem.sender }}: </span>
             <span v-if="messageItem.message">{{ messageItem.message }}</span>
-            <img v-if="messageItem.image" :src="messageItem.image" style="max-width: 100px; max-height: 100px; display: block; margin-top: 5px;" />
+            <img v-if="messageItem.image" :src="messageItem.image" style="max-width: 100px; max-height: 100px; display: block; margin-top: 5px;"/>
         </li>
     </ul>
 </div>
@@ -66,36 +66,44 @@
             this.roomId = localStorage.getItem('wschat.roomId');
             this.roomName = localStorage.getItem('wschat.roomName');
 
-            var _this = this;
-            // 현재 사용자 정보를 요청하여 토큰과 사용자 이름을 가져옵니다.
-            axios.get('/api/chat/user').then(response => {
-                _this.token = response.data.data.token; // 토큰 할당
-                localStorage.setItem('username', response.data.data.name); // 사용자 이름을 로컬 스토리지에 저장
-                console.log('Received token:', _this.token);
-                console.log('Username stored in localStorage:', response.data.data.name);
+            // 사용자 정보를 요청하여 토큰과 사용자 이름을 가져옵니다.
+            axios.get('/api/chat/user')
+                .then(response => {
+                    if (response.data.code === "200") {  // 서버에서 받아온 코드 확인
+                        this.token = response.data.data.token; // 토큰 할당
+                        localStorage.setItem('username', response.data.data.name); // 사용자 이름을 로컬 스토리지에 저장
+                        console.log('Received token:', this.token);
+                        console.log('Username stored in localStorage:', response.data.data.name);
 
-                // WebSocket 연결 설정
-                ws.connect({"token": _this.token}, function(frame) {
-                    ws.subscribe("/sub/chat/room/" + _this.roomId, function(message) {
-                        var recv = JSON.parse(message.body);
-                        _this.recvMessage(recv); // 메시지 수신 처리
-                    });
+                        // WebSocket 연결 설정
+                        ws.connect({"token": this.token}, function(frame) {
+                            ws.subscribe("/sub/chat/room/" + this.roomId, function(message) {
+                                var recv = JSON.parse(message.body);
+                                this.recvMessage(recv); // 메시지 수신 처리
+                            }.bind(this)); // bind로 this를 유지
 
-                    // 페이지 로드 시 기존 메시지 요청
-                    axios.get('/api/chat/message', {
-                        params: { roomId: _this.roomId }
-                    })
-                        .then(response => {
-                            _this.messages = response.data.data; // 기존 메시지 데이터
-                        })
-                        .catch(error => {
-                            console.error("Error fetching messages:", error);
+                            // 페이지 로드 시 기존 메시지 요청
+                            axios.get('/api/chat/message', {
+                                params: { roomId: this.roomId }
+                            })
+                                .then(response => {
+                                    this.messages = response.data.data; // 기존 메시지 데이터
+                                })
+                                .catch(error => {
+                                    console.error("Error fetching messages:", error);
+                                });
+                        }.bind(this), function(error) {
+                            alert("서버 연결에 실패하였습니다. 다시 접속해 주십시오.");
+                            location.href = "/api/chat/room"; // 실패 시 방으로 이동
                         });
-                }, function(error) {
-                    alert("서버 연결에 실패하였습니다. 다시 접속해 주십시오.");
-                    location.href = "/api/chat/room"; // 실패 시 방으로 이동
+                    } else {
+                        console.error("Failed to fetch user info:", response.data.message);
+                        alert(response.data.message); // 문제 발생 시 사용자에게 알림
+                    }
+                })
+                .catch(error => {
+                    console.error("Error fetching user info:", error);
                 });
-            });
         },
         methods: {
             onFileChange(event) {
@@ -121,7 +129,7 @@
             },
             sendMessage(type = 'TALK', imageUrl = null) {
                 const sender = localStorage.getItem('username'); // 사용자 이름을 로컬 스토리지에서 가져옴
-                console.log("Sender fetched from localStorage:", sender); // 추가된 로그
+                console.log("Sender fetched from localStorage:", sender);
 
                 const payload = {
                     type: type,
@@ -145,33 +153,30 @@
                     type: recv.type,
                     sender: recv.sender,
                     message: recv.message || null,
-                    image: recv.image || null, // 이미지가 있을 경우 URL 추가
+                    image: recv.image || null,
                     timestamp: recv.timestamp || new Date().toLocaleTimeString()
                 });
                 this.refreshMessages();
                 console.log('Updated messages:', this.messages); // 업데이트된 메시지 배열 상태
             },
             clearChat(roomId) {
-                const _this = this;
                 axios.delete('/api/chat/message', {
                     params: { roomId: roomId }
                 })
                     .then(response => {
-                        _this.messages = []; // 화면에서 메시지 비우기
+                        this.messages = []; // 화면에서 메시지 비우기
                         location.href = "/api/chat/room";
-                        console.log("성공"); // 성공 메시지 출력
                     })
                     .catch(error => {
                         console.error("채팅방 나가기 중 오류 발생:", error);
                     });
             },
             refreshMessages() {
-                var _this = this;
                 axios.get('/api/chat/message', {
                     params: { roomId: this.roomId }
                 })
                     .then(response => {
-                        _this.messages = response.data.data; // 서버로부터 가져온 메시지 갱신
+                        this.messages = response.data.data; // 서버로부터 가져온 메시지 갱신
                     })
                     .catch(error => {
                         console.error("Error fetching messages:", error);

@@ -3,7 +3,10 @@ package com.NBE_4_5_2.Team5.domain.chat.controller;
 import com.NBE_4_5_2.Team5.domain.chat.entity.ChatMessage;
 import com.NBE_4_5_2.Team5.domain.chat.service.ChatRoomService;
 import com.NBE_4_5_2.Team5.domain.chat.service.ChatService;
+import com.NBE_4_5_2.Team5.domain.user.entity.User;
 import com.NBE_4_5_2.Team5.domain.user.service.AuthTokenService;
+import com.NBE_4_5_2.Team5.domain.user.service.UserService;
+import com.NBE_4_5_2.Team5.global.Rq;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.Header;
@@ -18,7 +21,7 @@ public class ChatController {
     private final ChatRoomService chatRoomService;
     private final ChatService chatService;
     private final AuthTokenService authTokenService;
-
+    private final Rq rq;
     /**
      * websocket "/pub/chat/message"로 들어오는 메시징을 처리한다.
      */
