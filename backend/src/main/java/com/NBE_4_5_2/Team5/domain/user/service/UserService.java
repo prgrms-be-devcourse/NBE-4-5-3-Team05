@@ -12,9 +12,6 @@ import com.NBE_4_5_2.Team5.global.exception.ServiceException;
 import com.NBE_4_5_2.Team5.global.security.SecurityUser;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,14 +20,12 @@ import org.springframework.stereotype.Service;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
-    private final JavaMailSender mailSender;
-    // TODO: template과 redisService 중복
-    private final StringRedisTemplate redisTemplate;
+
+    private final EmailService emailService;
     private final UserRepository userRepository;
     private final AuthTokenService authTokenService;
     private final RedisService redisService;
@@ -259,48 +254,19 @@ public class UserService {
         userRepository.delete(user);
     }
 
-    //이메일 전송
-    public void send(String email, String subject, String text, int code) {
-        long count = getEmailRequestCount(email);
-        if (count == 5) {
-            throw new RuntimeException("이메일 인증 요청 5번 초과로 24시간 동안 이메일 인증 요청을 할 수 없습니다.");
-        }
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(email);
-        message.setSubject(subject);
-        message.setText(text);
-        mailSender.send(message);
-        saveVerificationCode(email, String.valueOf(code)); //인증 코드 저장
+    public void sendAuthenticationCode(String email) {
+        emailService.sendAuthenticationCode(email);
+    }
 
-        increaseEmailRequestCount(email); // 이메일을 보낸 후 요청 횟수를 증가
-    }
-    //이메일 인증
-    public void verificationEmail(String code, String savedCode) {
-        if (!code.equals(savedCode)) {
-            throw new ServiceException("400-1", "code가 일치하지 않음");
-        }
-    }
-    //redis에서 인증코드 가져오기
-    public String getVerificationCode(String email) {
-        return redisTemplate.opsForValue().get(email);
-    }
-    //redis에 인증코드 저장
-    public void saveVerificationCode(String email, String code) {
-        redisTemplate.opsForValue().set(email, code, 3, TimeUnit.MINUTES); //1분 타임아웃
-    }
-    //이메일 요청 카운트 증가
-    public void increaseEmailRequestCount(String email) {
-        String key = "email_request_count:" + email;
-        long count = redisTemplate.opsForValue().increment(key);
+    public void verifyAuthenticationCode(String email, String code) {
 
-        if (count == 5) {
-            redisTemplate.expire(key, 24, TimeUnit.HOURS);
+        String savedCode = emailService.getVerificationCode(email);
+        boolean verified = emailService.verifyAuthenticationCode(code, savedCode);
+
+        if (!verified) {
+            throw new ServiceException("400-1", "인증코드가 틀렸습니다.");
         }
-    }
-    //이메일 요청 카운트 가져오기
-    public long getEmailRequestCount(String email) {
-        String key = "email_request_count:" + email;
-        String value = redisTemplate.opsForValue().get(key);
-        return value != null ? Long.parseLong(value) : 0;
+
+        emailService.deleteVerificationCode(email);
     }
 }
