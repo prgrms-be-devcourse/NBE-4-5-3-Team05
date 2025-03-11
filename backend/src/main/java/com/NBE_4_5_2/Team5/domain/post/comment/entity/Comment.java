@@ -3,7 +3,7 @@ package com.NBE_4_5_2.Team5.domain.post.comment.entity;
 import java.util.UUID;
 
 import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductPost;
-import com.NBE_4_5_2.Team5.domain.user.entity.User;
+import com.NBE_4_5_2.Team5.domain.user.user.entity.User;
 import com.NBE_4_5_2.Team5.global.exception.security.ForbiddenAccessException;
 
 import jakarta.persistence.Entity;

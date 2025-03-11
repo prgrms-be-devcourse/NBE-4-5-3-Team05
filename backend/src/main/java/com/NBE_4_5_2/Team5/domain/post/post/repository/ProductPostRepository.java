@@ -1,7 +1,5 @@
 package com.NBE_4_5_2.Team5.domain.post.post.repository;
 
-import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductPost;
-import com.NBE_4_5_2.Team5.domain.user.entity.User;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -14,7 +12,7 @@ import org.springframework.stereotype.Repository;
 
 import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductPost;
 import com.NBE_4_5_2.Team5.domain.post.post.enums.ProductStatus;
-import com.NBE_4_5_2.Team5.domain.user.entity.User;
+import com.NBE_4_5_2.Team5.domain.user.user.entity.User;
 
 @Repository
 public interface ProductPostRepository extends JpaRepository<ProductPost, String> {

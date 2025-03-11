@@ -1,18 +1,12 @@
 package com.NBE_4_5_2.Team5.domain.post.comment.controller;
 
-import com.NBE_4_5_2.Team5.TestConfig;
-import com.NBE_4_5_2.Team5.Util;
-import com.NBE_4_5_2.Team5.domain.post.comment.entity.Comment;
-import com.NBE_4_5_2.Team5.domain.post.comment.repository.CommentRepository;
-import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductPost;
-import com.NBE_4_5_2.Team5.domain.post.post.repository.ProductPostRepository;
-import com.NBE_4_5_2.Team5.domain.post.post.service.ProductPostService;
-import com.NBE_4_5_2.Team5.domain.user.entity.User;
-import com.NBE_4_5_2.Team5.domain.user.repository.UserRepository;
-import com.NBE_4_5_2.Team5.domain.user.service.UserService;
-import com.NBE_4_5_2.Team5.global.config.RedisTestContainerConfig;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.servlet.http.Cookie;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,12 +23,20 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import com.NBE_4_5_2.Team5.TestConfig;
+import com.NBE_4_5_2.Team5.Util;
+import com.NBE_4_5_2.Team5.domain.post.comment.entity.Comment;
+import com.NBE_4_5_2.Team5.domain.post.comment.repository.CommentRepository;
+import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductPost;
+import com.NBE_4_5_2.Team5.domain.post.post.repository.ProductPostRepository;
+import com.NBE_4_5_2.Team5.domain.post.post.service.ProductPostService;
+import com.NBE_4_5_2.Team5.domain.user.user.entity.User;
+import com.NBE_4_5_2.Team5.domain.user.user.repository.UserRepository;
+import com.NBE_4_5_2.Team5.domain.user.user.service.UserService;
+import com.NBE_4_5_2.Team5.global.config.RedisTestContainerConfig;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import jakarta.servlet.http.Cookie;
 
 @SpringBootTest
 @AutoConfigureMockMvc

@@ -1,7 +1,9 @@
 package com.NBE_4_5_2.Team5.domain.user.repository;
 
-import com.NBE_4_5_2.Team5.domain.user.entity.RefreshToken;
-import com.NBE_4_5_2.Team5.global.config.RedisTestContainerConfig;
+import static org.assertj.core.api.Assertions.*;
+
+import java.util.Optional;
+
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -12,9 +14,9 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import com.NBE_4_5_2.Team5.domain.user.user.entity.RefreshToken;
+import com.NBE_4_5_2.Team5.domain.user.user.repository.RedisRepository;
+import com.NBE_4_5_2.Team5.global.config.RedisTestContainerConfig;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -23,58 +25,58 @@ import static org.assertj.core.api.Assertions.assertThat;
 @TestPropertySource(properties = "custom.refreshToken.expire-seconds=3600")
 class RedisContainersTest {
 
-    @Autowired
-    private RedisRepository redisRepository;
+	@Autowired
+	private RedisRepository redisRepository;
 
-    @AfterAll
-    static void stopRedisContainer() {
-        RedisTestContainerConfig.stopContainer();
-    }
+	@AfterAll
+	static void stopRedisContainer() {
+		RedisTestContainerConfig.stopContainer();
+	}
 
-    @Test
-    @DisplayName("RefreshToken을 저장하고 조회할 수 있어야 한다.")
-    void saveAndFindToken() {
-        // Given
-        String userId = "user123";
-        String refreshToken = "refresh-token-abc";
-        Long expiration = 3600L;
+	@Test
+	@DisplayName("RefreshToken을 저장하고 조회할 수 있어야 한다.")
+	void saveAndFindToken() {
+		// Given
+		String userId = "user123";
+		String refreshToken = "refresh-token-abc";
+		Long expiration = 3600L;
 
-        RefreshToken token = RefreshToken.builder()
-                .userId(userId)
-                .refreshToken(refreshToken)
-                .expiration(expiration)
-                .build();
+		RefreshToken token = RefreshToken.builder()
+			.userId(userId)
+			.refreshToken(refreshToken)
+			.expiration(expiration)
+			.build();
 
-        // When
-        redisRepository.save(token);
-        Optional<RefreshToken> foundToken = redisRepository.findById(userId);
+		// When
+		redisRepository.save(token);
+		Optional<RefreshToken> foundToken = redisRepository.findById(userId);
 
-        // Then
-        assertThat(foundToken).isPresent();
-        assertThat(foundToken.get().getUserId()).isEqualTo(userId);
-        assertThat(foundToken.get().getRefreshToken()).isEqualTo(refreshToken);
-        assertThat(foundToken.get().getExpiration()).isEqualTo(expiration);
-    }
+		// Then
+		assertThat(foundToken).isPresent();
+		assertThat(foundToken.get().getUserId()).isEqualTo(userId);
+		assertThat(foundToken.get().getRefreshToken()).isEqualTo(refreshToken);
+		assertThat(foundToken.get().getExpiration()).isEqualTo(expiration);
+	}
 
-    @Test
-    @DisplayName("저장된 RefreshToken이 삭제되어야 한다.")
-    void shouldDeleteRefreshToken() {
-        // Given
-        String userId = "userToDelete";
-        RefreshToken token = RefreshToken.builder()
-                .userId(userId)
-                .refreshToken("token-to-delete")
-                .expiration(3600L)
-                .build();
+	@Test
+	@DisplayName("저장된 RefreshToken이 삭제되어야 한다.")
+	void shouldDeleteRefreshToken() {
+		// Given
+		String userId = "userToDelete";
+		RefreshToken token = RefreshToken.builder()
+			.userId(userId)
+			.refreshToken("token-to-delete")
+			.expiration(3600L)
+			.build();
 
-        redisRepository.save(token);
+		redisRepository.save(token);
 
-        // When
-        redisRepository.deleteById(userId);
-        Optional<RefreshToken> foundToken = redisRepository.findById(userId);
+		// When
+		redisRepository.deleteById(userId);
+		Optional<RefreshToken> foundToken = redisRepository.findById(userId);
 
-        // Then
-        assertThat(foundToken).isEmpty(); // 삭제 후 조회하면 없어야 함
-    }
+		// Then
+		assertThat(foundToken).isEmpty(); // 삭제 후 조회하면 없어야 함
+	}
 }
 
