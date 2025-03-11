@@ -1,10 +1,10 @@
-package com.NBE_4_5_2.Team5;
-
-import java.util.List;
+package com.NBE_4_5_2.Team5.global.config;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
+
+import java.util.List;
 
 public class Util {
 
