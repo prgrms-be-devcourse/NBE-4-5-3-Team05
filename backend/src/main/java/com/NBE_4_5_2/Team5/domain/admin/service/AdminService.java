@@ -1,5 +1,12 @@
 package com.NBE_4_5_2.Team5.domain.admin.service;
 
+import java.time.LocalDateTime;
+import java.util.UUID;
+
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.NBE_4_5_2.Team5.domain.admin.dto.BanListDto;
 import com.NBE_4_5_2.Team5.domain.admin.dto.NoticeResBody;
 import com.NBE_4_5_2.Team5.domain.admin.entity.BanList;
@@ -12,17 +19,11 @@ import com.NBE_4_5_2.Team5.domain.user.entity.User;
 import com.NBE_4_5_2.Team5.domain.user.repository.UserRepository;
 import com.NBE_4_5_2.Team5.domain.user.service.UserService;
 import com.NBE_4_5_2.Team5.global.exception.ServiceException;
+
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Slf4j
 @Service
@@ -59,7 +60,6 @@ public class AdminService {
 		 * 변경했습니다.
 		 * */
 		userService.generateAuthtoken(admin);
-
 
 		return userRepository.save(admin);
 	}
@@ -105,7 +105,7 @@ public class AdminService {
 
 	private void isAdmin(User admin) {
 		if (!admin.getRole().equals(Role.ADMIN)) {
-			throw new ServiceException(HttpStatus.BAD_REQUEST.toString(), "관리자만 작성할 수 있는 글입니다.");
+			throw new ServiceException("400-1", "관리자만 작성할 수 있는 글입니다.");
 		}
 	}
 
