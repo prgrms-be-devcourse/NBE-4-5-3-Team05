@@ -2,12 +2,14 @@ package com.NBE_4_5_2.Team5.domain.user.service;
 
 import com.NBE_4_5_2.Team5.domain.user.entity.Role;
 import com.NBE_4_5_2.Team5.domain.user.entity.User;
+import com.NBE_4_5_2.Team5.domain.user.repository.UserRepository;
 import com.NBE_4_5_2.Team5.global.standard.util.Ut;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -25,6 +27,8 @@ public class AuthTokenService {
     }
 
     // id, username, role 정보를 담은 accessToken 생성
+    private final UserRepository userRepository;
+
     String generateAccessToken(User user) {
 
         return Ut.Jwt.createToken(
@@ -59,5 +63,22 @@ public class AuthTokenService {
                 "nickname", nickname,
                 "role", role
         );
+    }
+
+    public String getUsernameFromToken(String accesstoken) {
+        Map<String,Object> payload = getPayload(accesstoken);
+        if(payload != null) {
+            return getNicknameFromName((String) payload.get("username"));
+        }
+        return null;
+    }
+
+    public String getNicknameFromName(String username) {
+        Optional<User> optionalUser = userRepository.findByUsername(username);
+        if(optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            return user.getNickname();
+        }
+        return null;
     }
 }
