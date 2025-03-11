@@ -1,119 +1,129 @@
 package com.NBE_4_5_2.Team5.domain.user.controller;
 
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.NBE_4_5_2.Team5.domain.user.dto.AuthToken;
 import com.NBE_4_5_2.Team5.domain.user.dto.SignUpUserForm;
 import com.NBE_4_5_2.Team5.domain.user.dto.UserDto;
 import com.NBE_4_5_2.Team5.domain.user.dto.UserUpdateRequest;
 import com.NBE_4_5_2.Team5.domain.user.entity.User;
+import com.NBE_4_5_2.Team5.domain.user.service.UserAuthService;
 import com.NBE_4_5_2.Team5.domain.user.service.UserService;
 import com.NBE_4_5_2.Team5.global.Rq;
 import com.NBE_4_5_2.Team5.global.dto.Empty;
 import com.NBE_4_5_2.Team5.global.dto.RsData;
+
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
 public class UserController {
 
-    private final UserService userService;
-    private final Rq rq;
+	private final UserService userService;
+	private final Rq rq;
+	private final UserAuthService userAuthService;
 
-    @PostMapping("/signup")
-    public RsData<UserDto> createUser(@RequestBody @Valid SignUpUserForm userForm) {
+	@PostMapping("/signup")
+	public RsData<UserDto> createUser(@RequestBody @Valid SignUpUserForm userForm) {
 
-        User user = userService.createUser(userForm.username(), userForm.password(), userForm.email(),
-                userForm.nickname(), userForm.address(), userForm.profileUrl());
+		User user = userService.createUser(userForm.username(), userForm.password(), userForm.email(),
+			userForm.nickname(), userForm.address(), userForm.profileUrl());
 
-        return new RsData<>("201-1", "회원 가입이 완료되었습니다.", new UserDto(user));
-    }
+		return new RsData<>("201-1", "회원 가입이 완료되었습니다.", new UserDto(user));
+	}
 
+	record LoginUserForm(
+		@NotBlank(message = "아이디는 필수 입력값입니다.") String username,
+		@NotBlank(message = "비밀번호는 필수 입력값입니다.") String password
+	) {
+	}
 
-    record LoginUserForm(
-            @NotBlank(message = "아이디는 필수 입력값입니다.") String username,
-            @NotBlank(message = "비밀번호는 필수 입력값입니다.") String password
-    ) {}
+	record LoginUserDto(String accessToken, String refreshToken, UserDto item) {
+	}
 
-    record LoginUserDto(String accessToken, String refreshToken, UserDto item) {}
+	@PostMapping("/login")
+	public RsData<LoginUserDto> loginUser(@RequestBody @Valid LoginUserForm userForm) {
 
-    @PostMapping("/login")
-    public RsData<LoginUserDto> loginUser(@RequestBody @Valid LoginUserForm userForm) {
+		User user = userService.loginUser(userForm.username(), userForm.password());
 
-        User user = userService.loginUser(userForm.username(), userForm.password());
+		AuthToken authToken = userService.generateAuthtoken(user);
+		rq.addCookie("accessToken", authToken.accessToken());
+		rq.addCookie("refreshToken", authToken.refreshToken());
 
-        AuthToken authToken = userService.generateAuthtoken(user);
-        rq.addCookie("accessToken", authToken.accessToken());
-        rq.addCookie("refreshToken", authToken.refreshToken());
+		return new RsData<>("200-1", "%s님 환영합니다.".formatted(user.getNickname()),
+			new LoginUserDto(authToken.accessToken(), authToken.refreshToken(), new UserDto(user)));
+	}
 
-        return new RsData<>("200-1", "%s님 환영합니다.".formatted(user.getNickname()),
-                new LoginUserDto(authToken.accessToken(), authToken.refreshToken(), new UserDto(user)));
-    }
+	@PreAuthorize("isAuthenticated()")
+	@PostMapping("/logout")
+	public RsData<Void> logoutUser() {
 
+		User userIdentity = userAuthService.getUserIdentity();
+		userService.logoutUser(userIdentity);
 
-    @PreAuthorize("isAuthenticated()")
-    @PostMapping("/logout")
-    public RsData<Void> logoutUser() {
+		rq.removeCookie("accessToken");
+		rq.removeCookie("refreshToken");
 
-        User userIdentity = rq.getUserIdentity();
-        userService.logoutUser(userIdentity);
+		return new RsData<>("200-1", "로그아웃 되었습니다.");
+	}
 
-        rq.removeCookie("accessToken");
-        rq.removeCookie("refreshToken");
+	//내 정보 조회
+	@PreAuthorize("isAuthenticated()")
+	@GetMapping("/me")
+	public RsData<UserDto> me() {
 
-        return new RsData<>("200-1", "로그아웃 되었습니다.");
-    }
+		User userIdentity = userAuthService.getUserIdentity();
+		User user = userAuthService.getRealActor(userIdentity);
 
-    //내 정보 조회
-    @PreAuthorize("isAuthenticated()")
-    @GetMapping("/me")
-    public RsData<UserDto> me() {
+		return new RsData<>("200-1", "내 정보 조회가 완료되었습니다.", new UserDto(user));
+	}
 
-        User userIdentity = rq.getUserIdentity();
-        User user = rq.getRealActor(userIdentity);
+	record RefreshUserForm(@NotBlank(message = "refreshToken을 입력해주세요.") String refreshToken) {
+	}
 
-        return new RsData<>("200-1", "내 정보 조회가 완료되었습니다.", new UserDto(user));
-    }
+	@PreAuthorize("isAuthenticated()")
+	@PostMapping("/refresh")
+	public RsData<String> refreshAccessToken(@RequestBody @Valid RefreshUserForm userForm) {
 
+		User userIdentity = userAuthService.getUserIdentity();
+		userService.validateRefreshToken(userIdentity, userForm.refreshToken());
 
-    record RefreshUserForm(@NotBlank(message = "refreshToken을 입력해주세요.") String refreshToken) {}
+		User user = userAuthService.getRealActor(userIdentity);
 
-    @PreAuthorize("isAuthenticated()")
-    @PostMapping("/refresh")
-    public RsData<String> refreshAccessToken(@RequestBody @Valid RefreshUserForm userForm) {
+		AuthToken newAuthToken = userService.generateAuthtoken(user);
+		rq.addCookie("accessToken", newAuthToken.accessToken());
 
-        User userIdentity = rq.getUserIdentity();
-        userService.validateRefreshToken(userIdentity, userForm.refreshToken());
+		return new RsData<>("200-1", "AccessToken이 재발급되었습니다.", newAuthToken.accessToken());
+	}
 
-        User user = rq.getRealActor(userIdentity);
+	//  내 정보 수정
+	@PreAuthorize("isAuthenticated()")
+	@PutMapping("/me")
+	public RsData<UserDto> updateMyProfile(@RequestBody @Valid UserUpdateRequest updateRequest) {
+		User userIdentity = userAuthService.getUserIdentity();
+		User user = userAuthService.getRealActor(userIdentity);
+		UserDto updatedUser = userService.updateMyProfile(user, updateRequest); // `userId` 대신 객체 전달
+		return new RsData<>("200", "사용자 정보가 성공적으로 수정되었습니다.", updatedUser);
+	}
 
-        AuthToken newAuthToken = userService.generateAuthtoken(user);
-        rq.addCookie("accessToken", newAuthToken.accessToken());
-
-        return new RsData<>("200-1", "AccessToken이 재발급되었습니다.", newAuthToken.accessToken());
-    }
-
-    //  내 정보 수정
-    @PreAuthorize("isAuthenticated()")
-    @PutMapping("/me")
-    public RsData<UserDto> updateMyProfile(@RequestBody @Valid UserUpdateRequest updateRequest) {
-        User userIdentity = rq.getUserIdentity();
-        User user = rq.getRealActor(userIdentity);
-        UserDto updatedUser = userService.updateMyProfile(user, updateRequest); // `userId` 대신 객체 전달
-        return new RsData<>("200", "사용자 정보가 성공적으로 수정되었습니다.", updatedUser);
-    }
-
-    // 회원 탈퇴
-    @PreAuthorize("isAuthenticated()")
-    @DeleteMapping("/me")
-    public RsData<?> deleteMyProfile() {
-        User userIdentity = rq.getUserIdentity();
-        User user = rq.getRealActor(userIdentity);
-        userService.deleteMyProfile(user);
-        return new RsData<>("200", "회원 탈퇴 성공", new Empty());
-    }
+	// 회원 탈퇴
+	@PreAuthorize("isAuthenticated()")
+	@DeleteMapping("/me")
+	public RsData<?> deleteMyProfile() {
+		User userIdentity = userAuthService.getUserIdentity();
+		User user = userAuthService.getRealActor(userIdentity);
+		userService.deleteMyProfile(user);
+		return new RsData<>("200", "회원 탈퇴 성공", new Empty());
+	}
 
 }
