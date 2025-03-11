@@ -55,6 +55,7 @@ dependencies {
 	implementation 'org.webjars.bower:axios:0.17.1'
 	implementation 'com.google.code.gson:gson:2.8.0'
 
+	// 임시
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 	// redis
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
