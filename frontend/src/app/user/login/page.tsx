@@ -1,5 +1,5 @@
 import ClientPage from "./ClientPage";
 
-export default function Page() {
+export default async function Page() {
   return <ClientPage />;
 }

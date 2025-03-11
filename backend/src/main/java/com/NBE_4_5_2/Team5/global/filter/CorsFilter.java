@@ -1,16 +1,11 @@
 package com.NBE_4_5_2.Team5.global.filter;
 
-import java.io.IOException;
-
-import org.springframework.stereotype.Component;
-
-import jakarta.servlet.Filter;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.ServletRequest;
-import jakarta.servlet.ServletResponse;
+import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.stereotype.Component;
+
+import java.io.IOException;
 
 @Component
 public class CorsFilter implements Filter {
@@ -27,6 +22,7 @@ public class CorsFilter implements Filter {
 		response.setHeader("Access-Control-Max-Age", "3600");
 		response.setHeader("Access-Control-Allow-Headers",
 			"Origin, X-Requested-With, Content-Type, Accept, Authorization");
+		response.setHeader("Access-Control-Max-Age", "3600");
 
 		if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
 			response.setStatus(HttpServletResponse.SC_OK);

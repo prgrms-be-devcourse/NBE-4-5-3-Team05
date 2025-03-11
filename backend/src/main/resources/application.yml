@@ -38,6 +38,7 @@ spring:
     open-in-view: false
   profiles:
     include: secret
+    active: dev
 
   security:
     oauth2:
