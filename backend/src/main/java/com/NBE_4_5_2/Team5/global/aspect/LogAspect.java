@@ -41,7 +41,8 @@ public class LogAspect {
 
 	@Around(value = """
 		execution(* com.NBE_4_5_2.Team5..*Controller.*(..)) &&
-		!execution(* com.NBE_4_5_2.Team5.domain.user.controller.UserController.me(..))""")
+		!execution(* com.NBE_4_5_2.Team5.domain.user.controller.UserController.me(..)) &&
+		!execution(* com.NBE_4_5_2.Team5.domain.user.controller.UserController.loginUser(..))""")
 	public Object controllerAspect(ProceedingJoinPoint joinPoint) throws Throwable {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		LocalDateTime now = LocalDateTime.now();
