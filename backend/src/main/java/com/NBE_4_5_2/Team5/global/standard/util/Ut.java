@@ -43,9 +43,9 @@ public class Ut {
 
         public static boolean isValidToken(String keyString, String token) {
 
-            SecretKey secretKey = Keys.hmacShaKeyFor(keyString.getBytes());
-
             try {
+                SecretKey secretKey = Keys.hmacShaKeyFor(keyString.getBytes());
+
                 Jwts
                         .parser()
                         .verifyWith(secretKey)

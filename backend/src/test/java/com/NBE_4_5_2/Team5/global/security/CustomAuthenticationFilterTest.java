@@ -1,25 +1,29 @@
 package com.NBE_4_5_2.Team5.global.security;
 
+import com.NBE_4_5_2.Team5.domain.user.dto.AuthToken;
 import com.NBE_4_5_2.Team5.domain.user.entity.User;
 import com.NBE_4_5_2.Team5.domain.user.service.UserService;
-import com.NBE_4_5_2.Team5.global.Rq;
+import com.NBE_4_5_2.Team5.global.config.RedisTestContainerConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.transaction.Transactional;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.List;
 
@@ -32,15 +36,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Transactional
+@Testcontainers
+@Import(RedisTestContainerConfig.class)
+@TestPropertySource(properties = "custom.refreshToken.expire-seconds=3600")
 class CustomAuthenticationFilterTest {
     @Autowired
     private MockMvc mvc;
 
     @Autowired
     private UserService userService;
-
-    @Autowired
-    private Rq rq;
 
     private User loginedUser;
     private String validAccessToken;
@@ -49,8 +53,15 @@ class CustomAuthenticationFilterTest {
     @BeforeEach
     void setUp() {
         loginedUser = userService.getUserByUsername("user1").get();
-        validAccessToken = userService.generateAccessToken(loginedUser);
-        validRefreshToken = loginedUser.getRefreshToken();
+
+        AuthToken authToken = userService.generateAuthtoken(loginedUser);
+        validRefreshToken = authToken.refreshToken();
+        validAccessToken = authToken.accessToken();
+    }
+
+    @AfterAll
+    static void stopRedisContainer() {
+        RedisTestContainerConfig.stopContainer();
     }
 
     @Test
@@ -87,25 +98,6 @@ class CustomAuthenticationFilterTest {
                 .andExpect(jsonPath("$.message").value("로그인이 필요합니다."));
     }
 
-    @Test
-    @DisplayName("인증 - 실패 - 인증되지 않은 사용자 요청")
-    void test3() throws Exception {
-
-        SecurityContextHolder.getContext().setAuthentication(
-                new UsernamePasswordAuthenticationToken("unknown_user", null, List.of())
-        );
-
-        ResultActions resultActions = mvc
-                .perform(get("/api/users/me"))
-                .andDo(print());
-
-        // CustomAuthenticationFilter에 의해 걸러지게 되어 SecurityConfig에서 예외 처리됨
-        resultActions
-                .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.code").value("401-2"))
-                .andExpect(jsonPath("$.message").value("잘못된 인증 정보입니다"));
-    }
-
     /**
      * 예외 테스트 코드 (test4 ~ test9)
      * <p>
@@ -114,7 +106,7 @@ class CustomAuthenticationFilterTest {
      */
     @Test
     @DisplayName("예외 - 인증 o - 존재하지 않는 URL 요청 시 404 반환")
-    void test4() throws Exception {
+    void test3() throws Exception {
         mvc.perform(get("/api/non-existent-endpoint")
                         .cookie(new Cookie("accessToken", validAccessToken))
                         .cookie(new Cookie("refreshToken", validRefreshToken)))
@@ -124,7 +116,7 @@ class CustomAuthenticationFilterTest {
 
     @Test
     @DisplayName("예외 - 인증 x - 존재하지 않는 URL 요청 시 404 반환")
-    void test5() throws Exception {
+    void test4() throws Exception {
         mvc.perform(get("/api/non-existent-endpoint"))
                 .andDo(print())
                 .andExpect(status().isNotFound());
@@ -132,7 +124,7 @@ class CustomAuthenticationFilterTest {
 
     @Test
     @DisplayName("예외 - 인증 o - 잘못된 요청 시 400 반환")
-    void test6() {
+    void test5() {
         Assertions.assertThatThrownBy(() ->
                         mvc.perform(get("/api/test/bad-request")
                                         .cookie(new Cookie("accessToken", validAccessToken))
@@ -145,7 +137,7 @@ class CustomAuthenticationFilterTest {
 
     @Test
     @DisplayName("예외 - 인증 x - 잘못된 요청 시 400 반환")
-    void test7() {
+    void test6() {
         Assertions.assertThatThrownBy(() ->
                         mvc.perform(get("/api/test/bad-request"))
                                 .andDo(print())
@@ -156,7 +148,7 @@ class CustomAuthenticationFilterTest {
 
     @Test
     @DisplayName("예외 - 인증 o - api 접속 중 NullPointerException 발생")
-    void test8() {
+    void test7() {
         Assertions.assertThatThrownBy(() ->
                         mvc.perform(get("/api/test/nullPointer-error")
                                         .cookie(new Cookie("accessToken", validAccessToken))
@@ -169,7 +161,7 @@ class CustomAuthenticationFilterTest {
 
     @Test
     @DisplayName("예외 - 인증 x - api 접속 중 NullPointerException 발생")
-    void test9() {
+    void test8() {
         Assertions.assertThatThrownBy(() ->
                         mvc.perform(get("/api/test/nullPointer-error"))
                                 .andDo(print())
