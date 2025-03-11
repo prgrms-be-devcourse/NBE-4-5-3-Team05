@@ -30,11 +30,11 @@ public class ChatRoomService {
     public static final String USER_COUNT = "USER_COUNT"; // 채팅룸에 입장한 클라이언트수 저장
     public static final String ENTER_INFO = "ENTER_INFO"; // 채팅룸에 입장한 클라이언트의 sessionId와 채팅룸 id를 맵핑한 정보 저장
 
-    @Resource(name = "redisTemplate")
+    @Resource(name = "objectRedisTemplate")
     private HashOperations<String, String, ChatRoom> hashOpsChatRoom;
-    @Resource(name = "redisTemplate")
+    @Resource(name = "objectRedisTemplate")
     private HashOperations<String, String, String> hashOpsEnterInfo;
-    @Resource(name = "redisTemplate")
+    @Resource(name = "objectRedisTemplate")
     private ValueOperations<String, String> valueOps;
     @Autowired
     private MessageRepository messageRepository;

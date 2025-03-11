@@ -42,7 +42,7 @@ public class ChatRoomController {
     @GetMapping("/room")
     public String rooms() {
         String token=rq.getValueFromCookie("accessToken");
-        if (token == null || authTokenService.getPayload(token) == null) {
+        if (token == null || authTokenService.getUsernameFromToken(token) == null) {
             return "redirect:/api/users/login"; // 로그인 페이지로 리다이렉트
         }
         return "/chat/room";
@@ -52,7 +52,7 @@ public class ChatRoomController {
     @GetMapping("/room/{roomId}/show")
     public String showRoomDetailPage(@PathVariable String roomId) {
         String token=rq.getValueFromCookie("accessToken");
-        if (token == null || authTokenService.getPayload(token) == null) {
+        if (token == null || authTokenService.getUsernameFromToken(token) == null) {
             return "redirect:/api/users/login"; // 로그인 페이지로 리다이렉트
         }
         // roomId를 이용해 추가적인 방 정보 검증이나 처리 로직 추가 가능

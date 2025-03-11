@@ -17,7 +17,7 @@ import java.util.List;
 public class ChatService {
 
     private final ChannelTopic channelTopic;
-    private final RedisTemplate redisTemplate;
+    private final RedisTemplate<String, Object> objectRedisTemplate;
     private final ChatRoomService chatRoomService;
     private final MessageRepository messageRepository;
 
@@ -51,7 +51,7 @@ public class ChatService {
             if (ChatMessage.MessageType.TALK.equals(chatMessage.getType())) {
 
                 // redis로 메세지 발송
-                redisTemplate.convertAndSend(channelTopic.getTopic(), chatMessage);
+                objectRedisTemplate.convertAndSend(channelTopic.getTopic(), chatMessage);
                 ChatMessage message=ChatMessage.builder()
                         .type(ChatMessage.MessageType.TALK)
                         .roomId(chatRoom.getRoomId()) // 동일한 roomId 사용
@@ -80,7 +80,7 @@ public class ChatService {
                         .build();
 
                 // redis로 메세지 발송
-                redisTemplate.convertAndSend(channelTopic.getTopic(), message);
+                objectRedisTemplate.convertAndSend(channelTopic.getTopic(), message);
                 messageRepository.save(message);
 
             }else if (ChatMessage.MessageType.LOCATION.equals(chatMessage.getType())) {
@@ -98,7 +98,7 @@ public class ChatService {
                         .build();
 
                 // Redis로 메시지 발송
-                redisTemplate.convertAndSend(channelTopic.getTopic(), message);
+                objectRedisTemplate.convertAndSend(channelTopic.getTopic(), message);
                 messageRepository.save(message);
             }
         }
