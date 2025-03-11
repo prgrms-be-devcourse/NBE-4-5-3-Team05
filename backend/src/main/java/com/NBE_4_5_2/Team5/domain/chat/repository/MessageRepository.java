@@ -7,8 +7,6 @@ import java.util.List;
 
 public interface MessageRepository extends MongoRepository<ChatMessage, String> {
 
-    List<ChatMessage> findAllByRoomId(String roomId);
-
     List<ChatMessage> findAllByClientAndRoomId(String client, String roomId);
 
     void deleteAllByClient(String id);
