@@ -1,25 +1,28 @@
 package com.NBE_4_5_2.Team5.domain.user.service;
 
-import java.util.Map;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
 import com.NBE_4_5_2.Team5.domain.user.entity.Role;
 import com.NBE_4_5_2.Team5.domain.user.entity.User;
 import com.NBE_4_5_2.Team5.global.standard.util.Ut;
-
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import java.util.Map;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class AuthTokenService {
 
-	@Value("${custom.jwt.secret-key}")
-	private String keyString;
+    @Value("${custom.jwt.secret-key}")
+    private String keyString;
 
-	@Value("${custom.jwt.expire-seconds}")
-	private int expireSeconds;
+    @Value("${custom.jwt.expire-seconds}")
+    private int expireSeconds;
+
+    String generateRefreshToken() {
+        return UUID.randomUUID().toString();
+    }
 
     // id, username, role 정보를 담은 accessToken 생성
     String generateAccessToken(User user) {
@@ -30,12 +33,13 @@ public class AuthTokenService {
                 Map.of(
                         "id", user.getId(),
                         "username", user.getUsername(),
+                        "nickname", user.getNickname(),
                         "role", user.getRole().name()
                 )
         );
     }
 
-	Map<String, Object> getPayload(String accessToken) {
+    Map<String, Object> getPayload(String accessToken) {
 
         if (!Ut.Jwt.isValidToken(keyString, accessToken)) {
             return null;
@@ -45,12 +49,14 @@ public class AuthTokenService {
 
         String id = (String) payload.get("id");
         String username = (String) payload.get("username");
+        String nickname = (String) payload.get("nickname");
         String roleStr = (String) payload.get("role");
         Role role = Role.valueOf(roleStr);
 
         return Map.of(
                 "id", id,
                 "username", username,
+                "nickname", nickname,
                 "role", role
         );
     }

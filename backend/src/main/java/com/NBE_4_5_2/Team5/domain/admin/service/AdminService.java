@@ -1,13 +1,5 @@
 package com.NBE_4_5_2.Team5.domain.admin.service;
 
-import java.time.LocalDateTime;
-import java.util.UUID;
-
-import org.springframework.http.HttpStatus;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.NBE_4_5_2.Team5.domain.admin.dto.BanListDto;
 import com.NBE_4_5_2.Team5.domain.admin.dto.NoticeResBody;
 import com.NBE_4_5_2.Team5.domain.admin.entity.BanList;
@@ -20,11 +12,17 @@ import com.NBE_4_5_2.Team5.domain.user.entity.User;
 import com.NBE_4_5_2.Team5.domain.user.repository.UserRepository;
 import com.NBE_4_5_2.Team5.domain.user.service.UserService;
 import com.NBE_4_5_2.Team5.global.exception.ServiceException;
-
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -51,7 +49,17 @@ public class AdminService {
 				.address("addr")
 				.profileUrl("url")
 				.build();
-		admin.setRefreshToken(UUID.randomUUID().toString());
+
+		/**
+		 *  기존 코드
+		 * 	admin.setRefreshToken(UUID.randomUUID().toString());
+		 *
+		 * refreshToken을 login 할 때 발급하여 redis에 저장하는 방식으로 변경했습니다.
+		 * 이에 따라 기존에 setRefreshToken 하던 방식에서 generateAuthtoken 하여 redis에 저장하는 방식으로
+		 * 변경했습니다.
+		 * */
+		userService.generateAuthtoken(admin);
+
 
 		return userRepository.save(admin);
 	}
