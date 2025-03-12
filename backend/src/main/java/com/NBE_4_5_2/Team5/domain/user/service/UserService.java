@@ -122,22 +122,25 @@ public class UserService {
     }
 
     /**
-     * refreshToken 검증
+     * refreshToken 검증 및 accessToken 재발급
      *
-     * @param user         로그인한 사용자
-     * @param refreshToken 검증할 refreshToken
-     * @throws ServiceException 사용자의 userId로 된 refreshToken이 존재하지 않거나 값이 일치하지 않을 경우
+     * @param refreshToken 재발급에 사용할 refreshToken
+     * @throws ServiceException 유효하지 않은 token 혹은 존재하지 않는 회원의 token인 경우(탈퇴)
      */
-    public void validateRefreshToken(User user, String refreshToken) {
-        String userId = user.getId();
+    public String refreshAccessToken(String refreshToken) {
 
-        String storedRefreshToken = redisService.getTokenByUserId(userId)
-                .map(RefreshToken::getRefreshToken)
-                .orElseThrow(() -> new ServiceException("401-1", "로그인이 필요합니다."));
+        Optional<RefreshToken> tokenByRefreshToken = redisService.getTokenByRefreshToken(refreshToken);
 
-        if (!storedRefreshToken.equals(refreshToken)) {
-            throw new ServiceException("401-2", "유효하지 않은 RefreshToken입니다.");
+        if (tokenByRefreshToken.isEmpty()) {
+            throw new ServiceException("401-1", "유효하지 않은 RefreshToken입니다.");
         }
+
+        String userId = tokenByRefreshToken.get().getUserId().substring("refreshToken:".length());
+        redisService.deleteTokenByUserId(userId);
+
+        return userRepository.findById(userId)
+                .map(authTokenService::generateAccessToken)
+                .orElseThrow(() -> new ServiceException("404-1", "존재하지 않는 회원의 refreshToken입니다."));
     }
 
     /**

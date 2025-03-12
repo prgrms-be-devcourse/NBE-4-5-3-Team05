@@ -678,11 +678,10 @@ class UserControllerTest{
                 .andExpect(jsonPath("$.message").value("로그인이 필요합니다."));
     }
 
-    private ResultActions refreshAccessTokenHeaderRequest(String refreshToken, String token) throws Exception {
+    private ResultActions refreshAccessTokenRequest(String refreshToken) throws Exception {
         return mvc
                 .perform(
                         post("/api/users/refresh")
-                                .header("Authorization", "Bearer " + token)
                                 .content("""
                                         {
                                           "refreshToken": "%s"
@@ -698,10 +697,10 @@ class UserControllerTest{
     }
 
     @Test
-    @DisplayName("토큰 재발급 - 성공 - 헤더 인증")
+    @DisplayName("토큰 재발급 - 성공")
     void refreshAccessToken1() throws Exception {
 
-        ResultActions resultActions = refreshAccessTokenHeaderRequest(validRefreshToken, validToken);
+        ResultActions resultActions = refreshAccessTokenRequest(validRefreshToken);
 
         resultActions
                 .andExpect(status().isOk())
@@ -750,7 +749,7 @@ class UserControllerTest{
     @DisplayName("토큰 재발급 - 실패 - refreshToken이 빈 문자열")
     void refreshAccessToken3() throws Exception {
         String token = " ";
-        ResultActions resultActions = refreshAccessTokenHeaderRequest(token, validToken);
+        ResultActions resultActions = refreshAccessTokenRequest(token);
 
         resultActions
                 .andExpect(status().isBadRequest())
@@ -763,11 +762,11 @@ class UserControllerTest{
     void refreshAccessToken4() throws Exception {
         String fakeRefreshToken = "invalid_refresh_token";
 
-        ResultActions resultActions = refreshAccessTokenHeaderRequest(fakeRefreshToken, validToken);
+        ResultActions resultActions = refreshAccessTokenRequest(fakeRefreshToken);
 
         resultActions
                 .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.code").value("401-2"))
+                .andExpect(jsonPath("$.code").value("401-1"))
                 .andExpect(jsonPath("$.message").value("유효하지 않은 RefreshToken입니다."));
     }
 
