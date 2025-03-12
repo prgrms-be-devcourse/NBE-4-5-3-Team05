@@ -35,13 +35,12 @@ class CustomAuthenticationFilterTest extends BaseTest {
     @Autowired
     private UserService userService;
 
-    private User loginedUser;
     private String validAccessToken;
     private String validRefreshToken;
 
     @BeforeEach
     void setUp() {
-        loginedUser = userService.getUserByUsername("user1").get();
+        User loginedUser = userService.getUserByUsername("user1").get();
 
         AuthToken authToken = userService.generateAuthtoken(loginedUser);
         validRefreshToken = authToken.refreshToken();
@@ -83,7 +82,7 @@ class CustomAuthenticationFilterTest extends BaseTest {
     }
 
     /**
-     * 예외 테스트 코드 (test4 ~ test9)
+     * 예외 테스트 코드 (test3 ~ test8)
      * <p>
      * GlobalExceptionHandler에서 직접 처리하지 않은 예외 상황이 발생했을 때,
      * Spring Boot의 기본 오류 처리 (`/error`)를 통해 정상적으로 응답이 반환되는지 검증하는 테스트

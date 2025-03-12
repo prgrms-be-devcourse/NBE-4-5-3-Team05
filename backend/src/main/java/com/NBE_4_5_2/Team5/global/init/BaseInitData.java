@@ -1,27 +1,27 @@
 package com.NBE_4_5_2.Team5.global.init;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.ApplicationRunner;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.core.annotation.Order;
-
 import com.NBE_4_5_2.Team5.domain.post.category.entity.Category;
 import com.NBE_4_5_2.Team5.domain.post.category.repository.CategoryRepository;
 import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductCategory;
 import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductPost;
 import com.NBE_4_5_2.Team5.domain.post.post.repository.ProductCategoryRepository;
 import com.NBE_4_5_2.Team5.domain.post.post.repository.ProductPostRepository;
+import com.NBE_4_5_2.Team5.domain.user.entity.Role;
 import com.NBE_4_5_2.Team5.domain.user.entity.User;
 import com.NBE_4_5_2.Team5.domain.user.repository.UserRepository;
-import com.NBE_4_5_2.Team5.domain.user.service.UserService;
-
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.ApplicationRunner;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.core.annotation.Order;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @Configuration
 @RequiredArgsConstructor
@@ -29,8 +29,8 @@ public class BaseInitData {
 	private final CategoryRepository categoryRepository;
 	private final ProductPostRepository postRepository;
 	private final ProductCategoryRepository productCategoryRepository;
-	private final UserService userService;
 	private final UserRepository userRepository;
+	private final PasswordEncoder passwordEncoder;
 
 	@Autowired
 	@Lazy
@@ -62,18 +62,30 @@ public class BaseInitData {
 
 	@Transactional
 	public void userInit() {
-
-		if (userService.count() > 0) {
+		if (userRepository.count() > 0) {
 			return;
 		}
 
-		userService.createUser("user1", "user11234@", "user1@gmail.com", "user1", "서울시 강남구",
-			"https://example.com/default_profile.png");
-		userService.createUser("user2", "user21234@", "user2@gmail.com", "user2", "서울시 강서구",
-			"https://example.com/default_profile.png");
-		userService.createUser("user3", "user31234@", "user3@gmail.com", "user3", "서울시 광진구",
-			"https://example.com/default_profile.png");
+		List<User> users = List.of(
+				createUser("user1", "user11234@", "user1@gmail.com", "user1", "서울시 강남구"),
+				createUser("user2", "user21234@", "user2@gmail.com", "user2", "서울시 강서구"),
+				createUser("user3", "user31234@", "user3@gmail.com", "user3", "서울시 광진구")
+		);
 
+		userRepository.saveAll(users);
+	}
+
+	private User createUser(String username, String password, String email, String nickname, String address) {
+		return User.builder()
+				.id("user-" + UUID.randomUUID())
+				.username(username)
+				.password(passwordEncoder.encode(password))
+				.email(email)
+				.nickname(nickname)
+				.address(address)
+				.profileUrl("https://example.com/default_profile.png")
+				.role(Role.USER)
+				.build();
 	}
 
 	@Transactional

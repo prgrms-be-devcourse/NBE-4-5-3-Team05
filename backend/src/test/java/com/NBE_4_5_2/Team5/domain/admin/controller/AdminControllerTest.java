@@ -1,6 +1,5 @@
 package com.NBE_4_5_2.Team5.domain.admin.controller;
 
-import com.NBE_4_5_2.Team5.global.config.Util;
 import com.NBE_4_5_2.Team5.domain.admin.entity.BanList;
 import com.NBE_4_5_2.Team5.domain.admin.entity.NoticePost;
 import com.NBE_4_5_2.Team5.domain.admin.repository.BanListRepository;
@@ -14,6 +13,7 @@ import com.NBE_4_5_2.Team5.domain.user.entity.Role;
 import com.NBE_4_5_2.Team5.domain.user.entity.User;
 import com.NBE_4_5_2.Team5.domain.user.repository.UserRepository;
 import com.NBE_4_5_2.Team5.global.config.BaseTest;
+import com.NBE_4_5_2.Team5.global.config.Util;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;
 import org.assertj.core.api.Assertions;
@@ -183,7 +183,7 @@ class AdminControllerTest extends BaseTest {
 			.andExpect(jsonPath("$.data.userId").value(banList.getBannedUser().getId()))
 			.andExpect(jsonPath("$.data.banCount").value(foundedUser.get().getBlockedCount()));
 		Assertions.assertThat(foundedUser.get().getBlocked()).isTrue();
-		Assertions.assertThat(foundedUser.get().getBlockedCount()).isEqualTo(user.getBlockedCount() + 1);
+		Assertions.assertThat(foundedUser.get().getBlockedCount()).isEqualTo(1);
 	}
 
 	@Test

@@ -4,10 +4,10 @@ import com.NBE_4_5_2.Team5.domain.user.dto.AuthToken;
 import com.NBE_4_5_2.Team5.domain.user.entity.User;
 import com.NBE_4_5_2.Team5.domain.user.service.UserService;
 import com.NBE_4_5_2.Team5.global.config.BaseTest;
+import com.NBE_4_5_2.Team5.global.init.BaseInitData;
 import jakarta.servlet.http.Cookie;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import jakarta.transaction.Transactional;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -25,6 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class UserControllerTest extends BaseTest {
 
     @Autowired
@@ -33,6 +34,9 @@ class UserControllerTest extends BaseTest {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private BaseInitData baseInitData;
+
     private User loginedUser;
     private String validToken;
     private String validAccessToken;
@@ -40,9 +44,14 @@ class UserControllerTest extends BaseTest {
     private String expiredAccessToken = "expiredAccessToken";
     private String invalidRefreshToken = "invalidRefreshToken";
 
+    @BeforeAll
+    void init(){
+        baseInitData.userInit();
+    }
+
     @BeforeEach
     void setUp() {
-        loginedUser = userService.getUserByUsername("user1").get();
+        loginedUser = userService.getUserByUsername("user1").orElseThrow();
 
         AuthToken authToken = userService.generateAuthtoken(loginedUser);
         validRefreshToken = authToken.refreshToken();
@@ -837,7 +846,13 @@ class UserControllerTest extends BaseTest {
                 .andExpect(jsonPath("$.message").value("회원 탈퇴 성공"));
 
         // 회원이 실제로 삭제되었는지 확인
-        assertThat(userService.getUserByUsername(loginedUser.getUsername())).isEmpty();
+        boolean isDeleted = isUserDeleted(loginedUser.getUsername());
+        assertThat(isDeleted).isTrue();
+    }
+
+    @Transactional
+    boolean isUserDeleted(String username) {
+        return userService.getUserByUsername(username).isEmpty();
     }
 
     @Test

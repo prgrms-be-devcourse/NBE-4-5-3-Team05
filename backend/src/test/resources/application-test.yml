@@ -5,20 +5,24 @@ spring:
   jackson:
     serialization:
       fail-on-empty-beans: false
-  
+
   output:
     ansi:
       enabled: always
-  
-  
+
+  data:
+    redis:
+      port: 6379
+      host: localhost
+
   datasource:
-    url: jdbc:h2:./db_dev;MODE=MySQL
+    url: jdbc:h2:./db_dev;MODE=MySQL # jdbc:h2:mem:db_test;MODE=MySQL
     username: sa
     password:
     driver-class-name: org.h2.Driver
     hikari:
       auto-commit: false
-  
+
   jpa:
     hibernate:
       ddl-auto: create-drop
@@ -46,13 +50,24 @@ spring:
             token-uri: https://kauth.kakao.com/oauth/token
             user-info-uri: https://kapi.kakao.com/v2/user/me
             user-name-attribute: id
+  mail:
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connection-timeout: 5000                     # 클라이언트 -> SMTP 서버 연결 대기 시간
+          timeout: 5000                                # 클라이언트 <- SMTP 서버 응답 대기 시간
+          write-timeout: 5000                          # 클라이언트 작업 완료 대기 시간
+
 logging:
   level:
     org.hibernate.SQL: DEBUG
     org.hibernate.orm.jdbc.bind: TRACE
     org.hibernate.orm.jdbc.extract: TRACE
     org.springframework.transaction.interceptor: TRACE
-
 
 springdoc:
   default-produces-media-type: application/json;charset=UTF-8
