@@ -86,15 +86,21 @@ public class ProductPostController {
 	@GetMapping("/{id}")
 	@Transactional(readOnly = true)
 	public RsData<ProductPostResponse> getPost(@PathVariable String id) {
-		User user = rq.getUserIdentity();
+		// 인증되지 않은 경우에도 게시글 상세 조회가 가능하도록 수정
 		ProductPostResponse postResponse = productPostService.getPost(id);
 
-		recentlyViewedService.addViewedPost(user.getId(), id);
+		// 만약 현재 로그인된 사용자가 있다면 최근 본 게시글로 추가
+		try {
+			User user = rq.getUserIdentity();
+			recentlyViewedService.addViewedPost(user.getId(), id);
+		} catch (Exception e) {
+			// 로그인 정보가 없으면 그냥 넘어감 (혹은 로그로 남김)
+		}
 
 		return new RsData<>(
-			"200",
-			"게시물 조회가 완료되었습니다.",
-			postResponse
+				"200",
+				"게시물 조회가 완료되었습니다.",
+				postResponse
 		);
 	}
 

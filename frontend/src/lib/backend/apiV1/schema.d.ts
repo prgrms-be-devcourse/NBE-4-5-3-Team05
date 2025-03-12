@@ -545,6 +545,10 @@ export interface components {
             /** Format: float */
             longitude?: number;
             categories?: string[];
+            /** Format: date-time */
+            createdAt?: string;
+            /** Format: date-time */
+            modifiedAt?: string;
         };
         RsDataProductPostResponse: {
             code: string;

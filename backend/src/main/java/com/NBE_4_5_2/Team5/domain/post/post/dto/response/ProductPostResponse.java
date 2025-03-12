@@ -1,5 +1,6 @@
 package com.NBE_4_5_2.Team5.domain.post.post.dto.response;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,6 +23,8 @@ public class ProductPostResponse {
 	private Float latitude;
 	private Float longitude;
 	private List<String> categories;
+	private LocalDateTime createdAt;    // 생성일
+	private LocalDateTime modifiedAt;   // 수정일
 
 	public static ProductPostResponse fromEntity(ProductPost post) {
 		return new ProductPostResponse(
@@ -37,7 +40,10 @@ public class ProductPostResponse {
 			post.getLongitude(),
 			post.getProductCategories().stream()
 				.map(pc -> pc.getCategory().getName())
-				.collect(Collectors.toList())
+				.collect(Collectors.toList()),
+			post.getCreatedAt(),
+			post.getModifiedAt()
+
 		);
 	}
 }

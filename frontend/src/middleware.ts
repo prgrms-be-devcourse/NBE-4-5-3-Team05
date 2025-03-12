@@ -6,11 +6,6 @@ import client from "./lib/client";
 import { parseAccessToken } from "./app/util/auth";
 
 export async function middleware(request: NextRequest) {
-  //개발 환경인 경우 인증 검사 건너뛰기
-  if (process.env.NODE_ENV === "development") {
-    return NextResponse.next();
-  }
-
   const myCookie = await cookies();
   const { isLogin, isExpired } = parseAccessToken(myCookie.get("accessToken"));
   const refresTokenCookie = myCookie.get("refreshToken");
