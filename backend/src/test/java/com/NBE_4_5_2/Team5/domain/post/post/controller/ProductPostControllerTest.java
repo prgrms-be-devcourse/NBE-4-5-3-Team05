@@ -8,9 +8,8 @@ import com.NBE_4_5_2.Team5.domain.post.post.service.ProductPostService;
 import com.NBE_4_5_2.Team5.domain.user.entity.User;
 import com.NBE_4_5_2.Team5.domain.user.service.UserService;
 import com.NBE_4_5_2.Team5.global.config.BaseTestConfig;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import com.NBE_4_5_2.Team5.global.init.BaseInitData;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -29,10 +28,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @BaseTestConfig
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class ProductPostControllerTest {
 
     @Autowired
     private MockMvc mvc;
+
+    @Autowired
+    private BaseInitData baseInitData;
 
     @Autowired
     private UserService userService;
@@ -50,6 +53,11 @@ public class ProductPostControllerTest {
     private User buyer;
     private String sellerToken;
     private String buyerToken;
+
+    @BeforeAll
+    void init(){
+        baseInitData.userInit();
+    }
 
     @BeforeEach
     void beforeEach() {
