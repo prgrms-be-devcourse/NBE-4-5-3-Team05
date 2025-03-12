@@ -13,6 +13,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -99,6 +100,7 @@ public class UserController {
     //  내 정보 수정
     @PreAuthorize("isAuthenticated()")
     @PutMapping("/me")
+    @Transactional
     public RsData<UserDto> updateMyProfile(@RequestBody @Valid UserUpdateRequest updateRequest) {
         User userIdentity = rq.getUserIdentity();
         User user = rq.getRealActor(userIdentity);
@@ -113,6 +115,10 @@ public class UserController {
         User userIdentity = rq.getUserIdentity();
         User user = rq.getRealActor(userIdentity);
         userService.deleteMyProfile(user);
+
+        rq.removeCookie("accessToken");
+        rq.removeCookie("refreshToken");
+
         return new RsData<>("200", "회원 탈퇴 성공", new Empty());
     }
 

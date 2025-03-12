@@ -1,7 +1,9 @@
 server:
   port: 8080
 
+
 spring:
+
   jackson:
     serialization:
       fail-on-empty-beans: false
@@ -36,6 +38,7 @@ spring:
     open-in-view: false
   profiles:
     include: secret
+    active: dev
 
   security:
     oauth2:
@@ -74,7 +77,6 @@ logging:
     org.springframework.transaction.interceptor: TRACE
     org.springframework.security: DEBUG
 
+
 springdoc:
   default-produces-media-type: application/json;charset=UTF-8
-
-

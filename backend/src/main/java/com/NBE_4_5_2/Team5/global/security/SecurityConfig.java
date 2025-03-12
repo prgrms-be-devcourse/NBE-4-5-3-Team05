@@ -36,7 +36,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> {
                     session.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
                 })
-//                .cors(cors -> cors.configurationSource(corsConfig))
+                .cors(cors -> cors.configurationSource(corsConfig))
                 .oauth2Login((oauth2) -> {
                     oauth2.authorizationEndpoint(
                             authorizationEndpoint -> authorizationEndpoint.authorizationRequestResolver(customAuthorizationRequestResolver)

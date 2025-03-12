@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>로그인 페이지</title>
+    <link rel="stylesheet" href="/webjars/bootstrap/4.3.1/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+<div class="container" id="app">
+    <h2>로그인</h2>
+    <form @submit.prevent="login">
+        <div class="form-group">
+            <label for="username">사용자 이름</label>
+            <input type="text" id="username" class="form-control" v-model="loginForm.username" required>
+        </div>
+        <div class="form-group">
+            <label for="password">비밀번호</label>
+            <input type="password" id="password" class="form-control" v-model="loginForm.password" required>
+        </div>
+        <button type="submit" class="btn btn-primary">로그인</button>
+    </form>
+    <div class="mt-3" v-if="message">
+        <div class="alert alert-danger">{{ message }}</div>
+    </div>
+</div>
+<script src="/webjars/vue/2.5.16/dist/vue.min.js"></script>
+<script src="/webjars/axios/0.17.1/dist/axios.min.js"></script>
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            loginForm: {
+                username: '',
+                password: ''
+            },
+            message: ''
+        },
+        methods: {
+            login() {
+                axios.post('/api/users/login', this.loginForm)
+                    .then(response => {
+                        // 로그인 성공시 처리
+                        alert(response.data.msg);
+                        window.location.href = '/api/chat/room'; // 로그인 후 채팅방으로 이동
+                    })
+                    .catch(error => {
+                        // 로그인 실패시 처리
+                        if (error.response) {
+                            this.message = error.response.data.msg; // 서버에서 반환된 에러 메시지
+                        } else {
+                            this.message = '로그인 중 오류가 발생했습니다.';
+                        }
+                    });
+            }
+        }
+    });
+</script>
+</body>
+</html>

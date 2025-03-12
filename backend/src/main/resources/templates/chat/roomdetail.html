@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Websocket ChatRoom</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <link rel="stylesheet" href="/webjars/bootstrap/4.3.1/dist/css/bootstrap.min.css">
+    <style>
+        [v-cloak] {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<div class="container" id="app" v-cloak>
+    <div class="row">
+        <div class="col-md-6">
+            <h4>{{ roomName }} <span class="badge badge-info badge-pill">{{ userCount }}</span></h4>
+        </div>
+        <div class="col-md-6 text-right">
+            <a class="btn btn-primary btn-sm" href="/logout">로그아웃</a>
+            <a class="btn btn-info btn-sm" href="/api/chat/room">home</a>
+            <button class="btn btn-warning btn-sm" @click="clearChat(roomId)">채팅방 나가기</button>
+        </div>
+    </div>
+    <div class="input-group mb-3">
+        <div class="input-group-prepend">
+            <label class="input-group-text">내용</label>
+        </div>
+        <input type="text" class="form-control" v-model="message" v-on:keypress.enter="sendMessage('TALK')">
+        <div class="input-group-append">
+            <button class="btn btn-primary" type="button" @click="sendMessage('TALK')">보내기</button>
+        </div>
+    </div>
+
+    <div class="input-group mb-3">
+        <button class="btn btn-success" type="button" @click="sendLocation">위치 전송</button>
+    </div>
+
+    <input type="file" @change="onFileChange" accept="image/*" class="mt-3">
+
+    <ul class="list-group mt-3">
+        <li class="list-group-item" v-for="(messageItem, index) in messages" :key="index">
+            <span v-if="messageItem.timestamp">[{{ messageItem.timestamp }}]</span>
+            <span v-if="messageItem.sender">{{ messageItem.sender }}: </span>
+            <span v-if="messageItem.message">{{ messageItem.message }}</span>
+            <span v-if="messageItem.latitude" class="text-primary">
+                (위도: {{ messageItem.latitude }}, 경도: {{ messageItem.longitude }})
+            </span>
+            <img v-if="messageItem.image" :src="messageItem.image" style="max-width: 100px; max-height: 100px; display: block; margin-top: 5px;"/>
+        </li>
+    </ul>
+</div>
+
+<script src="/webjars/vue/2.5.16/dist/vue.min.js"></script>
+<script src="/webjars/axios/0.17.1/dist/axios.min.js"></script>
+<script src="/webjars/sockjs-client/1.1.2/sockjs.min.js"></script>
+<script src="/webjars/stomp-websocket/2.3.3-1/stomp.min.js"></script>
+<script>
+    var sock = new SockJS("/ws-stomp");
+    var ws = Stomp.over(sock);
+    var vm = new Vue({
+        el: '#app',
+        data: {
+            roomId: '',
+            roomName: '',
+            message: '',
+            messages: [], // 채팅 메시지를 담는 배열
+            token: '',
+            userCount: 0
+        },
+        created() {
+            this.roomId = localStorage.getItem('wschat.roomId');
+            this.roomName = localStorage.getItem('wschat.roomName');
+
+            // 사용자 정보를 요청하여 토큰과 사용자 이름을 가져옵니다.
+            axios.get('/api/chat/user')
+                .then(response => {
+                    if (response.data.code === "200") {  // 서버에서 받아온 코드 확인
+                        this.token = response.data.data.token; // 토큰 할당
+                        localStorage.setItem('username', response.data.data.name); // 사용자 이름을 로컬 스토리지에 저장
+                        console.log('Received token:', this.token);
+                        console.log('Username stored in localStorage:', response.data.data.name);
+
+                        // WebSocket 연결 설정
+                        ws.connect({"token": this.token}, function(frame) {
+                            ws.subscribe("/sub/chat/room/" + this.roomId, function(message) {
+                                var recv = JSON.parse(message.body);
+                                this.recvMessage(recv); // 메시지 수신 처리
+                            }.bind(this)); // bind로 this를 유지
+
+                            // 페이지 로드 시 기존 메시지 요청
+                            axios.get('/api/chat/message', {
+                                params: { roomId: this.roomId }
+                            })
+                                .then(response => {
+                                    this.messages = response.data.data; // 기존 메시지 데이터
+                                })
+                                .catch(error => {
+                                    console.error("Error fetching messages:", error);
+                                });
+                        }.bind(this), function(error) {
+                            alert("서버 연결에 실패하였습니다. 다시 접속해 주십시오.");
+                            location.href = "/api/chat/room"; // 실패 시 방으로 이동
+                        });
+                    } else {
+                        console.error("Failed to fetch user info:", response.data.message);
+                        alert(response.data.message); // 문제 발생 시 사용자에게 알림
+                    }
+                })
+                .catch(error => {
+                    console.error("Error fetching user info:", error);
+                });
+        },
+        methods: {
+            onFileChange(event) {
+                const file = event.target.files[0]; // 선택한 파일
+                if (file) {
+                    const formData = new FormData();
+                    formData.append('file', file); // 파일 추가
+
+                    // S3에 이미지 업로드
+                    axios.post('/api/uploadFile', formData, {
+                        headers: {
+                            'Content-Type': 'multipart/form-data',
+                        },
+                    })
+                        .then(response => {
+                            const imageUrl = response.data; // S3에서 받아온 이미지 URL
+                            this.sendMessage('IMAGE', imageUrl); // URL로 메시지 전송
+                        })
+                        .catch(error => {
+                            console.error("Image upload failed:", error);
+                        });
+                }
+            },
+            sendMessage(type = 'TALK', imageUrl = null) {
+                const sender = localStorage.getItem('username'); // 사용자 이름을 로컬 스토리지에서 가져옴
+                console.log("Sender fetched from localStorage:", sender);
+
+                const payload = {
+                    type: type,
+                    roomId: this.roomId,
+                    message: type === 'TALK' ? this.message : null,
+                    image: type === 'IMAGE' ? imageUrl : null,
+                    sender: sender // sender 값을 할당
+                };
+
+                console.log("Sending message:", payload); // 전송할 메시지 로그
+                ws.send("/pub/chat/message", {"token": this.token}, JSON.stringify(payload));
+                this.message = ''; // 텍스트 메시지 전송 후 입력 공간 비우기
+                this.refreshMessages();
+            },
+            sendLocation() {
+                navigator.geolocation.getCurrentPosition((position) => {
+                    const latitude = position.coords.latitude;
+                    const longitude = position.coords.longitude;
+
+                    const payload = {
+                        type: 'LOCATION', // 메시지 타입
+                        roomId: this.roomId,
+                        sender: localStorage.getItem('username'), // 사용자 이름
+                        latitude: latitude, // 위도
+                        longitude: longitude // 경도
+                    };
+
+                    console.log("Sending location message:", payload); // 전송할 위치 메시지 로그
+                    ws.send("/pub/chat/message", {"token": this.token}, JSON.stringify(payload));
+                    alert("위치가 전송되었습니다!"); // 위치 전송 확인 메시지 추가
+                }, (error) => {
+                    console.error("Error obtaining location:", error); // 위치 얻기 실패 시 에러 로그
+                    alert("위치를 가져오는 데 실패했습니다.");
+                });
+            },
+            recvMessage(recv) {
+                console.log('Received message:', recv); // 수신한 메시지 로그
+                this.userCount = recv.userCount; // 사용자 수 업데이트
+
+                // 수신된 메시지를 messages 배열에 추가
+                this.messages.unshift({
+                    type: recv.type,
+                    sender: recv.sender,
+                    message: recv.message || null,
+                    latitude: recv.latitude || null, // 위도 추가
+                    longitude: recv.longitude || null, // 경도 추가
+                    image: recv.image || null,
+                    timestamp: recv.timestamp || new Date().toLocaleTimeString()
+                });
+                this.refreshMessages();
+                console.log('Updated messages:', this.messages); // 업데이트된 메시지 배열 상태
+            },
+            clearChat(roomId) {
+                axios.delete('/api/chat/message', {
+                    params: { roomId: roomId }
+                })
+                    .then(response => {
+                        this.messages = []; // 화면에서 메시지 비우기
+                        location.href = "/api/chat/room";
+                    })
+                    .catch(error => {
+                        console.error("채팅방 나가기 중 오류 발생:", error);
+                    });
+            },
+            refreshMessages() {
+                axios.get('/api/chat/message', {
+                    params: { roomId: this.roomId }
+                })
+                    .then(response => {
+                        this.messages = response.data.data; // 서버로부터 가져온 메시지 갱신
+                    })
+                    .catch(error => {
+                        console.error("Error fetching messages:", error);
+                    });
+            },
+            logout() {
+                axios.post('/api/users/logout') // 로그아웃 API 호출
+                    .then(response => {
+                        alert(response.msg); // 성공 메시지 표시
+                        location.href = "/api/users/login"; // 로그인 페이지로 리다이렉트
+                    })
+                    .catch(error => {
+                        console.error("로그아웃 실패:", error);
+                        alert("로그아웃에 실패하였습니다.");
+                    });
+            }
+        }
+    });
+</script>
+</body>
+</html>

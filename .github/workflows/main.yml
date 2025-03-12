@@ -23,21 +23,24 @@ jobs:
           - 6379:6379
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up JDK 17
-      uses: actions/setup-java@v4
-      with:
-        java-version: '17'
-        distribution: 'temurin'
+      - uses: actions/checkout@v4
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
 
-    - name: Setup Gradle
-      uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
 
-    - name: Build with Gradle Wrapper
-      run: |
-        JWT_SECRET=${{ secrets.JWT_SECRET }} \
-        TOSS_SECRET=${{ secrets.TOSS_SECRET }} \
-        KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }} \
-        SPRING_DATA_REDIS_HOST=localhost \
-        SPRING_DATA_REDIS_PORT=6379 \
-        ./gradlew test
+      - name: Build with Gradle Wrapper
+        run: |
+          JWT_SECRET=${{ secrets.JWT_SECRET }} \
+          TOSS_SECRET=${{ secrets.TOSS_SECRET }} \
+          KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }} \
+          AWS_S3_BUCKET_NAME=${{ secrets.AWS_S3_BUCKET_NAME }} \
+          AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY }} \
+          AWS_SECRET_KEY=${{ secrets.AWS_SECRET_KEY }} \
+          SPRING_DATA_REDIS_HOST=localhost \
+          SPRING_DATA_REDIS_PORT=6379 \
+          ./gradlew test

@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Websocket Chat</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <!-- CSS -->
+    <link rel="stylesheet" href="/webjars/bootstrap/4.3.1/dist/css/bootstrap.min.css">
+    <style>
+        [v-cloak] {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<div class="container" id="app" v-cloak>
+    <div class="row">
+        <div class="col-md-6">
+            <h3>채팅방 개설</h3>
+        </div>
+        <div class="col-md-6 text-right">
+            <span class="mr-2">현재 사용자: {{ userNickname }}</span>
+            <button class="btn btn-danger btn-sm" @click="logout">로그아웃</button>
+        </div>
+    </div>
+
+    <h4>대화할 게시글 ID 입력</h4>
+    <input type="text" class="form-control mb-3" v-model="selectedPostId" placeholder="대화할 게시글 ID를 입력하세요" />
+
+    <h4>모든 게시글 목록</h4>
+    <ul class="list-group mb-3">
+        <li class="list-group-item" v-for="post in posts" v-bind:key="post.id">
+            ID: {{ post.id }} - 제목: {{ post.title }} (작성자: {{ post.writerName }})
+        </li>
+    </ul>
+
+    <button class="btn btn-primary" @click="createRoom" :disabled="!selectedPostId">채팅방 개설</button>
+
+    <h4>현재 채팅방 목록</h4>
+    <ul class="list-group">
+        <li class="list-group-item list-group-item-action"
+            v-for="item in chatrooms"
+            v-bind:key="item.roomId"
+            @click="enterRoom(item.roomId)">
+            <h6>{{ item.name }} <span class="badge badge-info badge-pill">{{ item.userCount }}</span></h6>
+            <button class="btn btn-warning btn-sm" @click.stop="clearChat(item.roomId)">채팅방 나가기</button>
+        </li>
+    </ul>
+</div>
+
+<!-- JavaScript -->
+<script src="/webjars/vue/2.5.16/dist/vue.min.js"></script>
+<script src="/webjars/axios/0.17.1/dist/axios.min.js"></script>
+<script>
+    var vm = new Vue({
+        el: '#app',
+        data: {
+            posts: [], // 게시글 목록
+            selectedPostId: '', // 사용자가 입력한 게시글 ID
+            chatrooms: [],
+            userNickname: '' // 현재 로그인한 사용자의 닉네임
+        },
+        created() {
+            this.fetchAllPosts(); // 모든 게시글을 가져옵니다.
+            this.findUserRooms(); // 로그인한 사용자가 참여 가능한 방 목록 조회
+            this.getUserInfo(); // 현재 로그인한 사용자 정보 조회
+        },
+        methods: {
+            fetchAllPosts: function() {
+                axios.get('http://localhost:8080/api/posts') // 모든 게시글 요청
+                    .then(response => {
+                        this.posts = response.data.data.items; // 게시글 목록 저장
+                    })
+                    .catch(error => {
+                        console.error("게시글 조회 실패:", error);
+                    });
+            },
+            getUserInfo: function() {
+                axios.get('/api/chat/user') // 현재 로그인한 사용자 정보 요청
+                    .then(response => {
+                        this.userNickname = response.data.data.name; // 사용자의 닉네임 저장
+                    })
+                    .catch(error => {
+                        console.error("사용자 정보 조회 실패:", error);
+                    });
+            },
+            findUserRooms: function() {
+                axios.get('/api/chat/rooms') // 채팅방 목록 요청
+                    .then(response => {
+                        // 서버의 RsData 형식에서 data 필드를 추출하여 chatrooms에 설정
+                        if (response.data.code === "200") { // 성공 응답 확인
+                            this.chatrooms = response.data.data; // 참여 가능한 방만 리스트에 업데이트
+                        } else {
+                            console.error("채팅방 목록 조회 실패: " + response.data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error("참여 가능한 채팅방 조회 실패:", error);
+                    });
+            },
+            createRoom: function() {
+                if (!this.selectedPostId) {
+                    alert("대화할 게시글 ID를 입력해 주세요.");
+                    return;
+                } else {
+                    console.log("선택한 게시글 ID:", this.selectedPostId); // 게시글 ID 확인용 로그 추가
+                    var params = new URLSearchParams();
+                    params.append("postId", this.selectedPostId); // 입력한 게시글 ID 설정
+
+                    axios.post('/api/chat/room', params)
+                        .then(response => {
+                            if (response.data.code === "200") {
+                                alert(response.data.message); // 성공 메시지
+                                this.selectedPostId = ''; // 입력 필드 초기화
+                                this.findUserRooms(); // 방 목록 새로 고침
+                            } else {
+                                alert("채팅방 개설에 실패하였습니다: " + response.data.message);
+                            }
+                        })
+                        .catch(error => {
+                            alert("채팅방 개설에 실패하였습니다.");
+                        });
+                }
+            },
+            enterRoom: function(roomId) {
+                localStorage.setItem('wschat.roomId', roomId); // 방 ID 저장
+                location.href = "/api/chat/room/" + roomId + "/show"; // 채팅방 상세 페이지로 이동
+            },
+            clearChat: function(roomId) {
+                if (confirm("채팅방을 나가겠습니까?")) {
+                    axios.delete('/api/chat/message', { params: { roomId: roomId } }) // 메시지 삭제 API 호출
+                        .then(response => {
+                            alert("성공"); // 성공 메시지 표시
+                            location.href = "/api/chat/room"; // 방 목록으로 이동
+                            this.findUserRooms(); // 방 목록 새로 고침
+                        })
+                        .catch(error => {
+                            console.error("실패:", error);ㅈ
+                            alert("채팅방 나가기에 실패하였습니다.");
+                        });
+                }
+            },
+            logout: function() {
+                axios.post('/api/users/logout') // 로그아웃 API 호출
+                    .then(response => {
+                        alert(response.data.message); // 성공 메시지 표시
+                        location.href = "/api/users/login"; // 로그인 페이지로 리다이렉트
+                    })
+                    .catch(error => {
+                        console.error("로그아웃 실패:", error);
+                        alert("로그아웃에 실패하였습니다.");
+                    });
+            }
+        }
+    });
+</script>
+</body>
+</html>
