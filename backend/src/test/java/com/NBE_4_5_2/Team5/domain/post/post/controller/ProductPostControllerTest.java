@@ -1,20 +1,5 @@
 package com.NBE_4_5_2.Team5.domain.post.post.controller;
 
-import static org.hamcrest.Matchers.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
-
 import com.NBE_4_5_2.Team5.domain.post.post.entity.LikedPost;
 import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductPost;
 import com.NBE_4_5_2.Team5.domain.post.post.repository.LikedPostRepository;
@@ -23,7 +8,20 @@ import com.NBE_4_5_2.Team5.domain.post.post.service.ProductPostService;
 import com.NBE_4_5_2.Team5.domain.user.entity.User;
 import com.NBE_4_5_2.Team5.domain.user.service.UserService;
 import com.NBE_4_5_2.Team5.global.config.BaseTestConfig;
-import com.NBE_4_5_2.Team5.global.init.BaseInitData;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
+
+import static org.hamcrest.Matchers.hasItem;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * ProductPostController 관련 기능(판매내역, 찜내역, 구매내역)을 통합 테스트하는 예시 코드
@@ -31,14 +29,10 @@ import com.NBE_4_5_2.Team5.global.init.BaseInitData;
 @SpringBootTest
 @AutoConfigureMockMvc
 @BaseTestConfig
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class ProductPostControllerTest {
 
 	@Autowired
 	private MockMvc mvc;
-
-	@Autowired
-	private BaseInitData baseInitData;
 
 	@Autowired
 	private UserService userService;
@@ -56,11 +50,6 @@ public class ProductPostControllerTest {
 	private User buyer;
 	private String sellerToken;
 	private String buyerToken;
-
-	// @BeforeAll
-	// void init(){
-	//     baseInitData.userInit();
-	// }
 
 	@BeforeEach
 	void beforeEach() {

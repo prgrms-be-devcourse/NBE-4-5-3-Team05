@@ -4,7 +4,6 @@ import com.NBE_4_5_2.Team5.domain.user.dto.AuthToken;
 import com.NBE_4_5_2.Team5.domain.user.entity.User;
 import com.NBE_4_5_2.Team5.domain.user.service.UserService;
 import com.NBE_4_5_2.Team5.global.config.BaseTestConfig;
-import com.NBE_4_5_2.Team5.global.init.BaseInitData;
 import jakarta.servlet.http.Cookie;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.*;
@@ -27,6 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @BaseTestConfig
+@Order(100)
 class UserControllerTest{
 
     @Autowired
@@ -35,20 +35,12 @@ class UserControllerTest{
     @Autowired
     private UserService userService;
 
-    @Autowired
-    private BaseInitData baseInitData;
-
     private User loginedUser;
     private String validToken;
     private String validAccessToken;
     private String validRefreshToken;
     private String expiredAccessToken = "expiredAccessToken";
     private String invalidRefreshToken = "invalidRefreshToken";
-
-    @BeforeAll
-    void init(){
-        baseInitData.userInit();
-    }
 
     @BeforeEach
     void setUp() {
