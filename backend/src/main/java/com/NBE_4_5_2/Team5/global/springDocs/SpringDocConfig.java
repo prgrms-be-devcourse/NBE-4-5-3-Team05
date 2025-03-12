@@ -6,7 +6,6 @@ import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-
 @Configuration
 @OpenAPIDefinition(info = @Info(title = "API 서버", version = "v1"))
 public class SpringDocConfig {

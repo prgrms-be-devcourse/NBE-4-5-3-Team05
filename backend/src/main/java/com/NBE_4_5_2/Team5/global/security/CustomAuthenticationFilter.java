@@ -1,5 +1,6 @@
 package com.NBE_4_5_2.Team5.global.security;
 
+import com.NBE_4_5_2.Team5.domain.user.dto.AuthToken;
 import com.NBE_4_5_2.Team5.domain.user.entity.User;
 import com.NBE_4_5_2.Team5.domain.user.service.UserService;
 import com.NBE_4_5_2.Team5.global.Rq;
@@ -26,7 +27,7 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
         String url = request.getRequestURI();
-        if (List.of("/api/users/login", "/api/users/signup", "/api/users/refresh", "/error").contains(url)) {
+        if (List.of("/api/users/login", "/api/users/signup", "/error").contains(url)) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -60,9 +61,6 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
 
         return authorizationHeader.startsWith("Bearer ");
     }
-
-
-    record AuthToken(String refreshToken, String accessToken) {}
 
     private AuthToken getAuthTokenFromRequest() {
 
@@ -98,25 +96,36 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
 
     }
 
+    /**
+     * accessToken 재발급 로직
+     *
+     * accessToken 재발급 시 refreshToken 또한 재발급하며 기존 refreshToken을 Redis에서 제거한다.
+     * - 현재 refreshToken은 로그아웃 시에만 삭제되므로,
+     * 사용자가 로그아웃하지 않는다면 탈취된 refreshToken으로 지속적인 재발급이 가능해지는 보안 문제가 발생한다.
+     *
+     *  1. Redis에 refreshToken을 저장하고 만료 시간을 설정하여 1차 방지
+     *  2. accessToken 재발급 시 기존 refreshToken을 저장소에서 제거하는 것으로 재발급을 1회로 제한하여 2차 방지
+     *
+     * ⚠️ 실제 사용자도 재발급이 1회만 가능해지기 때문에 사용자 경험이 저하될 수 있다.
+     *     이는 accessToken의 유효기간을 1시간으로 설정하여 보완한다.
+     */
     private User getUserByAccessToken(String accessToken, String refreshToken) {
 
-        // accessToken이 유효하다면 accessToken을 통해 user 정보를 반환
+        // accessToken이 유효하다면 해당 user 정보를 반환
         Optional<User> opAccessUser = userService.getUserByAccessToken(accessToken);
 
         if (opAccessUser.isPresent()) {
             return opAccessUser.get();
         }
 
-        // accessToken이 만료되었다면 refreshToken을 통해 새로운 accessToken을 발급받아 user 정보를 반환
         Optional<User> opRefreshUser = userService.getUserByRefreshToken(refreshToken);
 
         if (opRefreshUser.isEmpty()) {
             return null;
         }
 
-        String newAccessToken = userService.generateAccessToken(opRefreshUser.get());
-        rq.addCookie("refreshToken", refreshToken);
-        rq.addCookie("accessToken", newAccessToken);
+        AuthToken newAuthToken = userService.generateAuthtoken(opRefreshUser.get());
+        rq.addCookie("accessToken", newAuthToken.accessToken());
 
         return opRefreshUser.get();
     }

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="JavaScriptLibraryMappings">
+    <excludedPredefinedLibrary name="NBE-4-5-2-Team05-develop/frontend/node_modules" />
+  </component>
+</project>

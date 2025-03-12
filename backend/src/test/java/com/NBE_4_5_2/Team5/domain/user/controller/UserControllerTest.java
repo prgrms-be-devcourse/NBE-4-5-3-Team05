@@ -1,20 +1,25 @@
 package com.NBE_4_5_2.Team5.domain.user.controller;
 
+import com.NBE_4_5_2.Team5.domain.user.dto.AuthToken;
 import com.NBE_4_5_2.Team5.domain.user.entity.User;
 import com.NBE_4_5_2.Team5.domain.user.service.UserService;
+import com.NBE_4_5_2.Team5.global.config.RedisTestContainerConfig;
 import jakarta.servlet.http.Cookie;
 import jakarta.transaction.Transactional;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.nio.charset.StandardCharsets;
 
@@ -25,9 +30,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
-@ActiveProfiles("test")
 @AutoConfigureMockMvc
 @Transactional
+@ActiveProfiles("test")
+@Import(RedisTestContainerConfig.class)
+@Testcontainers
+@TestPropertySource(properties = "custom.refreshToken.expire-seconds=3600")
 class UserControllerTest {
 
     @Autowired
@@ -37,22 +45,25 @@ class UserControllerTest {
     private UserService userService;
 
     private User loginedUser;
-    private String token;
+    private String validToken;
     private String validAccessToken;
     private String validRefreshToken;
     private String expiredAccessToken = "expiredAccessToken";
     private String invalidRefreshToken = "invalidRefreshToken";
 
+    @AfterAll
+    static void stopRedisContainer() {
+        RedisTestContainerConfig.stopContainer();
+    }
 
     @BeforeEach
-    void loginUser() {
+    void setUp() {
         loginedUser = userService.getUserByUsername("user1").get();
-        validAccessToken = userService.generateAccessToken(loginedUser);
-        validRefreshToken = loginedUser.getRefreshToken();
-        token = validRefreshToken + " " + validAccessToken;
 
-        // 인증 정보가 초기화된 상태로 테스트 진행
-        SecurityContextHolder.clearContext();
+        AuthToken authToken = userService.generateAuthtoken(loginedUser);
+        validRefreshToken = authToken.refreshToken();
+        validAccessToken = authToken.accessToken();
+        validToken = validRefreshToken + " " + validAccessToken;
     }
 
     private void checkUser(ResultActions resultActions, User user) throws Exception {
@@ -282,11 +293,12 @@ class UserControllerTest {
     @DisplayName("로그인 - 성공")
     void loginUser1() throws Exception {
 
-        String username = "user1";
-        String password = "user11234@";
+        String username = "user2";
+        String password = "user21234@";
 
         ResultActions resultActions = loginUserRequest(username, password);
         User user = userService.getUserByUsername(username).get();
+        String refreshToken = userService.getRefreshTokenByUserId(user.getId());
 
         resultActions
                 .andExpect(status().isOk())
@@ -296,7 +308,7 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.message").value("%s님 환영합니다.".formatted(user.getNickname())))
                 .andExpect(jsonPath("$.data").exists())
                 .andExpect(jsonPath("$.data.accessToken").exists())
-                .andExpect(jsonPath("$.data.refreshToken").value(user.getRefreshToken()))
+                .andExpect(jsonPath("$.data.refreshToken").value(refreshToken))
                 .andExpect(jsonPath("$.data.item.id").value(user.getId()))
                 .andExpect(jsonPath("$.data.item.username").value(user.getUsername()))
                 .andExpect(jsonPath("$.data.item.email").value(user.getEmail()))
@@ -309,25 +321,25 @@ class UserControllerTest {
 
         resultActions
                 .andExpect(mvcResult -> {
-                    Cookie refreshToken = mvcResult.getResponse().getCookie("refreshToken");
+                    Cookie cookieRefreshToken = mvcResult.getResponse().getCookie("refreshToken");
 
-                    assertThat(refreshToken).isNotNull();
-                    assertThat(refreshToken.getName()).isEqualTo("refreshToken");
-                    assertThat(refreshToken.getValue()).isNotBlank();
-                    assertThat(refreshToken.getDomain()).isEqualTo("localhost");
-                    assertThat(refreshToken.getPath()).isEqualTo("/");
-                    assertThat(refreshToken.isHttpOnly()).isTrue();
-                    assertThat(refreshToken.getSecure()).isTrue();
+                    assertThat(cookieRefreshToken).isNotNull();
+                    assertThat(cookieRefreshToken.getName()).isEqualTo("refreshToken");
+                    assertThat(cookieRefreshToken.getValue()).isNotBlank();
+                    assertThat(cookieRefreshToken.getDomain()).isEqualTo("localhost");
+                    assertThat(cookieRefreshToken.getPath()).isEqualTo("/");
+                    assertThat(cookieRefreshToken.isHttpOnly()).isTrue();
+                    assertThat(cookieRefreshToken.getSecure()).isTrue();
 
-                    Cookie accessToken = mvcResult.getResponse().getCookie("accessToken");
+                    Cookie cookieAccessToken = mvcResult.getResponse().getCookie("accessToken");
 
-                    assertThat(accessToken).isNotNull();
-                    assertThat(accessToken.getName()).isEqualTo("accessToken");
-                    assertThat(accessToken.getValue()).isNotBlank();
-                    assertThat(accessToken.getDomain()).isEqualTo("localhost");
-                    assertThat(accessToken.getPath()).isEqualTo("/");
-                    assertThat(accessToken.isHttpOnly()).isTrue();
-                    assertThat(accessToken.getSecure()).isTrue();
+                    assertThat(cookieAccessToken).isNotNull();
+                    assertThat(cookieAccessToken.getName()).isEqualTo("accessToken");
+                    assertThat(cookieAccessToken.getValue()).isNotBlank();
+                    assertThat(cookieAccessToken.getDomain()).isEqualTo("localhost");
+                    assertThat(cookieAccessToken.getPath()).isEqualTo("/");
+                    assertThat(cookieAccessToken.isHttpOnly()).isTrue();
+                    assertThat(cookieAccessToken.getSecure()).isTrue();
 
                 });
     }
@@ -425,11 +437,11 @@ class UserControllerTest {
     }
 
     @Test
-    @DisplayName("로그아웃 - 성공")
-    void logoutUser() throws Exception {
+    @DisplayName("로그아웃 - 성공 - 헤더 인증")
+    void logoutUser1() throws Exception {
         ResultActions resultActions = mvc.perform(
                 post("/api/users/logout")
-                        .header("Authorization", "Bearer " + token)
+                        .header("Authorization", "Bearer " + validToken)
         );
 
         resultActions
@@ -454,77 +466,38 @@ class UserControllerTest {
                         }
                 );
 
-        // SecurityContext 초기화 검증
-        assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
-
-    }
-
-    private ResultActions meRequest(String token) throws Exception {
-        return mvc
-                .perform(
-                        get("/api/users/me")
-                                .header("Authorization", "Bearer " + token)
-
-                )
-                .andDo(print());
     }
 
     @Test
-    @DisplayName("내 정보 조회 - 성공")
-    void me1() throws Exception {
-
-        String refreshToken = loginedUser.getRefreshToken();
-        String token = userService.getAuthToken(loginedUser);
-
-        ResultActions resultActions = meRequest(token);
+    @DisplayName("로그아웃 - 성공 - 쿠키 인증")
+    void logoutUser2() throws Exception {
+        ResultActions resultActions = mvc.perform(
+                post("/api/users/logout")
+                        .cookie(new Cookie("accessToken", validAccessToken))
+                        .cookie(new Cookie("refreshToken", validRefreshToken))
+        );
 
         resultActions
                 .andExpect(status().isOk())
                 .andExpect(handler().handlerType(UserController.class))
-                .andExpect(handler().methodName("me"))
+                .andExpect(handler().methodName("logoutUser"))
                 .andExpect(jsonPath("$.code").value("200-1"))
-                .andExpect(jsonPath("$.message").value("내 정보 조회가 완료되었습니다."));
+                .andExpect(jsonPath("$.message").value("로그아웃 되었습니다."));
 
-        checkUser(resultActions, loginedUser);
+        resultActions.
+                andExpect(
+                        mvcResult -> {
+                            Cookie refreshToken = mvcResult.getResponse().getCookie("refreshToken");
+                            assertThat(refreshToken).isNotNull();
+                            assertThat(refreshToken.getMaxAge()).isLessThanOrEqualTo(0);
 
-    }
-
-    @Test
-    @DisplayName("내 정보 조회 - 실패 - 잘못된 refreshToken")
-    void me2() throws Exception {
-
-        String refreshToken = "";
-
-        ResultActions resultActions = meRequest(refreshToken);
-
-        resultActions
-                .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.code").value("401-1"))
-                .andExpect(jsonPath("$.message").value("로그인이 필요합니다."));
+                            Cookie accessToken = mvcResult.getResponse().getCookie("accessToken");
+                            assertThat(accessToken).isNotNull();
+                            assertThat(refreshToken.getMaxAge()).isLessThanOrEqualTo(0);
+                        }
+                );
 
     }
-
-    @Test
-    @DisplayName("내 정보 조회 - 만료된 accessToken 사용")
-    void me3() throws Exception {
-
-        String refreshToken = loginedUser.getRefreshToken();
-        String expiredToken = refreshToken
-                + " eyJhbGciOiJIUzUxMiJ9.eyJpZCI6InVzZXItNjVhYTMxMDUtMzYyNi00NzZlLThjMzgtZmU0OGVjNGQyMDNjIiwidXNlcm5hbWUiOiJ1c2VyMSIsImlhdCI6MTc0MDk5MTc2NCwiZXhwIjoxNzQwOTkxNzY5fQ.UypcRIORV4MyzY53-2W94z3jxP5VLbs5NGWOjJDZZ-O5yLxTHxhzDbU9LTNfcblQXaZAiypGU0m3EDq_RjHlsQ";
-
-        ResultActions resultActions = meRequest(expiredToken);
-
-        resultActions
-                .andExpect(status().isOk())
-                .andExpect(handler().handlerType(UserController.class))
-                .andExpect(handler().methodName("me"))
-                .andExpect(jsonPath("$.code").value("200-1"))
-                .andExpect(jsonPath("$.message").value("내 정보 조회가 완료되었습니다."));
-
-        checkUser(resultActions, loginedUser);
-
-    }
-
 
     @Test
     @DisplayName("내 정보 조회 - 성공 - 쿠키 인증 - 유효한 AccessToken + 유효한 RefreshToken")
@@ -631,7 +604,7 @@ class UserControllerTest {
         ResultActions resultActions = mvc
                 .perform(
                         get("/api/users/me")
-                                .header("Authorization", "Bearer " + validRefreshToken + " " + validAccessToken)
+                                .header("Authorization", "Bearer " + validToken)
                 )
                 .andDo(print());
 
@@ -719,10 +692,11 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.message").value("로그인이 필요합니다."));
     }
 
-    private ResultActions refreshAccessTokenRequest(String refreshToken) throws Exception {
+    private ResultActions refreshAccessTokenHeaderRequest(String refreshToken, String token) throws Exception {
         return mvc
                 .perform(
                         post("/api/users/refresh")
+                                .header("Authorization", "Bearer " + token)
                                 .content("""
                                         {
                                           "refreshToken": "%s"
@@ -737,14 +711,11 @@ class UserControllerTest {
                 .andDo(print());
     }
 
-
     @Test
-    @DisplayName("토큰 재발급 - 성공")
+    @DisplayName("토큰 재발급 - 성공 - 헤더 인증")
     void refreshAccessToken1() throws Exception {
 
-        String token = loginedUser.getRefreshToken();
-
-        ResultActions resultActions = refreshAccessTokenRequest(token);
+        ResultActions resultActions = refreshAccessTokenHeaderRequest(validRefreshToken, validToken);
 
         resultActions
                 .andExpect(status().isOk())
@@ -756,15 +727,6 @@ class UserControllerTest {
 
         resultActions
                 .andExpect(mvcResult -> {
-                    Cookie refreshToken = mvcResult.getResponse().getCookie("refreshToken");
-
-                    assertThat(refreshToken).isNotNull();
-                    assertThat(refreshToken.getName()).isEqualTo("refreshToken");
-                    assertThat(refreshToken.getValue()).isNotBlank();
-                    assertThat(refreshToken.getDomain()).isEqualTo("localhost");
-                    assertThat(refreshToken.getPath()).isEqualTo("/");
-                    assertThat(refreshToken.isHttpOnly()).isTrue();
-                    assertThat(refreshToken.getSecure()).isTrue();
 
                     Cookie accessToken = mvcResult.getResponse().getCookie("accessToken");
 
@@ -802,7 +764,7 @@ class UserControllerTest {
     @DisplayName("토큰 재발급 - 실패 - refreshToken이 빈 문자열")
     void refreshAccessToken3() throws Exception {
         String token = " ";
-        ResultActions resultActions = refreshAccessTokenRequest(token);
+        ResultActions resultActions = refreshAccessTokenHeaderRequest(token, validToken);
 
         resultActions
                 .andExpect(status().isBadRequest())
@@ -815,7 +777,7 @@ class UserControllerTest {
     void refreshAccessToken4() throws Exception {
         String fakeRefreshToken = "invalid_refresh_token";
 
-        ResultActions resultActions = refreshAccessTokenRequest(fakeRefreshToken);
+        ResultActions resultActions = refreshAccessTokenHeaderRequest(fakeRefreshToken, validToken);
 
         resultActions
                 .andExpect(status().isUnauthorized())
@@ -832,7 +794,7 @@ class UserControllerTest {
 
         ResultActions resultActions = mvc.perform(
                 put("/api/users/me")
-                        .header("Authorization", "Bearer " + token)
+                        .header("Authorization", "Bearer " + validToken)
                         .content("""
                                 {
                                   "nickname": "%s",
@@ -862,7 +824,7 @@ class UserControllerTest {
 
         ResultActions resultActions = mvc.perform(
                 put("/api/users/me")
-                        .header("Authorization", "Bearer " + token)
+                        .header("Authorization", "Bearer " + validToken)
                         .content("""
                                 {
                                   "email": "%s"
@@ -882,7 +844,7 @@ class UserControllerTest {
     void deleteProfile1() throws Exception {
         ResultActions resultActions = mvc.perform(
                 delete("/api/users/me")
-                        .header("Authorization", "Bearer " + token)
+                        .header("Authorization", "Bearer " + validToken)
         );
 
         resultActions

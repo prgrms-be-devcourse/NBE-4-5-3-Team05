@@ -1,0 +1,83 @@
+"use client";
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import client from "@/lib/client";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+
+export default function ClientPage() {
+  const router = useRouter();
+
+  async function login(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const form = e.target as HTMLFormElement;
+
+    const username = form.username.value;
+    const password = form.password.value;
+
+    if (username.trim().length === 0) {
+      alert("아이디를 입력해주세요.");
+      return;
+    }
+
+    if (password.trim().length === 0) {
+      alert("비밀번호를 입력해주세요.");
+      return;
+    }
+
+    const response = await client.POST("/api/users/login", {
+      body: {
+        username,
+        password,
+      },
+      credentials: "include",
+    });
+
+    if (response.error) {
+      alert(response.error.message);
+      return;
+    }
+
+    alert("로그인 성공하셨습니다.");
+    router.refresh();
+    window.location.href = "/";
+  }
+
+  return (
+    <>
+      <div className="flex items-center justify-center h-screen">
+        <div className="flex flex-col gap-2">
+          <form onSubmit={login} className="flex flex-col w-full gap-2">
+            <Input
+              type="text"
+              name="username"
+              placeholder="아이디"
+              className="border-2 border-black w-full"
+            />
+            <Input
+              type="password"
+              name="password"
+              placeholder="비밀번호"
+              className="border-2 border-black w-full"
+            />
+            <Button type="submit" className="cursor-pointer">
+              로그인
+            </Button>
+          </form>
+          <Link href="/user/signup">
+            <Button className="w-full cursor-pointer">회원가입</Button>
+          </Link>
+          <Button variant="ghost" className="w-full mt-4 p-0">
+            <Link
+              href="http://localhost:8080/oauth2/authorization/kakao?redirectUrl=http://localhost:3000"
+              className="w-full"
+            >
+              <img src="/kakao_login.png" className="w-full" />
+            </Link>
+          </Button>
+        </div>
+      </div>
+    </>
+  );
+}
