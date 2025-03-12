@@ -131,7 +131,7 @@ public class UserService {
         Optional<RefreshToken> tokenByRefreshToken = redisService.getTokenByRefreshToken(refreshToken);
 
         if (tokenByRefreshToken.isEmpty()) {
-            throw new ServiceException("400-1", "유효하지 않은 refreshToken입니다.");
+            throw new ServiceException("401-1", "유효하지 않은 RefreshToken입니다.");
         }
 
         String userId = tokenByRefreshToken.get().getUserId().substring("refreshToken:".length());

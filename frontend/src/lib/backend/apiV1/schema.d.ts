@@ -52,6 +52,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/chat/admin": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["grantAdmin"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/users/signup": {
         parameters: {
             query?: never;
@@ -116,6 +132,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/uploadFile": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["uploadFile"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/posts": {
         parameters: {
             query?: never;
@@ -158,6 +190,38 @@ export interface paths {
         get?: never;
         put?: never;
         post: operations["purchaseItem"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/chat/room": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["createRoom"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/chat/admin/{adminId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["createRoomAdmin"];
         delete?: never;
         options?: never;
         head?: never;
@@ -308,6 +372,70 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/chat/user": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getUserInfo"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/chat/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["findChatRooms"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/chat/rooms": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getUserRooms"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/chat/message": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getMessages"];
+        put?: never;
+        post?: never;
+        delete: operations["deleteRoom"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/categories": {
         parameters: {
             query?: never;
@@ -423,6 +551,83 @@ export interface components {
             message: string;
             data: components["schemas"]["ProductPostResponse"];
         };
+        Category: {
+            /** Format: int64 */
+            id?: number;
+            name?: string;
+        };
+        Comment: {
+            id?: string;
+            content?: string;
+            target?: components["schemas"]["ProductPost"];
+            author?: components["schemas"]["User"];
+        };
+        GrantedAuthority: {
+            authority?: string;
+        };
+        ProductCategory: {
+            /** Format: int64 */
+            id?: number;
+            productPost?: components["schemas"]["ProductPost"];
+            category?: components["schemas"]["Category"];
+        };
+        ProductPost: {
+            id?: string;
+            productName?: string;
+            /** Format: int32 */
+            productPrice?: number;
+            buyer?: components["schemas"]["User"];
+            title?: string;
+            content?: string;
+            image_urls?: string;
+            /** Format: int32 */
+            likedCount?: number;
+            /** @enum {string} */
+            status?: "RESERVED" | "AVAILABLE" | "PURCHASED";
+            /** Format: float */
+            latitude?: number;
+            /** Format: float */
+            longitude?: number;
+            /** Format: date-time */
+            createdAt?: string;
+            /** Format: date-time */
+            modifiedAt?: string;
+            productCategories?: components["schemas"]["ProductCategory"][];
+            writer?: components["schemas"]["User"];
+            commentList?: components["schemas"]["Comment"][];
+            available?: boolean;
+        };
+        RsDataUser: {
+            code: string;
+            message: string;
+            data: components["schemas"]["User"];
+        };
+        User: {
+            id?: string;
+            /** Format: date-time */
+            createdAt?: string;
+            /** Format: date-time */
+            modifiedAt?: string;
+            username?: string;
+            password?: string;
+            email?: string;
+            nickname?: string;
+            address?: string;
+            profileUrl?: string;
+            /** Format: int32 */
+            cash?: number;
+            /** @enum {string} */
+            role?: "ADMIN" | "USER";
+            blocked?: boolean;
+            /** Format: int32 */
+            blockedCount?: number;
+            purchasedProducts?: components["schemas"]["ProductPost"][];
+            writtenProducts?: components["schemas"]["ProductPost"][];
+            wroteComments?: components["schemas"]["Comment"][];
+            admin?: boolean;
+            authorities?: components["schemas"]["GrantedAuthority"][];
+            memberAuthoritiesAsString?: string[];
+        };
         SignUpUserForm: {
             username?: string;
             password?: string;
@@ -498,6 +703,21 @@ export interface components {
             code: string;
             message: string;
             data: components["schemas"]["PaymentDto"];
+        };
+        ChatRoom: {
+            id?: string;
+            roomId?: string;
+            name?: string;
+            sender?: string;
+            receiver?: string;
+            client?: string;
+            /** Format: int64 */
+            userCount?: number;
+        };
+        RsDataChatRoom: {
+            code: string;
+            message: string;
+            data: components["schemas"]["ChatRoom"];
         };
         BanReqBody: {
             reason: string;
@@ -591,10 +811,37 @@ export interface components {
             message: string;
             data: components["schemas"]["PaymentMetaData"];
         };
-        Category: {
-            /** Format: int64 */
-            id?: number;
+        AccessProvider: {
             name?: string;
+            token?: string;
+        };
+        RsDataAccessProvider: {
+            code: string;
+            message: string;
+            data: components["schemas"]["AccessProvider"];
+        };
+        ChatRoomDto: {
+            postId?: string;
+            roomId?: string;
+            name?: string;
+            /** Format: int64 */
+            userCount?: number;
+        };
+        RsDataListChatRoomDto: {
+            code: string;
+            message: string;
+            data: components["schemas"]["ChatRoomDto"][];
+        };
+        MessageDto: {
+            sender?: string;
+            message?: string;
+            image?: string;
+            timestamp?: string;
+        };
+        RsDataListMessageDto: {
+            code: string;
+            message: string;
+            data: components["schemas"]["MessageDto"][];
         };
         RsDataListCategory: {
             code: string;
@@ -875,6 +1122,37 @@ export interface operations {
             };
         };
     };
+    grantAdmin: {
+        parameters: {
+            query: {
+                userId: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataUser"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataVoid"];
+                };
+            };
+        };
+    };
     createUser: {
         parameters: {
             query?: never;
@@ -990,6 +1268,42 @@ export interface operations {
                 };
                 content: {
                     "application/json;charset=UTF-8": components["schemas"]["RsDataLoginUserDto"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataVoid"];
+                };
+            };
+        };
+    };
+    uploadFile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /** Format: binary */
+                    file: string;
+                };
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": string;
                 };
             };
             /** @description Internal Server Error */
@@ -1125,6 +1439,68 @@ export interface operations {
                 };
                 content: {
                     "application/json;charset=UTF-8": components["schemas"]["RsDataPaymentDto"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataVoid"];
+                };
+            };
+        };
+    };
+    createRoom: {
+        parameters: {
+            query: {
+                postId: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataChatRoom"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataVoid"];
+                };
+            };
+        };
+    };
+    createRoomAdmin: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                adminId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataChatRoom"];
                 };
             };
             /** @description Internal Server Error */
@@ -1407,6 +1783,157 @@ export interface operations {
                 };
                 content: {
                     "application/json;charset=UTF-8": components["schemas"]["RsDataPaymentMetaData"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataVoid"];
+                };
+            };
+        };
+    };
+    getUserInfo: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataAccessProvider"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataVoid"];
+                };
+            };
+        };
+    };
+    findChatRooms: {
+        parameters: {
+            query: {
+                receiver: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataString"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataVoid"];
+                };
+            };
+        };
+    };
+    getUserRooms: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataListChatRoomDto"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataVoid"];
+                };
+            };
+        };
+    };
+    getMessages: {
+        parameters: {
+            query: {
+                roomId: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataListMessageDto"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataVoid"];
+                };
+            };
+        };
+    };
+    deleteRoom: {
+        parameters: {
+            query: {
+                roomId: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataString"];
                 };
             };
             /** @description Internal Server Error */
