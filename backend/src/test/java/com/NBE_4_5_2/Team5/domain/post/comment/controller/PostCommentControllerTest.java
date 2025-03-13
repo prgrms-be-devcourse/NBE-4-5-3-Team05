@@ -6,6 +6,7 @@ import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductPost;
 import com.NBE_4_5_2.Team5.domain.post.post.repository.ProductPostRepository;
 import com.NBE_4_5_2.Team5.domain.user.entity.User;
 import com.NBE_4_5_2.Team5.domain.user.service.UserService;
+import com.NBE_4_5_2.Team5.domain.user.service.email.EmailService;
 import com.NBE_4_5_2.Team5.global.config.BaseTestConfig;
 import com.NBE_4_5_2.Team5.global.config.Util;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -47,10 +48,13 @@ class PostCommentControllerTest {
 	private ObjectMapper objectMapper;
 	@Autowired
 	private CommentRepository commentRepository;
+	@Autowired
+	EmailService emailService;
 
 	@BeforeEach
 	void setUp() {
 		util.truncateAllTables();
+		emailService.saveVerificationCode("email", "verified"); // 이메일 인증이 통과되었다고 가정
 	}
 
 	@Test
@@ -87,7 +91,6 @@ class PostCommentControllerTest {
 	@Test
 	void updateTest() throws Exception {
 		//given
-
 		User author = userService.createUser("username", "password", "email", "nickname", "address", "url");
 
 		ProductPost productPost = productPostRepository.save(
@@ -149,7 +152,6 @@ class PostCommentControllerTest {
 	@Test
 	void deleteTest() throws Exception {
 		//given
-		// 로그인하고 Product Post 작성, comment 작성
 		User author = userService.createUser("username", "password", "email", "nickname", "address", "url");
 
 		ProductPost productPost = productPostRepository.save(

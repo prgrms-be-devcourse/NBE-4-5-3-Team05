@@ -2,7 +2,6 @@ package com.NBE_4_5_2.Team5.domain.user.service.email.service;
 
 import com.NBE_4_5_2.Team5.domain.user.service.email.EmailService;
 import com.NBE_4_5_2.Team5.global.config.BaseTestConfig;
-import com.NBE_4_5_2.Team5.global.config.email.TimeProvider;
 import com.NBE_4_5_2.Team5.global.exception.ServiceException;
 import jakarta.mail.internet.MimeMessage;
 import org.assertj.core.api.Assertions;
@@ -26,8 +25,6 @@ class EmailServiceTest{
     private JavaMailSender mailSender;
     @MockitoBean
     private BouncedEmailService bouncedEmailService;
-    @MockitoBean
-    private TimeProvider timeProvider;
     @Autowired
     private EmailService emailService;
     @Autowired
@@ -63,21 +60,21 @@ class EmailServiceTest{
     @Test
     @DisplayName("인증코드 발송 : 실패 : 존재하지 않는 이메일")
     void test2() {
-        // ✅ given: 반송된 이메일이라면 false 반환하도록 설정
+        // given: 반송된 이메일이라면 false 반환하도록 설정
         when(bouncedEmailService.checkBouncedEmail(testEmail)).thenReturn(false);
 
-        // ✅ when & then: 예외가 발생하는지 확인
+        // when & then: 예외가 발생하는지 확인
         ServiceException exception = assertThrows(ServiceException.class, () ->
                 emailService.checkBouncedEmail(testEmail)
         );
 
-        // ✅ 예외 메시지 검증
+        // 예외 메시지 검증
         assertAll(
                 () -> assertEquals("404-1", exception.getCode()),
                 () -> assertEquals("존재하지않는 이메일입니다.", exception.getMessage())
         );
 
-        // ✅ 실제 Redis에서 값이 삭제되었는지 확인
+        // 실제 Redis에서 값이 삭제되었는지 확인
         Assertions.assertThat(redisTemplate.hasKey(redisKey)).isFalse();
     }
 }
