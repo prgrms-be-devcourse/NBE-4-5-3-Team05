@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.annotation.Order;
 
+import com.NBE_4_5_2.Team5.domain.admin.service.AdminService;
 import com.NBE_4_5_2.Team5.domain.post.category.entity.Category;
 import com.NBE_4_5_2.Team5.domain.post.category.repository.CategoryRepository;
 import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductCategory;
@@ -35,6 +36,8 @@ public class BaseInitData {
 	@Autowired
 	@Lazy
 	private BaseInitData self;
+	@Autowired
+	private AdminService adminService;
 
 	@Bean
 	@Order(1)
@@ -51,7 +54,7 @@ public class BaseInitData {
 			self.categoryInit();
 		};
 	}
-	
+
 	@Bean
 	@Order(3)
 	public ApplicationRunner applicationRunner3() {
@@ -73,6 +76,7 @@ public class BaseInitData {
 			"https://example.com/default_profile.png");
 		userService.createUser("user3", "user31234@", "user3@gmail.com", "user3", "서울시 광진구",
 			"https://example.com/default_profile.png");
+		adminService.signUpAdmin("admin", "password", "admin@gmail.com");
 
 	}
 
