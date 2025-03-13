@@ -1,5 +1,9 @@
 package com.NBE_4_5_2.Team5.domain.admin.controller;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -11,6 +15,7 @@ import com.NBE_4_5_2.Team5.domain.admin.dto.BanListDto;
 import com.NBE_4_5_2.Team5.domain.admin.dto.BanResBody;
 import com.NBE_4_5_2.Team5.domain.admin.dto.NoticeResBody;
 import com.NBE_4_5_2.Team5.domain.admin.service.AdminService;
+import com.NBE_4_5_2.Team5.domain.user.dto.UserDto;
 import com.NBE_4_5_2.Team5.global.response.RsData;
 
 import jakarta.validation.Valid;
@@ -27,6 +32,7 @@ public class AdminController {
 	public record NoticeReqBody(@NotEmpty String title, @NotEmpty String content) {
 	}
 
+	@PreAuthorize("isAuthenticated()")
 	@PostMapping("/notices")
 	public RsData<NoticeResBody> writeNotice(@RequestBody @Valid NoticeReqBody body) {
 		NoticeResBody data = adminService.writeNotice(body.title(), body.content());
@@ -37,6 +43,7 @@ public class AdminController {
 	public record BanReqBody(@NotEmpty String reason) {
 	}
 
+	@PreAuthorize("isAuthenticated()")
 	@PostMapping("/users/{user-id}/ban")
 	public RsData<BanResBody> banUser(@PathVariable(name = "user-id") String userId,
 		@Valid @RequestBody BanReqBody reason) {
@@ -51,9 +58,18 @@ public class AdminController {
 		));
 	}
 
+	@PreAuthorize("isAuthenticated()")
 	@DeleteMapping("/posts/{post-id}")
 	public RsData<Void> deletePost(@PathVariable(name = "post-id") String postId) {
 		adminService.deletePost(postId);
 		return new RsData<>("204-1", "게시글 삭제 성공.");
 	}
+
+	@PreAuthorize("isAuthenticated()")
+	public RsData<Page<UserDto>> getUserList(@PageableDefault(size = 10, page = 1) Pageable pageable) {
+		Page<UserDto> users = adminService.getUsers(pageable);
+
+		return new RsData<>("200-1", "유저 리스트 조회 성공.", users);
+	}
+
 }
