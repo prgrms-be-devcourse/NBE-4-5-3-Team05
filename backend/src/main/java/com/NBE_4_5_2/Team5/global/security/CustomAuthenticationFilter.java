@@ -107,16 +107,16 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
 
     /**
      * accessToken 재발급 로직
-     *
+     * <p>
      * accessToken 재발급 시 refreshToken 또한 재발급하며 기존 refreshToken을 Redis에서 제거한다.
      * - 현재 refreshToken은 로그아웃 시에만 삭제되므로,
      * 사용자가 로그아웃하지 않는다면 탈취된 refreshToken으로 지속적인 재발급이 가능해지는 보안 문제가 발생한다.
-     *
-     *  1. Redis에 refreshToken을 저장하고 만료 시간을 설정하여 1차 방지
-     *  2. accessToken 재발급 시 기존 refreshToken을 저장소에서 제거하는 것으로 재발급을 1회로 제한하여 2차 방지
-     *
+     * <p>
+     * 1. Redis에 refreshToken을 저장하고 만료 시간을 설정하여 1차 방지
+     * 2. accessToken 재발급 시 기존 refreshToken을 저장소에서 제거하는 것으로 재발급을 1회로 제한하여 2차 방지
+     * <p>
      * ⚠️ 실제 사용자도 재발급이 1회만 가능해지기 때문에 사용자 경험이 저하될 수 있다.
-     *     이는 accessToken의 유효기간을 1시간으로 설정하여 보완한다.
+     * 이는 accessToken의 유효기간을 1시간으로 설정하여 보완한다.
      */
     private User getUserByAccessToken(String accessToken, String refreshToken) {
 
