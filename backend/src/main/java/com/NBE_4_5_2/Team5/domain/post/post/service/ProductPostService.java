@@ -99,7 +99,9 @@ public class ProductPostService {
 		ProductPost post = productPostRepository.findById(id).orElseThrow(
 			() -> new ServiceException("404", "해당 글은 존재하지 않습니다.")
 		);
-
+		//조회수 증가
+		post.incrementViewCount();
+		productPostRepository.save(post);
 		return ProductPostResponse.fromEntity(post);
 	}
 
@@ -161,6 +163,15 @@ public class ProductPostService {
 			post.getProductCategories().addAll(newProductCategories);
 		}
 
+		return ProductPostResponse.fromEntity(post);
+	}
+
+	//찜 기능 : 로그인한 유저가 찜을 누르면 찜 개수를 증가
+	public ProductPostResponse likePost(User actor, String postId) {
+		ProductPost post = productPostRepository.findById(postId)
+				.orElseThrow(() -> new ServiceException("404", "해당 글을 존재하지 않습니다."));
+		post.setLikedCount(post.getLikedCount() + 1);
+		productPostRepository.save(post);
 		return ProductPostResponse.fromEntity(post);
 	}
 

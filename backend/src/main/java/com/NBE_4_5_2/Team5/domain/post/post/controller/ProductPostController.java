@@ -150,6 +150,15 @@ public class ProductPostController {
 		);
 	}
 
+	//찜 엔드포인트
+	@PreAuthorize("isAuthenticated()")
+	@PostMapping("/{id}/like")
+	public RsData<ProductPostResponse> likePost(@PathVariable String id) {
+		User actor = rq.getUserIdentity();
+		ProductPostResponse response = productPostService.likePost(actor, id);
+		return new RsData<>("200", "찜 완료", response);
+	}
+
     // 내가 구매한 내역 조회
     @GetMapping("/my/purchases")
     public RsData<List<ProductPostResponse>> getMyPurchases() {

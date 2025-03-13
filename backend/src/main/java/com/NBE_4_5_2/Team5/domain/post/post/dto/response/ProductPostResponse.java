@@ -26,6 +26,8 @@ public class ProductPostResponse {
 	private LocalDateTime createdAt;    // 생성일
 	private LocalDateTime modifiedAt;   // 수정일
 
+	private Integer viewCount; // 조회수
+
 	public static ProductPostResponse fromEntity(ProductPost post) {
 		return new ProductPostResponse(
 			post.getId(),
@@ -42,7 +44,8 @@ public class ProductPostResponse {
 				.map(pc -> pc.getCategory().getName())
 				.collect(Collectors.toList()),
 			post.getCreatedAt(),
-			post.getModifiedAt()
+			post.getModifiedAt(),
+			post.getViewCount()
 
 		);
 	}
