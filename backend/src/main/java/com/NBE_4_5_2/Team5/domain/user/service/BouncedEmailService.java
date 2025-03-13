@@ -61,14 +61,14 @@ public class BouncedEmailService {
         return true;
     }
 
-    private LocalDateTime getMessageTime(Message message) throws MessagingException {
+    LocalDateTime getMessageTime(Message message) throws MessagingException {
         return message.getSentDate()
                 .toInstant()
                 .atZone(ZoneId.systemDefault())
                 .toLocalDateTime();
     }
 
-    private Folder getEmailFolder() {
+    Folder getEmailFolder() {
         try {
             Properties properties = new Properties();
             properties.put("mail.pop3.host", pop3Properties.getHost());
