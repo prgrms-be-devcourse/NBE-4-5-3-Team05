@@ -1,5 +1,6 @@
-package com.NBE_4_5_2.Team5.domain.user.service;
+package com.NBE_4_5_2.Team5.domain.user.service.email;
 
+import com.NBE_4_5_2.Team5.domain.user.service.email.service.BouncedEmailService;
 import com.NBE_4_5_2.Team5.global.exception.ServiceException;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;

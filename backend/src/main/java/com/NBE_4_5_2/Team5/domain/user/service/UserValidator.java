@@ -2,6 +2,7 @@ package com.NBE_4_5_2.Team5.domain.user.service;
 
 import com.NBE_4_5_2.Team5.domain.user.entity.User;
 import com.NBE_4_5_2.Team5.domain.user.repository.UserRepository;
+import com.NBE_4_5_2.Team5.domain.user.service.email.EmailService;
 import com.NBE_4_5_2.Team5.global.exception.ServiceException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;

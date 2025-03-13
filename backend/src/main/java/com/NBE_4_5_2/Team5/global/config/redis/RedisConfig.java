@@ -1,4 +1,4 @@
-package com.NBE_4_5_2.Team5.global.config;
+package com.NBE_4_5_2.Team5.global.config.redis;
 
 import com.NBE_4_5_2.Team5.global.redis.RedisSubscriber;
 import lombok.RequiredArgsConstructor;

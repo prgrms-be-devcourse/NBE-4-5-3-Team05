@@ -2,7 +2,7 @@ package com.NBE_4_5_2.Team5.domain.user.controller;
 
 import com.NBE_4_5_2.Team5.domain.user.dto.AuthToken;
 import com.NBE_4_5_2.Team5.domain.user.entity.User;
-import com.NBE_4_5_2.Team5.domain.user.service.EmailService;
+import com.NBE_4_5_2.Team5.domain.user.service.email.EmailService;
 import com.NBE_4_5_2.Team5.domain.user.service.UserService;
 import com.NBE_4_5_2.Team5.global.config.BaseTestConfig;
 import jakarta.servlet.http.Cookie;

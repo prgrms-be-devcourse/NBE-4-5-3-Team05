@@ -1,4 +1,4 @@
-package com.NBE_4_5_2.Team5.global.config;
+package com.NBE_4_5_2.Team5.global.config.email;
 
 import lombok.Getter;
 import lombok.Setter;

@@ -1,6 +1,7 @@
-package com.NBE_4_5_2.Team5.domain.user.service;
+package com.NBE_4_5_2.Team5.domain.user.service.email.service;
 
-import com.NBE_4_5_2.Team5.global.config.Pop3Properties;
+import com.NBE_4_5_2.Team5.global.config.email.Pop3Properties;
+import com.NBE_4_5_2.Team5.global.config.email.TimeProvider;
 import com.NBE_4_5_2.Team5.global.exception.ServiceException;
 import jakarta.mail.*;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,7 @@ public class BouncedEmailService {
 
     private final Pop3Properties pop3Properties;
     private static final String FAILED_RECIPIENTS_HEADER = "X-Failed-Recipients";
+    private final TimeProvider timeProvider;
 
     /**
      * 발송된 이메일 주소가 존재하는 이메일인지 확인
@@ -27,7 +29,7 @@ public class BouncedEmailService {
      * */
     public boolean checkBouncedEmail(String email) {
         try {
-            Thread.sleep(3000); // 반송 메일이 도착하기까지 대기
+            timeProvider.sleep(3000); // 반송 메일이 도착하기까지 대기
             Folder emailFolder = getEmailFolder();
             LocalDateTime untilTime = LocalDateTime.now().minusSeconds(pop3Properties.getUntilTime()); // 현재시간 - 2분
 
@@ -87,4 +89,5 @@ public class BouncedEmailService {
             throw new ServiceException("404-1", "반송 메일을 찾기 못했습니다.");
         }
     }
+
 }

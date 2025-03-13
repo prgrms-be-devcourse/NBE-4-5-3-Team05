@@ -1,6 +1,8 @@
-package com.NBE_4_5_2.Team5.domain.user.service;
+package com.NBE_4_5_2.Team5.domain.user.service.email.service;
 
+import com.NBE_4_5_2.Team5.domain.user.service.email.EmailService;
 import com.NBE_4_5_2.Team5.global.config.BaseTestConfig;
+import com.NBE_4_5_2.Team5.global.config.email.TimeProvider;
 import com.NBE_4_5_2.Team5.global.exception.ServiceException;
 import jakarta.mail.internet.MimeMessage;
 import org.assertj.core.api.Assertions;
@@ -24,6 +26,8 @@ class EmailServiceTest{
     private JavaMailSender mailSender;
     @MockitoBean
     private BouncedEmailService bouncedEmailService;
+    @MockitoBean
+    private TimeProvider timeProvider;
     @Autowired
     private EmailService emailService;
     @Autowired
@@ -76,6 +80,4 @@ class EmailServiceTest{
         // ✅ 실제 Redis에서 값이 삭제되었는지 확인
         Assertions.assertThat(redisTemplate.hasKey(redisKey)).isFalse();
     }
-
-
 }

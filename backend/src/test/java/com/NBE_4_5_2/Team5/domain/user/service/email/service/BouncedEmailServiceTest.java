@@ -1,6 +1,7 @@
-package com.NBE_4_5_2.Team5.domain.user.service;
+package com.NBE_4_5_2.Team5.domain.user.service.email.service;
 
-import com.NBE_4_5_2.Team5.global.config.Pop3Properties;
+import com.NBE_4_5_2.Team5.global.config.email.Pop3Properties;
+import com.NBE_4_5_2.Team5.global.config.email.TimeProvider;
 import jakarta.mail.Flags;
 import jakarta.mail.Folder;
 import jakarta.mail.Message;
@@ -23,7 +24,8 @@ class BouncedEmailServiceTest {
 
     @Mock
     private Pop3Properties pop3Properties;
-
+    @Mock
+    private TimeProvider timeProvider;
     @InjectMocks
     private BouncedEmailService bouncedEmailService;
 
