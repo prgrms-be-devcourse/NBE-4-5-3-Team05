@@ -34,7 +34,7 @@ public class EmailService {
 
         try {
             String code = generateVerificationCode();
-            String subject = "요청하신 이메일 변경 인증 코드는 %s입니다.".formatted(code);
+            String subject = "요청하신 이메일 인증 코드는 %s입니다.".formatted(code);
             String htmlContent = loadHtmlTemplate("templates/email/email-template.html").replace("{{CODE}}", code);
 
             sendHtmlEmail(email, subject, htmlContent);

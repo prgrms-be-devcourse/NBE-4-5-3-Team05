@@ -12,23 +12,17 @@ import org.springframework.stereotype.Component;
 public class UserValidator {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
 
-    public void duplicate(String username, String email, String nickname) {
-        // TODO : select 3번 발생 최적화 필요
-        userRepository.findByUsername(username)
-                .ifPresent(user -> {
-                    throw new ServiceException("409-1", "이미 사용중인 아이디입니다.");
-                });
+    public void duplicate(String username, String nickname) {
 
-        userRepository.findByEmail(email)
-                .ifPresent(user -> {
-                    throw new ServiceException("409-2", "이미 사용중인 이메일입니다.");
-                });
+        if (userRepository.existsByUsername(username)) {
+            throw new ServiceException("409-1", "이미 사용중인 아이디입니다.");
+        }
 
-        userRepository.findByNickname(nickname)
-                .ifPresent(user -> {
-                    throw new ServiceException("409-3", "이미 사용중인 닉네임입니다.");
-                });
+        if(userRepository.existsByNickname(nickname)) {
+            throw new ServiceException("409-3", "이미 사용중인 닉네임입니다.");
+        }
 
     }
 
@@ -41,6 +35,20 @@ public class UserValidator {
             throw new ServiceException("401-2", "비밀번호가 일치하지 않습니다.");
         }
         return user;
+
+    }
+
+    public void emailVerified(String email) {
+
+        if (userRepository.existsByEmail(email)) {
+            throw new ServiceException("400-EMAIL-ALREADY-EXISTS", "이미 사용 중인 이메일입니다.");
+        }
+
+        // 해당 이메일에 대한 인증이 완료되었는지 검증
+        String verificationCode = emailService.getVerificationCode(email);
+        if (verificationCode == null || !verificationCode.equals("verified")) {
+            throw new ServiceException("400-EMAIL-VERIFICATION-REQUIRED", "이메일 인증이 완료되지 않았습니다. 인증 후 다시 시도해주세요.");
+        }
 
     }
 }
