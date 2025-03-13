@@ -61,8 +61,8 @@ export default function ClientLayout({
             </Link>
           )}
         </header>
-        <div className="flex-grow">{children}</div>
-        <footer>푸터</footer>
+        <div className="flex-1">{children}</div>
+        <footer className="h-10">푸터</footer>
       </body>
     </html>
   );
