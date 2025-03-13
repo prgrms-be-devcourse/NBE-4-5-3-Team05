@@ -180,6 +180,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/posts/{id}/like": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["likePost"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/payments": {
         parameters: {
             query?: never;
@@ -452,6 +468,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/admin/notices/latest": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getLatestNotices"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/admin/posts/{post-id}": {
         parameters: {
             query?: never;
@@ -549,6 +581,10 @@ export interface components {
             createdAt?: string;
             /** Format: date-time */
             modifiedAt?: string;
+            /** Format: int32 */
+            viewCount?: number;
+            /** Format: int32 */
+            likedCount?: number;
         };
         RsDataProductPostResponse: {
             code: string;
@@ -585,7 +621,7 @@ export interface components {
             content?: string;
             image_urls?: string;
             /** Format: int32 */
-            likedCount?: number;
+            viewCount?: number;
             /** @enum {string} */
             status?: "RESERVED" | "AVAILABLE" | "PURCHASED";
             /** Format: float */
@@ -789,6 +825,10 @@ export interface components {
             thumbNail?: string;
             /** Format: date-time */
             createdAt?: string;
+            /** Format: int32 */
+            viewCount?: number;
+            /** Format: int32 */
+            likedCount?: number;
         };
         RsDataPageDtoPreviewPostResponse: {
             code: string;
@@ -851,6 +891,11 @@ export interface components {
             code: string;
             message: string;
             data: components["schemas"]["Category"][];
+        };
+        RsDataListNoticeResBody: {
+            code: string;
+            message: string;
+            data: components["schemas"]["NoticeResBody"][];
         };
         RsDataObject: {
             code: string;
@@ -1423,6 +1468,37 @@ export interface operations {
             };
         };
     };
+    likePost: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataProductPostResponse"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataVoid"];
+                };
+            };
+        };
+    };
     purchaseItem: {
         parameters: {
             query?: never;
@@ -1967,6 +2043,35 @@ export interface operations {
                 };
                 content: {
                     "application/json;charset=UTF-8": components["schemas"]["RsDataListCategory"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataVoid"];
+                };
+            };
+        };
+    };
+    getLatestNotices: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataListNoticeResBody"];
                 };
             };
             /** @description Internal Server Error */

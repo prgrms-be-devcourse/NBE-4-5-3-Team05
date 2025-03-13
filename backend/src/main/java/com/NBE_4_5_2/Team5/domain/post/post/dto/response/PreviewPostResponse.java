@@ -23,6 +23,9 @@ public class PreviewPostResponse {
 	private String thumbNail;
 	private LocalDateTime createdAt;
 
+	private Integer viewCount;
+	private Integer likedCount;
+
 	public static PreviewPostResponse fromEntity(ProductPost post) {
 		return PreviewPostResponse.builder()
 			.id(post.getId())
@@ -35,7 +38,28 @@ public class PreviewPostResponse {
 			.longitude(post.getLongitude())
 			.thumbNail(post.getImage_urls().split(",")[0])
 			.createdAt(post.getCreatedAt())
+			.viewCount(post.getViewCount())
+			.likedCount(0)
 			.build();
 	}
+	public static PreviewPostResponse fromEntityWithLikeCount(ProductPost post, int likedCount) {
+		return PreviewPostResponse.builder()
+				.id(post.getId())
+				.productName(post.getProductName())
+				.productPrice(post.getProductPrice())
+				.title(post.getTitle())
+				.writerId(post.getWriter().getId())
+				.writerName(post.getWriter().getNickname())
+				.latitude(post.getLatitude())
+				.longitude(post.getLongitude())
+				.thumbNail(post.getImage_urls() != null && !post.getImage_urls().trim().isEmpty()
+						? post.getImage_urls().split(",")[0]
+						: "")
+				.createdAt(post.getCreatedAt())
+				.viewCount(post.getViewCount())
+				.likedCount(likedCount)
+				.build();
+	}
+
 
 }

@@ -3,23 +3,10 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
+import type { components } from "@/lib/backend/apiV1/schema";
 
-// AWS S3 업로드 API 호출 함수
-const uploadFile = async (file: File): Promise<string> => {
-  const formData = new FormData();
-  formData.append("file", file);
-  const response = await axios.post("/api/uploadFile", formData, {
-    headers: { "Content-Type": "multipart/form-data" },
-    withCredentials: true, // 쿠키 전송
-  });
-  return response.data;
-};
-
-// 카테고리 인터페이스 (백엔드의 Category 엔티티와 일치)
-interface Category {
-  id: number;
-  name: string;
-}
+// OpenAPI 스키마의 Category 타입 사용 (선택적 속성일 수 있으므로 필요한 경우 non-null assertion이나 default 값을 설정)
+type Category = components["schemas"]["Category"];
 
 export default function PostCreatePage() {
   const router = useRouter();
@@ -53,13 +40,25 @@ export default function PostCreatePage() {
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
   // 업로드된 이미지 URL 리스트
   const [imageUrlList, setImageUrlList] = useState<string[]>([]);
-  // 백엔드에서 불러온 카테고리 목록 state
+  // 백엔드에서 불러온 카테고리 목록 state (OpenAPI 스키마의 Category 타입 사용)
   const [categories, setCategories] = useState<Category[]>([]);
 
-  // 백엔드에서 카테고리 목록 불러오기
+  // AWS S3 업로드 API 호출 함수
+  const uploadFile = async (file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append("file", file);
+    const response = await axios.post("/api/uploadFile", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+      withCredentials: true,
+    });
+    return response.data;
+  };
+
+  // 백엔드에서 카테고리 목록 불러오기 (스키마 기반 타입 사용)
   useEffect(() => {
     async function fetchCategories() {
       try {
+        // schema.d.ts에 정의된 Category 배열을 반환하는 엔드포인트 호출
         const res = await axios.get<{
           code: string;
           message: string;
@@ -67,6 +66,7 @@ export default function PostCreatePage() {
         }>("/api/categories", {
           withCredentials: true,
         });
+        // 필요시 undefined 속성을 보완할 수 있음
         setCategories(res.data.data);
       } catch (err) {
         console.error("카테고리 로드 실패", err);
@@ -105,7 +105,7 @@ export default function PostCreatePage() {
 
       await axios.post("/api/posts", data, {
         headers: { "Content-Type": "application/json" },
-        withCredentials: true, // 쿠키 전송
+        withCredentials: true,
       });
 
       router.push("/posts");
@@ -167,7 +167,7 @@ export default function PostCreatePage() {
           >
             <option value="">카테고리 선택</option>
             {categories.map((cat) => (
-              <option key={cat.id} value={cat.id}>
+              <option key={cat.id!} value={cat.id!}>
                 {cat.name}
               </option>
             ))}

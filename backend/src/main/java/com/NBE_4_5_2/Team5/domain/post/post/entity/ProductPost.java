@@ -67,11 +67,6 @@ public class ProductPost {
 	@Setter
 	private String image_urls; // 쉼표가 포함된 url 문자열
 
-	@Column(nullable = false)
-	@Setter
-	@Builder.Default
-	private Integer likedCount = 0;
-
 	//조회수
 	@Column(nullable = false)
 	@Builder.Default
@@ -180,4 +175,5 @@ public class ProductPost {
 	public void incrementViewCount() {
 		this.viewCount++;
 	}
+
 }

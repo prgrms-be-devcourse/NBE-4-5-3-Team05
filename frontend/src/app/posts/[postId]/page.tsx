@@ -1,11 +1,10 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import { useParams, useRouter } from "next/navigation";
+import axios from "axios";
 import type { components } from "@/lib/backend/apiV1/schema";
 
-// OpenAPI 스키마에서 생성된 타입을 사용
 type ProductPostResponse = components["schemas"]["ProductPostResponse"];
 type RsDataProductPostResponse = {
   code: string;
@@ -13,62 +12,118 @@ type RsDataProductPostResponse = {
   data: ProductPostResponse;
 };
 
-export default function PostDetailPage() {
-  const { postId } = useParams<{ postId: string }>(); // URL: /posts/[postId]
-  const router = useRouter();
+// 수정된 찜한 내역 API 응답 타입 – 백엔드에서 ProductPostResponse 배열 반환
+type RsDataFavorites = {
+  code: string;
+  message: string;
+  data: ProductPostResponse[];
+};
 
+export default function PostDetailPage() {
+  const { postId } = useParams<{ postId: string }>();
+  const router = useRouter();
   const [post, setPost] = useState<ProductPostResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
+  const [likeLoading, setLikeLoading] = useState<boolean>(false);
+  const [liked, setLiked] = useState<boolean>(false);
+
+  // 로그인 상태 체크 함수
+  const checkLoginStatus = async (): Promise<boolean> => {
+    try {
+      // 로그인 여부를 확인하는 API 호출 (/api/users/me)
+      await axios.get("/api/users/me", { withCredentials: true });
+      return true;
+    } catch (err) {
+      return false;
+    }
+  };
+
+  // 게시글 상세 조회 (백엔드에서 조회수 증가 처리)
+  const fetchPost = async () => {
+    if (!postId) return;
+    try {
+      const response = await axios.get<RsDataProductPostResponse>(
+        `/api/posts/${postId}`,
+        { withCredentials: true }
+      );
+      setPost(response.data.data);
+      setLoading(false);
+    } catch (err) {
+      console.error("게시글 상세 조회 실패", err);
+      setError("게시글 정보를 불러올 수 없습니다.");
+      setLoading(false);
+    }
+  };
+
+  // 사용자의 찜한 내역을 불러와 현재 게시글이 찜되었는지 확인
+  const fetchUserFavorites = async () => {
+    // 먼저 로그인 상태 체크
+    const isLoggedIn = await checkLoginStatus();
+    if (!isLoggedIn) {
+      // 로그인 안되어 있으면 찜한 내역을 불러오지 않음
+      return;
+    }
+    try {
+      const response = await axios.get<RsDataFavorites>(
+        "/api/posts/my/favorites",
+        { withCredentials: true }
+      );
+      const favorites = response.data.data; // ProductPostResponse[]
+      if (post?.id && favorites.some((fav) => fav.id === post.id)) {
+        setLiked(true);
+      }
+    } catch (err) {
+      console.error("찜한 내역 조회 실패", err);
+    }
+  };
 
   useEffect(() => {
-    if (!postId) return;
-
-    async function fetchPost() {
-      try {
-        const response = await axios.get<RsDataProductPostResponse>(
-          `/api/posts/${postId}`,
-          {
-            withCredentials: true,
-          }
-        );
-        setPost(response.data.data);
-        setLoading(false);
-      } catch (err) {
-        console.error("게시글 상세 조회 실패", err);
-        setError("게시글 정보를 불러올 수 없습니다.");
-        setLoading(false);
-      }
-    }
-
     fetchPost();
   }, [postId]);
 
-  if (loading) {
-    return <div className="p-4">로딩 중...</div>;
-  }
+  useEffect(() => {
+    if (post) {
+      fetchUserFavorites();
+    }
+  }, [post]);
 
-  if (error) {
-    return <div className="p-4 text-red-500">{error}</div>;
-  }
+  const handleLike = async () => {
+    if (!post) return;
+    // 로그인 상태 체크
+    const isLoggedIn = await checkLoginStatus();
+    if (!isLoggedIn) {
+      alert("먼저 로그인을 해주세요.");
+      router.push("/user/login");
+      return;
+    }
+    setLikeLoading(true);
+    try {
+      const response = await axios.post<RsDataProductPostResponse>(
+        `/api/posts/${post.id}/like`,
+        null,
+        { withCredentials: true }
+      );
+      setPost(response.data.data);
+      setLiked(true);
+    } catch (err) {
+      console.error("찜 처리 실패", err);
+    }
+    setLikeLoading(false);
+  };
 
-  if (!post) {
-    return <div className="p-4">게시글 정보를 찾을 수 없습니다.</div>;
-  }
+  if (loading) return <div className="p-4">로딩 중...</div>;
+  if (error) return <div className="p-4 text-red-500">{error}</div>;
+  if (!post) return <div className="p-4">게시글 정보를 찾을 수 없습니다.</div>;
 
-  // imageUrls는 쉼표로 구분된 문자열로 전송된다고 가정
   const images = post.imageUrls ? post.imageUrls.split(",") : [];
 
   return (
     <div className="p-4">
-      {/* 배너 영역 */}
       <div className="bg-gray-800 text-white p-4 rounded mb-4">
         <h1 className="text-2xl font-bold">길게 볼 장터</h1>
       </div>
-
-      {/* 상단 레이아웃: 사진 + 유저 정보 */}
       <div className="flex flex-col md:flex-row gap-4">
-        {/* 사진 영역 */}
         <div className="flex-1 bg-gray-100 rounded p-4">
           <h2 className="text-xl font-semibold mb-2">사진</h2>
           {images.length > 0 ? (
@@ -83,8 +138,6 @@ export default function PostDetailPage() {
             </div>
           )}
         </div>
-
-        {/* 유저 정보 + 판매자 정보 */}
         <div className="w-full md:w-1/3 bg-blue-50 rounded p-4">
           <h2 className="text-xl font-semibold mb-2">유저 정보</h2>
           <ul className="space-y-1">
@@ -92,7 +145,6 @@ export default function PostDetailPage() {
             <li>작성자 닉네임: {post.writerName}</li>
           </ul>
           <div className="mt-4">
-            {/* 채팅 걸기 버튼 - 로그인하지 않아도 상세조회는 공개이지만 채팅은 별도 */}
             <button
               onClick={() => router.push(`/chat/${post.id}`)}
               className="px-4 py-2 bg-blue-500 text-white rounded"
@@ -102,8 +154,6 @@ export default function PostDetailPage() {
           </div>
         </div>
       </div>
-
-      {/* 중간 레이아웃: 판매글 정보 */}
       <div className="mt-4 bg-white rounded p-4 shadow">
         <div className="flex flex-col gap-2 md:flex-row md:justify-between md:items-center">
           <h2 className="text-2xl font-bold">{post.title}</h2>
@@ -114,7 +164,8 @@ export default function PostDetailPage() {
                 ? new Date(post.createdAt).toLocaleDateString()
                 : ""}
             </span>
-            {/* 필요하다면 조회수, 찜 횟수, 상태 등 추가 (스키마에 없으면 제외) */}
+            <span className="mr-2">조회수: {post.viewCount}</span>
+            <span className="mr-2">찜: {post.likedCount}</span>
           </div>
         </div>
         <hr className="my-2" />
@@ -153,8 +204,15 @@ export default function PostDetailPage() {
           </div>
         )}
       </div>
-
-      {/* 댓글 영역은 스키마에 포함되어 있지 않아 생략 (필요 시 별도 API 호출) */}
+      <div className="mt-4">
+        <button
+          disabled={likeLoading || liked}
+          onClick={handleLike}
+          className="px-4 py-2 bg-red-500 text-white rounded"
+        >
+          {liked ? "찜 완료" : likeLoading ? "처리 중..." : "찜하기"}
+        </button>
+      </div>
     </div>
   );
 }

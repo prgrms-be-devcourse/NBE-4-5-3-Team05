@@ -84,7 +84,7 @@ public class ProductPostController {
 	}
 
 	@GetMapping("/{id}")
-	@Transactional(readOnly = true)
+	@Transactional(readOnly = false)
 	public RsData<ProductPostResponse> getPost(@PathVariable String id) {
 		// 인증되지 않은 경우에도 게시글 상세 조회가 가능하도록 수정
 		ProductPostResponse postResponse = productPostService.getPost(id);
@@ -150,7 +150,7 @@ public class ProductPostController {
 		);
 	}
 
-	//찜 엔드포인트
+	/// 찜(좋아요) 엔드포인트 – 한 유저가 한 게시글에 대해 한 번만 찜할 수 있음
 	@PreAuthorize("isAuthenticated()")
 	@PostMapping("/{id}/like")
 	public RsData<ProductPostResponse> likePost(@PathVariable String id) {
@@ -159,7 +159,7 @@ public class ProductPostController {
 		return new RsData<>("200", "찜 완료", response);
 	}
 
-    // 내가 구매한 내역 조회
+    /// 내가 구매한 내역 조회
     @GetMapping("/my/purchases")
     public RsData<List<ProductPostResponse>> getMyPurchases() {
         User actor = rq.getUserIdentity();
@@ -173,7 +173,7 @@ public class ProductPostController {
 		);
 	}
 
-	// 내가 판매한 내역
+	/// 내가 판매한 내역
 	@PreAuthorize("isAuthenticated()")
 	@GetMapping("/my/sales")
 	public RsData<List<ProductPostResponse>> getMySales() {
@@ -187,7 +187,7 @@ public class ProductPostController {
 		);
 	}
 
-	// 내가 찜한 내역
+	/// 내가 찜한 내역
 	@PreAuthorize("isAuthenticated()")
 	@GetMapping("/my/favorites")
 	public RsData<List<ProductPostResponse>> getMyFavorites() {
