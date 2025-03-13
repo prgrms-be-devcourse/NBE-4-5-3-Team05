@@ -16,7 +16,7 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ setPage }) => {
   return (
-    <div className="w-64 h-screen bg-gray-900 text-white p-5 flex flex-col gap-4">
+    <div className="w-64 bg-gray-900 text-white p-5 flex flex-col gap-4">
       <button
         onClick={() => setPage("ProductList")}
         className="flex items-center gap-2 p-3 hover:bg-gray-700 rounded"
@@ -63,7 +63,7 @@ const Content: React.FC<ContentProps> = ({ page }) => {
 const SidebarLayout: React.FC = () => {
   const [page, setPage] = useState<PageType>("ProductList");
   return (
-    <div className="flex h-screen">
+    <div className="flex ">
       <Sidebar setPage={setPage} />
       <Content page={page} />
     </div>
