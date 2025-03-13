@@ -15,22 +15,31 @@ export default function ClientPage({
   cookie: string;
 }) {
     const deleteRoom = async () => {
-        const deleteResponse = await fetch(`http://localhost:8080/api/chat/message/${roomId}`, {
-            method: 'DELETE',
+        const response = await client.DELETE(`/api/chat/message`, { // 이때 URL 경로는 고정
             headers: {
-                'Content-Type': 'application/json',
                 cookie: cookie,
             },
-            credentials: 'include'
+            params: { 
+                query:{
+                    roomId,
+                }
+            },
+            credentials: 'include',
         });
-        
-        if (!deleteResponse.ok) {
-            const errorData=await deleteResponse.json();
-            console.error("삭제 실패:", errorData);
+        const rsData=response.data!!;        
+
+        if (rsData.code!="200") {
+            console.error("삭제 실패:", rsData.message);
             alert("채팅방 삭제에 실패했습니다.");
         } else {
             alert("채팅방 삭제가 완료되었습니다.");
             window.location.href = "/chat"; // 메인 페이지로 리다이렉트
+        }
+    };
+
+    const handleDelete = () => {
+        if (window.confirm("메세지가 삭제됩니다. 정말로 나가시겠습니까? ")) {
+          deleteRoom(); // 사용자 확인 시 삭제 호출
         }
     };
     
@@ -38,7 +47,7 @@ export default function ClientPage({
     <div>
         <h1 className="text-xl font-bold mb-4">{title}</h1>
         <button 
-          onClick={deleteRoom} // 삭제 함수 호출
+          onClick={handleDelete} // 삭제 함수 호출
           className="mb-4 px-4 py-2 bg-red-600 text-white rounded"
         >
           채팅방 나가기

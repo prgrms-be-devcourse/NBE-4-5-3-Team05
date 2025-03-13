@@ -155,9 +155,9 @@ public class ChatRoomController {
     }
 
     // 채팅방 삭제
-    @DeleteMapping("/message/{roomId}")
+    @DeleteMapping("/message")
     @ResponseBody
-    public RsData<?> deleteRoom(@PathVariable String roomId) {
+    public RsData<?> deleteRoom(@RequestParam String roomId) {
         User userIdentity = rq.getUserIdentity();
         User user = rq.getRealActor(userIdentity);
         chatRoomService.deleteChatRoom(roomId,user.getNickname());
