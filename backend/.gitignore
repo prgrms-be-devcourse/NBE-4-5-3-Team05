@@ -39,7 +39,6 @@ nbdist/
 
 ### 🛠 환경 설정 파일 ###
 /src/main/resources/application.properties
-/src/main/resources/*.yml
 gradle
 
 ### custom ###
@@ -60,6 +59,4 @@ Dockerfile
 ### 💡 특정 데이터 폴더 무시 ###
 data/
 db_dev.mv.db  # H2 데이터베이스 파일도 무시
-gradle
-src/main/resources/application*.yml
 apiV1.json
