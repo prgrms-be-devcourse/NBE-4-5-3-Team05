@@ -664,8 +664,8 @@ export interface components {
             purchasedProducts?: components["schemas"]["ProductPost"][];
             writtenProducts?: components["schemas"]["ProductPost"][];
             wroteComments?: components["schemas"]["Comment"][];
-            admin?: boolean;
             authorities?: components["schemas"]["GrantedAuthority"][];
+            admin?: boolean;
             memberAuthoritiesAsString?: string[];
         };
         SignUpUserForm: {
@@ -825,6 +825,7 @@ export interface components {
             thumbNail?: string;
             /** Format: date-time */
             createdAt?: string;
+            imageUrls?: string;
             /** Format: int32 */
             viewCount?: number;
             /** Format: int32 */

@@ -4,7 +4,8 @@ import React from "react";
 import Link from "next/link";
 import type { components } from "@/lib/backend/apiV1/schema";
 
-export type Post = components["schemas"]["ProductPostResponse"];
+// PreviewPostResponse 타입을 사용하는 경우
+export type Post = components["schemas"]["PreviewPostResponse"];
 
 interface PostListProps {
   posts: Post[];
@@ -18,9 +19,7 @@ export default function PostList({ posts }: PostListProps) {
   return (
     <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {posts.map((post) => {
-        const thumbNail = post.imageUrls?.trim()
-          ? post.imageUrls.split(",")[0]
-          : "";
+        const thumbNail = post.thumbNail?.trim() || "";
         return (
           <li key={post.id} className="border rounded p-4 shadow">
             <Link href={`/posts/${post.id}`} className="block hover:opacity-90">
