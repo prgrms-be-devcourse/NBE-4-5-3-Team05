@@ -1,0 +1,12 @@
+version: 0.0
+os: linux
+files:
+  # Copy deploy.zip from the bundle to the target directory
+  - source: /
+    destination: /home/ubuntu/app
+
+hooks:
+  ApplicationStart:
+    - location: scripts/start_app.sh
+      timeout: 300
+      runas: root

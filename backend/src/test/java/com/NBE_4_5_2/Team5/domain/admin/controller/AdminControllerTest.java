@@ -50,7 +50,7 @@ import jakarta.servlet.http.Cookie;
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-@Order(-100)
+@Order(100)
 @Import({TestConfig.class})
 @Testcontainers
 @TestPropertySource(properties = "custom.refreshToken.expire-seconds=3600")

@@ -7,7 +7,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.List;
 
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -55,11 +54,6 @@ class CustomAuthenticationFilterTest extends RedisTestContainerConfig {
 		AuthToken authToken = userService.generateAuthtoken(loginedUser);
 		validRefreshToken = authToken.refreshToken();
 		validAccessToken = authToken.accessToken();
-	}
-
-	@AfterAll
-	static void stopRedisContainer() {
-		RedisTestContainerConfig.stopContainer();
 	}
 
 	@Test

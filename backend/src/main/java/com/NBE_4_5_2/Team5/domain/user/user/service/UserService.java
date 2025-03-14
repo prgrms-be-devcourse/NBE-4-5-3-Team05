@@ -21,7 +21,6 @@ import com.NBE_4_5_2.Team5.global.exception.ServiceException;
 import com.NBE_4_5_2.Team5.global.exception.security.AuthenticationNotFoundException;
 import com.NBE_4_5_2.Team5.global.exception.security.AuthenticationNotValidException;
 import com.NBE_4_5_2.Team5.global.exception.security.TokenNotFoundException;
-import com.NBE_4_5_2.Team5.global.exception.security.TokenNotValidException;
 import com.NBE_4_5_2.Team5.global.exception.validation.AlreadyUsedException;
 import com.NBE_4_5_2.Team5.global.security.SecurityUser;
 
@@ -134,16 +133,20 @@ public class UserService {
 	 * @param refreshToken 검증할 refreshToken
 	 * @throws ServiceException 사용자의 userId로 된 refreshToken이 존재하지 않거나 값이 일치하지 않을 경우
 	 */
-	public void validateRefreshToken(User user, String refreshToken) {
-		String userId = user.getId();
+	public String refreshAccessToken(String refreshToken) {
 
-		String storedRefreshToken = redisService.getTokenByUserId(userId)
-			.map(RefreshToken::getRefreshToken)
-			.orElseThrow(() -> new TokenNotFoundException("401-1", "로그인이 필요합니다."));
+		Optional<RefreshToken> tokenByRefreshToken = redisService.getTokenByRefreshToken(refreshToken);
 
-		if (!storedRefreshToken.equals(refreshToken)) {
-			throw new TokenNotValidException("401-2", "유효하지 않은 RefreshToken입니다.");
+		if (tokenByRefreshToken.isEmpty()) {
+			throw new ServiceException("401-1", "유효하지 않은 RefreshToken입니다.");
 		}
+
+		String userId = tokenByRefreshToken.get().getUserId().substring("refreshToken:".length());
+		redisService.deleteTokenByUserId(userId);
+
+		return userRepository.findById(userId)
+			.map(authTokenService::generateAccessToken)
+			.orElseThrow(() -> new ServiceException("404-1", "존재하지 않는 회원의 refreshToken입니다."));
 	}
 
 	/**

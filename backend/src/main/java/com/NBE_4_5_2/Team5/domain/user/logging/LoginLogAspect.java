@@ -7,7 +7,7 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Component;
 
-import com.NBE_4_5_2.Team5.domain.user.controller.UserController;
+import com.NBE_4_5_2.Team5.domain.user.user.controller.UserController;
 import com.NBE_4_5_2.Team5.global.dto.RsData;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -23,7 +23,7 @@ public class LoginLogAspect {
 	private final HttpServletRequest request;
 
 	@Around("""
-		execution(* com.NBE_4_5_2.Team5.domain.user.controller.UserController.loginUser(..))""")
+		execution(* com.NBE_4_5_2.Team5.domain.user.user.controller.UserController.loginUser(..))""")
 	public Object userLoginAspect(ProceedingJoinPoint joinPoint) throws Throwable {
 		LocalDateTime now = LocalDateTime.now();
 

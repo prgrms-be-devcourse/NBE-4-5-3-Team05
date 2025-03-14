@@ -17,6 +17,10 @@ import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductCategory;
 import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductPost;
 import com.NBE_4_5_2.Team5.domain.post.post.repository.ProductCategoryRepository;
 import com.NBE_4_5_2.Team5.domain.post.post.repository.ProductPostRepository;
+import com.NBE_4_5_2.Team5.domain.user.admin.entity.NoticePost;
+import com.NBE_4_5_2.Team5.domain.user.admin.repository.NoticePostRepository;
+import com.NBE_4_5_2.Team5.domain.user.admin.service.AdminService;
+import com.NBE_4_5_2.Team5.domain.user.user.entity.Role;
 import com.NBE_4_5_2.Team5.domain.user.user.entity.User;
 import com.NBE_4_5_2.Team5.domain.user.user.repository.UserRepository;
 import com.NBE_4_5_2.Team5.domain.user.user.service.UserService;
@@ -33,6 +37,8 @@ public class BaseInitData {
 	private final ProductCategoryRepository productCategoryRepository;
 	private final UserService userService;
 	private final UserRepository userRepository;
+	private final AdminService adminService;
+	private final NoticePostRepository noticePostRepository;
 
 	@Autowired
 	@Lazy
@@ -62,6 +68,14 @@ public class BaseInitData {
 		};
 	}
 
+	@Bean
+	@Order(4)
+	public ApplicationRunner applicationRunner4() {
+		return args -> {
+			self.noticeInit();
+		};
+	}
+
 	@Transactional
 	public void userInit() {
 
@@ -75,6 +89,8 @@ public class BaseInitData {
 			"https://example.com/default_profile.png");
 		userService.createUser("user3", "user31234@", "user3@gmail.com", "user3", "서울시 광진구",
 			"https://example.com/default_profile.png");
+
+		adminService.signUpAdmin("user4", "user41234@", "user4@gmail.com");
 
 	}
 
@@ -146,5 +162,30 @@ public class BaseInitData {
 		}
 
 		productCategoryRepository.saveAll(productCategories);
+	}
+
+	@Transactional
+	public void noticeInit() {
+		if (noticePostRepository.count() > 0) {
+			return;
+		}
+
+		// 공지사항 생성: 총 10개의 공지사항 생성
+		User admin = userRepository.findAll().stream()
+			.filter(u -> u.getRole().equals(Role.ADMIN))
+			.findFirst()
+			.orElse(null);
+		if (admin == null && !userRepository.findAll().isEmpty()) {
+			admin = userRepository.findAll().get(0);
+		}
+
+		for (int i = 1; i <= 10; i++) {
+			NoticePost notice = NoticePost.builder()
+				.admin(admin)
+				.title("공지사항 제목 " + i)
+				.content("공지사항 내용 " + i + " - 중요한 공지사항 내용입니다.")
+				.build();
+			noticePostRepository.save(notice);
+		}
 	}
 }

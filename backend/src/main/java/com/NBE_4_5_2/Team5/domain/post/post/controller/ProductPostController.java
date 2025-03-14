@@ -85,7 +85,7 @@ public class ProductPostController {
 	}
 
 	@GetMapping("/{id}")
-	@Transactional(readOnly = true)
+	@Transactional(readOnly = false)
 	public RsData<ProductPostResponse> getPost(@PathVariable String id) {
 		User user = userAuthService.getUserIdentity();
 		ProductPostResponse postResponse = productPostService.getPost(id);
@@ -93,9 +93,9 @@ public class ProductPostController {
 		recentlyViewedService.addViewedPost(user.getId(), id);
 
 		return new RsData<>(
-			"200",
-			"게시물 조회가 완료되었습니다.",
-			postResponse
+				"200",
+				"게시물 조회가 완료되었습니다.",
+				postResponse
 		);
 	}
 
@@ -159,7 +159,7 @@ public class ProductPostController {
 		);
 	}
 
-	// 내가 판매한 내역
+	/// 내가 판매한 내역
 	@PreAuthorize("isAuthenticated()")
 	@GetMapping("/my/sales")
 	public RsData<List<ProductPostResponse>> getMySales() {
@@ -173,7 +173,7 @@ public class ProductPostController {
 		);
 	}
 
-	// 내가 찜한 내역
+	/// 내가 찜한 내역
 	@PreAuthorize("isAuthenticated()")
 	@GetMapping("/my/favorites")
 	public RsData<List<ProductPostResponse>> getMyFavorites() {

@@ -31,11 +31,11 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
 		FilterChain filterChain) throws ServletException, IOException {
 
-        String url = request.getRequestURI();
-        if (List.of("/api/users/login", "/api/users/signup", "/api/users/refresh" , "/error").contains(url)) {
-            filterChain.doFilter(request, response);
-            return;
-        }
+		String url = request.getRequestURI();
+		if (List.of("/api/users/login", "/api/users/signup", "/error", "/actuator/**", "/api/users/refresh" ).contains(url)) {
+			filterChain.doFilter(request, response);
+			return;
+		}
 
 		AuthToken tokens = getAuthTokenFromRequest();
 

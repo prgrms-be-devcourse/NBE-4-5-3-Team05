@@ -42,13 +42,13 @@ public class UserController {
 		return new RsData<>("201-1", "회원 가입이 완료되었습니다.", new UserDto(user));
 	}
 
-	record LoginUserForm(
+	public record LoginUserForm(
 		@NotBlank(message = "아이디는 필수 입력값입니다.") String username,
 		@NotBlank(message = "비밀번호는 필수 입력값입니다.") String password
 	) {
 	}
 
-	record LoginUserDto(String accessToken, String refreshToken, UserDto item) {
+	public record LoginUserDto(String accessToken, String refreshToken, UserDto item) {
 	}
 
 	@PostMapping("/login")
@@ -91,19 +91,14 @@ public class UserController {
 	record RefreshUserForm(@NotBlank(message = "refreshToken을 입력해주세요.") String refreshToken) {
 	}
 
-	@PreAuthorize("isAuthenticated()")
 	@PostMapping("/refresh")
 	public RsData<String> refreshAccessToken(@RequestBody @Valid RefreshUserForm userForm) {
 
-		User userIdentity = userAuthService.getUserIdentity();
-		userService.validateRefreshToken(userIdentity, userForm.refreshToken());
+		String refreshToken = userForm.refreshToken();
+		String newAccessToken = userService.refreshAccessToken(refreshToken);
+		rq.addCookie("accessToken", newAccessToken);
 
-		User user = userAuthService.getRealActor(userIdentity);
-
-		AuthToken newAuthToken = userService.generateAuthtoken(user);
-		rq.addCookie("accessToken", newAuthToken.accessToken());
-
-		return new RsData<>("200-1", "AccessToken이 재발급되었습니다.", newAuthToken.accessToken());
+		return new RsData<>("200-1", "AccessToken이 재발급되었습니다.", newAccessToken);
 	}
 
 	//  내 정보 수정
