@@ -26,11 +26,29 @@ export default async function Page({
         },
         credentials:"include",
     });
+
+    const roomResponse =await client.GET("/api/chat/room/{roomId}",{
+      headers: {
+          cookie:cookie,
+        },
+        params: {
+          path:{
+            roomId,
+          },
+        },
+        credentials:"include",
+    });
     
+    const roomData=roomResponse.data!!;
+    if(roomData.code!="200"){
+      alert(roomData.message);
+    }
+    const chatRoom=roomData.data;
+
     const messageData = messageResponse.data!!; // 변환할 데이터
     const title = messageData.message;
     const messages = messageData.data; // 메시지 데이터
   
-    return <ClientPage messages={messages} title={title} roomId={roomId} cookie={cookie}/>; // 메시지 데이터 클라이언트 페이지로 전달
+    return <ClientPage messages={messages} title={title} roomId={roomId} cookie={cookie} chatRoom={chatRoom}/>; // 메시지 데이터 클라이언트 페이지로 전달
 
 }

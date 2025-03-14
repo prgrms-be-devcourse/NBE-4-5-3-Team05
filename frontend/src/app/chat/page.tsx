@@ -49,7 +49,7 @@ export default async function Page(
     if(searchResponse.error){
       console.error("검색 오류, ",searchResponse.error.message);
     }else{
-      const data = searchResponse.data.data;
+      const data = searchResponse.data.data; // 단일 객체 인지 또는 배열인지 확인
       searchChatRoomDto = Array.isArray(data) ? data : data ? [data] : [];
     }
   }

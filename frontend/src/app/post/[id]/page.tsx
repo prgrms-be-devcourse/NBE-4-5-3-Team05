@@ -1,4 +1,3 @@
-import createClient from "openapi-fetch";
 import ClientPage from "./ClientPage";
 import { paths } from "@/lib/backend/apiV1/schema";
 import client from "@/lib/backend/client";
@@ -50,7 +49,7 @@ export default async function Page(
     const createData=createResponse.data!!;
     if(createData.code!="200"){
         alert("채팅방 생성 실패")
-        console.log(createData.message);
+        console.log(createData);
     }
     const chatRoom=createData.data;
 

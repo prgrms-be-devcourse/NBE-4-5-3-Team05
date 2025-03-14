@@ -135,6 +135,16 @@ public class ChatRoomController {
         return new RsData<>("200","채팅방 목록",response);
     }
 
+    @GetMapping("/room/{roomId}")
+    @ResponseBody
+    public RsData<ChatRoom> getRoomByRoomId(@PathVariable String roomId) {
+        User userIdentity = rq.getUserIdentity();
+        User user = rq.getRealActor(userIdentity);
+
+        ChatRoom chatRoom=chatRoomService.findChatRoomByClient(roomId,user.getNickname());
+        return new RsData<>("200","채팅방 반환",chatRoom);
+    }
+
     // 채팅방 메세지 조회
     @GetMapping("/message")
     @ResponseBody
