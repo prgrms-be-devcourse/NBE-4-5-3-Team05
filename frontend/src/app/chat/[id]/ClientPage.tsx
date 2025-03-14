@@ -1,13 +1,13 @@
 "use client";
 
 import { components } from "@/lib/backend/apiV1/schema";
-import client from "@/lib/backend/client";
+import client from "@/lib/backend/client"; // Axios 클라이언트
 import { useEffect, useState } from "react";
 import SockJS from 'sockjs-client'; 
 import { Stomp } from "@stomp/stompjs"; 
 
 export default function ClientPage({
-  messages,
+  messages,  // 서버에서 전달된 초기 메시지 데이터
   title,
   roomId,
   cookie,
@@ -18,42 +18,50 @@ export default function ClientPage({
   cookie: string;
 }) {
   const [inputMessage, setInputMessage] = useState<string>(""); 
-  const [chatMessages, setChatMessages] = useState<components["schemas"]["MessageDto"][]>(messages); 
+  const [chatMessages, setChatMessages] = useState<components["schemas"]["MessageDto"][]>(messages); // 초기 메시지로 설정
   const [userNickname, setUserNickname] = useState<string>(""); 
   const [accessToken, setAccessToken] = useState<string>("");
   const [stompClient, setStompClient] = useState<any>(null);
 
   useEffect(() => {
-    const fetchUserInfo = async () => {
+    const fetchUserInfoAndConnect = async () => {
       try {
-        const response = await client.GET('/api/chat/user', {
+        const userResponse = await client.GET('/api/chat/user', {
           headers: { cookie },
           credentials: "include"
         });
-        
-        if (response.data?.code === "200") {
-          setUserNickname(response.data.data.name || "Unknown");
-          setAccessToken(response.data.data.token || "");
+
+        if (userResponse.data?.code === "200") {
+          setUserNickname(userResponse.data.data.name || "Unknown");
+          setAccessToken(userResponse.data.data.token || "");
 
           const socket = new SockJS("http://localhost:8080/ws-stomp");
-          const client = Stomp.over(socket);
-          setStompClient(client);
+          const stompClient = Stomp.over(socket);
+          setStompClient(stompClient);
 
           console.log("연결 시도 중...");
-          client.connect({ token: response.data.data.token }, (frame: string) => {
+          stompClient.connect({ token: accessToken }, (frame:string) => {
             console.log("연결 완료!", frame);
-  
-            client.subscribe(`/sub/chat/room/${roomId}`, (message: { body: string }) => {
+          
+            stompClient.subscribe(`/sub/chat/room/${roomId}`, async (message: { body: string }) => {
               const messageData = JSON.parse(message.body);
-              console.log("수신된 메시지: ", messageData); // 받은 메시지 로그
-
-              // 현재 채팅방에 수신된 메시지만 업데이트 (중복되지 않도록)
-              setChatMessages(prevMessages => 
-                prevMessages.find(msg => msg.messageId === messageData.messageId) ? prevMessages : [...prevMessages, messageData]
-              );
+              console.log("수신된 메시지: ", messageData);
+              
+              // 서버에서 최신 메시지를 가져오기 위한 API 호출
+              const messageResponse = await client.GET("/api/chat/message", {
+                headers: { cookie },
+                params: {
+                  query: { roomId },
+                },
+                credentials: "include"
+              });
+              
+              if (messageResponse.data?.code === "200") {
+                setChatMessages(messageResponse.data.data); // 수신된 메시지로 상태 업데이트
+              }
             });
           }, (error: any) => {
-            alert("WebSocket 연결이 실패했습니다. 다시 시도해 주세요.");
+            alert("WebSocket 연결 실패했습니다. 다시 시도해 주세요.");
           });
         }
       } catch (error) {
@@ -61,7 +69,7 @@ export default function ClientPage({
       }
     };
 
-    fetchUserInfo();
+    fetchUserInfoAndConnect();
 
     return () => {
       if (stompClient) {
@@ -80,22 +88,26 @@ export default function ClientPage({
       alert("메시지를 입력하세요.");
       return;
     }
-
+  
     if (!stompClient) {
       alert("WebSocket 연결이 되어 있지 않습니다.");
       return;
     }
-
+  
     const message = {
       roomId,
       message: inputMessage,
       sender: userNickname,
-      type: "TALK", // 메시지 타입 추가
+      type: "TALK",
     };
-
+  
     stompClient.send("/pub/chat/message", { token: accessToken }, JSON.stringify(message));
     setInputMessage(""); // 입력창 초기화
-    console.log("전송된 메시지: ", message);
+  };
+  const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') {
+      handleSendMessage();
+    }
   };
 
   const deleteRoom = async () => {
@@ -112,7 +124,6 @@ export default function ClientPage({
       alert("채팅방 삭제 중 오류가 발생했습니다.");
     }
   };
-
   const handleDelete = () => {
     if (window.confirm("메세지가 삭제됩니다. 정말로 나가시겠습니까? ")) {
       deleteRoom();
@@ -143,7 +154,7 @@ export default function ClientPage({
               </div>
             )}
             <div>
-              <strong>보낸 시간:</strong> {message.timestamp}
+              <strong>보낸 시간:</strong> {message.timestamp} 
             </div>
           </li>
         ))}
@@ -153,6 +164,7 @@ export default function ClientPage({
           type="text"
           value={inputMessage}
           onChange={handleInputChange}
+          onKeyPress={handleKeyPress} 
           placeholder="메시지를 입력하세요."
           className="border p-2 flex-grow rounded"
         />
