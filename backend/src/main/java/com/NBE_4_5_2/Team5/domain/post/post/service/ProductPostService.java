@@ -2,6 +2,7 @@ package com.NBE_4_5_2.Team5.domain.post.post.service;
 
 import java.util.List;
 
+import com.NBE_4_5_2.Team5.domain.post.post.entity.LikedPost;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -78,7 +79,10 @@ public class ProductPostService {
 			postpage = productPostRepository.findByTitleLike(likeKeyword, pageable);
 		}
 
-		Page<PreviewPostResponse> mappedPosts = postpage.map(PreviewPostResponse::fromEntity);
+		Page<PreviewPostResponse> mappedPosts = postpage.map(post -> {
+			int likedCount = likedPostRepository.countByProductPostId(post.getId());
+			return PreviewPostResponse.fromEntityWithLikeCount(post, likedCount);
+		});
 
 		return new PageDto<>(mappedPosts);
 	}
@@ -96,11 +100,15 @@ public class ProductPostService {
 	}
 
 	public ProductPostResponse getPost(String id) {
-		ProductPost post = productPostRepository.findById(id).orElseThrow(
-			() -> new ServiceException("404", "해당 글은 존재하지 않습니다.")
-		);
 
-		return ProductPostResponse.fromEntity(post);
+		ProductPost post = productPostRepository.findByIdWithWriter(id)
+				.orElseThrow(() -> new ServiceException("404", "해당 글은 존재하지 않습니다.")
+		);
+		//조회수 증가
+		post.incrementViewCount();
+		productPostRepository.save(post);
+		int likedCount = likedPostRepository.countByProductPostId(id);
+		return ProductPostResponse.fromEntityWithLikeCount(post,likedCount);
 	}
 
 	public void delete(User actor, String postId) {
@@ -164,6 +172,23 @@ public class ProductPostService {
 		return ProductPostResponse.fromEntity(post);
 	}
 
+	// 찜 기능: 한 유저가 한 게시글에 대해 찜을 한 번만 할 수 있도록 한다.
+	@Transactional
+	public ProductPostResponse likePost(User actor, String postId) {
+		ProductPost post = productPostRepository.findByIdWithWriter(postId)
+				.orElseThrow(() -> new ServiceException("404", "해당 글은 존재하지 않습니다."));
+		if (likedPostRepository.existsByUserIdAndProductPostId(actor.getId(), postId)) {
+			throw new ServiceException("400", "이미 찜한 게시글입니다.");
+		}
+		LikedPost likedPost = LikedPost.builder()
+				.userId(actor.getId())
+				.productPostId(postId)
+				.build();
+		likedPostRepository.save(likedPost);
+		int likedCount = likedPostRepository.countByProductPostId(postId);
+		return ProductPostResponse.fromEntityWithLikeCount(post, likedCount);
+	}
+
 	// 특정 게시글을 로그인 유저가 구매 확정
 
 	public ProductPostResponse purchasePost(User buyer, String postId) {
@@ -209,7 +234,7 @@ public class ProductPostService {
 		if (postIds.isEmpty())
 			return List.of();
 
-		List<ProductPost> favoritePosts = productPostRepository.findAllById(postIds);
+		List<ProductPost> favoritePosts = productPostRepository.findByIdIn(postIds);
 		return favoritePosts.stream()
 			.map(ProductPostResponse::fromEntity)
 			.toList();

@@ -20,9 +20,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.Comparator;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -116,4 +119,14 @@ public class AdminService {
 
 		productPostRepository.deleteById(postId);
 	}
+	// 최신 공지사항을 조회하는 메서드 (최신순 정렬 후 상위 limit 개 반환)
+	@Transactional(readOnly = true)
+	public List<NoticePost> getLatestNotices(int limit) {
+		List<NoticePost> notices = noticePostRepository.findAll();
+		return notices.stream()
+				.sorted(Comparator.comparing(NoticePost::getCreatedAt).reversed())
+				.limit(limit)
+				.collect(Collectors.toList());
+	}
+
 }

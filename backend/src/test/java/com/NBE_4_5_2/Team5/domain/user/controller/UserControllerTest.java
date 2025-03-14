@@ -158,7 +158,7 @@ class UserControllerTest {
     @DisplayName("회원 가입 - 실패 - email 중복")
     void createUser3() throws Exception {
 
-        String username = "user4";
+        String username = "user5";
         String password = "new1234@";
         String email = "user1@gmail.com";
         String nickname = "무명";
@@ -180,9 +180,9 @@ class UserControllerTest {
     @DisplayName("회원 가입 - 실패 - nickname 중복")
     void createUser4() throws Exception {
 
-        String username = "user4";
+        String username = "user5";
         String password = "new1234@";
-        String email = "user4@gmail.com";
+        String email = "user5@gmail.com";
         String nickname = "user1";
         String address = "서울시 강남구";
         String profileUrl = "https://example.com/default_profile.png";
