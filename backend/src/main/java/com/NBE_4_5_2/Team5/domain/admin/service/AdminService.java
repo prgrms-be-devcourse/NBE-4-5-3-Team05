@@ -6,6 +6,7 @@ import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -124,5 +125,30 @@ public class AdminService {
 	public Page<UserDto> getUsers(Pageable pageable) {
 		Page<User> all = userRepository.findAll(pageable);
 		return all.map(UserDto::new);
+	}
+
+	public void unBanUser(String userId) {
+		User loggedInUser = getUser();
+
+		isAdmin(loggedInUser);
+
+		User unBanUser = userRepository.findById(userId)
+			.orElseThrow(() -> new UsernameNotFoundException("유저를 찾을 수 없습니다."));
+
+		if (!unBanUser.getBlocked()) {
+			throw new IllegalStateException("계정 정지 상태가 아닙니다.");
+		}
+
+		unBanUser.unBan();
+
+		removeBanInfo(userId);
+	}
+
+	/**
+	 * {@code userId}를 가진 유저의 밴 이력을 삭제한다.
+	 * @param userId
+	 */
+	private void removeBanInfo(String userId) {
+		banListRepository.deleteByBannedUser_Id(userId);
 	}
 }

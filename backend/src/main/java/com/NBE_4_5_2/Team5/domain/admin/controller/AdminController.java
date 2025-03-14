@@ -60,6 +60,13 @@ public class AdminController {
 	}
 
 	@PreAuthorize("isAuthenticated()")
+	@DeleteMapping("/users/{user-id}/ban")
+	public RsData<Void> unBanUser(@PathVariable(name = "user-id") String userId) {
+		adminService.unBanUser(userId);
+		return new RsData<>("204-1", "계정 정지 해제 성공.");
+	}
+
+	@PreAuthorize("isAuthenticated()")
 	@DeleteMapping("/posts/{post-id}")
 	public RsData<Void> deletePost(@PathVariable(name = "post-id") String postId) {
 		adminService.deletePost(postId);
