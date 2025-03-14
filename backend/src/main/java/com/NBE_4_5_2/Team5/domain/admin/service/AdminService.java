@@ -11,6 +11,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.NBE_4_5_2.Team5.domain.admin.controller.AdminController;
 import com.NBE_4_5_2.Team5.domain.admin.dto.BanListDto;
 import com.NBE_4_5_2.Team5.domain.admin.dto.NoticeResBody;
 import com.NBE_4_5_2.Team5.domain.admin.entity.BanList;
@@ -24,6 +25,7 @@ import com.NBE_4_5_2.Team5.domain.user.entity.User;
 import com.NBE_4_5_2.Team5.domain.user.repository.UserRepository;
 import com.NBE_4_5_2.Team5.domain.user.service.UserService;
 import com.NBE_4_5_2.Team5.global.exception.ServiceException;
+import com.NBE_4_5_2.Team5.global.exception.notice.NoticeNotFoundException;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.constraints.NotEmpty;
@@ -158,5 +160,16 @@ public class AdminService {
 
 		Page<NoticePost> all = noticePostRepository.findAll(pageable);
 		return all.map(notice -> NoticeResBody.of(notice));
+	}
+
+	public NoticeResBody updateNotice(String noticeId, AdminController.UpdateNoticeReq body) {
+		User admin = getUser();
+
+		isAdmin(admin);
+
+		NoticePost noticePost = noticePostRepository.findById(noticeId)
+			.orElseThrow(() -> new NoticeNotFoundException("404-1", "Notice post를 찾을 수 없습니다."));
+
+		return NoticeResBody.of(noticePost.update(body.title(), body.content()));
 	}
 }

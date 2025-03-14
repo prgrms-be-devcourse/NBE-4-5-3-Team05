@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -86,5 +87,16 @@ public class AdminController {
 	public RsData<Page<NoticeResBody>> getNotices(@PageableDefault(size = 10, page = 0) Pageable pageable) {
 		Page<NoticeResBody> notices = adminService.getNotices(pageable);
 		return new RsData<>("200-1", "공지사항 리스트 조회 성공.", notices);
+	}
+
+	public record UpdateNoticeReq(String title, String content) {
+	}
+
+	@PreAuthorize("isAuthenticated()")
+	@PutMapping("/notices/{notice-id}")
+	public RsData<NoticeResBody> updateNotice(@PathVariable(name = "notice-id") String noticeId,
+		@RequestBody UpdateNoticeReq body) {
+		NoticeResBody res = adminService.updateNotice(noticeId, body);
+		return new RsData<>("200-1", "공지사항 업데이트 성공.", res);
 	}
 }

@@ -46,5 +46,11 @@ public class NoticePost {
 		this.title = title;
 		this.content = content;
 	}
+
+	public NoticePost update(String title, String content) {
+		this.title = title;
+		this.content = content;
+		return this;
+	}
 }
 
