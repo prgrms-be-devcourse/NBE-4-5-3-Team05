@@ -452,6 +452,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/admin/users": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getUserList"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/admin/posts/{post-id}": {
         parameters: {
             query?: never;
@@ -847,6 +863,52 @@ export interface components {
             code: string;
             message: string;
             data: components["schemas"]["Category"][];
+        };
+        Pageable: {
+            /** Format: int32 */
+            page?: number;
+            /** Format: int32 */
+            size?: number;
+            sort?: string[];
+        };
+        PageUserDto: {
+            /** Format: int64 */
+            totalElements?: number;
+            /** Format: int32 */
+            totalPages?: number;
+            /** Format: int32 */
+            size?: number;
+            content?: components["schemas"]["UserDto"][];
+            /** Format: int32 */
+            number?: number;
+            sort?: components["schemas"]["SortObject"];
+            first?: boolean;
+            last?: boolean;
+            /** Format: int32 */
+            numberOfElements?: number;
+            pageable?: components["schemas"]["PageableObject"];
+            empty?: boolean;
+        };
+        PageableObject: {
+            /** Format: int64 */
+            offset?: number;
+            sort?: components["schemas"]["SortObject"];
+            paged?: boolean;
+            /** Format: int32 */
+            pageSize?: number;
+            /** Format: int32 */
+            pageNumber?: number;
+            unpaged?: boolean;
+        };
+        RsDataPageUserDto: {
+            code: string;
+            message: string;
+            data: components["schemas"]["PageUserDto"];
+        };
+        SortObject: {
+            empty?: boolean;
+            unsorted?: boolean;
+            sorted?: boolean;
         };
         RsDataObject: {
             code: string;
@@ -1963,6 +2025,37 @@ export interface operations {
                 };
                 content: {
                     "application/json;charset=UTF-8": components["schemas"]["RsDataListCategory"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataVoid"];
+                };
+            };
+        };
+    };
+    getUserList: {
+        parameters: {
+            query: {
+                pageable: components["schemas"]["Pageable"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataPageUserDto"];
                 };
             };
             /** @description Internal Server Error */

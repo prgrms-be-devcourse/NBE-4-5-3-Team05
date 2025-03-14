@@ -38,8 +38,10 @@ export default function ClientLayout({
 
   return (
     <html lang="en" className={`${fontVariable}`}>
-      <body className={`min-h-[100dvh] flex flex-col ${fontClassName}`}>
-        <header className="flex justify-between">
+      <body
+        className={`min-h-[100dvh] max-h-screen flex flex-col ${fontClassName}`}
+      >
+        <header className="flex justify-between min-h-10">
           <Link href="/" className="flex items-center gap-2">
             <Button>
               <FaStore className="text-lg" />
@@ -61,7 +63,7 @@ export default function ClientLayout({
             </Link>
           )}
         </header>
-        <div className="flex-1">{children}</div>
+        <div className="flex-1 flex flex-col">{children}</div>
         <footer className="h-10">푸터</footer>
       </body>
     </html>

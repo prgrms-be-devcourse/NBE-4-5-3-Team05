@@ -1,3 +1,4 @@
+import { ProductListItem } from "@/app/_type/ProductListItem";
 import { components } from "@/lib/backend/apiV1/schema";
 import client from "@/lib/client";
 import {
@@ -7,14 +8,11 @@ import {
   AccordionTrigger,
 } from "@radix-ui/react-accordion";
 import { ChevronDown, Trash2 } from "lucide-react";
-import { useRouter } from "next/navigation";
-
-type AccordionItemType = components["schemas"]["PreviewPostResponse"];
 
 export default function ShadcnAccordionList({
   items,
 }: {
-  items: AccordionItemType[];
+  items: ProductListItem[];
 }) {
   const doDelete = async (item) => {
     const response = await client.DELETE("/api/admin/posts/{post-id}", {

@@ -3,11 +3,12 @@
 import { components } from "@/lib/backend/apiV1/schema";
 import client from "@/lib/client";
 import { useEffect, useState } from "react";
-import ProductListAccordian from "./ProductListAccordian";
-import PageSizeSelector from "./PageSizeSelector";
-import Pagination from "./Pagination";
+import ProductListAccordian from "../_components/productlist/ProductListAccordian";
+import PageSizeSelector from "../_components/common/PageSizeSelector";
+import Pagination from "../_components/common/Pagination";
+import { ProductListItem } from "@/app/_type/ProductListItem";
 
-type ProductListItem = components["schemas"]["PreviewPostResponse"];
+
 
 export default function ProductListAdmin() {
   const [page, setPage] = useState<number>(1);
