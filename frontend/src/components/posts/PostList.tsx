@@ -4,7 +4,6 @@ import React from "react";
 import Link from "next/link";
 import type { components } from "@/lib/backend/apiV1/schema";
 
-// PreviewPostResponse 타입을 사용하는 경우
 export type Post = components["schemas"]["PreviewPostResponse"];
 
 interface PostListProps {

@@ -3,57 +3,52 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import Notice from "@/components/posts/Notice";
 import FilterSidebar from "@/components/posts/FilterSiderbar";
 import PostList from "@/components/posts/PostList";
 import Pagination from "@/components/posts/Pagination";
+import type { components } from "@/lib/backend/apiV1/schema";
 
-interface PostsResponseData {
-  items: any[]; // 백엔드에서 받은 ProductPostResponse 배열
-  totalPages: number;
-  totalItems: number;
-  curPageNo: number;
-  pageSize: number;
-}
+type RsDataListNoticeResBody = components["schemas"]["RsDataListNoticeResBody"];
+type NoticeResBody = components["schemas"]["NoticeResBody"];
 
-interface RsData<T> {
-  code: string;
-  message: string;
-  data: T;
-}
+type PageDtoPreviewPostResponse =
+  components["schemas"]["PageDtoPreviewPostResponse"];
+type RsDataPageDtoPreviewPostResponse =
+  components["schemas"]["RsDataPageDtoPreviewPostResponse"];
 
-interface NoticeData {
-  title: string;
-  content: string;
-}
-
-interface CategoryData {
-  id?: number;
-  name?: string;
-}
+type Category = components["schemas"]["Category"];
 
 export default function PostsPage() {
-  const [noticeList, setNoticeList] = useState<NoticeData[]>([]);
-  const [posts, setPosts] = useState<any[]>([]);
+  const searchParams = useSearchParams();
+  const initialKeyword = searchParams.get("keyword") || "";
+
+  const [noticeList, setNoticeList] = useState<NoticeResBody[]>([]);
+  const [posts, setPosts] = useState<
+    components["schemas"]["PreviewPostResponse"][]
+  >([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [categories, setCategories] = useState<{ id: number; name: string }[]>(
-    []
-  );
+  const [categories, setCategories] = useState<Category[]>([]);
   const [filters, setFilters] = useState({
-    keyword: "",
+    keyword: initialKeyword,
     minPrice: null as number | null,
     maxPrice: null as number | null,
     category: "",
     sort: "desc",
   });
 
+  // 공지사항 로드
   useEffect(() => {
     (async () => {
       try {
-        const res = await axios.get<RsData<NoticeData[]>>(
+        // /api/admin/notices/latest 엔드포인트가 리스트 형태로 공지사항을 반환한다고 가정합니다.
+        const res = await axios.get<RsDataListNoticeResBody>(
           "/api/admin/notices/latest",
-          { withCredentials: true }
+          {
+            withCredentials: true,
+          }
         );
         setNoticeList(res.data.data);
       } catch (err) {
@@ -62,37 +57,42 @@ export default function PostsPage() {
     })();
   }, []);
 
+  // 카테고리 로드
   useEffect(() => {
     (async () => {
       try {
-        const res = await axios.get<RsData<CategoryData[]>>("/api/categories", {
+        const res = await axios.get<{
+          code: string;
+          message: string;
+          data: Category[];
+        }>("/api/categories", {
           withCredentials: true,
         });
-        const cats = res.data.data.map((cat) => ({
-          id: cat.id ?? 0,
-          name: cat.name ?? "",
-        }));
-        setCategories(cats);
+        setCategories(res.data.data);
       } catch (err) {
         console.error("카테고리 로드 실패", err);
       }
     })();
   }, []);
 
+  // 게시글 로드: 필터 상태나 페이지가 변경되면 호출
   const fetchPosts = async () => {
     try {
-      const res = await axios.get<RsData<PostsResponseData>>("/api/posts", {
-        params: {
-          page: currentPage,
-          pageSize: 10,
-          keyword: filters.keyword || undefined,
-          sort: filters.sort,
-          minPrice: filters.minPrice || undefined,
-          maxPrice: filters.maxPrice || undefined,
-          category: filters.category || undefined,
-        },
-        withCredentials: true,
-      });
+      const res = await axios.get<RsDataPageDtoPreviewPostResponse>(
+        "/api/posts",
+        {
+          params: {
+            page: currentPage,
+            pageSize: 10,
+            keyword: filters.keyword || undefined,
+            sort: filters.sort,
+            minPrice: filters.minPrice || undefined,
+            maxPrice: filters.maxPrice || undefined,
+            category: filters.category || undefined,
+          },
+          withCredentials: true,
+        }
+      );
       const { items, totalPages } = res.data.data;
       setPosts(items);
       setTotalPages(totalPages);
@@ -118,8 +118,8 @@ export default function PostsPage() {
               {noticeList.map((notice, index) => (
                 <Notice
                   key={index}
-                  title={notice.title}
-                  content={notice.content}
+                  title={notice.title ?? ""}
+                  content={notice.content ?? ""}
                 />
               ))}
             </div>
@@ -137,7 +137,10 @@ export default function PostsPage() {
             setFilters(newFilters);
             setCurrentPage(1);
           }}
-          categories={categories}
+          categories={categories.map((cat) => ({
+            id: cat.id ?? 0,
+            name: cat.name ?? "",
+          }))}
         />
       </div>
       <div className="fixed bottom-4 right-4">
