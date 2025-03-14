@@ -13,39 +13,36 @@ spring:
 
   data:
     redis:
-      port: 6379
-      host: localhost
+      port: ${REDIS_PORT}
+      host: ${REDIS_HOST}
 
   datasource:
-    url: jdbc:h2:./db_dev;MODE=MySQL
-    username: sa
-    password:
-    driver-class-name: org.h2.Driver
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
       auto-commit: false
 
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
     show-sql: false
     properties:
       hibernate:
-        format_sql: true
-        highlight_sql: true
-        use_sql_comments: true
         default_batch_fetch_size: 100
     open-in-view: false
+
 
   security:
     oauth2:
       client:
         registration:
           kakao:
-            clientId: ON_SECRET
             scope: profile_nickname, profile_image
             client-name: Kakao
             authorization-grant-type: authorization_code
-            redirect-uri: http://localhost:8080/login/oauth2/code/kakao
+            redirect-uri: http://${SERVER_HOST}:${SERVER_PORT}/login/oauth2/code/kakao
         provider:
           kakao:
             authorization-uri: https://kauth.kakao.com/oauth/authorize
@@ -55,12 +52,12 @@ spring:
 
 logging:
   level:
-    org.hibernate.SQL: DEBUG
-    org.hibernate.orm.jdbc.bind: TRACE
-    org.hibernate.orm.jdbc.extract: TRACE
-    org.springframework.transaction.interceptor: TRACE
-    org.springframework.security: DEBUG
+    root: info
 
 
 springdoc:
   default-produces-media-type: application/json;charset=UTF-8
+
+custom:
+  server:
+    host: ${SERVER_HOST}

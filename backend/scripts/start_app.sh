@@ -34,7 +34,16 @@ fi
 export JWT_SECRET=$(aws ssm get-parameter --name /team5/JWT_SECRET --with-decryption --query "Parameter.Value" --output text)
 export TOSS_SECRET=$(aws ssm get-parameter --name /team5/TOSS_SECRET --with-decryption --query "Parameter.Value" --output text)
 export KAKAO_CLIENT_ID=$(aws ssm get-parameter --name /team5/KAKAO_CLIENT_ID --with-decryption --query "Parameter.Value" --output text)
+export AWS_ACCESS_KEY=$(aws ssm get-parameter --name /team5/AWS_ACCESS_KEY --with-decryption --query "Parameter.Value" --output text)
+export AWS_S3_BUCKET_NAME=$(aws ssm get-parameter --name /team5/AWS_S3_BUCKET_NAME --with-decryption --query "Parameter.Value" --output text)
+export AWS_SECRET_KEY=$(aws ssm get-parameter --name /team5/AWS_SECRET_KEY --with-decryption --query "Parameter.Value" --output text)
+export MAIL_PASSWORD=$(aws ssm get-parameter --name /team5/MAIL_PASSWORD --with-decryption --query "Parameter.Value" --output text)
+export REDIS_PORT=$(aws ssm get-parameter --name /team5/REDIS_PORT --with-decryption --query "Parameter.Value" --output text)
+export REDIS_HOST=$(aws ssm get-parameter --name /team5/REDIS_HOST --with-decryption --query "Parameter.Value" --output text)
+export DB_URL=$(aws ssm get-parameter --name /team5/DB_URL --with-decryption --query "Parameter.Value" --output text)
+export DB_USERNAME=$(aws ssm get-parameter --name /team5/DB_USERNAME --with-decryption --query "Parameter.Value" --output text)
 export DB_PASSWORD=$(aws ssm get-parameter --name /team5/DB_PASSWORD --with-decryption --query "Parameter.Value" --output text)
 
+
 # Start your .jar in background (example)
-nohup java -jar /home/ubuntu/app/build/libs/*.jar --spring.profiles.active=dev,secret > /home/ubuntu/app/app.log 2>&1 &
+nohup java -jar /home/ubuntu/app/build/libs/*.jar --spring.profiles.active=prod,secret,monitor > /home/ubuntu/app/app.log 2>&1 &
