@@ -8,7 +8,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@radix-ui/react-accordion";
-import { ChevronDown, Trash2 } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { UserListItem } from "@/app/_type/UserListItem";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
@@ -37,7 +37,7 @@ export default function UserListAccordian({
     window.location.reload();
   };
 
-  const doUnBan = async (item:UserListItem)=>{
+  const doUnBan = async (item: UserListItem) => {
     const response = await client.POST("/api/admin/users/{user-id}/ban", {
       params: {
         path: {
@@ -53,10 +53,13 @@ export default function UserListAccordian({
       console.log(response.response);
     }
     window.location.reload();
-  }
+  };
   return (
-    <div className="w-full mx-auto overflow-y-auto border rounded-lg px-2">
-      <Accordion type="multiple" className="w-full mx-auto mt-5 ">
+    <div className="w-full mx-auto overflow-y-auto border rounded-lg px-2 flex-1 flex flex-col">
+      <Accordion
+        type="multiple"
+        className="w-full mx-auto mt-5 flex-1 flex flex-col"
+      >
         {items.map((item) => (
           <AccordionItem
             key={item.id}

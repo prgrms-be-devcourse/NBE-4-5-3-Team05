@@ -30,7 +30,7 @@ export default function ShadcnAccordionList({
   };
   return (
     <div className="w-full mx-auto overflow-y-auto border rounded-lg px-2">
-      <Accordion type="multiple" className="w-full mx-auto mt-5 ">
+      <Accordion type="multiple" className="w-full mx-auto  ">
         {items.map((item) => (
           <AccordionItem
             key={item.id}

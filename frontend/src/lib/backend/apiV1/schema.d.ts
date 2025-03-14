@@ -238,7 +238,7 @@ export interface paths {
         get?: never;
         put?: never;
         post: operations["banUser"];
-        delete?: never;
+        delete: operations["unBanUser"];
         options?: never;
         head?: never;
         patch?: never;
@@ -251,7 +251,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        get: operations["getNotices"];
         put?: never;
         post: operations["writeNotice"];
         delete?: never;
@@ -769,6 +769,8 @@ export interface components {
             title?: string;
             content?: string;
             admin?: components["schemas"]["AdminResBody"];
+            /** Format: date-time */
+            createdAt?: string;
         };
         RsDataNoticeResBody: {
             code: string;
@@ -884,21 +886,21 @@ export interface components {
             sort?: components["schemas"]["SortObject"];
             first?: boolean;
             last?: boolean;
+            pageable?: components["schemas"]["PageableObject"];
             /** Format: int32 */
             numberOfElements?: number;
-            pageable?: components["schemas"]["PageableObject"];
             empty?: boolean;
         };
         PageableObject: {
             /** Format: int64 */
             offset?: number;
             sort?: components["schemas"]["SortObject"];
-            paged?: boolean;
             /** Format: int32 */
             pageSize?: number;
+            paged?: boolean;
+            unpaged?: boolean;
             /** Format: int32 */
             pageNumber?: number;
-            unpaged?: boolean;
         };
         RsDataPageUserDto: {
             code: string;
@@ -909,6 +911,29 @@ export interface components {
             empty?: boolean;
             unsorted?: boolean;
             sorted?: boolean;
+        };
+        PageNoticeResBody: {
+            /** Format: int64 */
+            totalElements?: number;
+            /** Format: int32 */
+            totalPages?: number;
+            /** Format: int32 */
+            size?: number;
+            content?: components["schemas"]["NoticeResBody"][];
+            /** Format: int32 */
+            number?: number;
+            sort?: components["schemas"]["SortObject"];
+            first?: boolean;
+            last?: boolean;
+            pageable?: components["schemas"]["PageableObject"];
+            /** Format: int32 */
+            numberOfElements?: number;
+            empty?: boolean;
+        };
+        RsDataPageNoticeResBody: {
+            code: string;
+            message: string;
+            data: components["schemas"]["PageNoticeResBody"];
         };
         RsDataObject: {
             code: string;
@@ -1598,6 +1623,68 @@ export interface operations {
                 };
                 content: {
                     "application/json;charset=UTF-8": components["schemas"]["RsDataBanResBody"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataVoid"];
+                };
+            };
+        };
+    };
+    unBanUser: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                "user-id": string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataVoid"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataVoid"];
+                };
+            };
+        };
+    };
+    getNotices: {
+        parameters: {
+            query: {
+                pageable: components["schemas"]["Pageable"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataPageNoticeResBody"];
                 };
             };
             /** @description Internal Server Error */

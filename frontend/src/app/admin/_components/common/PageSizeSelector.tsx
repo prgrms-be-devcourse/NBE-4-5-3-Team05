@@ -18,7 +18,7 @@ export default function PageSizeSelector({
   setSelectedPageSize,
 }: PageSizeSelectorProps) {
   return (
-    <div className="max-w-md mt-5 p-4 border rounded-lg shadow-md">
+    <div className="max-w-md p-4 border rounded-lg shadow-md">
       <label className="text-lg font-semibold">Select Page Size:</label>
       <Select onValueChange={(value) => setSelectedPageSize(Number(value))}>
         <SelectTrigger className="w-full mt-2">

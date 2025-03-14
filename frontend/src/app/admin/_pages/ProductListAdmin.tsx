@@ -8,8 +8,6 @@ import PageSizeSelector from "../_components/common/PageSizeSelector";
 import Pagination from "../_components/common/Pagination";
 import { ProductListItem } from "@/app/_type/ProductListItem";
 
-
-
 export default function ProductListAdmin() {
   const [page, setPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(10);
@@ -39,10 +37,10 @@ export default function ProductListAdmin() {
   };
 
   return (
-    <div className="w-full">
-      <div className="flex-1 flex flex-col ">
+    <div className="w-full flex flex-col flex-1 min-h-0">
+      <div className="flex-1 flex flex-col min-h-0 ">
         <h1>ProductList</h1>
-        <div className="flex justify-end items-end">
+        <div className="flex justify-end items-end min-h-0">
           <PageSizeSelector
             selectedPageSize={pageSize}
             setSelectedPageSize={setPageSize}

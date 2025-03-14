@@ -1,0 +1,59 @@
+import { NoticeListItem } from "@/app/_type/NoticeListItem";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@radix-ui/react-accordion";
+import { ChevronDown } from "lucide-react";
+
+export default function NoticeListAccordian({
+  items,
+}: {
+  items: NoticeListItem[];
+}) {
+  return (
+    <div className="flex-1  overflow-y-auto border rounded-lg px-2">
+      <Accordion type="multiple" className="w-full mx-auto mt-5 ">
+        {items.map((item) => (
+          <AccordionItem
+            key={item.id}
+            value={String(item.id)}
+            className="border rounded-lg border-gray-300 my-2 "
+          >
+            <AccordionTrigger className="w-full h-full flex justify-between px-3 text-xl hover:cursor-pointer py-4">
+              <p>{item.title}</p>
+              <div className="flex">
+                <p className="opacity-40">{item.createdAt}</p>
+                <ChevronDown className="ml-2" size={20} />
+              </div>
+            </AccordionTrigger>
+
+            <AccordionContent className="flex justify-between p-6 min-h-48 bg-gray-300 ">
+              <div className="flex-col justify-between">
+                <p>id : {item.id}</p>
+                <p>{item.content}</p>
+                <p>작성자 : {item.admin?.nickname}</p>
+              </div>
+
+              {/* <button
+                className="p-3 text-red-500 hover:text-red-700"
+                onClick={(e) => {
+                  e.preventDefault();
+                  const userConfirmed =
+                    window.confirm("정말로 삭제하시겠습니까?");
+                  if (userConfirmed) {
+                    doDelete(item);
+                    // 여기에 실행할 동작을 추가하세요
+                  } else {
+                    console.log("사용자가 취소를 클릭했습니다.");
+                  }
+                }}
+              ></button> */}
+            </AccordionContent>
+          </AccordionItem>
+        ))}
+      </Accordion>
+    </div>
+  );
+}

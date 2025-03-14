@@ -52,7 +52,7 @@ interface ContentProps {
 
 const Content: React.FC<ContentProps> = ({ page }) => {
   return (
-    <div className="flex-1 p-5">
+    <div className="flex flex-col flex-1 p-5">
       {page === "ProductList" && <ProductListAdmin></ProductListAdmin>}
       {page === "UserList" && <UserListAdmin></UserListAdmin>}
       {page === "Notice" && <NoticeAdmin></NoticeAdmin>}
