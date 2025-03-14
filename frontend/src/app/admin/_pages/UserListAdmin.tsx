@@ -25,6 +25,7 @@ export default function UserListAdmin() {
     });
     if (result.error) {
       console.log(result.response);
+      return;
     }
     setUserList(result.data!.data.content!);
   };
@@ -35,7 +36,7 @@ export default function UserListAdmin() {
   return (
     <div className="w-full">
       <div className="flex-1 flex flex-col ">
-        <h1>ProductList</h1>
+        <h1>UserList</h1>
         <div className="flex justify-end items-end">
           <PageSizeSelector
             selectedPageSize={pageSize}

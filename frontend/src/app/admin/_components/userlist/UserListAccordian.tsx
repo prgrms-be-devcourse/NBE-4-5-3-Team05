@@ -66,6 +66,7 @@ export default function UserListAccordian({
                 <Input
                   className="my-2"
                   placeholder="정지 사유를 입력하세요"
+                  disabled={item.blocked}
                   onChange={(e) => {
                     e.preventDefault();
                     setReason(e.target.value);
