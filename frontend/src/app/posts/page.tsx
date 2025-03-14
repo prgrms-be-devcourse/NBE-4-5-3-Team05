@@ -10,6 +10,8 @@ import PostList from "@/components/posts/PostList";
 import Pagination from "@/components/posts/Pagination";
 import type { components } from "@/lib/backend/apiV1/schema";
 
+// 백엔드에서 공지사항 관련 응답 타입 (리스트 형태)
+// 실제 스키마에 따라 RsDataListNoticeResBody의 이름이 다를 수 있으니 확인하세요.
 type RsDataListNoticeResBody = components["schemas"]["RsDataListNoticeResBody"];
 type NoticeResBody = components["schemas"]["NoticeResBody"];
 
@@ -24,6 +26,7 @@ export default function PostsPage() {
   const searchParams = useSearchParams();
   const initialKeyword = searchParams.get("keyword") || "";
 
+  // 공지사항은 스키마 타입을 그대로 사용합니다.
   const [noticeList, setNoticeList] = useState<NoticeResBody[]>([]);
   const [posts, setPosts] = useState<
     components["schemas"]["PreviewPostResponse"][]

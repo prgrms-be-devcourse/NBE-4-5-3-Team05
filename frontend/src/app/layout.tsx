@@ -4,6 +4,7 @@ import localFont from "next/font/local";
 import ClientLayout from "./ClientLayout";
 import { cookies } from "next/headers";
 import { parseAccessToken } from "./util/auth";
+import type { components } from "@/lib/backend/apiV1/schema";
 
 const pretendard = localFont({
   src: "./../../node_modules/pretendard/dist/web/variable/woff2/PretendardVariable.woff2",
@@ -19,20 +20,38 @@ export const metadata: Metadata = {
 
 export default async function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   const myCookie = await cookies();
   const { isLogin, payload } = parseAccessToken(myCookie.get("accessToken"));
 
-  const me = isLogin
+  const me: components["schemas"]["UserDto"] = isLogin
     ? {
         id: payload.id,
+        username: payload.username,
+        email: "", // 실제 이메일 등 필요한 값 채워주세요.
         nickname: payload.nickname,
+        address: "",
+        profileUrl: "",
+        role: payload.role,
+        createdAt: "",
+        modifiedAt: "",
+        blocked: false,
+        blockedCount: 0,
       }
     : {
         id: "",
+        username: "",
+        email: "",
         nickname: "",
+        address: "",
+        profileUrl: "",
+        role: "USER",
+        createdAt: "",
+        modifiedAt: "",
+        blocked: false,
+        blockedCount: 0,
       };
 
   return (
