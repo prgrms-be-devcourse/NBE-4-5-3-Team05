@@ -2,6 +2,7 @@
 
 import { lazy, useState } from "react";
 import { Home, User, Settings } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const ProductListAdmin = lazy(() => import("./_pages/ProductListAdmin"));
 const NoticeAdmin = lazy(() => import("./_pages/NoticeAdmin"));
@@ -61,11 +62,20 @@ const Content: React.FC<ContentProps> = ({ page }) => {
 };
 
 const SidebarLayout: React.FC = () => {
-  const [page, setPage] = useState<PageType>("ProductList");
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  // URL에서 현재 탭 상태 가져오기
+  const currentPage = (searchParams.get("tab") as PageType) || "ProductList";
+
+  // 페이지 변경 시 URL 업데이트
+  const setPage = (page: PageType) => {
+    router.push(`?tab=${page}`, { scroll: false });
+  };
   return (
     <div className="flex flex-1 overflow-y-scroll ">
       <Sidebar setPage={setPage} />
-      <Content page={page} />
+      <Content page={currentPage} />
     </div>
   );
 };

@@ -36,6 +36,24 @@ export default function UserListAccordian({
     }
     window.location.reload();
   };
+
+  const doUnBan = async (item:UserListItem)=>{
+    const response = await client.POST("/api/admin/users/{user-id}/ban", {
+      params: {
+        path: {
+          "user-id": item.id!,
+        },
+      },
+      body: {
+        reason: reason,
+      },
+      credentials: "include",
+    });
+    if (response.error) {
+      console.log(response.response);
+    }
+    window.location.reload();
+  }
   return (
     <div className="w-full mx-auto overflow-y-auto border rounded-lg px-2">
       <Accordion type="multiple" className="w-full mx-auto mt-5 ">
@@ -97,9 +115,9 @@ export default function UserListAccordian({
                   onClick={(e) => {
                     e.preventDefault();
                     const userConfirmed =
-                      window.confirm("정말로 삭제하시겠습니까?");
+                      window.confirm("정지를 해제하시겠습니까?");
                     if (userConfirmed) {
-                      doBan(item);
+                      doUnBan(item);
                       // 여기에 실행할 동작을 추가하세요
                     } else {
                       console.log("사용자가 취소를 클릭했습니다.");
