@@ -26,18 +26,24 @@ import com.NBE_4_5_2.Team5.global.dto.Empty;
 import com.NBE_4_5_2.Team5.global.dto.PageDto;
 import com.NBE_4_5_2.Team5.global.dto.RsData;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-
 
 @RestController
 @RequestMapping("/api/posts")
 @RequiredArgsConstructor
+@Tag(name = "Product Post API", description = "상품 게시글 API")
 public class ProductPostController {
 	private final ProductPostService productPostService;
 	private final RecentlyViewedService recentlyViewedService;
 	private final Rq rq;
 
+	@Operation(summary = "상품 게시글 작성", description = "상품 게시글을 작성합니다.")
+	@SecurityRequirement(name = "cookieAuth")
 	@PreAuthorize("isAuthenticated()")
 	@PostMapping
 	public RsData<ProductPostResponse> createPost(@Valid @RequestBody ProductPostWriteForm body) {
@@ -52,11 +58,17 @@ public class ProductPostController {
 		);
 	}
 
+	@Operation(summary = "글 목록 조회", description = "상품 게시글 목록을 조회합니다.")
 	@GetMapping
 	@Transactional(readOnly = true)
-	public RsData<PageDto<PreviewPostResponse>> getPosts(@RequestParam(defaultValue = "1") int page,
+	public RsData<PageDto<PreviewPostResponse>> getPosts(
+		@Parameter(description = "페이지 번호")
+		@RequestParam(defaultValue = "1") int page,
+		@Parameter(description = "페이지에 포함된 아이템 개수")
 		@RequestParam(defaultValue = "10") int pageSize,
+		@Parameter(description = "검색 키워드")
 		@RequestParam(defaultValue = "") String keyword,
+		@Parameter(description = "정렬 순서. desc:내림차순, asc:오름차순", example = "desc")
 		@RequestParam(defaultValue = "desc") String sort) {
 		PageDto<PreviewPostResponse> postPage = productPostService.getPosts(page, pageSize, keyword, sort);
 
@@ -67,11 +79,17 @@ public class ProductPostController {
 		);
 	}
 
+	@Operation(summary = "내가 작성한 상품 게시글 조회", description = "내가 작성한 상품 게시글을 조회합니다.")
+	@SecurityRequirement(name = "cookieAuth")
 	@PreAuthorize("isAuthenticated()")
 	@GetMapping("/my")
 	@Transactional(readOnly = true)
-	public RsData<PageDto<PreviewPostResponse>> getMyPosts(@RequestParam(defaultValue = "1") int page,
+	public RsData<PageDto<PreviewPostResponse>> getMyPosts(
+		@Parameter(description = "페이지 번호")
+		@RequestParam(defaultValue = "1") int page,
+		@Parameter(description = "페이지 내 아이템 개수")
 		@RequestParam(defaultValue = "10") int pageSize,
+		@Parameter(description = "정렬 순서")
 		@RequestParam(defaultValue = "desc") String sort) {
 		User actor = rq.getUserIdentity();
 		PageDto<PreviewPostResponse> postPage = productPostService.getMyPosts(actor, page, pageSize, sort);
@@ -83,9 +101,12 @@ public class ProductPostController {
 		);
 	}
 
+	@Operation(summary = "상품 게시글 상세 조회", description = "상품 게시글의 상세 정보를 조회합니다.")
 	@GetMapping("/{id}")
 	@Transactional(readOnly = false)
-	public RsData<ProductPostResponse> getPost(@PathVariable String id) {
+	public RsData<ProductPostResponse> getPost(
+		@Parameter(description = "상품 게시글 id", example = "ppost-f90sdf8-sd8fu7sd-ds8uf9")
+		@PathVariable String id) {
 		// 인증되지 않은 경우에도 게시글 상세 조회가 가능하도록 수정
 		ProductPostResponse postResponse = productPostService.getPost(id);
 
@@ -98,12 +119,14 @@ public class ProductPostController {
 		}
 
 		return new RsData<>(
-				"200",
-				"게시물 조회가 완료되었습니다.",
-				postResponse
+			"200",
+			"게시물 조회가 완료되었습니다.",
+			postResponse
 		);
 	}
 
+	@Operation(summary = "최근 조회한 상품 조회", description = "최근 조회한 상품들을 조회합니다.")
+	@SecurityRequirement(name = "cookieAuth")
 	@PreAuthorize("isAuthenticated()")
 	@GetMapping("/recently-viewed")
 	@Transactional(readOnly = true)
@@ -119,11 +142,14 @@ public class ProductPostController {
 		);
 	}
 
+	@Operation(summary = "상품 게시글 수정", description = "상품 게시글의 내용을 수정합니다.")
+	@SecurityRequirement(name = "cookieAuth")
 	@PreAuthorize("isAuthenticated()")
 	@PutMapping("/{id}")
 	@Transactional
 	public RsData<ProductPostResponse> modify(
 		@Valid @RequestBody ProductPostModifyForm body,
+		@Parameter(description = "상품 게시글 id", example = "ppost-fsiodf-21edd-fd2c1")
 		@PathVariable String id) {
 
 		User actor = rq.getUserIdentity();
@@ -136,10 +162,14 @@ public class ProductPostController {
 		);
 	}
 
+	@Operation(summary = "상품 게시글 삭제", description = "상품 게시글을 삭제합니다.")
+	@SecurityRequirement(name = "cookieAuth")
 	@PreAuthorize("isAuthenticated()")
 	@DeleteMapping("/{id}")
 	@Transactional
-	public RsData<Empty> delete(@PathVariable String id) {
+	public RsData<Empty> delete(
+		@Parameter(description = "상품 게시글 id", example = "ppost-2ji109-fe3sfd-3fsdf")
+		@PathVariable String id) {
 
 		User actor = rq.getUserIdentity();
 		productPostService.delete(actor, id);
@@ -151,18 +181,25 @@ public class ProductPostController {
 	}
 
 	/// 찜(좋아요) 엔드포인트 – 한 유저가 한 게시글에 대해 한 번만 찜할 수 있음
+	@Operation(summary = "상품 게시글 찜", description = "상품 게시글을 찜합니다.")
+	@SecurityRequirement(name = "cookieAuth")
 	@PreAuthorize("isAuthenticated()")
 	@PostMapping("/{id}/like")
-	public RsData<ProductPostResponse> likePost(@PathVariable String id) {
+	public RsData<ProductPostResponse> likePost(
+		@Parameter(description = "상품 게시글 id", example = "ppost-2ji109-fe3sfd-3fsdf")
+		@PathVariable String id) {
 		User actor = rq.getUserIdentity();
 		ProductPostResponse response = productPostService.likePost(actor, id);
 		return new RsData<>("200", "찜 완료", response);
 	}
 
-    /// 내가 구매한 내역 조회
-    @GetMapping("/my/purchases")
-    public RsData<List<ProductPostResponse>> getMyPurchases() {
-        User actor = rq.getUserIdentity();
+	/// 내가 구매한 내역 조회
+	@Operation(summary = "내가 구매한 상품 게시글 리스트 조회", description = "내가 구매한 상품 게시글의 목록을 조회합니다.")
+	@SecurityRequirement(name = "cookieAuth")
+	@PreAuthorize("isAuthenticated()")
+	@GetMapping("/my/purchases")
+	public RsData<List<ProductPostResponse>> getMyPurchases() {
+		User actor = rq.getUserIdentity();
 
 		List<ProductPostResponse> myPurchases = productPostService.getMyPurchases(actor);
 
@@ -174,6 +211,8 @@ public class ProductPostController {
 	}
 
 	/// 내가 판매한 내역
+	@Operation(summary = "내가 판매한 상품 게시글 리스트 조회", description = "내가 판매한 상품 게시글의 목록을 조회합니다.")
+	@SecurityRequirement(name = "cookieAuth")
 	@PreAuthorize("isAuthenticated()")
 	@GetMapping("/my/sales")
 	public RsData<List<ProductPostResponse>> getMySales() {
@@ -188,6 +227,8 @@ public class ProductPostController {
 	}
 
 	/// 내가 찜한 내역
+	@Operation(summary = "내가 판매한 상품 게시글 리스트 조회", description = "내가 판매한 상품 게시글의 목록을 조회합니다.")
+	@SecurityRequirement(name = "cookieAuth")
 	@PreAuthorize("isAuthenticated()")
 	@GetMapping("/my/favorites")
 	public RsData<List<ProductPostResponse>> getMyFavorites() {

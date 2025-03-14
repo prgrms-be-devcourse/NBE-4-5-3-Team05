@@ -1,4 +1,4 @@
-package com.NBE_4_5_2.Team5.infrastructure;
+package com.NBE_4_5_2.Team5.infrastructure.toss;
 
 import java.util.Map;
 
