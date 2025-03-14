@@ -9,7 +9,6 @@ import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
-  BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 
 export default function NoticeAdmin() {
@@ -19,6 +18,7 @@ export default function NoticeAdmin() {
   const [notices, setNotices] = useState<NoticeListItem[]>([]);
 
   const [currentView, setCurrentView] = useState<"list" | "form">("list");
+  const [editNotice, setEditNotice] = useState<NoticeListItem | null>(null);
 
   const getNotices = async () => {
     const response = await client.GET("/api/admin/notices", {
@@ -72,10 +72,16 @@ export default function NoticeAdmin() {
             selectedPageSize={size}
             setSelectedPageSize={setSize}
           />
-          <NoticeListAccordian items={notices} />
+          <NoticeListAccordian
+            items={notices}
+            onEdit={(notice) => {
+              setEditNotice(notice);
+              setCurrentView("form");
+            }}
+          />
           <Pagination
             currentPage={page}
-            totalPages={totalPages - 1}
+            totalPages={totalPages > 0 ? totalPages - 1 : 0}
             onPageChange={setPage}
           />
           <button
@@ -87,7 +93,7 @@ export default function NoticeAdmin() {
         </div>
       ) : (
         <div className="h-full flex flex-col flex-1">
-          <NoticeForm />
+          <NoticeForm editNotice={editNotice!} />
           <button
             onClick={() => setCurrentView("list")}
             className="mt-4 p-2 bg-gray-500 text-white rounded"

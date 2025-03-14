@@ -8,8 +8,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import client from "@/lib/client";
+import { NoticeListItem } from "@/app/_type/NoticeListItem";
 
 const formSchema = z.object({
   title: z.string().min(3, "제목은 최소 3자 이상 입력해야 합니다."),
@@ -18,29 +19,59 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
-const TitleContentForm = () => {
+const TitleContentForm = ({ editNotice }: { editNotice?: NoticeListItem }) => {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(formSchema),
   });
 
-  const submitNotice = async (data: FormData) => {
-    const response = await client.POST("/api/admin/notices", {
-      body: {
-        title: data!.title,
-        content: data!.content,
-      },
-      credentials: "include",
-    });
-    if (response.error) {
-      console.log(response.error);
-      return;
+  useEffect(() => {
+    if (editNotice) {
+      setValue("title", editNotice.title!);
+      setValue("content", editNotice.content!);
     }
-    alert("공지사항 작성 성공.");
-    window.location.reload();
+  }, [editNotice, setValue]);
+
+  const submitNotice = async (data: FormData) => {
+    if (editNotice) {
+      // 수정 진행
+      const response = await client.PUT("/api/admin/notices/{notice-id}", {
+        params: {
+          path: {
+            "notice-id": editNotice.id!,
+          },
+        },
+        body: {
+          title: data.title,
+          content: data.content,
+        },
+        credentials: "include",
+      });
+      if (response.error) {
+        console.log(response.error);
+        return;
+      }
+      alert("공지사항 수정 성공.");
+      window.location.reload();
+    } else {
+      const response = await client.POST("/api/admin/notices", {
+        body: {
+          title: data!.title,
+          content: data!.content,
+        },
+        credentials: "include",
+      });
+      if (response.error) {
+        console.log(response.error);
+        return;
+      }
+      alert("공지사항 작성 성공.");
+      window.location.reload();
+    }
   };
 
   const onSubmit = (data: FormData) => {
@@ -50,7 +81,9 @@ const TitleContentForm = () => {
   return (
     <Card className="flex-1 h-full  p-5 shadow-md">
       <CardHeader>
-        <h2 className="text-lg font-semibold">공지사항 작성</h2>
+        <h2 className="text-lg font-semibold">
+          {editNotice ? "공지사항 수정" : "공지사항 작성"}
+        </h2>
       </CardHeader>
       <CardContent className="h-full flex flex-col flex-1">
         <form
@@ -93,7 +126,7 @@ const TitleContentForm = () => {
 
           {/* 제출 버튼 */}
           <Button type="submit" className="w-full">
-            제출
+            {editNotice ? "수정하기" : "작성하기"}
           </Button>
         </form>
       </CardContent>
