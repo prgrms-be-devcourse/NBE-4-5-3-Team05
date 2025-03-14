@@ -67,9 +67,10 @@ public class ProductPost {
 	@Setter
 	private String image_urls; // 쉼표가 포함된 url 문자열
 
+	//조회수
 	@Column(nullable = false)
 	@Builder.Default
-	private Integer likedCount = 0;
+	private Integer viewCount = 0;
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
@@ -169,4 +170,10 @@ public class ProductPost {
 	public void addComment(Comment comment) {
 		commentList.add(comment);
 	}
+
+	//조회수 증가
+	public void incrementViewCount() {
+		this.viewCount++;
+	}
+
 }

@@ -1,7 +1,10 @@
 package com.NBE_4_5_2.Team5.domain.admin.service;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -45,7 +48,7 @@ public class AdminService {
 	private final PasswordEncoder passwordEncoder;
 	private final ProductPostRepository productPostRepository;
 
-	public User signUpAdmin(String username, String password, String email) {
+	public User signUpAdmin(String username, String password, String nickname, String email) {
 		User admin =
 			User.builder()
 				.id("user-" + UUID.randomUUID())
@@ -53,7 +56,7 @@ public class AdminService {
 				.username(username)
 				.password(passwordEncoder.encode(password))
 				.email(email)
-				.nickname("admin")
+				.nickname(nickname)
 				.address("addr")
 				.profileUrl("url")
 				.build();
@@ -178,4 +181,15 @@ public class AdminService {
 		isAdmin(user);
 		noticePostRepository.deleteById(noticeId);
 	}
+
+	// 최신 공지사항을 조회하는 메서드 (최신순 정렬 후 상위 limit 개 반환)
+	@Transactional(readOnly = true)
+	public List<NoticePost> getLatestNotices(int limit) {
+		List<NoticePost> notices = noticePostRepository.findAll();
+		return notices.stream()
+			.sorted(Comparator.comparing(NoticePost::getCreatedAt).reversed())
+			.limit(limit)
+			.collect(Collectors.toList());
+	}
+
 }
