@@ -22,7 +22,7 @@ public class PreviewPostResponse {
 	private Float longitude;
 	private String thumbNail;
 	private LocalDateTime createdAt;
-
+	private String imageUrls;
 	private Integer viewCount;
 	private Integer likedCount;
 
@@ -37,6 +37,7 @@ public class PreviewPostResponse {
 			.latitude(post.getLatitude())
 			.longitude(post.getLongitude())
 			.thumbNail(post.getImage_urls().split(",")[0])
+			.imageUrls(post.getImage_urls())
 			.createdAt(post.getCreatedAt())
 			.viewCount(post.getViewCount())
 			.likedCount(0)
