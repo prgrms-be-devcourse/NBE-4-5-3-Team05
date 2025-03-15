@@ -52,6 +52,18 @@ spring:
             user-info-uri: https://kapi.kakao.com/v2/user/me
             user-name-attribute: id
 
+  mail:
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connection-timeout: 5000                     # 클라이언트 -> SMTP 서버 연결 대기 시간
+          timeout: 5000                                # 클라이언트 <- SMTP 서버 응답 대기 시간
+          write-timeout: 5000                          # 클라이언트 작업 완료 대기 시간
+
 logging:
   level:
     org.hibernate.SQL: DEBUG
@@ -59,7 +71,6 @@ logging:
     org.hibernate.orm.jdbc.extract: TRACE
     org.springframework.transaction.interceptor: TRACE
     org.springframework.security: DEBUG
-
 
 springdoc:
   default-produces-media-type: application/json;charset=UTF-8

@@ -2,10 +2,13 @@
 db_dev.mv.db
 db_dev.trace.db
 api.json
+/backend/application.pid
+/frontend/src/lib/backend/apiV1/schema.d.ts
+frontend/src/lib/backend/apiV1/schema.d.ts
+
 
 .idea/
 *.iws
 *.iml
 *.ipr
 
-frontend/src/lib/backend/api/

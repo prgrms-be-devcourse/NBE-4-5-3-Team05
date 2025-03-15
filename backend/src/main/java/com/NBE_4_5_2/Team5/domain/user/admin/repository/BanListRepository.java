@@ -9,4 +9,6 @@ import com.NBE_4_5_2.Team5.domain.user.admin.entity.BanList;
 
 public interface BanListRepository extends JpaRepository<BanList, String> {
 	List<BanList> findAllByEndDateAfter(LocalDateTime endDateAfter);
+
+	void deleteByBannedUser_Id(String bannedUserId);
 }

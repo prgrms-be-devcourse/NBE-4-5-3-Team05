@@ -16,27 +16,22 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 import com.NBE_4_5_2.Team5.domain.user.user.dto.AuthToken;
 import com.NBE_4_5_2.Team5.domain.user.user.entity.User;
 import com.NBE_4_5_2.Team5.domain.user.user.service.UserService;
+import com.NBE_4_5_2.Team5.global.config.BaseTestConfig;
 import com.NBE_4_5_2.Team5.global.config.RedisTestContainerConfig;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
-import jakarta.transaction.Transactional;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@ActiveProfiles("test")
-@Transactional
-@TestPropertySource(properties = "custom.refreshToken.expire-seconds=3600")
+@BaseTestConfig
 class CustomAuthenticationFilterTest extends RedisTestContainerConfig {
-
 	@Autowired
 	private MockMvc mvc;
 
@@ -91,7 +86,7 @@ class CustomAuthenticationFilterTest extends RedisTestContainerConfig {
 	}
 
 	/**
-	 * 예외 테스트 코드 (test4 ~ test9)
+	 * 예외 테스트 코드 (test3 ~ test8)
 	 * <p>
 	 * GlobalExceptionHandler에서 직접 처리하지 않은 예외 상황이 발생했을 때,
 	 * Spring Boot의 기본 오류 처리 (`/error`)를 통해 정상적으로 응답이 반환되는지 검증하는 테스트

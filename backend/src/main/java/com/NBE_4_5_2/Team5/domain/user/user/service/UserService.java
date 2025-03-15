@@ -16,12 +16,12 @@ import com.NBE_4_5_2.Team5.domain.user.user.entity.RefreshToken;
 import com.NBE_4_5_2.Team5.domain.user.user.entity.Role;
 import com.NBE_4_5_2.Team5.domain.user.user.entity.User;
 import com.NBE_4_5_2.Team5.domain.user.user.repository.UserRepository;
+import com.NBE_4_5_2.Team5.domain.user.user.service.email.EmailService;
 import com.NBE_4_5_2.Team5.global.Rq;
 import com.NBE_4_5_2.Team5.global.exception.ServiceException;
 import com.NBE_4_5_2.Team5.global.exception.security.AuthenticationNotFoundException;
 import com.NBE_4_5_2.Team5.global.exception.security.AuthenticationNotValidException;
 import com.NBE_4_5_2.Team5.global.exception.security.TokenNotFoundException;
-import com.NBE_4_5_2.Team5.global.exception.validation.AlreadyUsedException;
 import com.NBE_4_5_2.Team5.global.security.SecurityUser;
 
 import jakarta.transaction.Transactional;
@@ -31,6 +31,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class UserService {
 
+	private final EmailService emailService;
 	private final UserRepository userRepository;
 	private final AuthTokenService authTokenService;
 	private final RedisService redisService;
@@ -41,7 +42,8 @@ public class UserService {
 	public User createUser(String username, String password, String email,
 		String nickname, String address, String profileUrl) {
 
-		userValidator.duplicate(username, email, nickname);
+		userValidator.duplicate(username, nickname);
+		userValidator.emailVerified(email);
 
 		User user = User.builder()
 			.id("user-" + UUID.randomUUID())
@@ -231,9 +233,14 @@ public class UserService {
 	// 내 프로필 수정
 	@Transactional
 	public UserDto updateMyProfile(User user, UserUpdateRequest updateRequest) {
+
 		// 닉네임 변경
-		if (updateRequest.getNickname() != null) {
-			user.setNickname(updateRequest.getNickname());
+		String updateNickname = updateRequest.getNickname();
+		if (updateNickname != null && !updateNickname.equals(user.getNickname())) {
+			if (userRepository.existsByNickname(updateNickname)) {
+				throw new ServiceException("400-NICKNAME-ALREADY-EXISTS", "이미 사용중인 닉네임입니다.");
+			}
+			user.setNickname(updateNickname);
 		}
 
 		// 주소 변경
@@ -247,10 +254,10 @@ public class UserService {
 		}
 
 		// 이메일 변경 시 중복 체크
-		if (updateRequest.getEmail() != null && !updateRequest.getEmail().equals(user.getEmail())) {
-			if (userRepository.existsByEmail(updateRequest.getEmail())) {
-				throw new AlreadyUsedException("400-EMAIL-ALREADY-EXISTS", "이미 사용 중인 이메일입니다.");
-			}
+		String updateEmail = updateRequest.getEmail();
+		if (updateEmail != null && !updateEmail.equals(user.getEmail())) {
+			// 이메일 중복 체크 & 인증된 이메일인지 검증 및 예외처리
+			userValidator.emailVerified(updateEmail);
 			user.setEmail(updateRequest.getEmail());
 		}
 
@@ -263,4 +270,32 @@ public class UserService {
 		userRepository.delete(user);
 	}
 
+	public void sendAuthenticationCode(String email) {
+
+		if (userRepository.existsByEmail(email)) {
+			throw new ServiceException("400-1", "이미 사용중인 이메일입니다.");
+		}
+
+		emailService.sendAuthenticationCode(email);
+		emailService.checkBouncedEmail(email);
+	}
+
+	/**
+	 * 사용자가 입력한 인증코드를 검증하여 일치할 경우 해당 이메일을 verified로 저장
+	 *
+	 * @param email 검증할 이메일
+	 * @param code  사용자가 입력한 인증 코드
+	 * @throws ServiceException 인증코드가 일치하지 않는 경우
+	 */
+	public void verifyAuthenticationCode(String email, String code) {
+
+		String savedCode = emailService.getVerificationCode(email);
+		boolean verified = emailService.verifyAuthenticationCode(code, savedCode);
+
+		if (!verified) {
+			throw new ServiceException("400-1", "인증코드가 틀렸습니다.");
+		}
+
+		emailService.saveVerificationCode(email, "verified");
+	}
 }

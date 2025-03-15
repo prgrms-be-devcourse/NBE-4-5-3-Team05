@@ -7,59 +7,60 @@ import { parseAccessToken } from "./app/util/auth";
 
 export async function middleware(request: NextRequest) {
   const myCookie = await cookies();
-  const { isLogin, isExpired } = parseAccessToken(myCookie.get("accessToken"));
-  const refresTokenCookie = myCookie.get("refreshToken");
+  const accessTokenCookie = myCookie.get("accessToken");
 
-  if (request.nextUrl.pathname.startsWith("/user/me") && !isLogin) {
-    return NextResponse.redirect(new URL("/", request.url));
+  const { isLogin, isExpired } = parseAccessToken(accessTokenCookie);
+
+  // ✅ 2. 로그인 상태이고, AccessToken이 유효하면 패스
+  if (isLogin && !isExpired) {
+    console.log("✅ AccessToken 유효 → 요청 패스");
+    return NextResponse.next();
   }
 
+  // ✅ 3. 로그인 상태인데 만료됨 → RefreshToken 존재 여부 확인
   if (isLogin && isExpired) {
-    return refreshAccessToken(refresTokenCookie);
-  }
-
-  if (!isLogin && isProtectedRoute(request.nextUrl.pathname)) {
-    return createUnauthorizedResponse();
+    console.log("🔄 AccessToken 만료 → RefreshToken으로 재발급 시도");
+    return refreshAccessToken();
   }
 }
 
-async function refreshAccessToken(refreshToken?: RequestCookie) {
-  /* TODO : 리프레시 설정 후 set-cookie 설정 필요 */
+// ❌ 강제 로그아웃 + 쿠키 삭제 + 로그인 화면 이동 (헤더 UI 반영)
+function forceLogout(request: NextRequest, redirectUrl: string = "/") {
+  console.log("🔴 강제 로그아웃 실행");
 
-  if (!refreshToken) {
-    return createUnauthorizedResponse();
-  }
+  const nextResponse = NextResponse.redirect(new URL(redirectUrl, request.url));
 
-  const response = await client.POST("/api/users/refresh", {
-    body: { refreshToken: refreshToken.value },
-    credentials: "include",
-  });
-
-  const rsData = response.data;
-
-  const newAccessToken = rsData?.data;
-  const nextResponse = NextResponse.next();
+  // 🟢 AccessToken 삭제
   nextResponse.headers.append(
     "Set-Cookie",
-    `accessToken=${newAccessToken}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=3600`
+    `accessToken=; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=0`
   );
 
   return nextResponse;
 }
 
-function createUnauthorizedResponse() {
-  return new NextResponse("로그인이 필요합니다.", {
-    status: 401,
+// 🔄 RefreshToken을 사용해 AccessToken 재발급
+async function refreshAccessToken() {
+  const nextResponse = NextResponse.next();
+
+  const response = await client.GET("/api/users/me", {
     headers: {
-      "Content-Type": "text/html; charset=utf-8",
+      cookie: (await cookies()).toString(),
     },
   });
-}
 
-function isProtectedRoute(pathname: string) {
-  return (
-    pathname.startsWith("/post/write") || pathname.startsWith("/post/edit")
-  );
+  // ✅ 새로운 AccessToken 쿠키 저장 (Max-Age 추가)
+  const springCookie = response.response.headers.getSetCookie();
+  console.log("스프링 쿠키:" + springCookie);
+  nextResponse.headers.set("set-cookie", String(springCookie));
+
+  // 🗑 RefreshToken 삭제 (1회용)
+  // nextResponse.headers.append(
+  //   "Set-Cookie",
+  //   `refreshToken=; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=0`
+  // );
+
+  return nextResponse;
 }
 
 // middleware 지날 곳을 향후에 더 추가
