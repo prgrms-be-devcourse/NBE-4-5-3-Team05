@@ -1,4 +1,4 @@
-package com.NBE_4_5_2.Team5.domain.admin.controller;
+package com.NBE_4_5_2.Team5.domain.user.admin.controller;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -73,10 +73,10 @@ class AdminControllerTest extends RedisTestContainerConfig {
 		User admin = userRepository.save(
 			User.builder()
 				.id("user-" + UUID.randomUUID())
-				.username("userndfdafasdadsa")
+				.username("username")
 				.password(passwordEncoder.encode("password"))
-				.email("emaildfsfsf")
-				.nickname("nickasdffdsf")
+				.email("email")
+				.nickname("nickname")
 				.address("address")
 				.role(Role.ADMIN)
 				.profileUrl("url")
@@ -137,26 +137,24 @@ class AdminControllerTest extends RedisTestContainerConfig {
 		User admin = userRepository.save(
 			User.builder()
 				.id("user-" + UUID.randomUUID())
-				.username("admiqrqwa")
+				.username("admin")
 				.password(passwordEncoder.encode("password"))
 				.email("email1@email.com")
-				.nickname("ne1q2e3wdasdc")
-				.address("address1")
+				.nickname("nickname1")
+				.address("address")
 				.role(Role.ADMIN)
 				.profileUrl("url")
 				.build());
 		User user = userRepository.save(User.builder()
 			.id("user-" + UUID.randomUUID())
-			.username("usercawedcs")
+			.username("username")
 			.password(passwordEncoder.encode("password"))
 			.email("email2@email.com")
-			.nickname("nicknssaqed")
-			.address("address2qwedxasqe")
+			.nickname("nickname2")
+			.address("address")
 			.profileUrl("url")
 			.role(Role.USER)
 			.build());
-
-		System.out.println("Before banUser: " + user.getBlockedCount());
 
 		Map<String, Cookie> cookieMap = login(admin.getUsername(), "password");
 		ResultActions perform = mockMvc.perform(post("/api/admin/users/%s/ban".formatted(user.getId()))
@@ -192,12 +190,12 @@ class AdminControllerTest extends RedisTestContainerConfig {
 	void deletePost() throws Exception {
 		//given
 		Category category = categoryRepository.save(Category.builder().name("cat1").build());
-		User user = adminService.signUpAdmin("userqed", "password", "emailqxaqrqw", "fklasjdlkf");
+		User user = adminService.signUpAdmin("user1", "password", "admin231", "email");
 		ProductPost post = productPostRepository.save(
 			ProductPost.create(user, "name", 5000, "title", "content", "url", 30F, 40F)
 		);
 
-		Map<String, Cookie> cookieMap = login(user.getUsername(), "password");
+		Map<String, Cookie> cookieMap = login("user1", "password");
 
 		//when
 		mockMvc.perform(delete("/api/admin/posts/%s".formatted(post.getId()))

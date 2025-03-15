@@ -1,38 +1,37 @@
 "use client";
 
+import { LoginMemberContext } from "@/app/stores/auth/loginMemberStore";
 import { Button } from "@/components/ui/button";
 import { components } from "@/lib/backend/apiV1/schema";
 import { useRouter } from "next/navigation";
 import router from "next/router";
+import { use } from "react";
 
-export default function ClientPage({
-  userInfo,
-}: {
-  userInfo: components["schemas"]["UserDto"];
-}) {
+export default function ClientPage() {
   const router = useRouter();
+  const { loginMember } = use(LoginMemberContext);
 
   return (
     <div className="flex flex-col items-center p-6">
       <h2 className="text-2xl font-bold mb-4">내 정보 조회</h2>
       <div className="border p-4 rounded-md w-[400px] shadow-lg">
         <div className="mb-2">
-          <strong>아이디:</strong> {userInfo.username}
+          <strong>아이디:</strong> {loginMember.username}
         </div>
         <div className="mb-2">
-          <strong>이메일:</strong> {userInfo.email}
+          <strong>이메일:</strong> {loginMember.email}
         </div>
         <div className="mb-2">
-          <strong>닉네임:</strong> {userInfo.nickname}
+          <strong>닉네임:</strong> {loginMember.nickname}
         </div>
         <div className="mb-2">
-          <strong>주소:</strong> {userInfo.address || "주소 없음"}
+          <strong>주소:</strong> {loginMember.address || "주소 없음"}
         </div>
         <div className="mb-4">
           <strong>프로필 사진:</strong> <br />
-          {userInfo.profileUrl ? (
+          {loginMember.profileUrl ? (
             <img
-              src={userInfo.profileUrl}
+              src={loginMember.profileUrl}
               alt="프로필"
               className="w-24 h-24 rounded-full mt-2"
             />

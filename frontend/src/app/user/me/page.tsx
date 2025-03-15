@@ -2,21 +2,12 @@ import client from "@/lib/client";
 import ClientPage from "./ClientPage";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import RequireAuthenticated from "@/components/auth/RequireAuthenticated";
 
 export default async function Page() {
-  const response = await client.GET("/api/users/me", {
-    headers: {
-      cookie: (await cookies()).toString(),
-    },
-  });
-
-  const rsData = response.data;
-
-  if (!rsData) {
-    redirect("/");
-  }
-
-  const userInfo = rsData.data;
-
-  return <ClientPage userInfo={userInfo} />;
+  return (
+    <RequireAuthenticated>
+      <ClientPage />
+    </RequireAuthenticated>
+  );
 }

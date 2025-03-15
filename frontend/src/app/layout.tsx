@@ -22,26 +22,15 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const myCookie = await cookies();
-  const { isLogin, payload } = parseAccessToken(myCookie.get("accessToken"));
-
-  const me = isLogin
-    ? {
-        id: payload.id,
-        nickname: payload.nickname,
-      }
-    : {
-        id: "",
-        nickname: "",
-      };
-
   return (
-    <ClientLayout
-      fontVariable={pretendard.variable}
-      fontClassName={pretendard.className}
-      me={me}
+    <html
+      lang="en"
+      className={`${pretendard.variable}`}
+      suppressHydrationWarning
     >
-      {children}
-    </ClientLayout>
+      <body className={`min-h-[100dvh] flex flex-col ${pretendard.className}`}>
+        <ClientLayout>{children}</ClientLayout>
+      </body>
+    </html>
   );
 }
