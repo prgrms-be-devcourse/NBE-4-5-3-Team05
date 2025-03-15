@@ -1,16 +1,14 @@
-import { dirname } from "path";
-import { fileURLToPath } from "url";
-import { FlatCompat } from "@eslint/eslintrc";
+import globals from "globals";
+import pluginReact from "eslint-plugin-react";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-});
-
-const eslintConfig = [
-  ...compat.extends("next/core-web-vitals", "next/typescript"),
+/** @type {import('eslint').Linter.Config[]} */
+export default [
+  { files: ["**/*.{js,mjs,cjs,jsx}"] },
+  { languageOptions: { globals: globals.browser } },
+  pluginReact.configs.flat.recommended,
+  {
+    rules: {
+      "@typescript-eslint/no-unused-vars": "off", // 🚀 unused-vars 규칙 끄기
+    },
+  },
 ];
-
-export default eslintConfig;

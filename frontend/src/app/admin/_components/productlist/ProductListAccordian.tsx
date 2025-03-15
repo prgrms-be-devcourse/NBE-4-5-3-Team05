@@ -14,7 +14,7 @@ export default function ShadcnAccordionList({
 }: {
   items: ProductListItem[];
 }) {
-  const doDelete = async (item) => {
+  const doDelete = async (item: ProductListItem) => {
     const response = await client.DELETE("/api/admin/posts/{post-id}", {
       params: {
         path: {
