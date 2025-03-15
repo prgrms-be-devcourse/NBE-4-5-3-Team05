@@ -9,6 +9,7 @@ import {
   useLoginMember,
 } from "./stores/auth/loginMemberStore";
 import { useRouter } from "next/router";
+import { useEffect } from "react";
 
 export default function ClientLayout({
   children,
