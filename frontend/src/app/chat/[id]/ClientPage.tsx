@@ -232,10 +232,12 @@ export default function ClientPage({
       />
       <ul className="space-y-4">
         {chatMessages.slice().reverse().map((message) => (
-          <li key={`${message.messageId}-${chatRoom.id}`} className="border p-2 bg-white rounded shadow-sm">
-            <div>
-              <strong>보낸 이:</strong> {message.sender}
-            </div>
+          <li key={`${message.messageId}-${chatRoom.id}`} className={`border p-2 rounded shadow-sm ${message.sender === userNickname ? "bg-blue-200 text-right" : "bg-white text-left"}`}>
+            {message.sender !== userNickname && (
+              <div>
+                <strong>보낸 이:</strong> {message.sender}
+              </div>
+            )}
             <div>
               <strong>메시지 내용:</strong> {message.message}
             </div>
@@ -258,7 +260,7 @@ export default function ClientPage({
                 <strong>이미지:</strong> <img src={message.image} alt="메시지 첨부 이미지" className="max-w-full h-auto" />
               </div>
             )}
-            <div>ㅇ
+            <div>
               <strong>보낸 시간:</strong> {message.timestamp} 
             </div>
           </li>
