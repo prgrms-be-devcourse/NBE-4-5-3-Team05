@@ -16,6 +16,7 @@ import com.NBE_4_5_2.Team5.domain.user.user.entity.User;
 import com.NBE_4_5_2.Team5.domain.user.user.repository.UserRepository;
 import com.NBE_4_5_2.Team5.domain.user.user.service.UserService;
 import com.NBE_4_5_2.Team5.global.exception.post.product.ProductNotFoundException;
+import com.NBE_4_5_2.Team5.global.exception.post.product.ProductPostNotFoundException;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +34,7 @@ public class PaymentService {
 	private final PaymentProviderAdapter paymentProviderAdapter;
 	private final UserService userService;
 	private final UserRepository userRepository;
+	private final ProductPostRepository productPostRepository;
 
 	public PaymentMetaData saveMetaData(String paymentId, Integer amount) {
 		User user = getLoggedInUser();
@@ -101,4 +103,13 @@ public class PaymentService {
 		}
 	}
 
+	public Boolean isPurchased(String postId) {
+
+		User loggedInUser = getLoggedInUser();
+
+		ProductPost productPost = productPostRepository.findById(postId)
+			.orElseThrow(() -> new ProductPostNotFoundException("404", "product post를 찾을 수 없습니다."));
+
+		return productPost.isPurchasedBy(loggedInUser);
+	}
 }

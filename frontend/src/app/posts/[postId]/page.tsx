@@ -2,22 +2,11 @@
 
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import axios from "axios";
 import type { components } from "@/lib/backend/apiV1/schema";
+import client from "@/lib/client";
+import Image from "next/image";
 
 type ProductPostResponse = components["schemas"]["ProductPostResponse"];
-type RsDataProductPostResponse = {
-  code: string;
-  message: string;
-  data: ProductPostResponse;
-};
-
-// 수정된 찜한 내역 API 응답 타입 – 백엔드에서 ProductPostResponse 배열 반환
-type RsDataFavorites = {
-  code: string;
-  message: string;
-  data: ProductPostResponse[];
-};
 
 export default function PostDetailPage() {
   const { postId } = useParams<{ postId: string }>();
@@ -28,63 +17,95 @@ export default function PostDetailPage() {
   const [likeLoading, setLikeLoading] = useState<boolean>(false);
   const [liked, setLiked] = useState<boolean>(false);
 
+  const [purchased, setPurchased] = useState<boolean>(false);
+  const [purchaseLoading, setPurchasedLoading] = useState<boolean>(false);
+
   // 로그인 상태 체크 함수
   const checkLoginStatus = async (): Promise<boolean> => {
-    try {
-      // 로그인 여부를 확인하는 API 호출 (/api/users/me)
-      await axios.get("/api/users/me", { withCredentials: true });
-      return true;
-    } catch (err) {
+    // 로그인 여부를 확인하는 API 호출 (/api/users/me)
+    const result = await client.GET("/api/users/me", {
+      credentials: "include",
+    });
+    console.log("result:", result);
+    if (result.response.status !== 200) {
       return false;
     }
+    return true;
   };
 
   // 게시글 상세 조회 (백엔드에서 조회수 증가 처리)
   const fetchPost = async () => {
     if (!postId) return;
-    try {
-      const response = await axios.get<RsDataProductPostResponse>(
-        `/api/posts/${postId}`,
-        { withCredentials: true }
-      );
-      setPost(response.data.data);
-      setLoading(false);
-    } catch (err) {
-      console.error("게시글 상세 조회 실패", err);
+    console.log(postId);
+    const response = await client.GET("/api/posts/{id}", {
+      withCredentials: true,
+      params: {
+        path: {
+          id: postId,
+        },
+      },
+    });
+    if (response.error) {
+      console.error("게시글 상세 조회 실패", response.error);
       setError("게시글 정보를 불러올 수 없습니다.");
-      setLoading(false);
+      return;
     }
+    setPost(response.data.data);
+    setLoading(false);
   };
 
   // 사용자의 찜한 내역을 불러와 현재 게시글이 찜되었는지 확인
   const fetchUserFavorites = async () => {
     // 먼저 로그인 상태 체크
     const isLoggedIn = await checkLoginStatus();
+    console.log(isLoggedIn);
     if (!isLoggedIn) {
       // 로그인 안되어 있으면 찜한 내역을 불러오지 않음
       return;
     }
     try {
-      const response = await axios.get<RsDataFavorites>(
-        "/api/posts/my/favorites",
-        { withCredentials: true }
-      );
-      const favorites = response.data.data; // ProductPostResponse[]
-      if (post?.id && favorites.some((fav) => fav.id === post.id)) {
+      const response = await client.GET("/api/posts/my/favorites", {
+        credentials: "include",
+      });
+      const favorites = response.data!.data; // ProductPostResponse[]
+      if (post?.id && favorites.items.some((fav) => fav.id === post.id)) {
         setLiked(true);
       }
-    } catch (err) {
-      console.error("찜한 내역 조회 실패", err);
+    } catch (error) {
+      console.error("찜한 내역 조회 실패", error);
+      return;
     }
+  };
+
+  const checkPurchased = async () => {
+    const isLoggedIn = await checkLoginStatus();
+
+    if (!isLoggedIn) return;
+
+    const result = await client.GET("/api/payments", {
+      params: {
+        query: {
+          "post-id": post!.id!,
+        },
+      },
+      credentials: "include",
+    });
+    if (result.error) {
+      console.log(result);
+      setPurchased(false);
+      return;
+    }
+    setPurchased(true);
   };
 
   useEffect(() => {
     fetchPost();
-  }, [postId]);
+  }, []);
 
   useEffect(() => {
     if (post) {
       fetchUserFavorites();
+      checkPurchased();
     }
   }, [post]);
 
@@ -98,18 +119,53 @@ export default function PostDetailPage() {
       return;
     }
     setLikeLoading(true);
-    try {
-      const response = await axios.post<RsDataProductPostResponse>(
-        `/api/posts/${post.id}/like`,
-        null,
-        { withCredentials: true }
-      );
-      setPost(response.data.data);
-      setLiked(true);
-    } catch (err) {
-      console.error("찜 처리 실패", err);
+
+    const response = await client.POST("/api/posts/{id}/like", {
+      params: {
+        path: {
+          id: post.id!,
+        },
+      },
+      credentials: "include",
+    });
+    if (response.error) {
+      console.error("찜 처리 실패", response.error);
+      return;
     }
+    setPost(response.data.data);
+    setLiked(true);
     setLikeLoading(false);
+  };
+
+  const handlePurchase = async () => {
+    console.log("hi");
+    const isLoggedIn = await checkLoginStatus();
+    if (!isLoggedIn) {
+      alert("먼저 로그인을 해주세요.");
+      router.push("/user/login");
+      return;
+    }
+
+    const isConfirmed = confirm("정말 구매하시겠습니까?");
+
+    if (isConfirmed) {
+      setPurchasedLoading(true);
+      const response = await client.POST("/api/payments", {
+        body: {
+          productId: post!.id,
+        },
+        credentials: "include",
+      });
+      if (response.error) {
+        alert("구매에 실패했습니다.");
+        console.error("구매 처리 실패", response.error);
+        setPurchasedLoading(false);
+        return;
+      }
+      setPurchased(true);
+      setPurchasedLoading(false);
+    } else {
+    }
   };
 
   if (loading) return <div className="p-4">로딩 중...</div>;
@@ -211,6 +267,17 @@ export default function PostDetailPage() {
           className="px-4 py-2 bg-red-500 text-white rounded"
         >
           {liked ? "찜 완료" : likeLoading ? "처리 중..." : "찜하기"}
+        </button>
+        <button
+          disabled={purchaseLoading || purchased}
+          onClick={handlePurchase}
+          className="px-4 py-2 bg-red-500 text-white rounded"
+        >
+          {purchased
+            ? "구매 완료"
+            : purchaseLoading
+            ? "처리 중..."
+            : "구매하기"}
         </button>
       </div>
     </div>
