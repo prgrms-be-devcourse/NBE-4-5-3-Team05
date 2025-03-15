@@ -72,4 +72,7 @@ springdoc:
 
 custom:
   server:
-    host: ${SERVER_HOST}
+    host: 3.35.108.184
+  front:
+    host: 3.37.172.144
+    port: 3000

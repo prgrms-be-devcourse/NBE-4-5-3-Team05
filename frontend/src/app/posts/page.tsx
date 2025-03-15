@@ -1,40 +1,20 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import Link from "next/link";
 import Notice from "@/components/posts/Notice";
 import FilterSidebar from "@/components/posts/FilterSiderbar";
 import PostList from "@/components/posts/PostList";
 import Pagination from "@/components/posts/Pagination";
+import { components } from "@/lib/backend/apiV1/schema";
+import client from "@/lib/client";
 
-interface PostsResponseData {
-  items: any[]; // 백엔드에서 받은 ProductPostResponse 배열
-  totalPages: number;
-  totalItems: number;
-  curPageNo: number;
-  pageSize: number;
-}
-
-interface RsData<T> {
-  code: string;
-  message: string;
-  data: T;
-}
-
-interface NoticeData {
-  title: string;
-  content: string;
-}
-
-interface CategoryData {
-  id?: number;
-  name?: string;
-}
+type NoticeListItem = components["schemas"]["NoticeResBody"];
+type ProductPostListItem = components["schemas"]["PreviewPostResponse"];
 
 export default function PostsPage() {
-  const [noticeList, setNoticeList] = useState<NoticeData[]>([]);
-  const [posts, setPosts] = useState<any[]>([]);
+  const [noticeList, setNoticeList] = useState<NoticeListItem[]>([]);
+  const [posts, setPosts] = useState<ProductPostListItem[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [categories, setCategories] = useState<{ id: number; name: string }[]>(
@@ -50,39 +30,38 @@ export default function PostsPage() {
 
   useEffect(() => {
     (async () => {
-      try {
-        const res = await axios.get<RsData<NoticeData[]>>(
-          "/api/admin/notices/latest",
-          { withCredentials: true }
-        );
-        setNoticeList(res.data.data);
-      } catch (err) {
-        console.error("공지사항 로드 실패", err);
+      const res = await client.GET("/api/admin/notices/latest", {
+        Credential: "include",
+      });
+      if (res.error) {
+        console.error("공지사항 로드 실패", res.error);
+        return;
       }
+      setNoticeList(res.data!.data);
     })();
   }, []);
 
   useEffect(() => {
     (async () => {
-      try {
-        const res = await axios.get<RsData<CategoryData[]>>("/api/categories", {
-          withCredentials: true,
-        });
-        const cats = res.data.data.map((cat) => ({
-          id: cat.id ?? 0,
-          name: cat.name ?? "",
-        }));
-        setCategories(cats);
-      } catch (err) {
-        console.error("카테고리 로드 실패", err);
+      const res = await client.GET("/api/categories", {
+        Credential: "include",
+      });
+      if (res.error) {
+        console.error("카테고리 로드 실패", res.error);
+        return;
       }
+      const cats = res.data!.data.map((cat) => ({
+        id: cat.id ?? 0,
+        name: cat.name ?? "",
+      }));
+      setCategories(cats);
     })();
   }, []);
 
   const fetchPosts = async () => {
-    try {
-      const res = await axios.get<RsData<PostsResponseData>>("/api/posts", {
-        params: {
+    const res = await client.GET("/api/posts", {
+      params: {
+        query: {
           page: currentPage,
           pageSize: 10,
           keyword: filters.keyword || undefined,
@@ -91,14 +70,15 @@ export default function PostsPage() {
           maxPrice: filters.maxPrice || undefined,
           category: filters.category || undefined,
         },
-        withCredentials: true,
-      });
-      const { items, totalPages } = res.data.data;
-      setPosts(items);
-      setTotalPages(totalPages);
-    } catch (err) {
-      console.error("게시글 로드 실패", err);
+      },
+      credentials: "include",
+    });
+    if (res.error) {
+      console.error("게시글 로드 실패", res.error);
     }
+    const { items, totalPages } = res.data!.data;
+    setPosts(items);
+    setTotalPages(totalPages);
   };
 
   useEffect(() => {
@@ -118,8 +98,8 @@ export default function PostsPage() {
               {noticeList.map((notice, index) => (
                 <Notice
                   key={index}
-                  title={notice.title}
-                  content={notice.content}
+                  title={notice.title!}
+                  content={notice.content!}
                 />
               ))}
             </div>

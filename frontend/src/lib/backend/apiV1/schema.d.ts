@@ -1028,6 +1028,23 @@ export interface components {
             title: string;
             content: string;
         };
+        AdminResBody: {
+            id?: string;
+            nickname?: string;
+            /** @enum {string} */
+            role?: "ADMIN" | "USER";
+        };
+        NoticeResBody: {
+            id?: string;
+            title?: string;
+            content?: string;
+            admin?: components["schemas"]["AdminResBody"];
+        };
+        RsDataNoticeResBody: {
+            code: string;
+            message: string;
+            data: components["schemas"]["NoticeResBody"];
+        };
         PageDtoPreviewPostResponse: {
             items: components["schemas"]["PreviewPostResponse"][];
             /** Format: int32 */

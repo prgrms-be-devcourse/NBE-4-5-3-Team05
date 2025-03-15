@@ -3,7 +3,6 @@
 import { Button } from "@/components/ui/button";
 import {
   loadTossPayments,
-  ANONYMOUS,
   TossPaymentsPayment,
 } from "@tosspayments/tosspayments-sdk";
 import { useEffect, useState } from "react";

@@ -26,8 +26,8 @@ export default function PostDetailPage() {
     const result = await client.GET("/api/users/me", {
       credentials: "include",
     });
-    console.log("result:", result);
-    if (result.response.status !== 200) {
+    if (result.error) {
+      console.log(result.error);
       return false;
     }
     return true;
@@ -36,7 +36,6 @@ export default function PostDetailPage() {
   // 게시글 상세 조회 (백엔드에서 조회수 증가 처리)
   const fetchPost = async () => {
     if (!postId) return;
-    console.log(postId);
     const response = await client.GET("/api/posts/{id}", {
       withCredentials: true,
       params: {
@@ -46,8 +45,9 @@ export default function PostDetailPage() {
       },
     });
     if (response.error) {
-      console.error("게시글 상세 조회 실패", response.error);
+      console.error("게시글 상세 조회 실패", err);
       setError("게시글 정보를 불러올 수 없습니다.");
+
       return;
     }
     setPost(response.data.data);
@@ -63,17 +63,16 @@ export default function PostDetailPage() {
       // 로그인 안되어 있으면 찜한 내역을 불러오지 않음
       return;
     }
-    try {
-      const response = await client.GET("/api/posts/my/favorites", {
-        credentials: "include",
-      });
-      const favorites = response.data!.data; // ProductPostResponse[]
-      if (post?.id && favorites.items.some((fav) => fav.id === post.id)) {
-        setLiked(true);
-      }
-    } catch (error) {
-      console.error("찜한 내역 조회 실패", error);
+    const response = await client.GET("/api/posts/my/favorites", {
+      credentials: "include",
+    });
+    if (response.error) {
+      console.error("찜한 내역 조회 실패", response.error);
       return;
+    }
+    const favorites = response.data!.data; // ProductPostResponse[]
+    if (post?.id && favorites.items.some((fav) => fav.id === post.id)) {
+      setLiked(true);
     }
   };
 
@@ -183,7 +182,7 @@ export default function PostDetailPage() {
         <div className="flex-1 bg-gray-100 rounded p-4">
           <h2 className="text-xl font-semibold mb-2">사진</h2>
           {images.length > 0 ? (
-            <img
+            <Image
               src={images[0]}
               alt={post.title || "이미지"}
               className="w-full h-auto object-cover rounded"
@@ -249,7 +248,7 @@ export default function PostDetailPage() {
             <h3 className="text-lg font-semibold mb-2">추가 사진</h3>
             <div className="flex gap-2 overflow-x-auto">
               {images.slice(1).map((imgUrl, idx) => (
-                <img
+                <Image
                   key={idx}
                   src={imgUrl}
                   alt={`${post.title} - ${idx + 1}`}
