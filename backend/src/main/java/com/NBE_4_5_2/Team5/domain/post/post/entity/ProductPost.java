@@ -12,8 +12,9 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import com.NBE_4_5_2.Team5.domain.post.category.entity.Category;
 import com.NBE_4_5_2.Team5.domain.post.comment.entity.Comment;
 import com.NBE_4_5_2.Team5.domain.post.post.enums.ProductStatus;
-import com.NBE_4_5_2.Team5.domain.user.entity.User;
-import com.NBE_4_5_2.Team5.global.exception.ServiceException;
+import com.NBE_4_5_2.Team5.domain.user.user.entity.User;
+import com.NBE_4_5_2.Team5.global.exception.security.AuthenticationNotFoundException;
+import com.NBE_4_5_2.Team5.global.exception.security.ForbiddenAccessException;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -67,9 +68,10 @@ public class ProductPost {
 	@Setter
 	private String image_urls; // 쉼표가 포함된 url 문자열
 
+	//조회수
 	@Column(nullable = false)
 	@Builder.Default
-	private Integer likedCount = 0;
+	private Integer viewCount = 0;
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
@@ -135,28 +137,28 @@ public class ProductPost {
 		this.productCategories.addAll(productCategories);
 	}
 
-	public boolean canModify(User writer) {
+	public void canModify(User writer) {
 		if (writer == null) {
-			throw new ServiceException("401-1", "인증 정보가 없습니다.");
+			throw new AuthenticationNotFoundException("401-1", "인증 정보가 없습니다.");
 		}
 
 		if (writer.isAdmin() || writer.equals(this.getWriter())) {
-			return true;
+			return;
 		}
 
-		throw new ServiceException("403-1", "자신이 작성한 글만 수정 가능합니다.");
+		throw new ForbiddenAccessException("403-1", "자신이 작성한 글만 수정 가능합니다.");
 	}
 
-	public boolean canDelete(User writer) {
+	public void canDelete(User writer) {
 		if (writer == null) {
-			throw new ServiceException("401-1", "인증 정보가 없습니다.");
+			throw new AuthenticationNotFoundException("401-1", "인증 정보가 없습니다.");
 		}
 
 		if (writer.isAdmin() || writer.equals(this.getWriter())) {
-			return true;
+			return;
 		}
 
-		throw new ServiceException("403-1", "자신이 작성한 글만 삭제 가능합니다.");
+		throw new ForbiddenAccessException("403-1", "자신이 작성한 글만 삭제 가능합니다.");
 	}
 
 	public boolean isAvailable() {
@@ -166,7 +168,14 @@ public class ProductPost {
 	public void updateStatus(ProductStatus status) {
 		this.status = status;
 	}
+
 	public void addComment(Comment comment) {
 		commentList.add(comment);
 	}
+
+	//조회수 증가
+	public void incrementViewCount() {
+		this.viewCount++;
+	}
+
 }

@@ -1,27 +1,32 @@
 package com.NBE_4_5_2.Team5.global.init;
 
-import com.NBE_4_5_2.Team5.domain.post.category.entity.Category;
-import com.NBE_4_5_2.Team5.domain.post.category.repository.CategoryRepository;
-import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductCategory;
-import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductPost;
-import com.NBE_4_5_2.Team5.domain.post.post.repository.ProductCategoryRepository;
-import com.NBE_4_5_2.Team5.domain.post.post.repository.ProductPostRepository;
-import com.NBE_4_5_2.Team5.domain.user.entity.Role;
-import com.NBE_4_5_2.Team5.domain.user.entity.User;
-import com.NBE_4_5_2.Team5.domain.user.repository.UserRepository;
-import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.annotation.Order;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import com.NBE_4_5_2.Team5.domain.post.category.entity.Category;
+import com.NBE_4_5_2.Team5.domain.post.category.repository.CategoryRepository;
+import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductCategory;
+import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductPost;
+import com.NBE_4_5_2.Team5.domain.post.post.repository.ProductCategoryRepository;
+import com.NBE_4_5_2.Team5.domain.post.post.repository.ProductPostRepository;
+import com.NBE_4_5_2.Team5.domain.user.admin.entity.NoticePost;
+import com.NBE_4_5_2.Team5.domain.user.admin.repository.NoticePostRepository;
+import com.NBE_4_5_2.Team5.domain.user.admin.service.AdminService;
+import com.NBE_4_5_2.Team5.domain.user.user.entity.Role;
+import com.NBE_4_5_2.Team5.domain.user.user.entity.User;
+import com.NBE_4_5_2.Team5.domain.user.user.repository.UserRepository;
+import com.NBE_4_5_2.Team5.domain.user.user.service.UserService;
+import com.NBE_4_5_2.Team5.domain.user.user.service.email.EmailService;
+
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 
 @Configuration
 @RequiredArgsConstructor
@@ -30,11 +35,15 @@ public class BaseInitData {
 	private final ProductPostRepository postRepository;
 	private final ProductCategoryRepository productCategoryRepository;
 	private final UserRepository userRepository;
-	private final PasswordEncoder passwordEncoder;
+	private final AdminService adminService;
+	private final NoticePostRepository noticePostRepository;
+	private final EmailService emailService;
 
 	@Autowired
 	@Lazy
 	private BaseInitData self;
+	@Autowired
+	private UserService userService;
 
 	@Bean
 	@Order(1)
@@ -51,7 +60,7 @@ public class BaseInitData {
 			self.categoryInit();
 		};
 	}
-	
+
 	@Bean
 	@Order(3)
 	public ApplicationRunner applicationRunner3() {
@@ -60,32 +69,33 @@ public class BaseInitData {
 		};
 	}
 
+	@Bean
+	@Order(4)
+	public ApplicationRunner applicationRunner4() {
+		return args -> {
+			self.noticeInit();
+		};
+	}
+
 	@Transactional
 	public void userInit() {
 		if (userRepository.count() > 0) {
 			return;
 		}
+		emailService.saveVerificationCode("user1@gmail.com", "verified");
+		emailService.saveVerificationCode("user2@gmail.com", "verified");
+		emailService.saveVerificationCode("user3@gmail.com", "verified");
+		emailService.saveVerificationCode("user4@gmail.com", "verified");
 
-		List<User> users = List.of(
-				createUser("user1", "user11234@", "user1@gmail.com", "user1", "서울시 강남구"),
-				createUser("user2", "user21234@", "user2@gmail.com", "user2", "서울시 강서구"),
-				createUser("user3", "user31234@", "user3@gmail.com", "user3", "서울시 광진구")
-		);
+		userService.createUser("user1", "user11234@", "user1@gmail.com", "user1", "서울시 강남구",
+			"https://example.com/default_profile.png");
+		userService.createUser("user2", "user21234@", "user2@gmail.com", "user2", "서울시 강서구",
+			"https://example.com/default_profile.png");
+		userService.createUser("user3", "user31234@", "user3@gmail.com", "user3", "서울시 광진구",
+			"https://example.com/default_profile.png");
 
-		userRepository.saveAll(users);
-	}
+		adminService.signUpAdmin("user4", "user41234@", "user4@gmail.com", "jdifoweafcnoi");
 
-	private User createUser(String username, String password, String email, String nickname, String address) {
-		return User.builder()
-				.id("user-" + UUID.randomUUID())
-				.username(username)
-				.password(passwordEncoder.encode(password))
-				.email(email)
-				.nickname(nickname)
-				.address(address)
-				.profileUrl("https://example.com/default_profile.png")
-				.role(Role.USER)
-				.build();
 	}
 
 	@Transactional
@@ -156,5 +166,30 @@ public class BaseInitData {
 		}
 
 		productCategoryRepository.saveAll(productCategories);
+	}
+
+	@Transactional
+	public void noticeInit() {
+		if (noticePostRepository.count() > 0) {
+			return;
+		}
+
+		// 공지사항 생성: 총 10개의 공지사항 생성
+		User admin = userRepository.findAll().stream()
+			.filter(u -> u.getRole().equals(Role.ADMIN))
+			.findFirst()
+			.orElse(null);
+		if (admin == null && !userRepository.findAll().isEmpty()) {
+			admin = userRepository.findAll().get(0);
+		}
+
+		for (int i = 1; i <= 10; i++) {
+			NoticePost notice = NoticePost.builder()
+				.admin(admin)
+				.title("공지사항 제목 " + i)
+				.content("공지사항 내용 " + i + " - 중요한 공지사항 내용입니다.")
+				.build();
+			noticePostRepository.save(notice);
+		}
 	}
 }

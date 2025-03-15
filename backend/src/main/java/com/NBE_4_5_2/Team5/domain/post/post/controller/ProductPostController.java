@@ -20,7 +20,8 @@ import com.NBE_4_5_2.Team5.domain.post.post.dto.response.PreviewPostResponse;
 import com.NBE_4_5_2.Team5.domain.post.post.dto.response.ProductPostResponse;
 import com.NBE_4_5_2.Team5.domain.post.post.service.ProductPostService;
 import com.NBE_4_5_2.Team5.domain.post.post.service.RecentlyViewedService;
-import com.NBE_4_5_2.Team5.domain.user.entity.User;
+import com.NBE_4_5_2.Team5.domain.user.user.entity.User;
+import com.NBE_4_5_2.Team5.domain.user.user.service.UserAuthService;
 import com.NBE_4_5_2.Team5.global.Rq;
 import com.NBE_4_5_2.Team5.global.dto.Empty;
 import com.NBE_4_5_2.Team5.global.dto.PageDto;
@@ -29,7 +30,6 @@ import com.NBE_4_5_2.Team5.global.dto.RsData;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
-
 @RestController
 @RequestMapping("/api/posts")
 @RequiredArgsConstructor
@@ -37,12 +37,13 @@ public class ProductPostController {
 	private final ProductPostService productPostService;
 	private final RecentlyViewedService recentlyViewedService;
 	private final Rq rq;
+	private final UserAuthService userAuthService;
 
 	@PreAuthorize("isAuthenticated()")
 	@PostMapping
 	public RsData<ProductPostResponse> createPost(@Valid @RequestBody ProductPostWriteForm body) {
 
-		User actor = rq.getUserIdentity();
+		User actor = userAuthService.getUserIdentity();
 		ProductPostResponse postResponse = productPostService.write(actor, body);
 
 		return new RsData<>(
@@ -73,7 +74,7 @@ public class ProductPostController {
 	public RsData<PageDto<PreviewPostResponse>> getMyPosts(@RequestParam(defaultValue = "1") int page,
 		@RequestParam(defaultValue = "10") int pageSize,
 		@RequestParam(defaultValue = "desc") String sort) {
-		User actor = rq.getUserIdentity();
+		User actor = userAuthService.getUserIdentity();
 		PageDto<PreviewPostResponse> postPage = productPostService.getMyPosts(actor, page, pageSize, sort);
 
 		return new RsData<>(
@@ -84,17 +85,17 @@ public class ProductPostController {
 	}
 
 	@GetMapping("/{id}")
-	@Transactional(readOnly = true)
+	@Transactional(readOnly = false)
 	public RsData<ProductPostResponse> getPost(@PathVariable String id) {
-		User user = rq.getUserIdentity();
+		User user = userAuthService.getUserIdentity();
 		ProductPostResponse postResponse = productPostService.getPost(id);
 
 		recentlyViewedService.addViewedPost(user.getId(), id);
 
 		return new RsData<>(
-			"200",
-			"게시물 조회가 완료되었습니다.",
-			postResponse
+				"200",
+				"게시물 조회가 완료되었습니다.",
+				postResponse
 		);
 	}
 
@@ -103,7 +104,7 @@ public class ProductPostController {
 	@Transactional(readOnly = true)
 	public RsData<List<PreviewPostResponse>> getRecentlyViewPosts() {
 
-		User user = rq.getUserIdentity();
+		User user = userAuthService.getUserIdentity();
 		List<PreviewPostResponse> recentlyViewedPosts = recentlyViewedService.getRecentlyViewedPosts(user.getId());
 
 		return new RsData<>(
@@ -120,7 +121,7 @@ public class ProductPostController {
 		@Valid @RequestBody ProductPostModifyForm body,
 		@PathVariable String id) {
 
-		User actor = rq.getUserIdentity();
+		User actor = userAuthService.getUserIdentity();
 		ProductPostResponse postResponse = productPostService.modify(actor, id, body);
 
 		return new RsData<>(
@@ -135,7 +136,7 @@ public class ProductPostController {
 	@Transactional
 	public RsData<Empty> delete(@PathVariable String id) {
 
-		User actor = rq.getUserIdentity();
+		User actor = userAuthService.getUserIdentity();
 		productPostService.delete(actor, id);
 
 		return new RsData<>(
@@ -144,10 +145,10 @@ public class ProductPostController {
 		);
 	}
 
-    // 내가 구매한 내역 조회
-    @GetMapping("/my/purchases")
-    public RsData<List<ProductPostResponse>> getMyPurchases() {
-        User actor = rq.getUserIdentity();
+	// 내가 구매한 내역 조회
+	@GetMapping("/my/purchases")
+	public RsData<List<ProductPostResponse>> getMyPurchases() {
+		User actor = userAuthService.getUserIdentity();
 
 		List<ProductPostResponse> myPurchases = productPostService.getMyPurchases(actor);
 
@@ -158,11 +159,11 @@ public class ProductPostController {
 		);
 	}
 
-	// 내가 판매한 내역
+	/// 내가 판매한 내역
 	@PreAuthorize("isAuthenticated()")
 	@GetMapping("/my/sales")
 	public RsData<List<ProductPostResponse>> getMySales() {
-		User actor = rq.getUserIdentity();
+		User actor = userAuthService.getUserIdentity();
 		List<ProductPostResponse> sales = productPostService.getMySales(actor);
 
 		return new RsData<>(
@@ -172,11 +173,11 @@ public class ProductPostController {
 		);
 	}
 
-	// 내가 찜한 내역
+	/// 내가 찜한 내역
 	@PreAuthorize("isAuthenticated()")
 	@GetMapping("/my/favorites")
 	public RsData<List<ProductPostResponse>> getMyFavorites() {
-		User actor = rq.getUserIdentity();
+		User actor = userAuthService.getUserIdentity();
 		List<ProductPostResponse> favorites = productPostService.getMyFavorites(actor);
 
 		return new RsData<>(

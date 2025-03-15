@@ -1,5 +1,9 @@
 package com.NBE_4_5_2.Team5.domain.payment.service;
 
+import java.util.Map;
+
+import org.springframework.http.ResponseEntity;
+
 /**
  * 결제를 위한 API 호출을 포함한 PG사에 맞는 세부적인 로직이 포함된 클래스
  */
@@ -10,5 +14,5 @@ public interface PaymentProviderAdapter {
 	 * @param paymentKey
 	 * @param amount
 	 */
-	void requestPayment(String id, String paymentKey, Integer amount);
+	ResponseEntity<Map<String, Object>> requestPayment(String id, String paymentKey, Integer amount);
 }

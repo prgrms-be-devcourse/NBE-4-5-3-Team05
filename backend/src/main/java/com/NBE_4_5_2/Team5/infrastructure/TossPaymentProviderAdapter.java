@@ -33,7 +33,7 @@ public class TossPaymentProviderAdapter implements PaymentProviderAdapter {
 	}
 
 	@Override
-	public void requestPayment(String id, String paymentKey, Integer amount) {
+	public ResponseEntity<Map<String, Object>> requestPayment(String id, String paymentKey, Integer amount) {
 
 		RestClient restClient = RestClient.create();
 		ResponseEntity<Map> response = restClient.post()
@@ -51,5 +51,6 @@ public class TossPaymentProviderAdapter implements PaymentProviderAdapter {
 		@SuppressWarnings("unchecked")
 		Map<String, Object> body = (Map<String, Object>)response.getBody();
 		assert body != null;
+		return new ResponseEntity<>(body, response.getStatusCode());
 	}
 }
