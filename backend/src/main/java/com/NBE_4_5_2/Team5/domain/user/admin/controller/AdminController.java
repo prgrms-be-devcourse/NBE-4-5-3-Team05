@@ -3,10 +3,15 @@ package com.NBE_4_5_2.Team5.domain.user.admin.controller;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,6 +21,7 @@ import com.NBE_4_5_2.Team5.domain.user.admin.dto.BanResBody;
 import com.NBE_4_5_2.Team5.domain.user.admin.dto.NoticeResBody;
 import com.NBE_4_5_2.Team5.domain.user.admin.entity.NoticePost;
 import com.NBE_4_5_2.Team5.domain.user.admin.service.AdminService;
+import com.NBE_4_5_2.Team5.domain.user.user.dto.UserDto;
 import com.NBE_4_5_2.Team5.global.response.RsData;
 
 import jakarta.validation.Valid;
@@ -32,6 +38,7 @@ public class AdminController {
 	public record NoticeReqBody(@NotEmpty String title, @NotEmpty String content) {
 	}
 
+	@PreAuthorize("isAuthenticated()")
 	@PostMapping("/notices")
 	public RsData<NoticeResBody> writeNotice(@RequestBody @Valid NoticeReqBody body) {
 		NoticeResBody data = adminService.writeNotice(body.title(), body.content());
@@ -42,6 +49,7 @@ public class AdminController {
 	public record BanReqBody(@NotEmpty String reason) {
 	}
 
+	@PreAuthorize("isAuthenticated()")
 	@PostMapping("/users/{user-id}/ban")
 	public RsData<BanResBody> banUser(@PathVariable(name = "user-id") String userId,
 		@Valid @RequestBody BanReqBody reason) {
@@ -56,6 +64,14 @@ public class AdminController {
 		));
 	}
 
+	@PreAuthorize("isAuthenticated()")
+	@DeleteMapping("/users/{user-id}/ban")
+	public RsData<Void> unBanUser(@PathVariable(name = "user-id") String userId) {
+		adminService.unBanUser(userId);
+		return new RsData<>("204-1", "계정 정지 해제 성공.");
+	}
+
+	@PreAuthorize("isAuthenticated()")
 	@DeleteMapping("/posts/{post-id}")
 	public RsData<Void> deletePost(@PathVariable(name = "post-id") String postId) {
 		adminService.deletePost(postId);
@@ -72,4 +88,36 @@ public class AdminController {
 		return new RsData<>("200", "최신 공지사항 조회 성공.", res);
 	}
 
+	@PreAuthorize("isAuthenticated()")
+	@GetMapping("/users")
+	public RsData<Page<UserDto>> getUserList(@PageableDefault(size = 10, page = 0) Pageable pageable) {
+		Page<UserDto> users = adminService.getUsers(pageable);
+
+		return new RsData<>("200-1", "유저 리스트 조회 성공.", users);
+	}
+
+	@PreAuthorize("isAuthenticated()")
+	@GetMapping("/notices")
+	public RsData<Page<NoticeResBody>> getNotices(@PageableDefault(size = 10, page = 0) Pageable pageable) {
+		Page<NoticeResBody> notices = adminService.getNotices(pageable);
+		return new RsData<>("200-1", "공지사항 리스트 조회 성공.", notices);
+	}
+
+	public record UpdateNoticeReq(String title, String content) {
+	}
+
+	@PreAuthorize("isAuthenticated()")
+	@PutMapping("/notices/{notice-id}")
+	public RsData<NoticeResBody> updateNotice(@PathVariable(name = "notice-id") String noticeId,
+		@RequestBody UpdateNoticeReq body) {
+		NoticeResBody res = adminService.updateNotice(noticeId, body);
+		return new RsData<>("200-1", "공지사항 업데이트 성공.", res);
+	}
+
+	@PreAuthorize("isAuthenticated()")
+	@DeleteMapping("/notices/{notice-id}")
+	public RsData<Void> deleteNotice(@PathVariable(name = "notice-id") String noticeId) {
+		adminService.deleteNotice(noticeId);
+		return new RsData<>("200-1", "공지사항 삭제 완료.");
+	}
 }

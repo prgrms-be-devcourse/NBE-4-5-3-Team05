@@ -208,7 +208,7 @@ class AdminControllerTest extends RedisTestContainerConfig {
 	void deletePost() throws Exception {
 		//given
 		Category category = categoryRepository.save(Category.builder().name("cat1").build());
-		User user = adminService.signUpAdmin("user1", "password", "email");
+		User user = adminService.signUpAdmin("user1", "password", "admin231", "email");
 		ProductPost post = productPostRepository.save(
 			ProductPost.create(user, "name", 5000, "title", "content", "url", 30F, 40F)
 		);

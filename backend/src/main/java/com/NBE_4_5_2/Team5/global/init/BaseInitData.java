@@ -89,8 +89,9 @@ public class BaseInitData {
 			"https://example.com/default_profile.png");
 		userService.createUser("user3", "user31234@", "user3@gmail.com", "user3", "서울시 광진구",
 			"https://example.com/default_profile.png");
+		adminService.signUpAdmin("admin2", "password2", "admin2", "admin2@gmail.com");
 
-		adminService.signUpAdmin("user4", "user41234@", "user4@gmail.com");
+		adminService.signUpAdmin("user4", "user41234@", "admin4", "user4@gmail.com");
 
 	}
 
