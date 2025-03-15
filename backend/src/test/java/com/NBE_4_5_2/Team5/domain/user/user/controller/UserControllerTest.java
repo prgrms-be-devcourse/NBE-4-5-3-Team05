@@ -1,4 +1,4 @@
-package com.NBE_4_5_2.Team5.domain.user.controller;
+package com.NBE_4_5_2.Team5.domain.user.user.controller;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.hamcrest.Matchers.*;
@@ -10,22 +10,21 @@ import java.nio.charset.StandardCharsets;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
-import com.NBE_4_5_2.Team5.domain.user.user.controller.UserController;
 import com.NBE_4_5_2.Team5.domain.user.user.dto.AuthToken;
 import com.NBE_4_5_2.Team5.domain.user.user.entity.User;
 import com.NBE_4_5_2.Team5.domain.user.user.service.UserService;
+import com.NBE_4_5_2.Team5.domain.user.user.service.email.EmailService;
+import com.NBE_4_5_2.Team5.global.config.BaseTestConfig;
 import com.NBE_4_5_2.Team5.global.config.RedisTestContainerConfig;
 
 import jakarta.servlet.http.Cookie;
@@ -33,12 +32,10 @@ import jakarta.transaction.Transactional;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@Transactional
-@ActiveProfiles("test")
-@Import(RedisTestContainerConfig.class)
-@Testcontainers
-@TestPropertySource(properties = "custom.refreshToken.expire-seconds=3600")
-class UserControllerTest {
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@BaseTestConfig
+@Order(100)
+class UserControllerTest extends RedisTestContainerConfig {
 
 	@Autowired
 	private MockMvc mvc;
@@ -46,7 +43,11 @@ class UserControllerTest {
 	@Autowired
 	private UserService userService;
 
+	@Autowired
+	EmailService emailService;
+
 	private User loginedUser;
+
 	private String validToken;
 	private String validAccessToken;
 	private String validRefreshToken;
@@ -55,7 +56,7 @@ class UserControllerTest {
 
 	@BeforeEach
 	void setUp() {
-		loginedUser = userService.getUserByUsername("user1").get();
+		loginedUser = userService.getUserByUsername("user1").orElseThrow();
 
 		AuthToken authToken = userService.generateAuthtoken(loginedUser);
 		validRefreshToken = authToken.refreshToken();
@@ -114,6 +115,9 @@ class UserControllerTest {
 		String address = "서울시 강남구";
 		String profileUrl = "default_profile.png";
 
+		// 이메일 인증이 통과되었다고 가정
+		emailService.saveVerificationCode(email, "verified");
+
 		ResultActions resultActions = createUserRequest(username, password, email, nickname, address, profileUrl);
 
 		User user = userService.getUserByUsername(username).get();
@@ -137,7 +141,7 @@ class UserControllerTest {
 
 		String username = "user1";
 		String password = "new1234@";
-		String email = "new@naver.com";
+		String email = "new2@naver.com";
 		String nickname = "무명";
 		String address = "서울시 강남구";
 		String profileUrl = "https://example.com/default_profile.png";
@@ -176,8 +180,30 @@ class UserControllerTest {
 	}
 
 	@Test
-	@DisplayName("회원 가입 - 실패 - nickname 중복")
+	@DisplayName("회원 가입 - 실패 - email 인증 안함")
 	void createUser4() throws Exception {
+
+		String username = "user12";
+		String password = "new1234@";
+		String email = "new@gmail.com";
+		String nickname = "무명";
+		String address = "서울시 강남구";
+		String profileUrl = "https://example.com/default_profile.png";
+
+		ResultActions resultActions = createUserRequest(username, password, email, nickname, address, profileUrl);
+
+		resultActions
+			.andExpect(status().isConflict())
+			.andExpect(handler().handlerType(UserController.class))
+			.andExpect(handler().methodName("createUser"))
+			.andExpect(jsonPath("$.code").value("409"))
+			.andExpect(jsonPath("$.message").value("이메일 인증이 완료되지 않았습니다. 인증 후 다시 시도해주세요."));
+
+	}
+
+	@Test
+	@DisplayName("회원 가입 - 실패 - nickname 중복")
+	void createUser5() throws Exception {
 
 		String username = "user5";
 		String password = "new1234@";
@@ -199,7 +225,7 @@ class UserControllerTest {
 
 	@Test
 	@DisplayName("회원 가입 - 실패 - 필수 입력 데이터 누락")
-	void createUser5() throws Exception {
+	void createUser6() throws Exception {
 
 		String username = "";
 		String password = "";
@@ -227,7 +253,7 @@ class UserControllerTest {
 
 	@Test
 	@DisplayName("회원 가입 - 실패 - 잘못된 형식의 데이터 입력")
-	void createUser6() throws Exception {
+	void createUser7() throws Exception {
 
 		String username = "wrong id"; // 공백 포함
 		String password = "wrongpassword"; // 특수문자 미포함
@@ -253,7 +279,7 @@ class UserControllerTest {
 
 	@Test
 	@DisplayName("회원 가입 - 실패 - 요청 body 누락")
-	void createUser7() throws Exception {
+	void createUser8() throws Exception {
 
 		ResultActions resultActions = mvc
 			.perform(
@@ -792,6 +818,9 @@ class UserControllerTest {
 		String newAddress = "서울시 서초구";
 		String newEmail = "newemail@example.com";
 
+		// 이메일 인증이 통과되었다고 가정
+		emailService.saveVerificationCode(newEmail, "verified");
+
 		ResultActions resultActions = mvc.perform(
 			put("/api/users/me")
 				.header("Authorization", "Bearer " + validToken)
@@ -818,7 +847,7 @@ class UserControllerTest {
 	}
 
 	@Test
-	@DisplayName("내 정보 수정 - 실패 (이메일 중복)")
+	@DisplayName("내 정보 수정 - 실패 - 이메일 중복")
 	void updateProfile2() throws Exception {
 		String duplicateEmail = "user2@gmail.com"; // 이미 존재하는 이메일
 
@@ -834,9 +863,53 @@ class UserControllerTest {
 		);
 
 		resultActions
+			.andExpect(status().isConflict())
+			.andExpect(jsonPath("$.code").value("409-2"))
+			.andExpect(jsonPath("$.message").value("이미 사용중인 이메일입니다."));
+	}
+
+	@Test
+	@DisplayName("내 정보 수정 - 실패 - 이메일 인증 안함")
+	void updateProfile3() throws Exception {
+		String duplicateEmail = "invaild@gmail.com"; // 인증하지 않은 이메일
+
+		ResultActions resultActions = mvc.perform(
+			put("/api/users/me")
+				.header("Authorization", "Bearer " + validToken)
+				.content("""
+					{
+					  "email": "%s"
+					}
+					""".formatted(duplicateEmail))
+				.contentType(MediaType.APPLICATION_JSON)
+		);
+
+		resultActions
+			.andExpect(status().isConflict())
+			.andExpect(jsonPath("$.code").value("409"))
+			.andExpect(jsonPath("$.message").value("이메일 인증이 완료되지 않았습니다. 인증 후 다시 시도해주세요."));
+	}
+
+	@Test
+	@DisplayName("내 정보 수정 - 실패 - 닉네임 중복")
+	void updateProfile4() throws Exception {
+		String duplicateNickname = "user3"; // 이미 존재하는 닉네임
+
+		ResultActions resultActions = mvc.perform(
+			put("/api/users/me")
+				.header("Authorization", "Bearer " + validToken)
+				.content("""
+					{
+					  "nickname": "%s"
+					}
+					""".formatted(duplicateNickname))
+				.contentType(MediaType.APPLICATION_JSON)
+		);
+
+		resultActions
 			.andExpect(status().isBadRequest())
-			.andExpect(jsonPath("$.code").value("400-EMAIL-ALREADY-EXISTS"))
-			.andExpect(jsonPath("$.message").value("이미 사용 중인 이메일입니다."));
+			.andExpect(jsonPath("$.code").value("400-NICKNAME-ALREADY-EXISTS"))
+			.andExpect(jsonPath("$.message").value("이미 사용중인 닉네임입니다."));
 	}
 
 	@Test
@@ -853,7 +926,13 @@ class UserControllerTest {
 			.andExpect(jsonPath("$.message").value("회원 탈퇴 성공"));
 
 		// 회원이 실제로 삭제되었는지 확인
-		assertThat(userService.getUserByUsername(loginedUser.getUsername())).isEmpty();
+		boolean isDeleted = isUserDeleted(loginedUser.getUsername());
+		assertThat(isDeleted).isTrue();
+	}
+
+	@Transactional
+	boolean isUserDeleted(String username) {
+		return userService.getUserByUsername(username).isEmpty();
 	}
 
 	@Test

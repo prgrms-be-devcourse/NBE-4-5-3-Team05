@@ -1,4 +1,4 @@
-package com.NBE_4_5_2.Team5.domain.user.service;
+package com.NBE_4_5_2.Team5.domain.user.user.service;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -9,21 +9,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
 
 import com.NBE_4_5_2.Team5.domain.user.user.entity.User;
-import com.NBE_4_5_2.Team5.domain.user.user.service.AuthTokenService;
-import com.NBE_4_5_2.Team5.domain.user.user.service.UserService;
+import com.NBE_4_5_2.Team5.global.config.BaseTestConfig;
 import com.NBE_4_5_2.Team5.global.config.RedisTestContainerConfig;
 import com.NBE_4_5_2.Team5.global.standard.util.Ut;
 
-import jakarta.transaction.Transactional;
-
 @SpringBootTest
-@ActiveProfiles("test")
-@Transactional
-@TestPropertySource(properties = "custom.refreshToken.expire-seconds=3600")
+@BaseTestConfig
 public class AuthTokenServiceTest extends RedisTestContainerConfig {
 
 	@Autowired
@@ -36,7 +29,7 @@ public class AuthTokenServiceTest extends RedisTestContainerConfig {
 	private String keyString;
 
 	@Test
-	@DisplayName("user1 - accessToken 생성 성공")
+	@DisplayName("jwt : accessToken : user1 accessToken 생성 성공")
 	void accessToken() {
 		// Given
 		User user = userService.getUserByUsername("user1").orElseThrow();
@@ -50,7 +43,7 @@ public class AuthTokenServiceTest extends RedisTestContainerConfig {
 	}
 
 	@Test
-	@DisplayName("jwt 유효성 체크")
+	@DisplayName("jwt : 토큰 유효성 체크")
 	void checkValid() {
 		// Given
 		User user = userService.getUserByUsername("user1").orElseThrow();
