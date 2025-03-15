@@ -1,27 +1,30 @@
 package com.NBE_4_5_2.Team5.domain.post.post.controller;
 
-import com.NBE_4_5_2.Team5.domain.post.post.entity.LikedPost;
-import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductPost;
-import com.NBE_4_5_2.Team5.domain.post.post.repository.LikedPostRepository;
-import com.NBE_4_5_2.Team5.domain.post.post.repository.ProductPostRepository;
-import com.NBE_4_5_2.Team5.domain.post.post.service.ProductPostService;
-import com.NBE_4_5_2.Team5.domain.user.entity.User;
-import com.NBE_4_5_2.Team5.domain.user.service.UserService;
-import com.NBE_4_5_2.Team5.global.config.BaseTestConfig;
+import static org.hamcrest.Matchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
-import static org.hamcrest.Matchers.hasItem;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import com.NBE_4_5_2.Team5.domain.post.post.entity.LikedPost;
+import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductPost;
+import com.NBE_4_5_2.Team5.domain.post.post.repository.LikedPostRepository;
+import com.NBE_4_5_2.Team5.domain.post.post.repository.ProductPostRepository;
+import com.NBE_4_5_2.Team5.domain.post.post.service.ProductPostService;
+import com.NBE_4_5_2.Team5.domain.user.user.entity.User;
+import com.NBE_4_5_2.Team5.domain.user.user.service.UserService;
+import com.NBE_4_5_2.Team5.global.config.BaseTestConfig;
+import com.NBE_4_5_2.Team5.global.config.RedisTestContainerConfig;
+import com.NBE_4_5_2.Team5.global.init.BaseInitData;
 
 /**
  * ProductPostController 관련 기능(판매내역, 찜내역, 구매내역)을 통합 테스트하는 예시 코드
@@ -29,7 +32,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @BaseTestConfig
-public class ProductPostControllerTest {
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+public class ProductPostControllerTest extends RedisTestContainerConfig {
 
 	@Autowired
 	private MockMvc mvc;
@@ -46,16 +50,29 @@ public class ProductPostControllerTest {
 	@Autowired
 	private LikedPostRepository likedPostRepository; // 찜 기능 테스트 시 필요
 
+	@Autowired
+	private BaseInitData baseInitData;
+
 	private User seller;
 	private User buyer;
 	private String sellerToken;
 	private String buyerToken;
 
+	// @BeforeAll
+	// void setup2() {
+	// 	baseInitData.userInit();
+	// 	baseInitData.categoryInit();
+	// 	baseInitData.postInit();
+	// 	baseInitData.noticeInit();
+	// }
+
 	@BeforeEach
 	void beforeEach() {
 		// 테스트용 유저 2명 사용
-		seller = userService.getUserByUsername("user1").orElseThrow();
-		buyer = userService.getUserByUsername("user2").orElseThrow();
+		seller = userService.getUserByUsername("user1").orElseThrow(
+			() -> new RuntimeException("User not found")
+		);
+		buyer = userService.getUserByUsername("user2").orElseThrow(() -> new RuntimeException("User not found"));
 
 		// JWT 토큰 발급
 		sellerToken = userService.generateAuthTokenAsString(seller);

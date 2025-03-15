@@ -1,0 +1,11 @@
+# 루트에서 생성된 파일 무시
+db_dev.mv.db
+db_dev.trace.db
+api.json
+
+.idea/
+*.iws
+*.iml
+*.ipr
+
+frontend/src/lib/backend/api/

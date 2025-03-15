@@ -1,5 +1,6 @@
 package com.NBE_4_5_2.Team5.domain.post.post.dto.response;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,6 +23,11 @@ public class ProductPostResponse {
 	private Float latitude;
 	private Float longitude;
 	private List<String> categories;
+	private LocalDateTime createdAt;    // 생성일
+	private LocalDateTime modifiedAt;   // 수정일
+
+	private Integer viewCount; // 조회수
+	private Integer likedCount;
 
 	public static ProductPostResponse fromEntity(ProductPost post) {
 		return new ProductPostResponse(
@@ -37,7 +43,35 @@ public class ProductPostResponse {
 			post.getLongitude(),
 			post.getProductCategories().stream()
 				.map(pc -> pc.getCategory().getName())
-				.collect(Collectors.toList())
+				.collect(Collectors.toList()),
+			post.getCreatedAt(),
+			post.getModifiedAt(),
+			post.getViewCount(),
+			0
+
 		);
 	}
+	// 찜 개수를 외부에서 전달받는 메서드
+	public static ProductPostResponse fromEntityWithLikeCount(ProductPost post, int likedCount) {
+		return new ProductPostResponse(
+				post.getId(),
+				post.getWriter().getId(),
+				post.getWriter().getNickname(),
+				post.getProductName(),
+				post.getProductPrice(),
+				post.getTitle(),
+				post.getContent(),
+				post.getImage_urls(),
+				post.getLatitude(),
+				post.getLongitude(),
+				post.getProductCategories().stream()
+						.map(pc -> pc.getCategory().getName())
+						.collect(Collectors.toList()),
+				post.getCreatedAt(),
+				post.getModifiedAt(),
+				post.getViewCount(),
+				likedCount
+		);
+	}
+
 }

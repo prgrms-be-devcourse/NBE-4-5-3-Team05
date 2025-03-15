@@ -12,10 +12,10 @@ import com.NBE_4_5_2.Team5.domain.payment.enums.PaymentStatus;
 import com.NBE_4_5_2.Team5.domain.payment.repository.PaymentRepository;
 import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductPost;
 import com.NBE_4_5_2.Team5.domain.post.post.repository.ProductPostRepository;
-import com.NBE_4_5_2.Team5.domain.user.entity.User;
-import com.NBE_4_5_2.Team5.domain.user.repository.UserRepository;
-import com.NBE_4_5_2.Team5.domain.user.service.UserService;
-import com.NBE_4_5_2.Team5.global.exception.product.ProductNotFoundException;
+import com.NBE_4_5_2.Team5.domain.user.user.entity.User;
+import com.NBE_4_5_2.Team5.domain.user.user.repository.UserRepository;
+import com.NBE_4_5_2.Team5.domain.user.user.service.UserService;
+import com.NBE_4_5_2.Team5.global.exception.post.product.ProductNotFoundException;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;

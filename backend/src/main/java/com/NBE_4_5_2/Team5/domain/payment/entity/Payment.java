@@ -7,7 +7,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.NBE_4_5_2.Team5.domain.payment.enums.PaymentStatus;
-import com.NBE_4_5_2.Team5.domain.user.entity.User;
+import com.NBE_4_5_2.Team5.domain.user.user.entity.User;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;

@@ -7,8 +7,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.NBE_4_5_2.Team5.domain.admin.entity.BanList;
-import com.NBE_4_5_2.Team5.domain.admin.repository.BanListRepository;
+import com.NBE_4_5_2.Team5.domain.user.admin.entity.BanList;
+import com.NBE_4_5_2.Team5.domain.user.admin.repository.BanListRepository;
 
 import lombok.RequiredArgsConstructor;
 
