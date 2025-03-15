@@ -63,6 +63,7 @@ public class PaymentController {
 	}
 
 	@Operation(summary = "상품 구매", description = "페이머니로 상품을 구매합니다.")
+	@PreAuthorize("isAuthenticated()")
 	@PostMapping("")
 	public RsData<PaymentDto> purchaseItem(
 		@RequestBody @NotNull PurchaseItemReqDto reqBody) {
@@ -70,4 +71,14 @@ public class PaymentController {
 
 		return new RsData<>("200-1", "상품 구매 성공.", purchased);
 	}
+
+	@Operation(summary = "상품 구매 여부 조회", description = "로그인한 유저가 상품을 구매했는지 여부를 반환합니다.")
+	@PreAuthorize("isAuthenticated()")
+	@GetMapping
+	public RsData<Boolean> checkPurchased(@RequestParam(name = "post-id") String postId) {
+		Boolean isPurchased = paymentService.isPurchased(postId);
+
+		return new RsData<>("200-1", "상품 결제 여부 조회 성공.", isPurchased);
+	}
+
 }

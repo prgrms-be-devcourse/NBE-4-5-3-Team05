@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import axios from "axios";
 import type { components } from "@/lib/backend/apiV1/schema";
+import client from "@/lib/client";
 
 // OpenAPI 스키마의 Category 타입 사용 (선택적 속성일 수 있으므로 필요한 경우 non-null assertion이나 default 값을 설정)
 type Category = components["schemas"]["Category"];
@@ -14,13 +14,12 @@ export default function PostCreatePage() {
   // 로그인 체크
   useEffect(() => {
     async function checkAuth() {
-      try {
-        await axios.get("/api/users/me", { withCredentials: true });
-      } catch (err: any) {
-        if (err.response && err.response.status === 401) {
-          alert("로그인을 먼저하세요.");
-          router.push("/user/login");
-        }
+      const response = await client.GET("/api/users/me", {
+        credentials: "include",
+      });
+      if (response.error && response.response.status === 401) {
+        alert("로그인을 먼저하세요.");
+        router.push("/user/login");
       }
     }
     checkAuth();
@@ -38,8 +37,6 @@ export default function PostCreatePage() {
   const [longitude, setLongitude] = useState<number | "">("");
   // 이미지 파일 선택 state
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
-  // 업로드된 이미지 URL 리스트
-  const [imageUrlList, setImageUrlList] = useState<string[]>([]);
   // 백엔드에서 불러온 카테고리 목록 state (OpenAPI 스키마의 Category 타입 사용)
   const [categories, setCategories] = useState<Category[]>([]);
 
@@ -47,30 +44,32 @@ export default function PostCreatePage() {
   const uploadFile = async (file: File): Promise<string> => {
     const formData = new FormData();
     formData.append("file", file);
-    const response = await axios.post("/api/uploadFile", formData, {
+    const response = await client.POST("/api/uploadFile", {
       headers: { "Content-Type": "multipart/form-data" },
-      withCredentials: true,
+      body: {
+        file: await file.text(),
+      },
+      credentials: "include",
     });
-    return response.data;
+    if (response.error) {
+      console.log(response);
+    }
+    return response.data!;
   };
 
   // 백엔드에서 카테고리 목록 불러오기 (스키마 기반 타입 사용)
   useEffect(() => {
     async function fetchCategories() {
-      try {
-        // schema.d.ts에 정의된 Category 배열을 반환하는 엔드포인트 호출
-        const res = await axios.get<{
-          code: string;
-          message: string;
-          data: Category[];
-        }>("/api/categories", {
-          withCredentials: true,
-        });
-        // 필요시 undefined 속성을 보완할 수 있음
-        setCategories(res.data.data);
-      } catch (err) {
-        console.error("카테고리 로드 실패", err);
+      // schema.d.ts에 정의된 Category 배열을 반환하는 엔드포인트 호출
+      const res = await client.GET("/api/categories", {
+        credentials: "include",
+      });
+      if (res.error) {
+        console.log(res.error);
+        return;
       }
+      // 필요시 undefined 속성을 보완할 수 있음
+      setCategories(res.data!.data);
     }
     fetchCategories();
   }, []);
@@ -79,45 +78,53 @@ export default function PostCreatePage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    try {
-      let uploadedUrls: string[] = [];
-      if (selectedFiles && selectedFiles.length > 0) {
-        uploadedUrls = await Promise.all(
-          Array.from(selectedFiles).map((file) => uploadFile(file))
-        );
-      }
-      setImageUrlList(uploadedUrls);
+    let uploadedUrls: string[] = [];
+    if (selectedFiles && selectedFiles.length > 0) {
+      uploadedUrls = await Promise.all(
+        Array.from(selectedFiles).map((file) => uploadFile(file))
+      );
+    }
+    // 선택한 카테고리 id를 숫자로 변환하여 배열에 넣음
+    const categoryIds = selectedCategory ? [Number(selectedCategory)] : [];
 
-      // 선택한 카테고리 id를 숫자로 변환하여 배열에 넣음
-      const categoryIds = selectedCategory ? [Number(selectedCategory)] : [];
+    // 게시글 생성 API로 보낼 JSON 데이터 구성
+    const data = {
+      productName,
+      productPrice: price === "" ? 0 : Number(price),
+      title,
+      content,
+      categoryIds: categoryIds,
+      imageUrlList: uploadedUrls,
+      latitude: latitude === "" ? 0 : Number(latitude),
+      longitude: longitude === "" ? 0 : Number(longitude),
+    };
 
-      // 게시글 생성 API로 보낼 JSON 데이터 구성
-      const data = {
-        productName,
-        productPrice: price === "" ? 0 : Number(price),
-        title,
-        content,
-        categoryIds: categoryIds,
-        imageUrlList: uploadedUrls,
-        latitude: latitude === "" ? 0 : Number(latitude),
-        longitude: longitude === "" ? 0 : Number(longitude),
-      };
-
-      await axios.post("/api/posts", data, {
-        headers: { "Content-Type": "application/json" },
-        withCredentials: true,
-      });
-
-      router.push("/posts");
-    } catch (err: any) {
-      console.error("게시글 작성 실패", err);
-      if (err.response && err.response.status === 401) {
+    const result = await client.POST("/api/posts", {
+      body: {
+        title: data.title,
+        content: data.content,
+        productName: data.productName,
+        productPrice: data.productPrice,
+        categoryIds: data.categoryIds,
+        imageUrlList: data.imageUrlList,
+        latitude: data.latitude,
+        longitude: data.longitude,
+      },
+      credentials: "include",
+    });
+    if (result.error) {
+      if (result.response.status === 401) {
         alert("로그인을 먼저하세요.");
         router.push("/user/login");
-      } else {
-        alert("게시글 작성 중 오류가 발생했습니다.");
+        return;
       }
+      console.log(result.error);
+      console.error("게시글 작성 실패", result.error);
+
+      return;
     }
+
+    router.push("/posts");
   };
 
   return (

@@ -8,12 +8,12 @@ import { useLoginMember } from "@/app/stores/auth/loginMemberStore";
 export default async function Page({
   searchParams,
 }: {
-  searchParams: {
+  searchParams: Promise<{
     page: number;
     pageSize: number;
     sort: string;
     status: "RESERVED" | "AVAILABLE" | "PURCHASED" | undefined;
-  };
+  }>;
 }) {
   const { page = 1, pageSize = 10, sort = "desc", status } = await searchParams;
 

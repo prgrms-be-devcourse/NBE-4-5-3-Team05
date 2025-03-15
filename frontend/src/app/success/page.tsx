@@ -1,19 +1,22 @@
-import { useRouter } from "next/navigation";
 import ClientPage from "./clientPage";
 
 export default async function Page({
   searchParams,
 }: {
-  searchParams: {
+  searchParams: Promise<{
     paymentType: string;
     orderId: string;
     paymentKey: string;
     amount: number;
-  };
+  }>;
 }) {
-  const { paymentType, orderId, paymentKey, amount } = await searchParams;
+  const { orderId, paymentKey, amount } = await searchParams;
 
-
-
-  return <ClientPage orderId={orderId} paymentKey={paymentKey} amount={amount}></ClientPage>;
+  return (
+    <ClientPage
+      orderId={orderId}
+      paymentKey={paymentKey}
+      amount={Number(amount)}
+    ></ClientPage>
+  );
 }

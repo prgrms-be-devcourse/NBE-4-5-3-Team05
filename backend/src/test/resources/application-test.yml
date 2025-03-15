@@ -1,6 +1,15 @@
 server:
   port: 8080
 
+
+custom:
+  server:
+    host: localhost
+  front:
+    host: localhost
+    port: 3000
+
+    
 spring:
   jackson:
     serialization:

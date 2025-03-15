@@ -1,17 +1,15 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { components } from "@/lib/backend/apiV1/schema";
 import client from "@/lib/client";
-import { cookies } from "next/headers";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 import { FaStore } from "react-icons/fa";
 import {
   LoginMemberContext,
   useLoginMember,
 } from "./stores/auth/loginMemberStore";
+import { useRouter } from "next/router";
+import { useEffect } from "react";
 
 export default function ClientLayout({
   children,
@@ -84,13 +82,20 @@ export default function ClientLayout({
           </Button>
         </Link>
         {isLogin && (
-          <div className="flex items-center gap-2">
-            <Link href="/user/me">
-              <Button>내 정보</Button>
-            </Link>
-            <Button className="cursor-pointer" onClick={handleLogout}>
-              로그아웃
-            </Button>
+          <div className="flex gap-2">
+            <div className="flex items-center gap-2">
+              <Link href={"/payments"}>
+                <p>{loginMember.cash}원</p>
+              </Link>
+            </div>
+            <div className="flex items-center gap-2">
+              <Link href="/user/me">
+                <Button>내 정보</Button>
+              </Link>
+              <Button className="cursor-pointer" onClick={handleLogout}>
+                로그아웃
+              </Button>
+            </div>
           </div>
         )}
         {!isLogin && (
@@ -99,7 +104,7 @@ export default function ClientLayout({
           </Link>
         )}
       </header>
-      <div className="flex-grow">{children}</div>
+      <div className="flex flex-1 flex-col items-center">{children}</div>
       <footer>푸터</footer>
     </LoginMemberContext.Provider>
   );

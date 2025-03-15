@@ -6,10 +6,10 @@ import ClientPage from "./ClientPage";
 export default async function Page({
   searchParams,
 }: {
-  searchParams: {
+  searchParams: Promise<{
     page: number;
     pageSize: number;
-  };
+  }>;
 }) {
   const { page = 1, pageSize = 5 } = await searchParams;
 
