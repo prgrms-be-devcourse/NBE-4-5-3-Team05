@@ -2,7 +2,6 @@
 
 import {
   loadTossPayments,
-  ANONYMOUS,
   TossPaymentsPayment,
 } from "@tosspayments/tosspayments-sdk";
 import { useEffect, useState } from "react";
@@ -56,8 +55,8 @@ export default function CheckoutButton({
   // ------ '결제하기' 버튼 누르면 결제창 띄우기 ------
   // @docs https://docs.tosspayments.com/sdk/v2/js#paymentrequestpayment
   async function requestPayment() {
-    const result = await fetch(
-      `http://localhost:8080/api/payments/metadata?id=${orderId}&amount=${amount.value}`,
+    await fetch(
+      `http://${process.env.NEXT_PUBLIC_BACKEND_HOST}:${process.env.NEXT_PUBLIC_BACKEND_PORT}/api/payments/metadata?id=${orderId}&amount=${amount.value}`,
       {
         credentials: "include",
       }

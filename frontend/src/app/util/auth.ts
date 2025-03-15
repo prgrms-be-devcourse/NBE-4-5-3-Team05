@@ -15,7 +15,7 @@ export function parseAccessToken(accessToken: RequestCookie | undefined) {
     }
   }
 
-  let isLogin = payload != null;
+  const isLogin = payload != null;
 
   return { isLogin, isExpired, payload };
 }

@@ -12,3 +12,4 @@ frontend/src/lib/backend/apiV1/schema.d.ts
 *.iml
 *.ipr
 
+frontend/src/lib/backend/api/

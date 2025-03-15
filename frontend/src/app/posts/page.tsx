@@ -1,107 +1,84 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 import Notice from "@/components/posts/Notice";
 import FilterSidebar from "@/components/posts/FilterSiderbar";
 import PostList from "@/components/posts/PostList";
 import Pagination from "@/components/posts/Pagination";
-import type { components } from "@/lib/backend/apiV1/schema";
+import { components } from "@/lib/backend/apiV1/schema";
+import client from "@/lib/client";
 
-// 백엔드에서 공지사항 관련 응답 타입 (리스트 형태)
-// 실제 스키마에 따라 RsDataListNoticeResBody의 이름이 다를 수 있으니 확인하세요.
-type RsDataListNoticeResBody = components["schemas"]["RsDataListNoticeResBody"];
-type NoticeResBody = components["schemas"]["NoticeResBody"];
-
-type PageDtoPreviewPostResponse =
-  components["schemas"]["PageDtoPreviewPostResponse"];
-type RsDataPageDtoPreviewPostResponse =
-  components["schemas"]["RsDataPageDtoPreviewPostResponse"];
-
-type Category = components["schemas"]["Category"];
+type NoticeListItem = components["schemas"]["NoticeResBody"];
+type ProductPostListItem = components["schemas"]["PreviewPostResponse"];
 
 export default function PostsPage() {
-  const searchParams = useSearchParams();
-  const initialKeyword = searchParams.get("keyword") || "";
-
-  // 공지사항은 스키마 타입을 그대로 사용합니다.
-  const [noticeList, setNoticeList] = useState<NoticeResBody[]>([]);
-  const [posts, setPosts] = useState<
-    components["schemas"]["PreviewPostResponse"][]
-  >([]);
+  const [noticeList, setNoticeList] = useState<NoticeListItem[]>([]);
+  const [posts, setPosts] = useState<ProductPostListItem[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [categories, setCategories] = useState<{ id: number; name: string }[]>(
+    []
+  );
   const [filters, setFilters] = useState({
-    keyword: initialKeyword,
+    keyword: "",
     minPrice: null as number | null,
     maxPrice: null as number | null,
     category: "",
     sort: "desc",
   });
 
-  // 공지사항 로드
   useEffect(() => {
     (async () => {
-      try {
-        // /api/admin/notices/latest 엔드포인트가 리스트 형태로 공지사항을 반환한다고 가정합니다.
-        const res = await axios.get<RsDataListNoticeResBody>(
-          "/api/admin/notices/latest",
-          {
-            withCredentials: true,
-          }
-        );
-        setNoticeList(res.data.data);
-      } catch (err) {
-        console.error("공지사항 로드 실패", err);
+      const res = await client.GET("/api/admin/notices/latest", {
+        Credential: "include",
+      });
+      if (res.error) {
+        console.error("공지사항 로드 실패", res.error);
+        return;
       }
+      setNoticeList(res.data!.data);
     })();
   }, []);
 
-  // 카테고리 로드
   useEffect(() => {
     (async () => {
-      try {
-        const res = await axios.get<{
-          code: string;
-          message: string;
-          data: Category[];
-        }>("/api/categories", {
-          withCredentials: true,
-        });
-        setCategories(res.data.data);
-      } catch (err) {
-        console.error("카테고리 로드 실패", err);
+      const res = await client.GET("/api/categories", {
+        Credential: "include",
+      });
+      if (res.error) {
+        console.error("카테고리 로드 실패", res.error);
+        return;
       }
+      const cats = res.data!.data.map((cat) => ({
+        id: cat.id ?? 0,
+        name: cat.name ?? "",
+      }));
+      setCategories(cats);
     })();
   }, []);
 
-  // 게시글 로드: 필터 상태나 페이지가 변경되면 호출
   const fetchPosts = async () => {
-    try {
-      const res = await axios.get<RsDataPageDtoPreviewPostResponse>(
-        "/api/posts",
-        {
-          params: {
-            page: currentPage,
-            pageSize: 10,
-            keyword: filters.keyword || undefined,
-            sort: filters.sort,
-            minPrice: filters.minPrice || undefined,
-            maxPrice: filters.maxPrice || undefined,
-            category: filters.category || undefined,
-          },
-          withCredentials: true,
-        }
-      );
-      const { items, totalPages } = res.data.data;
-      setPosts(items);
-      setTotalPages(totalPages);
-    } catch (err) {
-      console.error("게시글 로드 실패", err);
+    const res = await client.GET("/api/posts", {
+      params: {
+        query: {
+          page: currentPage,
+          pageSize: 10,
+          keyword: filters.keyword || undefined,
+          sort: filters.sort,
+          minPrice: filters.minPrice || undefined,
+          maxPrice: filters.maxPrice || undefined,
+          category: filters.category || undefined,
+        },
+      },
+      credentials: "include",
+    });
+    if (res.error) {
+      console.error("게시글 로드 실패", res.error);
     }
+    const { items, totalPages } = res.data!.data;
+    setPosts(items);
+    setTotalPages(totalPages);
   };
 
   useEffect(() => {
@@ -121,8 +98,8 @@ export default function PostsPage() {
               {noticeList.map((notice, index) => (
                 <Notice
                   key={index}
-                  title={notice.title ?? ""}
-                  content={notice.content ?? ""}
+                  title={notice.title!}
+                  content={notice.content!}
                 />
               ))}
             </div>
@@ -140,10 +117,7 @@ export default function PostsPage() {
             setFilters(newFilters);
             setCurrentPage(1);
           }}
-          categories={categories.map((cat) => ({
-            id: cat.id ?? 0,
-            name: cat.name ?? "",
-          }))}
+          categories={categories}
         />
       </div>
       <div className="fixed bottom-4 right-4">

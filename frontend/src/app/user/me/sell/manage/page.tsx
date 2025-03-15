@@ -1,50 +1,16 @@
-import client from "@/lib/client";
 import ClientPage from "./ClientPage";
-import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
-import RequireAuthenticated from "@/components/auth/RequireAuthenticated";
-import { useLoginMember } from "@/app/stores/auth/loginMemberStore";
+import { parseAccessToken } from "@/app/util/auth";
+import { redirect } from "next/navigation";
 
-export default async function Page({
-  searchParams,
-}: {
-  searchParams: {
-    page: number;
-    pageSize: number;
-    sort: string;
-    status: "RESERVED" | "AVAILABLE" | "PURCHASED" | undefined;
-  };
-}) {
-  const { page = 1, pageSize = 10, sort = "desc", status } = await searchParams;
+export default async function Page() {
+  const myCookie = await cookies();
 
-  const response = await client.GET("/api/posts/my", {
-    params: {
-      query: {
-        page,
-        pageSize,
-        sort,
-        ...(status ? { status } : {}),
-      },
-    },
-    headers: {
-      cookie: (await cookies()).toString(),
-    },
-  });
+  const { isLogin } = parseAccessToken(myCookie.get("accessToken"));
 
-  if (response.error) {
-    console.log("서버 오류 : " + response.error.message);
-    return;
+  if (!isLogin) {
+    redirect("/");
   }
 
-  const rsData = response.data;
-
-  const postInfo = rsData.data.items;
-  const pageInfo = {
-    totalPages: rsData.data.totalPages,
-    totalItems: rsData.data.totalItems,
-    currentPage: rsData.data.curPageNo,
-    pageSize,
-  };
-
-  return <ClientPage postInfo={postInfo} pageInfo={pageInfo} />;
+  return <ClientPage />;
 }

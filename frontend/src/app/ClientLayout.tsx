@@ -3,10 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { components } from "@/lib/backend/apiV1/schema";
 import client from "@/lib/client";
-import { cookies } from "next/headers";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 import { FaStore } from "react-icons/fa";
 import {
   LoginMemberContext,

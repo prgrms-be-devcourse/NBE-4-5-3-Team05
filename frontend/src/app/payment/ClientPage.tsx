@@ -3,6 +3,7 @@
 import { useState } from "react";
 import CheckoutButton from "./CheckoutButton";
 import { v4 as uuidv4 } from "uuid";
+import client from "@/lib/client";
 
 export default function CheckoutPage() {
   const values = [1000, 5000, 10000, 50000];
@@ -11,17 +12,15 @@ export default function CheckoutPage() {
   const [productId, setProductId] = useState<string>("");
 
   const purchaseItem = async () => {
-    const response = await fetch("http://localhost:8080/api/payments", {
-      method: "POST",
-      body: JSON.stringify({
+    const response = await client.POST("/api/payments", {
+      body: {
         productId: productId,
-      }),
-      headers: {
-        "Content-Type": "application/json",
       },
     });
-    const json = await response.json();
-    console.log(json);
+    if (response.error) {
+      console.log(response.error);
+      return;
+    }
   };
   return (
     <div>

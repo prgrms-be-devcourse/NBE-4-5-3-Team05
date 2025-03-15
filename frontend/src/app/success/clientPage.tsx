@@ -1,5 +1,6 @@
 "use client";
 
+import client from "@/lib/client";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
@@ -14,15 +15,19 @@ export default function ClientPage({
 }) {
   const router = useRouter();
   const requestPayment = async () => {
-    const response = await fetch(
-      `http://localhost:8080/api/payments/request?orderId=${orderId}&paymentKey=${paymentKey}&amount=${amount}`,
-      {
-        credentials: "include",
-      }
-    );
-    const json = await response.json();
-
-    console.log(json);
+    const response = await client.GET("/api/payments/request", {
+      params: {
+        query: {
+          orderId,
+          paymentKey,
+          amount,
+        },
+      },
+      credentials: "include",
+    });
+    if (response.error) {
+      console.log(response.error);
+    }
   };
   useEffect(() => {
     requestPayment();
