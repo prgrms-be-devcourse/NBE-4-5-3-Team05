@@ -38,8 +38,23 @@ nbdist/
 *.code-workspace
 
 ### 🛠 환경 설정 파일 ###
-/src/main/resources/application.properties
-gradle
+
+### 🚀 데이터베이스 관련 ###
+*.db
+*.sqlite
+*.s3db
+*.h2.db
+*.mv.db  # H2 데이터베이스 무시
+*.trace.db
+
+### 📝 로그 파일 ###
+logs/
+*.log
+*.log.*
+log/
+debug.log
+error.log
+
 
 ### custom ###
 gradlew
