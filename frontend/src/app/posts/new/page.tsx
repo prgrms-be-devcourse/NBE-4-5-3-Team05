@@ -2,8 +2,9 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import type { components } from "@/lib/backend/apiV1/schema";
+import client from "@/lib/client";
 
 // OpenAPI 스키마의 Category 타입 사용 (선택적 속성일 수 있으므로 필요한 경우 non-null assertion이나 default 값을 설정)
 type Category = components["schemas"]["Category"];
@@ -14,13 +15,12 @@ export default function PostCreatePage() {
   // 로그인 체크
   useEffect(() => {
     async function checkAuth() {
-      try {
-        await axios.get("/api/users/me", { withCredentials: true });
-      } catch (err: any) {
-        if (err.response && err.response.status === 401) {
-          alert("로그인을 먼저하세요.");
-          router.push("/user/login");
-        }
+      const response = await client.GET("/api/users/me", {
+        credentials: "include",
+      });
+      if (response.error && response.response.status === 401) {
+        alert("로그인을 먼저하세요.");
+        router.push("/user/login");
       }
     }
     checkAuth();
@@ -38,8 +38,6 @@ export default function PostCreatePage() {
   const [longitude, setLongitude] = useState<number | "">("");
   // 이미지 파일 선택 state
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
-  // 업로드된 이미지 URL 리스트
-  const [imageUrlList, setImageUrlList] = useState<string[]>([]);
   // 백엔드에서 불러온 카테고리 목록 state (OpenAPI 스키마의 Category 타입 사용)
   const [categories, setCategories] = useState<Category[]>([]);
 
@@ -86,8 +84,6 @@ export default function PostCreatePage() {
           Array.from(selectedFiles).map((file) => uploadFile(file))
         );
       }
-      setImageUrlList(uploadedUrls);
-
       // 선택한 카테고리 id를 숫자로 변환하여 배열에 넣음
       const categoryIds = selectedCategory ? [Number(selectedCategory)] : [];
 
@@ -109,9 +105,10 @@ export default function PostCreatePage() {
       });
 
       router.push("/posts");
-    } catch (err: any) {
+    } catch (err) {
+      const error = err as AxiosError;
       console.error("게시글 작성 실패", err);
-      if (err.response && err.response.status === 401) {
+      if (error.response && error.response.status === 401) {
         alert("로그인을 먼저하세요.");
         router.push("/user/login");
       } else {

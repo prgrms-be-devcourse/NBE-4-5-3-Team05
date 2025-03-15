@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import type { components } from "@/lib/backend/apiV1/schema";
 
 type ProductPostResponse = components["schemas"]["ProductPostResponse"];
@@ -35,6 +35,7 @@ export default function PostDetailPage() {
       await axios.get("/api/users/me", { withCredentials: true });
       return true;
     } catch (err) {
+      console.log(err as AxiosError)
       return false;
     }
   };

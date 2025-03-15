@@ -1,6 +1,5 @@
 import { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import { cookies } from "next/headers";
-import createClient from "openapi-fetch";
 import { NextRequest, NextResponse } from "next/server";
 import client from "./lib/client";
 import { parseAccessToken } from "./app/util/auth";

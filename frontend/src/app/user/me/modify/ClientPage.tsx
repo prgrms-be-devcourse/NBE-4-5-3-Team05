@@ -4,9 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { components } from "@/lib/backend/apiV1/schema";
 import client from "@/lib/client";
-import { faP } from "@fortawesome/free-solid-svg-icons";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 
 export default function ClientPage({
   userInfo,

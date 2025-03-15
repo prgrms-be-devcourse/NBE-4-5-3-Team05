@@ -7,34 +7,18 @@ import Notice from "@/components/posts/Notice";
 import FilterSidebar from "@/components/posts/FilterSiderbar";
 import PostList from "@/components/posts/PostList";
 import Pagination from "@/components/posts/Pagination";
+import { components } from "@/lib/backend/apiV1/schema";
 
-interface PostsResponseData {
-  items: any[]; // 백엔드에서 받은 ProductPostResponse 배열
-  totalPages: number;
-  totalItems: number;
-  curPageNo: number;
-  pageSize: number;
-}
-
-interface RsData<T> {
-  code: string;
-  message: string;
-  data: T;
-}
-
-interface NoticeData {
-  title: string;
-  content: string;
-}
-
-interface CategoryData {
-  id?: number;
-  name?: string;
-}
+type NoticeListItem = components["schemas"]["NoticeResBody"];
+type RsDataNoticeListResBody = components["schemas"]["RsDataListNoticeResBody"];
+type PageProductPostListRes =
+  components["schemas"]["PageDtoPreviewPostResponse"];
+type ProductPostListItem = components["schemas"]["PreviewPostResponse"];
+type CategoryListRes = components["schemas"]["RsDataListCategory"];
 
 export default function PostsPage() {
-  const [noticeList, setNoticeList] = useState<NoticeData[]>([]);
-  const [posts, setPosts] = useState<any[]>([]);
+  const [noticeList, setNoticeList] = useState<NoticeListItem[]>([]);
+  const [posts, setPosts] = useState<ProductPostListItem[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [categories, setCategories] = useState<{ id: number; name: string }[]>(
@@ -51,7 +35,7 @@ export default function PostsPage() {
   useEffect(() => {
     (async () => {
       try {
-        const res = await axios.get<RsData<NoticeData[]>>(
+        const res = await axios.get<RsDataNoticeListResBody>(
           "/api/admin/notices/latest",
           { withCredentials: true }
         );
@@ -65,7 +49,7 @@ export default function PostsPage() {
   useEffect(() => {
     (async () => {
       try {
-        const res = await axios.get<RsData<CategoryData[]>>("/api/categories", {
+        const res = await axios.get<CategoryListRes>("/api/categories", {
           withCredentials: true,
         });
         const cats = res.data.data.map((cat) => ({
@@ -81,7 +65,7 @@ export default function PostsPage() {
 
   const fetchPosts = async () => {
     try {
-      const res = await axios.get<RsData<PostsResponseData>>("/api/posts", {
+      const res = await axios.get<PageProductPostListRes>("/api/posts", {
         params: {
           page: currentPage,
           pageSize: 10,
@@ -93,7 +77,7 @@ export default function PostsPage() {
         },
         withCredentials: true,
       });
-      const { items, totalPages } = res.data.data;
+      const { items, totalPages } = res.data;
       setPosts(items);
       setTotalPages(totalPages);
     } catch (err) {
@@ -118,8 +102,8 @@ export default function PostsPage() {
               {noticeList.map((notice, index) => (
                 <Notice
                   key={index}
-                  title={notice.title}
-                  content={notice.content}
+                  title={notice.title!}
+                  content={notice.content!}
                 />
               ))}
             </div>
