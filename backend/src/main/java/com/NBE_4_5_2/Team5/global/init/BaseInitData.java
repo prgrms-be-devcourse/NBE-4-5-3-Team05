@@ -1,16 +1,5 @@
 package com.NBE_4_5_2.Team5.global.init;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.ApplicationRunner;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.context.annotation.Profile;
-import org.springframework.core.annotation.Order;
-
 import com.NBE_4_5_2.Team5.domain.post.category.entity.Category;
 import com.NBE_4_5_2.Team5.domain.post.category.repository.CategoryRepository;
 import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductCategory;
@@ -24,9 +13,18 @@ import com.NBE_4_5_2.Team5.domain.user.user.entity.Role;
 import com.NBE_4_5_2.Team5.domain.user.user.entity.User;
 import com.NBE_4_5_2.Team5.domain.user.user.repository.UserRepository;
 import com.NBE_4_5_2.Team5.domain.user.user.service.UserService;
-
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.ApplicationRunner;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Profile;
+import org.springframework.core.annotation.Order;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Configuration
 @Profile("!monitor")

@@ -1,19 +1,17 @@
 "use client";
 
+import { LoginMemberContext } from "@/app/stores/auth/loginMemberStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { components } from "@/lib/backend/apiV1/schema";
 import client from "@/lib/client";
 import { faP } from "@fortawesome/free-solid-svg-icons";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { use, useState } from "react";
 
-export default function ClientPage({
-  userInfo,
-}: {
-  userInfo: components["schemas"]["UserDto"];
-}) {
+export default function ClientPage() {
   const router = useRouter();
+  const { loginMember, setLoginMember } = use(LoginMemberContext);
 
   async function updateInfo(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -37,10 +35,12 @@ export default function ClientPage({
 
     if (response.error) {
       alert(response.error.message);
+      router.push("/user/login");
       return;
     }
 
     alert("사용자 정보가 성공적으로 수정되었습니다.");
+    setLoginMember(response.data.data);
     router.push("/user/me");
   }
 
@@ -63,7 +63,7 @@ export default function ClientPage({
                 name="email"
                 placeholder="이메일"
                 className="border-2 border-black"
-                defaultValue={userInfo.email}
+                defaultValue={loginMember.email}
               />
             </div>
             <div>
@@ -79,7 +79,7 @@ export default function ClientPage({
                 name="nickname"
                 placeholder="닉네임"
                 className="border-2 border-black"
-                defaultValue={userInfo.nickname}
+                defaultValue={loginMember.nickname}
               />
             </div>
             <div>
@@ -94,7 +94,7 @@ export default function ClientPage({
                 name="address"
                 placeholder="주소"
                 className="border-2 border-black w-[500px]"
-                defaultValue={userInfo.address}
+                defaultValue={loginMember.address}
               />
             </div>
             <div>
@@ -109,7 +109,7 @@ export default function ClientPage({
                 name="profileUrl"
                 placeholder="프로필URL"
                 className="border-2 border-black w-[500px]"
-                defaultValue={userInfo.profileUrl}
+                defaultValue={loginMember.profileUrl}
               />
             </div>
 

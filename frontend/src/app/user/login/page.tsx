@@ -1,5 +1,10 @@
+import RequireAnonymous from "@/components/auth/RequireAnonymous";
 import ClientPage from "./ClientPage";
 
 export default async function Page() {
-  return <ClientPage />;
+  return (
+    <RequireAnonymous>
+      <ClientPage />
+    </RequireAnonymous>
+  );
 }
