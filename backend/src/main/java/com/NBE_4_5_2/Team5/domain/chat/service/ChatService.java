@@ -60,6 +60,8 @@ public class ChatService {
                         .message(chatMessage.getMessage()) // 원 메시지 내용
                         .userCount(chatMessage.getUserCount())
                         .image(chatMessage.getImage())
+                        .latitude(0.0f)
+                        .longitude(0.0f)
                         .timestamp(chatMessage.formatTimestamp(LocalDateTime.now()))
                         .build();
                 // DB에 저장
@@ -76,6 +78,8 @@ public class ChatService {
                         .message(chatMessage.getMessage()) // 원 메시지 내용
                         .userCount(chatMessage.getUserCount())
                         .image(chatMessage.getImage())
+                        .latitude(0.0f)
+                        .longitude(0.0f)
                         .timestamp(chatMessage.formatTimestamp(LocalDateTime.now()))
                         .build();
 

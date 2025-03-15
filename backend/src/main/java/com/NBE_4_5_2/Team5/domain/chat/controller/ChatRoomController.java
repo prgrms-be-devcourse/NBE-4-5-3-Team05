@@ -159,6 +159,8 @@ public class ChatRoomController {
                         chatMessage.getSender(),
                         chatMessage.getMessage(),
                         chatMessage.getImage(),
+                        chatMessage.getLatitude(),
+                        chatMessage.getLongitude(),
                         chatMessage.getTimestamp()))
                 .toList();
         return new RsData<>("200",other+"와의 대화방",response);

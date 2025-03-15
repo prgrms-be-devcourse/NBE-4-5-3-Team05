@@ -12,5 +12,7 @@ public class MessageDto {
     private String sender;
     private String message;
     private String image;
+    private double latitude;
+    private double longitude;
     private String timestamp;
 }

@@ -781,6 +781,10 @@ export interface components {
             sender?: string;
             message?: string;
             image?: string;
+            /** Format: double */
+            latitude?: number;
+            /** Format: double */
+            longitude?: number;
             timestamp?: string;
         };
         RsDataListMessageDto: {
@@ -1241,7 +1245,8 @@ export interface operations {
         requestBody?: {
             content: {
                 "application/json": {
-                    file: File;
+                    /** Format: binary */
+                    file: string;
                 };
             };
         };

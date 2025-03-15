@@ -8,7 +8,7 @@ import { Stomp } from "@stomp/stompjs";
 import { headers } from "next/headers";
 
 export default function ClientPage({
-  messages,  // 서버에서 전달된 초기 메시지 데이터
+  messages,
   title,
   roomId,
   cookie,
@@ -136,26 +136,30 @@ export default function ClientPage({
 
   const handleSendLocation = () => {
     if (!stompClient) {
-      alert("WebSocket 연결이 되어 있지 않습니다.");
-      return;
+        alert("WebSocket 연결이 되어 있지 않습니다.");
+        return;
     }
-  
+
     navigator.geolocation.getCurrentPosition((position) => {
-      const latitude = position.coords.latitude;
-      const longitude = position.coords.longitude;
-      const message = {
-        roomId,
-        type: "LOCATION",
-        sender: userNickname,
-        latitude,
-        longitude,
-      };
-  
-      stompClient.send("/pub/chat/message", { token: accessToken }, JSON.stringify(message));
-      alert("위치가 전송되었습니다!");
+        const latitude = position.coords.latitude;
+        const longitude = position.coords.longitude;
+
+        const message = {
+            roomId,
+            sender: userNickname,
+            type: "LOCATION",
+            latitude, // 위도 
+            longitude, // 경도
+            messageId: null, // 필요 시 비워둡니다
+            image: null, // 필요 시 비워둡니다
+            timestamp: new Date().toISOString(), // 현재 시간 설정
+        };
+
+        stompClient.send("/pub/chat/message", { token: accessToken }, JSON.stringify(message));
+        alert("위치가 전송되었습니다!");
     }, (error) => {
-      console.error("Error obtaining location:", error);
-      alert("위치를 가져오는 데 실패했습니다.");
+        console.error("Error obtaining location:", error);
+        alert("위치를 가져오는 데 실패했습니다.");
     });
   };
 
@@ -235,6 +239,20 @@ export default function ClientPage({
             <div>
               <strong>메시지 내용:</strong> {message.message}
             </div>
+            {(message.latitude !== 0 && message.longitude !== 0) ? (
+              <div>
+                <strong>위치 정보:</strong> 
+                <div>위도: {message.latitude}, 경도: {message.longitude}</div>
+                <a
+                  href={`https://www.google.com/maps?q=${message.latitude},${message.longitude}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-500"
+                >
+                  구글 맵에서 보기
+                </a>
+              </div>
+            ) : null}
             {message.image && (
               <div>
                 <strong>이미지:</strong> <img src={message.image} alt="메시지 첨부 이미지" className="max-w-full h-auto" />
