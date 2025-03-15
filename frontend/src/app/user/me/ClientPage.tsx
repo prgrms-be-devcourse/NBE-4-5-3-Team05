@@ -3,7 +3,6 @@
 import { Button } from "@/components/ui/button";
 import { components } from "@/lib/backend/apiV1/schema";
 import { useRouter } from "next/navigation";
-import router from "next/router";
 
 export default function ClientPage({
   userInfo,

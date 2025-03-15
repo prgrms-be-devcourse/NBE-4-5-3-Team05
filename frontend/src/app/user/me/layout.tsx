@@ -2,8 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
+import { usePathname } from "next/navigation";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faUser,
@@ -24,8 +23,6 @@ export default function UserLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const router = useRouter();
-
   async function handleDeleteAccount() {
     const confirmDelete = confirm("정말로 회원 탈퇴를 하시겠습니까?");
     if (!confirmDelete) return;
@@ -54,7 +51,9 @@ export default function UserLayout({
         <Link href="/user/me/modify">
           <Button
             variant="ghost"
-            className={`cursor-pointer w-full justify-start ${pathname === "/user/me/info" ? "bg-blue-100 text-blue-600" : ""}`}
+            className={`cursor-pointer w-full justify-start ${
+              pathname === "/user/me/info" ? "bg-blue-100 text-blue-600" : ""
+            }`}
           >
             <FontAwesomeIcon icon={faUser} className="mr-2" />
             프로필 수정
@@ -75,7 +74,11 @@ export default function UserLayout({
               <Link href="/user/me/sell/manage">
                 <Button
                   variant="ghost"
-                  className={`w-full justify-start ${pathname === "/user/me/sell/manage" ? "bg-blue-100 text-blue-600" : ""}`}
+                  className={`w-full justify-start ${
+                    pathname === "/user/me/sell/manage"
+                      ? "bg-blue-100 text-blue-600"
+                      : ""
+                  }`}
                 >
                   내 상품 관리
                 </Button>
@@ -83,7 +86,11 @@ export default function UserLayout({
               <Link href="/user/me/sell/history">
                 <Button
                   variant="ghost"
-                  className={`w-full justify-start ${pathname === "/user/me/sell/history" ? "bg-blue-100 text-blue-600" : ""}`}
+                  className={`w-full justify-start ${
+                    pathname === "/user/me/sell/history"
+                      ? "bg-blue-100 text-blue-600"
+                      : ""
+                  }`}
                 >
                   판매 내역
                 </Button>
@@ -91,7 +98,11 @@ export default function UserLayout({
               <Link href="/user/me/sell/shipping">
                 <Button
                   variant="ghost"
-                  className={`w-full justify-start ${pathname === "/user/me/sell/shipping" ? "bg-blue-100 text-blue-600" : ""}`}
+                  className={`w-full justify-start ${
+                    pathname === "/user/me/sell/shipping"
+                      ? "bg-blue-100 text-blue-600"
+                      : ""
+                  }`}
                 >
                   배송 신청
                 </Button>
