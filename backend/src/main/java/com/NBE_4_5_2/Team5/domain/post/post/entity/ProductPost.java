@@ -178,4 +178,7 @@ public class ProductPost {
 		this.viewCount++;
 	}
 
+	public Boolean isPurchasedBy(User loggedInUser) {
+		return buyer.equals(loggedInUser);
+	}
 }

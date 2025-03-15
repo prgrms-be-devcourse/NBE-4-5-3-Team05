@@ -15,7 +15,7 @@ export default function ClientPage({
   const router = useRouter();
   const requestPayment = async () => {
     const response = await fetch(
-      `http://localhost:8080/api/payments/request?orderId=${orderId}&paymentKey=${paymentKey}&amount=${amount}`,
+      `http://${process.env.NEXT_PUBLIC_BACKEND_HOST}:${process.env.NEXT_PUBLIC_BACKEND_PORT}/api/payments/request?orderId=${orderId}&paymentKey=${paymentKey}&amount=${amount}`,
       {
         credentials: "include",
       }
