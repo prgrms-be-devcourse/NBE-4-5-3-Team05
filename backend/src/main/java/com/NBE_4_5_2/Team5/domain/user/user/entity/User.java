@@ -9,14 +9,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import com.NBE_4_5_2.Team5.domain.base.entity.BaseTime;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-
 import com.NBE_4_5_2.Team5.domain.post.comment.entity.Comment;
 import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductPost;
 import com.NBE_4_5_2.Team5.domain.post.post.enums.ProductStatus;
@@ -125,6 +117,7 @@ public class User extends BaseTime {
 		pay(amount);
 		addToPurchasedProductList(product);
 		product.updateStatus(ProductStatus.PURCHASED);
+		product.setBuyer(this);
 	}
 
 	//TODO : Member 객체의 구현에 따라 구매 상품을 담을 list에 업데이트 필요
@@ -219,4 +212,5 @@ public class User extends BaseTime {
 	public void setAdmin() {
 		this.role = Role.ADMIN;
 	}
+
 }

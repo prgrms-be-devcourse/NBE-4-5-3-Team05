@@ -28,6 +28,7 @@ function createEmptyMember(): Member {
     id: "",
     username: "",
     email: "",
+    cash: 0,
     nickname: "",
     address: "",
     profileUrl: "",

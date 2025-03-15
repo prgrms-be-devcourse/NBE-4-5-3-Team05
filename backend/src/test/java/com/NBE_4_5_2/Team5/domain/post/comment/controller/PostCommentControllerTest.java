@@ -11,46 +11,38 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
-import com.NBE_4_5_2.Team5.TestConfig;
-import com.NBE_4_5_2.Team5.Util;
 import com.NBE_4_5_2.Team5.domain.post.comment.entity.Comment;
 import com.NBE_4_5_2.Team5.domain.post.comment.repository.CommentRepository;
 import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductPost;
 import com.NBE_4_5_2.Team5.domain.post.post.repository.ProductPostRepository;
-import com.NBE_4_5_2.Team5.domain.post.post.service.ProductPostService;
 import com.NBE_4_5_2.Team5.domain.user.user.entity.User;
-import com.NBE_4_5_2.Team5.domain.user.user.repository.UserRepository;
 import com.NBE_4_5_2.Team5.domain.user.user.service.UserService;
+import com.NBE_4_5_2.Team5.domain.user.user.service.email.EmailService;
+import com.NBE_4_5_2.Team5.global.config.BaseTestConfig;
 import com.NBE_4_5_2.Team5.global.config.RedisTestContainerConfig;
+import com.NBE_4_5_2.Team5.global.config.Util;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.http.Cookie;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@ActiveProfiles("test")
-@Import({TestConfig.class})
-@Order(99)
-@TestPropertySource(properties = "custom.refreshToken.expire-seconds=3600")
+@BaseTestConfig
+@Order(102)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class PostCommentControllerTest extends RedisTestContainerConfig {
 
 	@Autowired
 	private Util util;
-	@Autowired
-	private ProductPostService productPostService;
-	@Autowired
-	private UserRepository userRepository;
 	@Autowired
 	private UserService userService;
 	@Autowired
@@ -61,22 +53,25 @@ class PostCommentControllerTest extends RedisTestContainerConfig {
 	private ObjectMapper objectMapper;
 	@Autowired
 	private CommentRepository commentRepository;
+	@Autowired
+	EmailService emailService;
 
 	@BeforeEach
 	void setUp() {
-		util.truncateAllTables();
+		emailService.saveVerificationCode("emasdfasdail", "verified"); // 이메일 인증이 통과되었다고 가정
 	}
 
 	@Test
 	void writeComment() throws Exception {
 		// given
-		User author = userService.createUser("username", "password", "email", "nickname", "address", "url");
+		User author = userService.createUser("useasdfasde", "password", "emasdfasdail", "nicsdfdakname", "address",
+			"url");
 
 		ProductPost productPost = productPostRepository.save(
 			ProductPost.create(author, "name", 5000, "title", "content", "url", 50F, 50F)
 		);
 
-		Map<String, Cookie> cookieMap = login();
+		Map<String, Cookie> cookieMap = login(author.getUsername(), "password");
 
 		// when
 		ResultActions action = mockMvc.perform(post("/api/posts/%s/comments".formatted(productPost.getId()))
@@ -101,14 +96,15 @@ class PostCommentControllerTest extends RedisTestContainerConfig {
 	@Test
 	void updateTest() throws Exception {
 		//given
-
-		User author = userService.createUser("username", "password", "email", "nickname", "address", "url");
+		User author = userService.createUser("userasdasname", "password", "emasdfasdail", "nicknfasdfasdaame",
+			"address",
+			"url");
 
 		ProductPost productPost = productPostRepository.save(
 			ProductPost.create(author, "name", 5000, "title", "content", "url", 50F, 50F)
 		);
 
-		Map<String, Cookie> cookieMap = login();
+		Map<String, Cookie> cookieMap = login(author.getUsername(), "password");
 
 		String content = mockMvc.perform(post("/api/posts/%s/comments".formatted(productPost.getId()))
 				.contentType(MediaType.APPLICATION_JSON)
@@ -146,14 +142,14 @@ class PostCommentControllerTest extends RedisTestContainerConfig {
 
 	}
 
-	private Map<String, Cookie> login() throws Exception {
+	private Map<String, Cookie> login(String username, String password) throws Exception {
 		MockHttpServletResponse response = mockMvc.perform(post("/api/users/login")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content("""
 					{
-						"username": "username",
-						"password": "password"
-					}""")).andExpect(status().isOk())
+						"username": "%s",
+						"password": "%s"
+					}""".formatted(username, password))).andExpect(status().isOk())
 			.andReturn().getResponse();
 
 		return Map.of("accessToken", Objects.requireNonNull(response.getCookie("accessToken")),
@@ -163,14 +159,14 @@ class PostCommentControllerTest extends RedisTestContainerConfig {
 	@Test
 	void deleteTest() throws Exception {
 		//given
-		// 로그인하고 Product Post 작성, comment 작성
-		User author = userService.createUser("username", "password", "email", "nickname", "address", "url");
+		User author = userService.createUser("userdasfasdname", "password", "emasdfasdail", "nicknawqeqwdcame",
+			"address", "url");
 
 		ProductPost productPost = productPostRepository.save(
 			ProductPost.create(author, "name", 5000, "title", "content", "url", 50F, 50F)
 		);
 
-		Map<String, Cookie> cookieMap = login();
+		Map<String, Cookie> cookieMap = login(author.getUsername(), "password");
 
 		String result = mockMvc.perform(post("/api/posts/%s/comments".formatted(productPost.getId()))
 				.contentType(MediaType.APPLICATION_JSON)

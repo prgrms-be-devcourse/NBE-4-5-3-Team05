@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import {
   loadTossPayments,
   TossPaymentsPayment,
@@ -55,7 +56,7 @@ export default function CheckoutButton({
   // ------ '결제하기' 버튼 누르면 결제창 띄우기 ------
   // @docs https://docs.tosspayments.com/sdk/v2/js#paymentrequestpayment
   async function requestPayment() {
-    await fetch(
+    const result = await fetch(
       `http://${process.env.NEXT_PUBLIC_BACKEND_HOST}:${process.env.NEXT_PUBLIC_BACKEND_PORT}/api/payments/metadata?id=${orderId}&amount=${amount.value}`,
       {
         credentials: "include",
@@ -85,8 +86,11 @@ export default function CheckoutButton({
   }
   return (
     // 결제하기 버튼
-    <button className="button" onClick={() => requestPayment()}>
+    <Button
+      className="w-full h-full button text-3xl"
+      onClick={() => requestPayment()}
+    >
       결제하기
-    </button>
+    </Button>
   );
 }

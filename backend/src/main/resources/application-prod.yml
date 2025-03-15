@@ -50,6 +50,18 @@ spring:
             user-info-uri: https://kapi.kakao.com/v2/user/me
             user-name-attribute: id
 
+  mail:
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connection-timeout: 5000                     # 클라이언트 -> SMTP 서버 연결 대기 시간
+          timeout: 5000                                # 클라이언트 <- SMTP 서버 응답 대기 시간
+          write-timeout: 5000                          # 클라이언트 작업 완료 대기 시간
+
 logging:
   level:
     root: info
@@ -60,7 +72,7 @@ springdoc:
 
 custom:
   server:
-    host: ${SERVER_HOST}
+    host: 3.35.108.184
   front:
-    host: ${FRONT_HOST}
-    port: ${FRONT_PORT}
+    host: 3.37.172.144
+    port: 3000
