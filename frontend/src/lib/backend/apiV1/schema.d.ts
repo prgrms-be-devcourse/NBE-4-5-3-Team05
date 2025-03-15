@@ -1241,8 +1241,7 @@ export interface operations {
         requestBody?: {
             content: {
                 "application/json": {
-                    /** Format: binary */
-                    file: string;
+                    file: File;
                 };
             };
         };

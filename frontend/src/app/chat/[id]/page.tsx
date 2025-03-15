@@ -49,6 +49,6 @@ export default async function Page({
     const title = messageData.message;
     const messages = messageData.data; // 메시지 데이터
   
-    return <ClientPage messages={messages} title={title} roomId={roomId} cookie={cookie}/>; // 메시지 데이터 클라이언트 페이지로 전달
+    return <ClientPage messages={messages} title={title} roomId={roomId} cookie={cookie} chatRoom={chatRoom}/>; // 메시지 데이터 클라이언트 페이지로 전달
 
 }

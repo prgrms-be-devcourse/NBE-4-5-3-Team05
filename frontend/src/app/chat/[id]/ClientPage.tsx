@@ -1,27 +1,31 @@
 "use client";
 
 import { components } from "@/lib/backend/apiV1/schema";
-import client from "@/lib/backend/client"; // Axios 클라이언트
-import { useEffect, useState } from "react";
+import client from "@/lib/backend/client"; 
+import { useEffect, useRef, useState } from "react";
 import SockJS from 'sockjs-client'; 
 import { Stomp } from "@stomp/stompjs"; 
+import { headers } from "next/headers";
 
 export default function ClientPage({
   messages,  // 서버에서 전달된 초기 메시지 데이터
   title,
   roomId,
   cookie,
+  chatRoom,
 }: {
   messages: components["schemas"]["MessageDto"][];
   title: string;
   roomId: string;
   cookie: string;
+  chatRoom: components["schemas"]["ChatRoom"];
 }) {
   const [inputMessage, setInputMessage] = useState<string>(""); 
   const [chatMessages, setChatMessages] = useState<components["schemas"]["MessageDto"][]>(messages); // 초기 메시지로 설정
   const [userNickname, setUserNickname] = useState<string>(""); 
   const [accessToken, setAccessToken] = useState<string>("");
   const [stompClient, setStompClient] = useState<any>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const fetchUserInfoAndConnect = async () => {
@@ -130,6 +134,71 @@ export default function ClientPage({
     }
   };
 
+  const handleSendLocation = () => {
+    if (!stompClient) {
+      alert("WebSocket 연결이 되어 있지 않습니다.");
+      return;
+    }
+  
+    navigator.geolocation.getCurrentPosition((position) => {
+      const latitude = position.coords.latitude;
+      const longitude = position.coords.longitude;
+      const message = {
+        roomId,
+        type: "LOCATION",
+        sender: userNickname,
+        latitude,
+        longitude,
+      };
+  
+      stompClient.send("/pub/chat/message", { token: accessToken }, JSON.stringify(message));
+      alert("위치가 전송되었습니다!");
+    }, (error) => {
+      console.error("Error obtaining location:", error);
+      alert("위치를 가져오는 데 실패했습니다.");
+    });
+  };
+
+  const handleFileSelect = () => {
+    fileInputRef.current?.click(); // 파일 입력 클릭
+  };
+  
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("file", file); // 파일 추가
+
+    try {
+        // fetch를 사용하여 파일 업로드
+        const response = await fetch("http://localhost:8080/api/uploadFile", {
+            method: "POST",
+            body: formData, 
+        });
+
+        if (!response.ok) {
+            throw new Error("파일 업로드 실패");
+        }
+
+        const imageUrl = await response.text(); // 서버에서 반환된 이미지 URL을 가져옵니다.
+        console.log("서버에서 반환된 이미지 URL:", imageUrl);
+
+        const message = {
+            roomId,
+            type: "IMAGE",
+            sender: userNickname,
+            image: imageUrl,
+        };
+
+        setChatMessages((prevMessages) => [...prevMessages, message]); // 메시지를 상태에 추가
+        stompClient.send("/pub/chat/message", { token: accessToken }, JSON.stringify(message)); // 메시지 전송
+    } catch (error) {
+        console.error("이미지 업로드에 실패했습니다:", error);
+        alert("이미지 업로드에 실패했습니다.");
+    }
+  };
+
   return (
     <div>
       <h1 className="text-xl font-bold mb-4">{title}</h1>
@@ -139,9 +208,27 @@ export default function ClientPage({
       >
         채팅방 나가기
       </button>
+      <button 
+        onClick={handleSendLocation}
+        className="ml-2 px-4 py-2 bg-green-500 text-white rounded"
+      >
+      위치 전송
+      </button>
+      <button 
+        onClick={handleFileSelect}
+        className="ml-2 px-4 py-2 bg-sky-500 text-white rounded"
+      > 
+        사진 전송
+      </button>
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileChange}
+        style={{ display: 'none' }} // 숨김 처리
+      />
       <ul className="space-y-4">
         {chatMessages.slice().reverse().map((message) => (
-          <li key={message.messageId} className="border p-2 bg-white rounded shadow-sm">
+          <li key={`${message.messageId}-${chatRoom.id}`} className="border p-2 bg-white rounded shadow-sm">
             <div>
               <strong>보낸 이:</strong> {message.sender}
             </div>
@@ -153,7 +240,7 @@ export default function ClientPage({
                 <strong>이미지:</strong> <img src={message.image} alt="메시지 첨부 이미지" className="max-w-full h-auto" />
               </div>
             )}
-            <div>
+            <div>ㅇ
               <strong>보낸 시간:</strong> {message.timestamp} 
             </div>
           </li>
