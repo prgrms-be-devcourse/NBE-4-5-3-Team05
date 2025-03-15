@@ -1,28 +1,30 @@
 package com.NBE_4_5_2.Team5.global.config;
 
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.GenericContainer;
 
-@TestConfiguration
 public class RedisTestContainerConfig {
 
-    private static final GenericContainer<?> redisContainer =
-            new GenericContainer<>("redis:7.0.8-alpine").withExposedPorts(6379);
+	private static final GenericContainer<?> redisContainer;
 
-    static {
-        redisContainer.start();
-        System.setProperty("spring.data.redis.host", redisContainer.getHost());
-        System.setProperty("spring.data.redis.port", redisContainer.getMappedPort(6379).toString());
-    }
+	static {
+		redisContainer =
+			new GenericContainer<>("redis:7.0.8-alpine").withExposedPorts(6379);
+		redisContainer.start();
+	}
 
-    @Bean
-    public GenericContainer<?> redisContainer() {
-        return redisContainer;
-    }
+	public static GenericContainer<?> redisContainer() {
+		return redisContainer;
+	}
 
-    public static void stopContainer() {
-        redisContainer.stop();
-    }
+	public static void stopContainer() {
+		redisContainer.stop();
+	}
 
+	@DynamicPropertySource
+	static void redisProperties(DynamicPropertyRegistry registry) {
+		registry.add("spring.data.redis.host", redisContainer::getHost);
+		registry.add("spring.data.redis.port", () -> redisContainer.getMappedPort(6379));
+	}
 }

@@ -1,13 +1,16 @@
 "use client";
 
+import { LoginMemberContext } from "@/app/stores/auth/loginMemberStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import client from "@/lib/client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { use } from "react";
 
 export default function ClientPage() {
   const router = useRouter();
+  const { setLoginMember } = use(LoginMemberContext);
 
   async function login(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -34,14 +37,18 @@ export default function ClientPage() {
       credentials: "include",
     });
 
+    console.log(response);
+
     if (response.error) {
       alert(response.error.message);
       return;
     }
 
     alert("로그인 성공하셨습니다.");
-    router.refresh();
-    window.location.href = "/";
+    if (response.data.data.item) {
+      setLoginMember(response.data.data.item);
+    }
+    router.replace("/");
   }
 
   return (
@@ -70,7 +77,7 @@ export default function ClientPage() {
           </Link>
           <Button variant="ghost" className="w-full mt-4 p-0">
             <Link
-              href="http://localhost:8080/oauth2/authorization/kakao?redirectUrl=http://localhost:3000"
+              href={`http://${process.env.NEXT_PUBLIC_BACKEND_HOST}:${process.env.NEXT_PUBLIC_BACKEND_PORT}/oauth2/authorization/kakao?redirectUrl=http://${process.env.NEXT_PUBLIC_FRONTEND_HOST}:${process.env.NEXT_PUBLIC_FRONTEND_PORT}`}
               className="w-full"
             >
               <img src="/kakao_login.png" className="w-full" />

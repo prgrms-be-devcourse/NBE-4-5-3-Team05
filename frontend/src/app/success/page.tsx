@@ -16,7 +16,7 @@ export default async function Page({
     <ClientPage
       orderId={orderId}
       paymentKey={paymentKey}
-      amount={amount}
+      amount={Number(amount)}
     ></ClientPage>
   );
 }

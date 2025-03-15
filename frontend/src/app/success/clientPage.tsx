@@ -15,19 +15,15 @@ export default function ClientPage({
 }) {
   const router = useRouter();
   const requestPayment = async () => {
-    const response = await client.GET("/api/payments/request", {
-      params: {
-        query: {
-          orderId,
-          paymentKey,
-          amount,
-        },
-      },
-      credentials: "include",
-    });
-    if (response.error) {
-      console.log(response.error);
-    }
+    const response = await fetch(
+      `http://${process.env.NEXT_PUBLIC_BACKEND_HOST}:${process.env.NEXT_PUBLIC_BACKEND_PORT}/api/payments/request?orderId=${orderId}&paymentKey=${paymentKey}&amount=${amount}`,
+      {
+        credentials: "include",
+      }
+    );
+    const json = await response.json();
+
+    console.log(json);
   };
   useEffect(() => {
     requestPayment();

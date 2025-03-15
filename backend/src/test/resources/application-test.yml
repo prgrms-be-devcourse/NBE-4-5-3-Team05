@@ -1,11 +1,20 @@
 server:
   port: 8080
 
+
+custom:
+  server:
+    host: localhost
+  front:
+    host: localhost
+    port: 3000
+
+    
 spring:
   jackson:
     serialization:
       fail-on-empty-beans: false
-  
+
   output:
     ansi:
       enabled: always
@@ -33,6 +42,18 @@ spring:
         use_sql_comments: true
         default_batch_fetch_size: 100
     open-in-view: false
+
+  mail:
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connection-timeout: 5000                     # 클라이언트 -> SMTP 서버 연결 대기 시간
+          timeout: 5000                                # 클라이언트 <- SMTP 서버 응답 대기 시간
+          write-timeout: 5000                          # 클라이언트 작업 완료 대기 시간
 
   security:
     oauth2:
