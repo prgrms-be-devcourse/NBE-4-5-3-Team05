@@ -21,6 +21,7 @@ public class UserDto {
 	private String address;
 	private String profileUrl;
 	private Role role;
+	private int cash;
 	private LocalDateTime createdAt;
 	private LocalDateTime modifiedAt;
 	private boolean blocked;
@@ -35,6 +36,7 @@ public class UserDto {
 		this.address = admin.getAddress();
 		this.profileUrl = admin.getProfileUrl();
 		this.blocked = admin.getBlocked();
+		this.cash = admin.getCash();
 		this.blockedCount = admin.getBlockedCount();
 		this.createdAt = admin.getCreatedAt();
 		this.modifiedAt = admin.getModifiedAt();
