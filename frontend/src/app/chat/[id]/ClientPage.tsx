@@ -26,6 +26,8 @@ export default function ClientPage({
   const [accessToken, setAccessToken] = useState<string>("");
   const [stompClient, setStompClient] = useState<any>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [visibleMessagesCount, setVisibleMessagesCount] = useState(20);
+
 
   useEffect(() => {
     const fetchUserInfoAndConnect = async () => {
@@ -203,84 +205,58 @@ export default function ClientPage({
     }
   };
 
+
+  const handleLoadMoreMessages = () => {
+    setVisibleMessagesCount((prevCount) => prevCount + 20); // 20개씩 추가
+  };
+  
   return (
-    <div>
+    <div className="flex flex-col h-screen"> {/* 전체 화면 높이 설정 */}
       <h1 className="text-xl font-bold mb-4">{title}</h1>
-      <button 
-        onClick={handleDelete}
-        className="mb-4 px-4 py-2 bg-red-600 text-white rounded"
-      >
-        채팅방 나가기
-      </button>
-      <button 
-        onClick={handleSendLocation}
-        className="ml-2 px-4 py-2 bg-green-500 text-white rounded"
-      >
-      위치 전송
-      </button>
-      <button 
-        onClick={handleFileSelect}
-        className="ml-2 px-4 py-2 bg-sky-500 text-white rounded"
-      > 
-        사진 전송
-      </button>
-      <input
-        type="file"
-        ref={fileInputRef}
-        onChange={handleFileChange}
-        style={{ display: 'none' }} // 숨김 처리
-      />
-      <ul className="space-y-4">
-        {chatMessages.slice().reverse().map((message) => (
-          <li key={`${message.messageId}-${chatRoom.id}`} className={`border p-2 rounded shadow-sm ${message.sender === userNickname ? "bg-blue-200 text-right" : "bg-white text-left"}`}>
-            {message.sender !== userNickname && (
+      <div className="flex-grow overflow-auto flex flex-col-reverse"> {/* Messages: Flex column reverse */}
+        <ul className="space-y-4">
+          {chatMessages.map((message) => (
+            <li key={`${message.messageId}-${chatRoom.id}`} className={`border p-2 rounded shadow-sm ${message.sender === userNickname ? "bg-blue-200 text-right" : "bg-white text-left"}`}>
+              {message.sender !== userNickname && (
+                <div>
+                  <strong>보낸 이:</strong> {message.sender}
+                </div>
+              )}
               <div>
-                <strong>보낸 이:</strong> {message.sender}
+                <strong>메시지 내용:</strong> {message.message}
               </div>
-            )}
-            <div>
-              <strong>메시지 내용:</strong> {message.message}
-            </div>
-            {(message.latitude !== 0 && message.longitude !== 0) ? (
+              {/* 위도, 경도 정보 표시 */}
+              {(message.latitude !== 0 && message.longitude !== 0) ? (
+                <div>
+                  <strong>위치 정보:</strong> 
+                  <div>위도: {message.latitude}, 경도: {message.longitude}</div>
+                  <a href={`https://www.google.com/maps?q=${message.latitude},${message.longitude}`} target="_blank" rel="noopener noreferrer" className="text-blue-500">구글 맵에서 보기</a>
+                </div>
+              ) : null}
+              {message.image && (
+                <div>
+                  <strong>이미지:</strong> <img src={message.image} alt="메시지 첨부 이미지" className="max-w-full h-auto" />
+                </div>
+              )}
               <div>
-                <strong>위치 정보:</strong> 
-                <div>위도: {message.latitude}, 경도: {message.longitude}</div>
-                <a
-                  href={`https://www.google.com/maps?q=${message.latitude},${message.longitude}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-500"
-                >
-                  구글 맵에서 보기
-                </a>
+                <strong>보낸 시간:</strong> {message.timestamp} 
               </div>
-            ) : null}
-            {message.image && (
-              <div>
-                <strong>이미지:</strong> <img src={message.image} alt="메시지 첨부 이미지" className="max-w-full h-auto" />
-              </div>
-            )}
-            <div>
-              <strong>보낸 시간:</strong> {message.timestamp} 
-            </div>
-          </li>
-        ))}
-      </ul>
-      <div className="flex mt-4">
-        <input
-          type="text"
-          value={inputMessage}
-          onChange={handleInputChange}
-          onKeyPress={handleKeyPress} 
-          placeholder="메시지를 입력하세요."
-          className="border p-2 flex-grow rounded"
-        />
-        <button
-          onClick={handleSendMessage}
-          className="ml-2 px-4 py-2 bg-blue-500 text-white rounded"
-        >
-          전송
-        </button>
+            </li>
+          ))}
+        </ul>
+      </div>
+  
+      {/* 메시지 입력 공간 */}
+      <div className="mt-5">
+        <input type="text" value={inputMessage} onChange={handleInputChange} onKeyPress={handleKeyPress} placeholder="메시지를 입력하세요." className="border p-2 flex-grow rounded" />
+        <button onClick={handleSendMessage} className="ml-2 px-4 py-2 bg-blue-500 text-white rounded">전송</button>
+      </div>
+  
+      {/* 버튼 영역 (채팅방 나가기, 위치 전송, 파일 첨부 버튼) */}
+      <div className="flex space-x-2 mb-4">
+        <button onClick={handleDelete} className="px-4 py-2 bg-red-600 text-white rounded">채팅방 나가기</button>
+        <button onClick={handleSendLocation} className="px-4 py-2 bg-green-500 text-white rounded">위치 전송</button>
+        <button onClick={handleFileSelect} className="px-4 py-2 bg-sky-500 text-white rounded">사진 전송</button>
       </div>
     </div>
   );
