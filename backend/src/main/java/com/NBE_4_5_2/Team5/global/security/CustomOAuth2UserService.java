@@ -2,6 +2,7 @@ package com.NBE_4_5_2.Team5.global.security;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
@@ -12,6 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.NBE_4_5_2.Team5.domain.user.user.entity.User;
 import com.NBE_4_5_2.Team5.domain.user.user.service.UserService;
+import com.NBE_4_5_2.Team5.domain.user.user.service.UserValidator;
+import com.NBE_4_5_2.Team5.domain.user.user.service.email.EmailService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -20,6 +23,8 @@ import lombok.RequiredArgsConstructor;
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
 	private final UserService userService;
+	private final UserValidator userValidator;
+	private final EmailService emailService;
 
 	@Transactional
 	public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
@@ -44,7 +49,9 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 		}
 
 		// 회원가입 구현
-		User user = userService.createUser(username, "", "", nickname, "", profileImage);
+		String randomEmail = UUID.randomUUID() + "@kakao.com";
+		emailService.saveVerificationCode(randomEmail, "verified");
+		User user = userService.createUser(username, "", randomEmail, nickname, "", profileImage);
 
 		return new SecurityUser(user);
 	}
