@@ -4,7 +4,6 @@ import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import type { components } from "@/lib/backend/apiV1/schema";
 import client from "@/lib/client";
-import Image from "next/image";
 
 type ProductPostResponse = components["schemas"]["ProductPostResponse"];
 
@@ -174,7 +173,7 @@ export default function PostDetailPage() {
   const images = post.imageUrls ? post.imageUrls.split(",") : [];
 
   return (
-    <div className="p-4">
+    <div className="p-4 w-full flex-1">
       <div className="bg-gray-800 text-white p-4 rounded mb-4">
         <h1 className="text-2xl font-bold">길게 볼 장터</h1>
       </div>
@@ -182,7 +181,7 @@ export default function PostDetailPage() {
         <div className="flex-1 bg-gray-100 rounded p-4">
           <h2 className="text-xl font-semibold mb-2">사진</h2>
           {images.length > 0 ? (
-            <Image
+            <img
               src={images[0]}
               alt={post.title || "이미지"}
               className="w-full h-auto object-cover rounded"
@@ -248,7 +247,7 @@ export default function PostDetailPage() {
             <h3 className="text-lg font-semibold mb-2">추가 사진</h3>
             <div className="flex gap-2 overflow-x-auto">
               {images.slice(1).map((imgUrl, idx) => (
-                <Image
+                <img
                   key={idx}
                   src={imgUrl}
                   alt={`${post.title} - ${idx + 1}`}

@@ -49,7 +49,7 @@ export default function UserLayout({
 
   return (
     <RequireAuthenticated>
-      <div className="flex min-h-screen p-6">
+      <div className="flex min-h-screen p-6 w-full">
         {/* ✅ 왼쪽 레이아웃 */}
         <aside className="border-r p-4 space-y-2 flex flex-col">
           <h2 className="font-bold text-xl mb-2">내 정보</h2>
@@ -57,7 +57,9 @@ export default function UserLayout({
           <Link href="/user/me/modify">
             <Button
               variant="ghost"
-              className={`cursor-pointer w-full justify-start ${pathname === "/user/me/info" ? "bg-blue-100 text-blue-600" : ""}`}
+              className={`cursor-pointer w-full justify-start ${
+                pathname === "/user/me/info" ? "bg-blue-100 text-blue-600" : ""
+              }`}
             >
               <FontAwesomeIcon icon={faUser} className="mr-2" />
               프로필 수정
@@ -78,7 +80,11 @@ export default function UserLayout({
                 <Link href="/user/me/sell/manage">
                   <Button
                     variant="ghost"
-                    className={`w-full justify-start ${pathname === "/user/me/sell/manage" ? "bg-blue-100 text-blue-600" : ""}`}
+                    className={`w-full justify-start ${
+                      pathname === "/user/me/sell/manage"
+                        ? "bg-blue-100 text-blue-600"
+                        : ""
+                    }`}
                   >
                     내 상품 관리
                   </Button>
@@ -142,7 +148,9 @@ export default function UserLayout({
         </aside>
 
         {/* ✅ 오른쪽 컨텐츠 (8) */}
-        <main className="w-4/5 p-4">{children}</main>
+        <div className="w-full flex justify-center">
+          <main className="w-4/5 p-4">{children}</main>
+        </div>
       </div>
     </RequireAuthenticated>
   );

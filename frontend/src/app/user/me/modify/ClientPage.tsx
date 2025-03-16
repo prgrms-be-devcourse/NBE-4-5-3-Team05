@@ -44,10 +44,10 @@ export default function ClientPage() {
 
   return (
     <>
-      <div className="flex h-full">
+      <div className="flex h-full w-full justify-center">
         <div className="flex flex-col gap-2">
           <h2 className="text-xl font-bold text-center">회원 정보 수정</h2>
-          <form onSubmit={updateInfo} className="flex flex-col w-[350px] gap-2">
+          <form onSubmit={updateInfo} className="flex flex-col gap-2">
             <div>
               <label
                 htmlFor="email"
