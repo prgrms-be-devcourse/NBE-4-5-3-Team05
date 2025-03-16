@@ -1,9 +1,6 @@
 import client from "@/lib/client";
 import ClientPage from "./ClientPage";
-import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
-import RequireAuthenticated from "@/components/auth/RequireAuthenticated";
-import { useLoginMember } from "@/app/stores/auth/loginMemberStore";
 
 export default async function Page({
   searchParams,

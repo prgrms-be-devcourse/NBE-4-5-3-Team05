@@ -1,4 +1,3 @@
-import RequireAuthenticated from "@/components/auth/RequireAuthenticated";
 import client from "@/lib/client";
 import { cookies } from "next/headers";
 import ClientPage from "./ClientPage";

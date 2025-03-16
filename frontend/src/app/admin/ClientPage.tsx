@@ -1,8 +1,8 @@
 "use client";
 
-import { lazy, useState } from "react";
+import { lazy, useEffect, useState } from "react";
 import { Home, User, Settings } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 const ProductListAdmin = lazy(() => import("./_pages/ProductListAdmin"));
 const NoticeAdmin = lazy(() => import("./_pages/NoticeAdmin"));
@@ -61,16 +61,27 @@ const Content: React.FC<ContentProps> = ({ page }) => {
   );
 };
 
-export default function SidebarLayout({searchParams}:{
-  searchParams:{
-    tab:string
-  }
+export default function SidebarLayout({
+  searchParams,
+}: {
+  searchParams: {
+    tab: string;
+  };
 }) {
   const router = useRouter();
-  const {tab} = searchParams;
+  const { tab } = searchParams;
+
+  const [currentPage, setCurrentPage] = useState<PageType>(
+    (tab as PageType) || ("ProductList" as PageType)
+  );
+
+  useEffect(() => {
+    if (!tab) {
+      router.replace("?tab=ProductList"); // ✅ 초기 상태 설정
+    }
+  }, [tab, router]);
 
   // URL에서 현재 탭 상태 가져오기
-  const currentPage = tab as PageType || "ProductList";
 
   // 페이지 변경 시 URL 업데이트
   const setPage = (page: PageType) => {

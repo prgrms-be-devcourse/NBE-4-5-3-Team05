@@ -117,7 +117,7 @@ export default function ClientPage() {
     }
 
     alert("회원가입에 성공하였습니다.");
-    router.push("/user/login");
+    router!.push("/user/login");
   }
 
   return (

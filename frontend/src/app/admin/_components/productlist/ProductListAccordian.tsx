@@ -1,5 +1,4 @@
 import { ProductListItem } from "@/app/_type/ProductListItem";
-import { components } from "@/lib/backend/apiV1/schema";
 import client from "@/lib/client";
 import {
   Accordion,

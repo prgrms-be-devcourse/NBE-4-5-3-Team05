@@ -1,4 +1,3 @@
-import { useState } from "react";
 import {
   Select,
   SelectTrigger,
@@ -6,7 +5,6 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-import { ChevronDown } from "lucide-react";
 
 const pageSizes = [5, 10, 15, 20, 25, 50];
 interface PageSizeSelectorProps {

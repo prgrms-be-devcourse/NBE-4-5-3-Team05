@@ -1,4 +1,3 @@
-import ClientPage from "../ClientPage";
 import SidebarLayout from "./ClientPage";
 
 export default async function Page({

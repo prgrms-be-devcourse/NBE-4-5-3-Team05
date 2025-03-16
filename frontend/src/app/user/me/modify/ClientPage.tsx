@@ -5,11 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import client from "@/lib/client";
 import { useRouter } from "next/navigation";
-import { use, useState } from "react";
+import { useState, useContext } from "react";
 
 export default function ClientPage() {
   const router = useRouter();
-  const { loginMember, setLoginMember } = use(LoginMemberContext);
+  const { loginMember, setLoginMember } = useContext(LoginMemberContext);
 
   // 이메일 인증 상태 관리
   const [email, setEmail] = useState(loginMember.email || "");
@@ -97,6 +97,7 @@ export default function ClientPage() {
     }
 
     const formData = e.target as HTMLFormElement;
+    console.log(formData);
     const email = formData.email.value;
     const nickname = formData.nickname.value;
     const address = formData.address.value;
@@ -125,15 +126,16 @@ export default function ClientPage() {
 
   return (
     <>
-      <div className="flex h-full">
+      <div className="flex h-full w-full justify-center">
         <div className="flex flex-col gap-2">
           <h2 className="text-xl font-bold text-center">회원 정보 수정</h2>
-          <form onSubmit={updateInfo} className="flex flex-col w-[350px] gap-2">
+          <form onSubmit={updateInfo} className="flex flex-col gap-2">
             <div className="flex flex-col gap-1">
               <label
                 htmlFor="email"
-                className="text-sm font-medium text-gray-700"
+                className="block text-sm font-medium text-gray-700"
               >
+                {" "}
                 이메일:
               </label>
               <div className="flex gap-2 items-center">
@@ -195,6 +197,7 @@ export default function ClientPage() {
                 htmlFor="nickname"
                 className="block text-sm font-medium text-gray-700"
               >
+                {" "}
                 닉네임:
               </label>
               <Input
