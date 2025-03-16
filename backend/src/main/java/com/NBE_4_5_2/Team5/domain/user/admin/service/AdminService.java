@@ -51,7 +51,6 @@ public class AdminService {
 	public User signUpAdmin(String username, String password, String nickname, String email) {
 		User admin =
 			User.builder()
-				.id("user-" + UUID.randomUUID())
 				.role(Role.ADMIN)
 				.username(username)
 				.password(passwordEncoder.encode(password))
