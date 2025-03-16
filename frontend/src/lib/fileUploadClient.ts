@@ -1,4 +1,3 @@
-// fileUploadClient.ts
 import createClient from "openapi-fetch";
 import { paths } from "./backend/apiV1/schema";
 

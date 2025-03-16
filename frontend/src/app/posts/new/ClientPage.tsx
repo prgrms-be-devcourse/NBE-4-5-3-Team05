@@ -4,11 +4,12 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import type { components } from "@/lib/backend/apiV1/schema";
 import client from "@/lib/client";
+import fileUploadClient from "@/lib/fileUploadClient"; // 파일 업로드 전용 클라이언트
 
-// OpenAPI 스키마의 Category 타입 사용 (선택적 속성일 수 있으므로 필요한 경우 non-null assertion이나 default 값을 설정)
+// OpenAPI 스키마의 Category 타입 사용
 type Category = components["schemas"]["Category"];
 
-export default function ClientPage() {
+export default function PostCreatePage() {
   const router = useRouter();
 
   // 로그인 체크
@@ -29,54 +30,83 @@ export default function ClientPage() {
   const [productName, setProductName] = useState("");
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  // 선택한 카테고리 id (문자열로 받아서 후에 number로 변환)
   const [selectedCategory, setSelectedCategory] = useState("");
   const [price, setPrice] = useState<number | "">("");
   const [location, setLocation] = useState("");
   const [latitude, setLatitude] = useState<number | "">("");
   const [longitude, setLongitude] = useState<number | "">("");
-  // 이미지 파일 선택 state
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
-  // 백엔드에서 불러온 카테고리 목록 state (OpenAPI 스키마의 Category 타입 사용)
   const [categories, setCategories] = useState<Category[]>([]);
 
-  // AWS S3 업로드 API 호출 함수
+  // AWS S3 업로드 API 호출 함수 (FormData 그대로 전송)
   const uploadFile = async (file: File): Promise<string> => {
     const formData = new FormData();
     formData.append("file", file);
-    const response = await client.POST("/api/uploadFile", {
-      headers: { "Content-Type": "multipart/form-data" },
-      body: {
-        file: await file.text(),
-      },
+    // fileUploadClient를 사용하여 multipart/form-data로 전송합니다.
+    const response = await fileUploadClient.POST("/api/uploadFile", {
+      body: formData as any,
+      rawBody: true, // JSON 자동 변환 방지
       credentials: "include",
+      headers: {}, // Content-Type 헤더 제거 (브라우저가 자동 설정)
     });
     if (response.error) {
-      console.log(response);
+      console.error("파일 업로드 실패", response.error);
     }
-    return response.data!;
+    return response.data as string;
   };
 
-  // 백엔드에서 카테고리 목록 불러오기 (스키마 기반 타입 사용)
+  // 카테고리 목록 불러오기
   useEffect(() => {
     async function fetchCategories() {
-      // schema.d.ts에 정의된 Category 배열을 반환하는 엔드포인트 호출
       const res = await client.GET("/api/categories", {
         credentials: "include",
       });
       if (res.error) {
-        console.log(res.error);
+        console.error("카테고리 불러오기 실패", res.error);
         return;
       }
-      // 필요시 undefined 속성을 보완할 수 있음
       setCategories(res.data!.data);
     }
     fetchCategories();
   }, []);
 
-  // 게시글 생성 처리
+  // 게시글 생성 처리 (폼 검증 추가)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // 폼 검증: 필수 입력값이 비어있는지 확인
+    if (!productName) {
+      alert("물픔 이름을 입력해주세요.");
+      return;
+    }
+    if (!selectedCategory) {
+      alert("카테고리를 선택해주세요.");
+      return;
+    }
+    if (!title.trim()) {
+      alert("게시글 제목을 입력해주세요.");
+      return;
+    }
+    if (!content.trim()) {
+      alert("본문 내용을 입력해주세요.");
+      return;
+    }
+    if (price === "" || Number(price) <= 0) {
+      alert("유효한 가격을 입력해주세요.");
+      return;
+    }
+    if (location.trim() === "") {
+      alert("거래 위치를 입력해주세요.");
+      return;
+    }
+    if (latitude === "" || isNaN(Number(latitude))) {
+      alert("유효한 위도를 입력해주세요.");
+      return;
+    }
+    if (longitude === "" || isNaN(Number(longitude))) {
+      alert("유효한 경도를 입력해주세요.");
+      return;
+    }
 
     let uploadedUrls: string[] = [];
     if (selectedFiles && selectedFiles.length > 0) {
@@ -84,32 +114,21 @@ export default function ClientPage() {
         Array.from(selectedFiles).map((file) => uploadFile(file))
       );
     }
-    // 선택한 카테고리 id를 숫자로 변환하여 배열에 넣음
-    const categoryIds = selectedCategory ? [Number(selectedCategory)] : [];
+    const categoryIds = [Number(selectedCategory)];
 
-    // 게시글 생성 API로 보낼 JSON 데이터 구성
     const data = {
       productName,
-      productPrice: price === "" ? 0 : Number(price),
+      productPrice: Number(price),
       title,
       content,
-      categoryIds: categoryIds,
+      categoryIds,
       imageUrlList: uploadedUrls,
-      latitude: latitude === "" ? 0 : Number(latitude),
-      longitude: longitude === "" ? 0 : Number(longitude),
+      latitude: Number(latitude),
+      longitude: Number(longitude),
     };
 
     const result = await client.POST("/api/posts", {
-      body: {
-        title: data.title,
-        content: data.content,
-        productName: data.productName,
-        productPrice: data.productPrice,
-        categoryIds: data.categoryIds,
-        imageUrlList: data.imageUrlList,
-        latitude: data.latitude,
-        longitude: data.longitude,
-      },
+      body: data,
       credentials: "include",
     });
     if (result.error) {
@@ -118,9 +137,7 @@ export default function ClientPage() {
         router.push("/user/login");
         return;
       }
-      console.log(result.error);
       console.error("게시글 작성 실패", result.error);
-
       return;
     }
 
@@ -223,7 +240,7 @@ export default function ClientPage() {
           />
         </div>
 
-        {/* 파일 입력 부분: 버튼으로 파일 선택 및 선택 파일 목록 표시 */}
+        {/* 파일 입력 부분 */}
         <div className="mb-4">
           <label className="block mb-1 font-semibold">사진 추가</label>
           <input
