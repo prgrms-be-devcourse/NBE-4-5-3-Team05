@@ -14,11 +14,10 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 
 import com.NBE_4_5_2.Team5.domain.user.user.entity.RefreshToken;
 import com.NBE_4_5_2.Team5.global.config.BaseTestConfig;
-import com.NBE_4_5_2.Team5.global.config.RedisTestContainerConfig;
 
 @SpringBootTest
 @BaseTestConfig
-class RedisContainersTest extends RedisTestContainerConfig {
+class RedisContainersTest  {
 
 	@Autowired
 	private RedisRepository redisRepository;

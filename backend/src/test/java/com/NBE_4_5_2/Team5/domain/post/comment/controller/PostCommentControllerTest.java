@@ -28,7 +28,6 @@ import com.NBE_4_5_2.Team5.domain.user.user.entity.User;
 import com.NBE_4_5_2.Team5.domain.user.user.service.UserService;
 import com.NBE_4_5_2.Team5.domain.user.user.service.email.EmailService;
 import com.NBE_4_5_2.Team5.global.config.BaseTestConfig;
-import com.NBE_4_5_2.Team5.global.config.RedisTestContainerConfig;
 import com.NBE_4_5_2.Team5.global.config.Util;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -39,7 +38,7 @@ import jakarta.servlet.http.Cookie;
 @BaseTestConfig
 @Order(102)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class PostCommentControllerTest extends RedisTestContainerConfig {
+class PostCommentControllerTest  {
 
 	@Autowired
 	private Util util;
