@@ -5,40 +5,75 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"; 
-import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
+import { faMagnifyingGlass,faHeadphones } from "@fortawesome/free-solid-svg-icons";
 import { Button } from "@/components/ui/button";
+import client from "@/lib/backend/client";
 
 
 export default function ClientPage({
   chatRoom,
   searchChatRoomDto,
   receiver,
+  cookie,
 }:{
   chatRoom:components["schemas"]["ChatRoomDto"][];
   searchChatRoomDto:components["schemas"]["ChatRoomDto"][];
   receiver:string;
+  cookie:string;
 }) {
 
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState(receiver); 
   const [isSearchVisible, setIsSearchVisible] = useState(false);
+  const [adminRoom, setAdminRoom] = useState(null); 
 
   const handleSearch = (event: React.FormEvent) => {
-    event.preventDefault(); // 기본 폼 제출 방지
+    event.preventDefault(); 
     router.push(`/chat?page=1&receiver=${searchTerm}`);
   };
 
   const handleKeyPress = (event: React.KeyboardEvent) => {
     if (event.key === 'Enter') {
-      handleSearch(event as React.FormEvent); // 엔터 시 검색 실행
+      handleSearch(event as React.FormEvent); 
+    }
+  };
+
+  const handleCreateAdminRoom= async()=>{
+    const adminId = "user-4e8d79c9-1adc-4bbf-b30f-8e251635bdcb"; 
+    let adminRoom;
+    const createAdminRoomResponse = await client.POST(`/api/chat/admin/{adminId}`,{
+      headers: {
+          cookie: cookie,
+      },
+      params:{
+        path: {
+          adminId:adminId,
+        },
+      },
+      credentials: "include",
+    });
+    
+    const adminRsdata= createAdminRoomResponse.data!!;
+    if (adminRsdata.code!="200") {
+        console.error("채팅방 생성 오류: ", adminRsdata.message);
+    } else {
+        // 여기서 data를 체크하여 null 여부를 확인
+        adminRoom=adminRsdata.data;
+        window.location.reload();  
+        console.log("채팅방 생성 성공:", adminRoom);
     }
   };
 
   return (
     <div>
     <h1 className="text-xl font-bold mb-4">채팅방 목록</h1>
+    <div className="mb-4 flex justify-end">
+      <Button onClick={handleCreateAdminRoom} variant="outline" className="ml-auto">
+        <FontAwesomeIcon icon={faHeadphones} />
+        고객센터
+      </Button>
+    </div>
     
-
     <form onSubmit={handleSearch} className="mb-4 flex items-center">
         <input
           type="text"
@@ -78,23 +113,23 @@ export default function ClientPage({
         </div>
       )}
 
-      {!receiver && (
-        <ul className="space-y-4">
-          {chatRoom.map((room) => (
-            <li key={room.roomId} className="border-2 border-gray-300 rounded-lg p-4 bg-white shadow-md">
-              <Link href={`/chat/${room.roomId}`} className="block">
-                <div>
-                  <strong className="text-lg">{room.other}</strong> 
-                </div>
-                <div className="text-gray-600 text-sm">{room.lastMessage}</div> 
-                <div className="text-gray-500 text-xs text-right"> 
-                  {room.lastTimestamp}
-                </div>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      )}
+     {!receiver && (
+      <ul className="space-y-4">
+        {chatRoom.map((room) => (
+          <li key={room.roomId} className="border-2 border-gray-300 rounded-lg p-4 bg-white shadow-md">
+            <Link href={`/chat/${room.roomId}`} className="block">
+              <div>
+                <strong className="text-lg">{room.other}</strong> 
+              </div>
+              <div className="text-gray-600 text-sm">{room.lastMessage}</div> 
+              <div className="text-gray-500 text-xs text-right"> 
+                {room.lastTimestamp}
+              </div>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    )}
     </div>
   );
 }

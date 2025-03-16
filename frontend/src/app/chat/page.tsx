@@ -54,5 +54,30 @@ export default async function Page(
     }
   }
 
-  return (<ClientPage chatRoom={chatRoom} searchChatRoomDto={searchChatRoomDto} receiver={receiver}/>);
+  const handleCreateAdminRoom= async()=>{
+    const adminId = "user-4e8d79c9-1adc-4bbf-b30f-8e251635bdcb"; 
+    let adminRoom;
+    const createAdminRoomResponse = await client.POST(`/api/chat/admin/{adminId}`,{
+      headers: {
+          cookie: cookie,
+      },
+      params:{
+        path: {
+          adminId:adminId,
+        },
+      },
+      credentials: "include",
+    });
+    
+    const adminRsdata= createAdminRoomResponse.data!!;
+    if (adminRsdata.code!="200") {
+        console.error("채팅방 생성 오류: ", adminRsdata.message);
+    } else {
+        // 여기서 data를 체크하여 null 여부를 확인
+        adminRoom=adminRsdata.data;    
+        console.log("채팅방 생성 성공:", adminRoom);
+    }
+  };
+
+  return (<ClientPage chatRoom={chatRoom} searchChatRoomDto={searchChatRoomDto} receiver={receiver} cookie={cookie}/>);
 }
