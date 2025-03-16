@@ -6,6 +6,19 @@ import { useEffect, useRef, useState } from "react";
 import SockJS from 'sockjs-client'; 
 import { Stomp } from "@stomp/stompjs"; 
 import { headers } from "next/headers";
+import { Textarea } from "@/components/ui/textarea"
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowRight, faPaperclip, faImage, faLocationDot } from "@fortawesome/free-solid-svg-icons";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Button } from "@/components/ui/button";
+
 
 export default function ClientPage({
   messages,
@@ -27,6 +40,7 @@ export default function ClientPage({
   const [stompClient, setStompClient] = useState<any>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [visibleMessagesCount, setVisibleMessagesCount] = useState(20);
+  const [showDropdown, setShowDropdown] = useState(false); 
 
 
   useEffect(() => {
@@ -85,7 +99,7 @@ export default function ClientPage({
     };
   }, [roomId, cookie]);
 
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInputMessage(event.target.value);
   };
 
@@ -110,7 +124,7 @@ export default function ClientPage({
     stompClient.send("/pub/chat/message", { token: accessToken }, JSON.stringify(message));
     setInputMessage(""); // 입력창 초기화
   };
-  const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyPress = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (event.key === 'Enter') {
       handleSendMessage();
     }
@@ -205,11 +219,11 @@ export default function ClientPage({
     }
   };
 
-
   const handleLoadMoreMessages = () => {
     setVisibleMessagesCount((prevCount) => prevCount + 20); // 20개씩 추가
   };
   
+
   return (
     <div className="flex flex-col h-screen"> {/* 전체 화면 높이 설정 */}
       <h1 className="text-xl font-bold mb-4">{title}</h1>
@@ -245,12 +259,50 @@ export default function ClientPage({
           ))}
         </ul>
       </div>
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileChange}
+        style={{ display: 'none' }}
+      />
   
       {/* 메시지 입력 공간 */}
-      <div className="mt-5">
-        <input type="text" value={inputMessage} onChange={handleInputChange} onKeyPress={handleKeyPress} placeholder="메시지를 입력하세요." className="border p-2 flex-grow rounded" />
-        <button onClick={handleSendMessage} className="ml-2 px-4 py-2 bg-blue-500 text-white rounded">전송</button>
+      <div className="mt-5 flex items-center"> 
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" className="bg-gray-200 rounded-md flex items-center px-2 h-15">
+              <FontAwesomeIcon icon={faPaperclip} />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-48 bg-white border border-gray-300 shadow-lg rounded-md">
+            <DropdownMenuLabel><strong>첨부 파일</strong></DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={handleSendLocation} className="flex items-center">
+              <FontAwesomeIcon icon={faLocationDot} className="mr-2" />
+              위치
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleFileSelect} className="flex items-center">
+              <FontAwesomeIcon icon={faImage} className="mr-2" />
+              사진
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+        <Textarea
+          value={inputMessage}
+          onChange={handleInputChange}
+          onKeyPress={handleKeyPress}
+          placeholder="메시지를 입력하세요."
+          className="border p-2 flex-grow mx-2 rounded-md resize-none h-15" 
+        />
+        
+        <button
+          onClick={handleSendMessage}
+          className="bg-blue-500 text-white rounded-md flex items-center h-15 px-2"
+        >
+          <FontAwesomeIcon icon={faArrowRight} />
+        </button>
       </div>
+
   
       {/* 버튼 영역 (채팅방 나가기, 위치 전송, 파일 첨부 버튼) */}
       <div className="flex space-x-2 mb-4">

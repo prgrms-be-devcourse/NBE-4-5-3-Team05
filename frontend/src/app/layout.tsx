@@ -5,6 +5,20 @@ import Link from "next/link";
 import ClinetLayout from "./ClientLayout";
 import client from "@/lib/backend/client";
 import { cookies, headers } from "next/headers";
+import localFont from "next/font/local";
+import { config } from '@fortawesome/fontawesome-svg-core'
+import '@fortawesome/fontawesome-svg-core/styles.css'
+
+
+config.autoAddCss = false
+
+
+const pretendard = localFont({
+  src: "./../../node_modules/pretendard/dist/web/variable/woff2/PretendardVariable.woff2",
+  display: "swap",
+  weight: "45 920",
+  variable: "--font-pretendard",
+});
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -49,5 +63,11 @@ export default async function RootLayout({
       blockedCount: 0,                  // 기본값 0
     };
     
-  return <ClinetLayout me={me}>{children}</ClinetLayout>;
+    
+  return (<ClinetLayout 
+    me={me} 
+    fontVariable={pretendard.variable}
+    fontClassName={pretendard.className}>
+      {children}
+      </ClinetLayout>);
 }
