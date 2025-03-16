@@ -18,7 +18,7 @@ bin/
 !**/src/test/**/bin/
 
 ### IntelliJ IDEA ###
-.idea/
+.idea
 *.iws
 *.iml
 *.ipr
@@ -29,9 +29,9 @@ out/
 ### NetBeans ###
 /nbproject/private/
 /nbbuild/
-dist/
-nbdist/
-.nb-gradle/
+/dist/
+/nbdist/
+/.nb-gradle/
 
 ### VS Code ###
 .vscode/
