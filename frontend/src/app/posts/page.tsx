@@ -91,7 +91,7 @@ export default function PostsPage() {
 
   return (
     <>
-      <div className="flex space-x-4">
+      <div className="flex w-full space-x-4">
         <div className="flex-grow">
           {noticeList.length > 0 && (
             <div className="mb-4 space-y-4">

@@ -104,7 +104,7 @@ export default function ClientLayout({
           </Link>
         )}
       </header>
-      <div className="flex flex-1 flex-col items-center">{children}</div>
+      <div className="flex flex-1 flex-col items-center w-full">{children}</div>
       <footer>푸터</footer>
     </LoginMemberContext.Provider>
   );

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 
 export default function ClientPage() {
   return (
-    <div className="flex flex-col gap-4 p-4">
+    <div className="flex flex-col gap-4 p-4 w-full">
       {/* 상단 섹션 */}
       <section className="flex items-start gap-4 border p-4">
         {/* 왼쪽 위 : 현재 위치 및 위치 수정버튼 */}
