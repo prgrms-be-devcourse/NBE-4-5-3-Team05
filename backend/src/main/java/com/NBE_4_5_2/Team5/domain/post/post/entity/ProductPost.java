@@ -73,6 +73,10 @@ public class ProductPost {
 	@Builder.Default
 	private Integer viewCount = 0;
 
+	@Builder.Default
+	@Column(nullable = false)
+	private Integer likeCount = 0;
+
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
 	@Setter
