@@ -10,9 +10,9 @@ export default function ClientPage() {
   const { loginMember } = use(LoginMemberContext);
 
   return (
-    <div className="flex flex-col items-center p-6">
+    <div className="flex flex-col items-center p-6 w-full">
       <h2 className="text-2xl font-bold mb-4">내 정보 조회</h2>
-      <div className="border p-4 rounded-md w-[400px] shadow-lg">
+      <div className="border p-4 rounded-md w-1/2 shadow-lg">
         <div className="mb-2">
           <strong>아이디:</strong> {loginMember.username}
         </div>

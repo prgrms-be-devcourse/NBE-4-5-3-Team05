@@ -128,7 +128,7 @@ export default function ClientPage() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex space-x-4 p-4">
+    <form onSubmit={handleSubmit} className="flex space-x-4 p-4 w-full flex-1">
       {/* 왼쪽 영역: 물품 이름, 게시글 제목, 본문 */}
       <div className="w-2/3">
         <h1 className="text-2xl font-bold mb-4">판매 게시글 작성</h1>
@@ -155,7 +155,7 @@ export default function ClientPage() {
         <div className="mb-4">
           <label className="block mb-1 font-semibold">본문</label>
           <textarea
-            className="border w-full p-2 h-48"
+            className="border w-full p-2 h-48 resize-none"
             value={content}
             onChange={(e) => setContent(e.target.value)}
             placeholder="상품 설명, 상태 등을 자세히 적어주세요."
