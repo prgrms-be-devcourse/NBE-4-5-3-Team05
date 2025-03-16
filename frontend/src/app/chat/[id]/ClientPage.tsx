@@ -8,7 +8,7 @@ import { Stomp } from "@stomp/stompjs";
 import { headers } from "next/headers";
 import { Textarea } from "@/components/ui/textarea"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowRight, faPaperclip, faImage, faLocationDot } from "@fortawesome/free-solid-svg-icons";
+import { faArrowRight, faPaperclip, faImage, faLocationDot, faRightFromBracket,faBars,faTrash } from "@fortawesome/free-solid-svg-icons";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -41,6 +41,7 @@ export default function ClientPage({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [visibleMessagesCount, setVisibleMessagesCount] = useState(20);
   const [showDropdown, setShowDropdown] = useState(false); 
+  const messagesEndRef = useRef<null | HTMLDivElement>(null);
 
 
   useEffect(() => {
@@ -78,14 +79,19 @@ export default function ClientPage({
               
               if (messageResponse.data?.code === "200") {
                 setChatMessages(messageResponse.data.data); // 수신된 메시지로 상태 업데이트
+                messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
               }
             });
           }, (error: any) => {
             alert("WebSocket 연결 실패했습니다. 다시 시도해 주세요.");
           });
+        } else {
+          alert("다시 로그인해 주세요.");
+          window.location.href = "/member/login"; // 로그인 페이지로 리다이렉트
         }
       } catch (error) {
-        console.error("사용자 정보 요청 실패:", error);
+        alert("다시 로그인해 주세요.");
+        window.location.href = "/member/login"; // 로그인 페이지로 리다이렉트
       }
     };
 
@@ -122,7 +128,11 @@ export default function ClientPage({
     };
   
     stompClient.send("/pub/chat/message", { token: accessToken }, JSON.stringify(message));
-    setInputMessage(""); // 입력창 초기화
+    setInputMessage("");
+
+    setChatMessages((prevMessages) => [...prevMessages, message]); 
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); // 스크롤 이동
+
   };
   const handleKeyPress = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (event.key === 'Enter') {
@@ -226,11 +236,28 @@ export default function ClientPage({
 
   return (
     <div className="flex flex-col h-screen"> {/* 전체 화면 높이 설정 */}
-      <h1 className="text-xl font-bold mb-4">{title}</h1>
-      <div className="flex-grow overflow-auto flex flex-col-reverse"> {/* Messages: Flex column reverse */}
-        <ul className="space-y-4">
+      <h1 className="text-xl font-bold mb-4 text-center">{title}</h1>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="outline" className="flex justify-end gap-3 px-4 py-4 rounded-md mb-4" style={{ marginLeft: 'auto' }}>
+            <FontAwesomeIcon icon={faBars} />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="w-48 bg-white border border-gray-300 shadow-lg rounded-md">
+          <DropdownMenuItem onClick={() => window.location.href = '/chat'} className="flex items-center">
+            <FontAwesomeIcon icon={faRightFromBracket} className="mr-2" />
+            채팅방 나가기
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={handleDelete} className="flex items-center">
+            <FontAwesomeIcon icon={faTrash} className="mr-2" />
+            채팅방 비우기
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      <div className="flex-grow overflow-auto flex flex-col mb-26">
+        <ul className="space-y-3">
           {chatMessages.map((message) => (
-            <li key={`${message.messageId}-${chatRoom.id}`} className={`border p-2 rounded shadow-sm ${message.sender === userNickname ? "bg-blue-200 text-right" : "bg-white text-left"}`}>
+            <li key={`${message.messageId}-${chatRoom.id}`} className={`border p-2 rounded shadow-sm text-sm ${message.sender === userNickname ? "bg-blue-200 text-right" : "bg-white text-left"}`}>
               {message.sender !== userNickname && (
                 <div>
                   <strong>보낸 이:</strong> {message.sender}
@@ -258,6 +285,7 @@ export default function ClientPage({
             </li>
           ))}
         </ul>
+        <div ref={messagesEndRef} />
       </div>
       <input
         type="file"
@@ -266,50 +294,43 @@ export default function ClientPage({
         style={{ display: 'none' }}
       />
   
-      {/* 메시지 입력 공간 */}
-      <div className="mt-5 flex items-center"> 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="bg-gray-200 rounded-md flex items-center px-2 h-15">
-              <FontAwesomeIcon icon={faPaperclip} />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-48 bg-white border border-gray-300 shadow-lg rounded-md">
-            <DropdownMenuLabel><strong>첨부 파일</strong></DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleSendLocation} className="flex items-center">
-              <FontAwesomeIcon icon={faLocationDot} className="mr-2" />
-              위치
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={handleFileSelect} className="flex items-center">
-              <FontAwesomeIcon icon={faImage} className="mr-2" />
-              사진
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-        <Textarea
-          value={inputMessage}
-          onChange={handleInputChange}
-          onKeyPress={handleKeyPress}
-          placeholder="메시지를 입력하세요."
-          className="border p-2 flex-grow mx-2 rounded-md resize-none h-15" 
-        />
+      <div className="fixed bottom-0 left-0 right-0 bg-white p-4 border-t flex items-center">
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="outline" className="rounded-md flex items-center px-3 h-15">
+            <FontAwesomeIcon icon={faPaperclip} />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="w-48 bg-white border border-gray-300 shadow-lg rounded-md">
+          <DropdownMenuLabel><strong>첨부 파일</strong></DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={handleSendLocation} className="flex items-center">
+            <FontAwesomeIcon icon={faLocationDot} className="mr-2" />
+            위치
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={handleFileSelect} className="flex items-center">
+            <FontAwesomeIcon icon={faImage} className="mr-2" />
+            사진
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
         
-        <button
-          onClick={handleSendMessage}
-          className="bg-blue-500 text-white rounded-md flex items-center h-15 px-2"
-        >
-          <FontAwesomeIcon icon={faArrowRight} />
-        </button>
-      </div>
-
-  
-      {/* 버튼 영역 (채팅방 나가기, 위치 전송, 파일 첨부 버튼) */}
-      <div className="flex space-x-2 mb-4">
-        <button onClick={handleDelete} className="px-4 py-2 bg-red-600 text-white rounded">채팅방 나가기</button>
-        <button onClick={handleSendLocation} className="px-4 py-2 bg-green-500 text-white rounded">위치 전송</button>
-        <button onClick={handleFileSelect} className="px-4 py-2 bg-sky-500 text-white rounded">사진 전송</button>
-      </div>
+      <Textarea
+        value={inputMessage}
+        onChange={handleInputChange}
+        onKeyPress={handleKeyPress}
+        placeholder="메시지를 입력하세요."
+        className="border p-2 flex-grow mx-2 rounded-md resize-none" 
+      />
+        
+      <Button
+        variant="outline"
+        onClick={handleSendMessage}
+        className="rounded-md flex items-center h-15 px-3"
+      >
+        <FontAwesomeIcon icon={faArrowRight} />
+      </Button>
+    </div>
     </div>
   );
 }
