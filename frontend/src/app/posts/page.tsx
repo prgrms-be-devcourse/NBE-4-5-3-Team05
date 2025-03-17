@@ -103,7 +103,7 @@ export default function PostsPage() {
           {noticeList.length > 0 && (
             <div className="mb-4 space-y-4">
               {noticeList.map((notice, index) => (
-                <Link href={`posts/notices/${notice.id!}`}>
+                <Link href={`/notices/${notice.id!}`}>
                   <Notice
                     key={index}
                     title={notice.title!}
