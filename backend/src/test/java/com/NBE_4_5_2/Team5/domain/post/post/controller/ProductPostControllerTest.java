@@ -8,7 +8,6 @@ import com.NBE_4_5_2.Team5.domain.post.post.service.ProductPostService;
 import com.NBE_4_5_2.Team5.domain.user.user.entity.User;
 import com.NBE_4_5_2.Team5.domain.user.user.service.UserService;
 import com.NBE_4_5_2.Team5.global.config.BaseTestConfig;
-import com.NBE_4_5_2.Team5.global.config.RedisTestContainerConfig;
 import com.NBE_4_5_2.Team5.global.init.BaseInitData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -33,7 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @BaseTestConfig
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class ProductPostControllerTest extends RedisTestContainerConfig {
+public class ProductPostControllerTest  {
 
 	@Autowired
 	private MockMvc mvc;

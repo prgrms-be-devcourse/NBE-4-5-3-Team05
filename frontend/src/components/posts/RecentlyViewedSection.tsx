@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+
 import { useRouter } from "next/navigation";
 import type { components } from "@/lib/backend/apiV1/schema";
 import client from "@/lib/client";
@@ -39,7 +40,7 @@ export default function RecentlyViewedSection() {
     async function fetchRecentlyViewed() {
       try {
         const res = await client.GET("/api/posts/recently-viewed", {
-          withCredentials: true,
+          credentials: "include",
         });
         setRecentProducts(res.data!.data);
       } catch (err) {

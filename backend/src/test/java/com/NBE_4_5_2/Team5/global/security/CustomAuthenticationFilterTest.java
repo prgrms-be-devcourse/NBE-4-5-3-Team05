@@ -23,7 +23,6 @@ import com.NBE_4_5_2.Team5.domain.user.user.dto.AuthToken;
 import com.NBE_4_5_2.Team5.domain.user.user.entity.User;
 import com.NBE_4_5_2.Team5.domain.user.user.service.UserService;
 import com.NBE_4_5_2.Team5.global.config.BaseTestConfig;
-import com.NBE_4_5_2.Team5.global.config.RedisTestContainerConfig;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -31,7 +30,7 @@ import jakarta.servlet.http.Cookie;
 @SpringBootTest
 @AutoConfigureMockMvc
 @BaseTestConfig
-class CustomAuthenticationFilterTest extends RedisTestContainerConfig {
+class CustomAuthenticationFilterTest  {
 	@Autowired
 	private MockMvc mvc;
 

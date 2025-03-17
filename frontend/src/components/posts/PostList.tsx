@@ -2,9 +2,9 @@
 
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import type { components } from "@/lib/backend/apiV1/schema";
 
-// PreviewPostResponse 타입을 사용하는 경우
 export type Post = components["schemas"]["PreviewPostResponse"];
 
 interface PostListProps {
@@ -19,16 +19,24 @@ export default function PostList({ posts }: PostListProps) {
   return (
     <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {posts.map((post) => {
-        const thumbNail = post.thumbNail?.trim() || "";
+        // post.thumbNail 값이 "null" 문자열인 경우를 체크하여 빈 문자열로 처리
+        const thumbNailRaw = post.thumbNail?.trim();
+        const thumbNail =
+          thumbNailRaw && thumbNailRaw !== "null" ? thumbNailRaw : "";
+
         return (
           <li key={post.id} className="border rounded p-4 shadow">
             <Link href={`/posts/${post.id}`} className="block hover:opacity-90">
               {thumbNail ? (
-                <img
-                  src={thumbNail}
-                  alt={post.title || "이미지"}
-                  className="w-full h-40 object-cover mb-2 rounded"
-                />
+                // Next.js Image 사용 시, 부모 요소에 relative, 고정 높이/너비가 필요합니다.
+                <div className="relative w-full h-40 mb-2 rounded">
+                  <Image
+                    src={thumbNail}
+                    alt={post.title || "이미지"}
+                    fill
+                    className="object-cover rounded"
+                  />
+                </div>
               ) : (
                 <div className="w-full h-40 bg-gray-200 flex items-center justify-center mb-2 rounded">
                   이미지 없음

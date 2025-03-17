@@ -107,21 +107,22 @@ public class BaseInitData {
         }
 
         List<Category> categories = List.of(
-                new Category(null, "전자제품"),
-                new Category(null, "가구"),
-                new Category(null, "의류"),
-                new Category(null, "스포츠 용품"),
-                new Category(null, "도서"),
-                new Category(null, "생활용품"),
-                new Category(null, "자동차 용품"),
-                new Category(null, "식품"),
-                new Category(null, "악기"),
-                new Category(null, "반려동물 용품"),
-                new Category(null, "뷰티/미용"),
-                new Category(null, "티켓/쿠폰"),
-                new Category(null, "수집/예술"),
-                new Category(null, "게임"),
-                new Category(null, "기타")
+                Category.builder().id(null).name("전자제품").build(),
+                Category.builder().id(null).name("가구").build(),
+                Category.builder().id(null).name("의류").build(),
+                Category.builder().id(null).name("스포츠 용품").build(),
+                Category.builder().id(null).name("도서").build(),
+                Category.builder().id(null).name("생활용품").build(),
+                Category.builder().id(null).name("자동차 용품").build(),
+                Category.builder().id(null).name("식품").build(),
+                Category.builder().id(null).name("악기").build(),
+                Category.builder().id(null).name("반려동물 용품").build(),
+                Category.builder().id(null).name("뷰티/미용").build(),
+                Category.builder().id(null).name("티켓/쿠폰").build(),
+                Category.builder().id(null).name("수집/예술").build(),
+                Category.builder().id(null).name("게임").build(),
+                Category.builder().id(null).name("기타").build()
+
         );
 
         categoryRepository.saveAll(categories);

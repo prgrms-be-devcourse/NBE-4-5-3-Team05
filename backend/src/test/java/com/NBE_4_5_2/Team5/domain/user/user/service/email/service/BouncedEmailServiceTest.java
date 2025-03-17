@@ -13,7 +13,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.NBE_4_5_2.Team5.global.config.RedisTestContainerConfig;
 import com.NBE_4_5_2.Team5.global.config.email.Pop3Properties;
 import com.NBE_4_5_2.Team5.global.config.email.TimeProvider;
 
@@ -22,7 +21,7 @@ import jakarta.mail.Folder;
 import jakarta.mail.Message;
 
 @ExtendWith(MockitoExtension.class)
-class BouncedEmailServiceTest extends RedisTestContainerConfig {
+class BouncedEmailServiceTest  {
 
 	@Mock
 	private Pop3Properties pop3Properties;

@@ -12,12 +12,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import com.NBE_4_5_2.Team5.domain.user.user.entity.User;
 import com.NBE_4_5_2.Team5.global.config.BaseTestConfig;
-import com.NBE_4_5_2.Team5.global.config.RedisTestContainerConfig;
 import com.NBE_4_5_2.Team5.global.standard.util.Ut;
 
 @SpringBootTest
 @BaseTestConfig
-public class AuthTokenServiceTest extends RedisTestContainerConfig {
+public class AuthTokenServiceTest  {
 
 	@Autowired
 	private AuthTokenService authTokenService;

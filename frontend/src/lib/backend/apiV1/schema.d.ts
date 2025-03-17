@@ -1194,8 +1194,8 @@ export interface components {
         };
         SortObject: {
             empty?: boolean;
-            unsorted?: boolean;
             sorted?: boolean;
+            unsorted?: boolean;
         };
         PageNoticeResBody: {
             /** Format: int64 */
