@@ -15,16 +15,13 @@ public class CorsConfig implements CorsConfigurationSource {
 	@Value("${custom.front.host}")
 	private String frontHost;
 
-	@Value("${custom.front.port}")
-	private int frontPort;
-
 	private String ALLOWED_ORIGIN;
 	private static final List<String> ALLOWED_METHODS = List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS");
 
 	@Override
 	public CorsConfiguration getCorsConfiguration(@NonNull HttpServletRequest request) {
 		CorsConfiguration config = new CorsConfiguration();
-		ALLOWED_ORIGIN = "http://%s:%s".formatted(frontHost, frontPort);
+		ALLOWED_ORIGIN = "http://%s".formatted(frontHost);
 		config.setAllowedOrigins(List.of(ALLOWED_ORIGIN));
 		config.setAllowedMethods(ALLOWED_METHODS);
 		config.setAllowCredentials(true);
