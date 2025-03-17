@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { use, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import client from "@/lib/client";
 import Link from "next/link";

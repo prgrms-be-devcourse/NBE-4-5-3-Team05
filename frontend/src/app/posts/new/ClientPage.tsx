@@ -13,20 +13,6 @@ type Category = components["schemas"]["Category"];
 export default function PostCreatePage() {
   const router = useRouter();
 
-  // // 로그인 체크
-  // useEffect(() => {
-  //   async function checkAuth() {
-  //     const response = await client.GET("/api/users/me", {
-  //       credentials: "include",
-  //     });
-  //     if (response.error && response.response.status === 401) {
-  //       alert("로그인을 먼저하세요.");
-  //       router.push("/user/login");
-  //     }
-  //   }
-  //   checkAuth();
-  // }, [router]);
-
   // 입력값 state
   const [productName, setProductName] = useState("");
   const [title, setTitle] = useState("");
