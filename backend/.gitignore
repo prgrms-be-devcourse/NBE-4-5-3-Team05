@@ -77,3 +77,4 @@ db_dev.mv.db  # H2 데이터베이스 파일도 무시
 apiV1.json
 /application.pid
 src/main/resources/application-mysql.yml
+generated/
