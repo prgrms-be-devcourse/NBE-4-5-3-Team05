@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import { useRouter } from "next/navigation";
 import type { components } from "@/lib/backend/apiV1/schema";
+import client from "@/lib/client";
 
 type PreviewPostResponse = components["schemas"]["PreviewPostResponse"];
 
@@ -17,19 +17,17 @@ export default function RecentlyUploadedSection() {
     async function fetchRecentlyUploaded() {
       try {
         // 최근 올라온 상품은 최신순(desc)으로 1페이지, 10개 항목 불러온다고 가정합니다.
-        const res = await client.GET<{
-          code: string;
-          message: string;
-          data: components["schemas"]["PageDtoPreviewPostResponse"];
-        }>("/api/posts", {
+        const res = await client.GET("/api/posts", {
           params: {
-            page: 1,
-            pageSize: 10,
-            sort: "desc",
+            query: {
+              page: 1,
+              pageSize: 10,
+              sort: "desc",
+            },
           },
-          withCredentials: true,
+          credentials: "include",
         });
-        const { items } = res.data.data;
+        const { items } = res.data!.data;
         setProducts(items);
       } catch (err) {
         console.error("최근 업로드 상품 조회 실패", err);
