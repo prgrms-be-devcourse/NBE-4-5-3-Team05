@@ -21,7 +21,7 @@ public class CorsConfig implements CorsConfigurationSource {
 	@Override
 	public CorsConfiguration getCorsConfiguration(@NonNull HttpServletRequest request) {
 		CorsConfiguration config = new CorsConfiguration();
-		ALLOWED_ORIGIN = "http://%s".formatted(frontHost);
+		ALLOWED_ORIGIN = "https://%s".formatted(frontHost);
 		config.setAllowedOrigins(List.of(ALLOWED_ORIGIN, "http://localhost:3000"));
 		config.setAllowedMethods(ALLOWED_METHODS);
 		config.setAllowCredentials(true);
