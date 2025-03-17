@@ -1,3 +1,4 @@
+import RequireAdmin from "@/components/auth/RequireAdmin";
 import SidebarLayout from "./ClientPage";
 
 export default async function Page({
@@ -8,5 +9,9 @@ export default async function Page({
   }>;
 }) {
   const params = await searchParams;
-  return <SidebarLayout searchParams={params}></SidebarLayout>;
+  return (
+    <RequireAdmin>
+      <SidebarLayout searchParams={params}></SidebarLayout>
+    </RequireAdmin>
+  );
 }

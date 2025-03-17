@@ -172,6 +172,35 @@ export default function PostDetailPage() {
   if (error) return <div className="p-4 text-red-500">{error}</div>;
   if (!post) return <div className="p-4">게시글 정보를 찾을 수 없습니다.</div>;
 
+  const handleCreateChatRoom = async () => {
+    try {
+      const createResponse = await client.POST("/api/chat/room", {
+        params: {
+          query: {
+            postId: postId, // 현재 게시글 ID 전송
+          },
+        },
+        credentials: "include",
+      });
+
+      if (createResponse.error) {
+        console.error("채팅방 생성 오류:", createResponse.error.message);
+        alert("채팅방 생성에 실패했습니다.");
+        return;
+      }
+
+      // 채팅방 생성 성공
+      const chatRoomId = createResponse.data.data.roomId; // 생성된 채팅방 ID
+      console.log("채팅방 생성 성공, ID:", chatRoomId);
+      router.push(`/chat/${chatRoomId}`); // 생성된 채팅방으로 이동
+    } catch (error) {
+      console.error("채팅방 생성 중 오류 발생:", error);
+      alert("채팅방 생성 중 오류가 발생했습니다.");
+    }
+  };
+
+
+
   // 이미지 URL들을 소문자와 trim을 적용해 유효한 값만 필터링
   const images = post.imageUrls
     ? post.imageUrls
@@ -211,8 +240,9 @@ export default function PostDetailPage() {
           </ul>
           <div className="mt-4">
             <button
-              onClick={() => router.push(`/chat/${post.id}`)}
-              className="px-4 py-2 bg-blue-500 text-white rounded"
+              onClick={handleCreateChatRoom}
+              // onClick={() => router.push(`/chat/${post.id}`)}
+              className="px-4 py-2 bg-orange-400 text-white rounded"
             >
               채팅 걸기
             </button>

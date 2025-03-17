@@ -8,28 +8,17 @@ import client from "@/lib/client";
 
 type PreviewPostResponse = components["schemas"]["PreviewPostResponse"];
 
-export default function RecentlyViewedSection() {
+export default function RecentlyViewedSection({
+  isLogin,
+}: {
+  isLogin: boolean;
+}) {
   const router = useRouter();
-  const [isLogin, setIsLogin] = useState<boolean>(false);
   const [recentProducts, setRecentProducts] = useState<PreviewPostResponse[]>(
     []
   );
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
-
-  // 로그인 상태 체크
-  useEffect(() => {
-    async function checkLogin() {
-      const result = await client.GET("/api/users/me", {
-        credentials: "include",
-      });
-      if (result.error) {
-        setIsLogin(false);
-      }
-      setIsLogin(true);
-    }
-    checkLogin();
-  }, []);
 
   // 로그인한 경우에만 최근 본 상품 데이터를 불러옴
   useEffect(() => {
@@ -56,7 +45,11 @@ export default function RecentlyViewedSection() {
   if (loading) return <p>로딩 중...</p>;
 
   if (!isLogin) {
-    return <p>로그인을 먼저 해주세요.</p>;
+    return (
+      <div>
+        <p>로그인 이후에 최근 본 상품을 이용할 수 있습니다.</p>
+      </div>
+    );
   }
 
   if (error) return <p className="text-red-500">{error}</p>;

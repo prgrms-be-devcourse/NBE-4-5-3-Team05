@@ -9,7 +9,7 @@ export default async function Page({
         id: string;
     }
 }) {
-    const roomId = await (await params).id; 
+    const roomId = params.id; 
     
     const token = (await cookies()).get("accessToken")?.value;
     console.log("token: ",token);
@@ -40,8 +40,10 @@ export default async function Page({
     });
     
     const roomData=roomResponse.data!!;
-    if(roomData.code!="200"){
-      alert(roomData.message);
+    if(!roomData || roomData.code!="200"){
+      return {
+        error: roomData?.message || "Room data is not available.",
+      };
     }
     const chatRoom=roomData.data;
 

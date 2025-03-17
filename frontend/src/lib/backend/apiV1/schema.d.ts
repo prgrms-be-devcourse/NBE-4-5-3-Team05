@@ -592,6 +592,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/chat/room/{roomId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getRoomByRoomId"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/chat/room/{roomId}/show": {
         parameters: {
             query?: never;
@@ -884,9 +900,9 @@ export interface components {
             purchasedProducts?: components["schemas"]["ProductPost"][];
             writtenProducts?: components["schemas"]["ProductPost"][];
             wroteComments?: components["schemas"]["Comment"][];
-            authorities?: components["schemas"]["GrantedAuthority"][];
-            admin?: boolean;
             memberAuthoritiesAsString?: string[];
+            admin?: boolean;
+            authorities?: components["schemas"]["GrantedAuthority"][];
         };
         UpdateNoticeReq: {
             title?: string;
@@ -1003,6 +1019,8 @@ export interface components {
             client?: string;
             /** Format: int64 */
             userCount?: number;
+            lastMessage?: string;
+            lastTimestamp?: string;
         };
         RsDataChatRoom: {
             code: string;
@@ -1129,6 +1147,14 @@ export interface components {
             name?: string;
             /** Format: int64 */
             userCount?: number;
+            lastMessage?: string;
+            lastTimestamp?: string;
+            other?: string;
+        };
+        RsDataChatRoomDto: {
+            code: string;
+            message: string;
+            data: components["schemas"]["ChatRoomDto"];
         };
         RsDataListChatRoomDto: {
             code: string;
@@ -1136,10 +1162,17 @@ export interface components {
             data: components["schemas"]["ChatRoomDto"][];
         };
         MessageDto: {
+            messageId?: string;
             sender?: string;
             message?: string;
             image?: string;
+            /** Format: double */
+            latitude?: number;
+            /** Format: double */
+            longitude?: number;
             timestamp?: string;
+            lastMessage?: string;
+            lastTimestamp?: string;
         };
         RsDataListMessageDto: {
             code: string;
@@ -1163,29 +1196,29 @@ export interface components {
             totalElements?: number;
             /** Format: int32 */
             totalPages?: number;
+            first?: boolean;
+            last?: boolean;
             /** Format: int32 */
             size?: number;
             content?: components["schemas"]["UserDto"][];
             /** Format: int32 */
             number?: number;
             sort?: components["schemas"]["SortObject"];
-            first?: boolean;
-            last?: boolean;
+            pageable?: components["schemas"]["PageableObject"];
             /** Format: int32 */
             numberOfElements?: number;
-            pageable?: components["schemas"]["PageableObject"];
             empty?: boolean;
         };
         PageableObject: {
             /** Format: int64 */
             offset?: number;
             sort?: components["schemas"]["SortObject"];
-            /** Format: int32 */
-            pageSize?: number;
+            unpaged?: boolean;
             paged?: boolean;
             /** Format: int32 */
             pageNumber?: number;
-            unpaged?: boolean;
+            /** Format: int32 */
+            pageSize?: number;
         };
         RsDataPageUserDto: {
             code: string;
@@ -1202,17 +1235,17 @@ export interface components {
             totalElements?: number;
             /** Format: int32 */
             totalPages?: number;
+            first?: boolean;
+            last?: boolean;
             /** Format: int32 */
             size?: number;
             content?: components["schemas"]["NoticeResBody"][];
             /** Format: int32 */
             number?: number;
             sort?: components["schemas"]["SortObject"];
-            first?: boolean;
-            last?: boolean;
+            pageable?: components["schemas"]["PageableObject"];
             /** Format: int32 */
             numberOfElements?: number;
-            pageable?: components["schemas"]["PageableObject"];
             empty?: boolean;
         };
         RsDataPageNoticeResBody: {
@@ -2556,7 +2589,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json;charset=UTF-8": components["schemas"]["RsDataString"];
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataChatRoomDto"];
                 };
             };
             /** @description Internal Server Error */
@@ -2586,6 +2619,37 @@ export interface operations {
                 };
                 content: {
                     "application/json;charset=UTF-8": components["schemas"]["RsDataListChatRoomDto"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataVoid"];
+                };
+            };
+        };
+    };
+    getRoomByRoomId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                roomId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataChatRoom"];
                 };
             };
             /** @description Internal Server Error */
@@ -2686,7 +2750,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json;charset=UTF-8": components["schemas"]["RsDataString"];
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataObject"];
                 };
             };
             /** @description Internal Server Error */

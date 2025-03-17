@@ -2,7 +2,7 @@
 
 import { components } from "@/lib/backend/apiV1/schema";
 import client from "@/lib/backend/client"; 
-import { useEffect, useRef, useState } from "react";
+import { use, useEffect, useRef, useState } from "react";
 import SockJS from 'sockjs-client'; 
 import { Stomp } from "@stomp/stompjs"; 
 import { headers } from "next/headers";
@@ -18,6 +18,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button";
+import { LoginMemberContext } from "@/app/stores/auth/loginMemberStore";
 
 
 export default function ClientPage({
@@ -42,6 +43,8 @@ export default function ClientPage({
   const [visibleMessagesCount, setVisibleMessagesCount] = useState(20);
   const [showDropdown, setShowDropdown] = useState(false); 
   const messagesEndRef = useRef<null | HTMLDivElement>(null);
+  const {isLogin}= use(LoginMemberContext);
+
 
 
   useEffect(() => {

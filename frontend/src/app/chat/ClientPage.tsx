@@ -9,7 +9,6 @@ import { faMagnifyingGlass,faHeadphones } from "@fortawesome/free-solid-svg-icon
 import { Button } from "@/components/ui/button";
 import client from "@/lib/backend/client";
 
-
 export default function ClientPage({
   chatRoom,
   searchChatRoomDto,
