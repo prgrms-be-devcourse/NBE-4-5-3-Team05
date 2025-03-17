@@ -83,6 +83,7 @@ public class PostCommentController {
 		return new RsData<>("204-1", "comment 삭제 성공.");
 	}
 
+	@Operation(summary = "댓글 목록 조회", description = "특정 게시글의 댓글 목록을 조회합니다.")
 	@GetMapping("/{id}/comments")
 	public RsData<Slice<CommentDto>> getComments(@PathVariable(name = "id") String postId, Pageable pageable) {
 		Slice<CommentDto> comments = commentService.getComments(postId, pageable);

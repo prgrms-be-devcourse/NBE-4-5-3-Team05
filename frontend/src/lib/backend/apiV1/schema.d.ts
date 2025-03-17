@@ -435,6 +435,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /**
+         * 댓글 목록 조회
+         * @description 특정 게시글의 댓글 목록을 조회합니다.
+         */
         get: operations["getComments"];
         put?: never;
         post?: never;
@@ -936,8 +940,8 @@ export interface components {
             purchasedProducts?: components["schemas"]["ProductPost"][];
             writtenProducts?: components["schemas"]["ProductPost"][];
             wroteComments?: components["schemas"]["Comment"][];
-            authorities?: components["schemas"]["GrantedAuthority"][];
             admin?: boolean;
+            authorities?: components["schemas"]["GrantedAuthority"][];
             memberAuthoritiesAsString?: string[];
         };
         UpdateNoticeReq: {
@@ -1142,12 +1146,12 @@ export interface components {
             /** Format: int64 */
             offset?: number;
             sort?: components["schemas"]["SortObject"];
-            unpaged?: boolean;
-            paged?: boolean;
             /** Format: int32 */
             pageSize?: number;
+            paged?: boolean;
             /** Format: int32 */
             pageNumber?: number;
+            unpaged?: boolean;
         };
         RsDataSliceCommentDto: {
             code: string;
@@ -1170,8 +1174,8 @@ export interface components {
         };
         SortObject: {
             empty?: boolean;
-            sorted?: boolean;
             unsorted?: boolean;
+            sorted?: boolean;
         };
         RsDataListPreviewPostResponse: {
             code: string;
@@ -1252,10 +1256,10 @@ export interface components {
             data: components["schemas"]["Category"][];
         };
         PageUserDto: {
-            /** Format: int32 */
-            totalPages?: number;
             /** Format: int64 */
             totalElements?: number;
+            /** Format: int32 */
+            totalPages?: number;
             /** Format: int32 */
             size?: number;
             content?: components["schemas"]["UserDto"][];
@@ -1275,10 +1279,10 @@ export interface components {
             data: components["schemas"]["PageUserDto"];
         };
         PageNoticeResBody: {
-            /** Format: int32 */
-            totalPages?: number;
             /** Format: int64 */
             totalElements?: number;
+            /** Format: int32 */
+            totalPages?: number;
             /** Format: int32 */
             size?: number;
             content?: components["schemas"]["NoticeResBody"][];
