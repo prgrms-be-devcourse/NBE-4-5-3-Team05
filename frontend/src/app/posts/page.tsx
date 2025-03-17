@@ -24,10 +24,11 @@ export default function PostsPage() {
     keyword: "",
     minPrice: null as number | null,
     maxPrice: null as number | null,
-    category: "",
+    categories: [] as string[],
     sort: "desc",
   });
 
+  // 공지사항 불러오기
   useEffect(() => {
     (async () => {
       const res = await client.GET("/api/admin/notices/latest", {
@@ -41,6 +42,7 @@ export default function PostsPage() {
     })();
   }, []);
 
+  // 카테고리 목록 불러오기
   useEffect(() => {
     (async () => {
       const res = await client.GET("/api/categories", {
@@ -50,7 +52,7 @@ export default function PostsPage() {
         console.error("카테고리 로드 실패", res.error);
         return;
       }
-      const cats = res.data!.data.map((cat) => ({
+      const cats = res.data!.data.map((cat: any) => ({
         id: cat.id ?? 0,
         name: cat.name ?? "",
       }));
@@ -58,6 +60,7 @@ export default function PostsPage() {
     })();
   }, []);
 
+  // 게시글 불러오기 (필터, 페이지 변경 시)
   const fetchPosts = async () => {
     const res = await client.GET("/api/posts", {
       params: {
@@ -68,13 +71,17 @@ export default function PostsPage() {
           sort: filters.sort,
           minPrice: filters.minPrice || undefined,
           maxPrice: filters.maxPrice || undefined,
-          category: filters.category || undefined,
+          // 다중 카테고리인 경우 콤마로 구분하여 전달
+          categories: filters.categories.length
+            ? filters.categories.join(",")
+            : undefined,
         },
       },
       credentials: "include",
     });
     if (res.error) {
       console.error("게시글 로드 실패", res.error);
+      return;
     }
     const { items, totalPages } = res.data!.data;
     setPosts(items);

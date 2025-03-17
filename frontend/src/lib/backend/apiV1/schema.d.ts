@@ -392,22 +392,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/posts/{id}/comments": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["getComments"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/posts/recently-viewed": {
         parameters: {
             query?: never;
@@ -1215,45 +1199,68 @@ export interface components {
             message: string;
             data: components["schemas"]["Category"][];
         };
+        Pageable: {
+            /** Format: int32 */
+            page?: number;
+            /** Format: int32 */
+            size?: number;
+            sort?: string[];
+        };
         PageUserDto: {
             /** Format: int64 */
             totalElements?: number;
             /** Format: int32 */
             totalPages?: number;
+            first?: boolean;
+            last?: boolean;
+            /** Format: int32 */
+            numberOfElements?: number;
+            pageable?: components["schemas"]["PageableObject"];
             /** Format: int32 */
             size?: number;
             content?: components["schemas"]["UserDto"][];
             /** Format: int32 */
             number?: number;
             sort?: components["schemas"]["SortObject"];
-            first?: boolean;
-            last?: boolean;
-            /** Format: int32 */
-            numberOfElements?: number;
-            pageable?: components["schemas"]["PageableObject"];
             empty?: boolean;
+        };
+        PageableObject: {
+            /** Format: int32 */
+            pageSize?: number;
+            paged?: boolean;
+            /** Format: int32 */
+            pageNumber?: number;
+            unpaged?: boolean;
+            /** Format: int64 */
+            offset?: number;
+            sort?: components["schemas"]["SortObject"];
         };
         RsDataPageUserDto: {
             code: string;
             message: string;
             data: components["schemas"]["PageUserDto"];
         };
+        SortObject: {
+            unsorted?: boolean;
+            sorted?: boolean;
+            empty?: boolean;
+        };
         PageNoticeResBody: {
             /** Format: int64 */
             totalElements?: number;
             /** Format: int32 */
             totalPages?: number;
+            first?: boolean;
+            last?: boolean;
+            /** Format: int32 */
+            numberOfElements?: number;
+            pageable?: components["schemas"]["PageableObject"];
             /** Format: int32 */
             size?: number;
             content?: components["schemas"]["NoticeResBody"][];
             /** Format: int32 */
             number?: number;
             sort?: components["schemas"]["SortObject"];
-            first?: boolean;
-            last?: boolean;
-            /** Format: int32 */
-            numberOfElements?: number;
-            pageable?: components["schemas"]["PageableObject"];
             empty?: boolean;
         };
         RsDataPageNoticeResBody: {
@@ -2305,39 +2312,6 @@ export interface operations {
                 };
                 content: {
                     "application/json;charset=UTF-8": components["schemas"]["RsDataNoticeResBody"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": components["schemas"]["RsDataVoid"];
-                };
-            };
-        };
-    };
-    getComments: {
-        parameters: {
-            query: {
-                pageable: components["schemas"]["Pageable"];
-            };
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": components["schemas"]["RsDataSliceCommentDto"];
                 };
             };
             /** @description Internal Server Error */

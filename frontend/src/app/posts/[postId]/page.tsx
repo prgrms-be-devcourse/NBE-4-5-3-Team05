@@ -1,46 +1,29 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import type { components } from "@/lib/backend/apiV1/schema";
 import client from "@/lib/client";
-import Comments from "./_pages/comments";
+import { LoginMemberContext } from "@/app/stores/auth/loginMemberStore";
 
 type ProductPostResponse = components["schemas"]["ProductPostResponse"];
 
 export default function PostDetailPage() {
   const { postId } = useParams<{ postId: string }>();
   const router = useRouter();
+  // LoginMemberContext를 useContext로 직접 읽어옵니다.
+  const { loginMember } = useContext(LoginMemberContext);
+
   const [post, setPost] = useState<ProductPostResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
   const [likeLoading, setLikeLoading] = useState<boolean>(false);
   const [liked, setLiked] = useState<boolean>(false);
-
   const [purchased, setPurchased] = useState<boolean>(false);
   const [purchaseLoading, setPurchasedLoading] = useState<boolean>(false);
 
-  const [comments, setComments] = useState<
-    components["schemas"]["CommentDto"][]
-  >([]);
-
-  const checkLoginStatus = async (): Promise<boolean> => {
-    try {
-      const result = await client.GET("/api/users/me", {
-        credentials: "include",
-      });
-      if (result.error) {
-        console.log("로그인 상태 확인 실패:", result.error);
-        return false;
-      }
-      return true;
-    } catch (err) {
-      console.log("로그인 상태 확인 중 예외 발생:", err);
-      return false;
-    }
-  };
-
+  // 게시글 상세 조회 API 호출
   const fetchPost = async () => {
     if (!postId) return;
     try {
@@ -62,30 +45,8 @@ export default function PostDetailPage() {
     }
   };
 
-  const checkPurchased = async () => {
-    const isLoggedIn = await checkLoginStatus();
-
-    if (!isLoggedIn) return;
-
-    const result = await client.GET("/api/payments", {
-      params: {
-        query: {
-          "post-id": post!.id!,
-        },
-      },
-      credentials: "include",
-    });
-    if (result.error) {
-      console.log(result);
-      setPurchased(false);
-      return;
-    }
-    setPurchased(true);
-  };
-
+  // 찜한 내역 조회
   const fetchUserFavorites = async () => {
-    const isLoggedIn = await checkLoginStatus();
-    if (!isLoggedIn) return;
     try {
       const response = await client.GET("/api/posts/my/favorites", {
         credentials: "include",
@@ -104,6 +65,26 @@ export default function PostDetailPage() {
     }
   };
 
+  // 구매 여부 확인 (로그인 정보가 있을 때만 확인)
+  const checkPurchased = async () => {
+    // 로그인 정보가 없으면 바로 return
+    if (!loginMember.id) return;
+    try {
+      const result = await client.GET("/api/payments", {
+        params: { query: { "post-id": post?.id! } },
+        credentials: "include",
+      });
+      if (result.error) {
+        console.log("구매 여부 확인 실패:", result.error);
+        setPurchased(false);
+        return;
+      }
+      setPurchased(true);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   useEffect(() => {
     fetchPost();
   }, [postId]);
@@ -112,89 +93,42 @@ export default function PostDetailPage() {
     if (post) {
       fetchUserFavorites();
       checkPurchased();
-      fetchComments();
     }
   }, [post]);
 
-  const fetchComments = async () => {
-    const result = await client.GET("/api/posts/{id}/comments", {
-      params: {
-        path: {
-          id: post!.id!,
-        },
-        query: {
-          pageable: {},
-          page: 0,
-          size: 10,
-        },
-      },
-      credentials: "include",
-    });
-    if (result.error) {
-      console.log(result.error);
-      return;
-    }
-    setComments(result.data.data.content!);
-  };
-
-  const loadComments = async (page: number) => {
-    const response = await client.GET("/api/posts/{id}/comments", {
-      params: {
-        path: {
-          id: post!.id!,
-        },
-        query: {
-          pageable: {},
-          page: page,
-        },
-      },
-    });
-    return response.data!.data.content!;
-  };
-
+  // 구매 처리 핸들러
   const handlePurchase = async () => {
-    console.log("hi");
-    const isLoggedIn = await checkLoginStatus();
-    if (!isLoggedIn) {
-      alert("먼저 로그인을 해주세요.");
-      router.push("/user/login");
-      return;
-    }
-
+    if (!post) return;
     const isConfirmed = confirm("정말 구매하시겠습니까?");
-
     if (isConfirmed) {
       setPurchasedLoading(true);
-      const response = await client.POST("/api/payments", {
-        body: {
-          productId: post!.id,
-        },
-        credentials: "include",
-      });
-      if (response.error) {
-        alert("구매에 실패했습니다.");
-        console.error("구매 처리 실패", response.error);
+      try {
+        const response = await client.POST("/api/payments", {
+          body: { productId: post.id },
+          credentials: "include",
+        });
+        if (response.error) {
+          alert("구매에 실패했습니다.");
+          console.error("구매 처리 실패", response.error);
+          setPurchasedLoading(false);
+          return;
+        }
+        setPurchased(true);
+      } catch (err) {
+        console.error(err);
+      } finally {
         setPurchasedLoading(false);
-        return;
       }
-      setPurchased(true);
-      setPurchasedLoading(false);
-    } else {
     }
   };
 
+  // 찜 처리 핸들러
   const handleLike = async () => {
-    if (!post) return;
-    const isLoggedIn = await checkLoginStatus();
-    if (!isLoggedIn) {
-      alert("먼저 로그인을 해주세요.");
-      router.push("/user/login");
-      return;
-    }
+    if (!post || !post.id) return;
     setLikeLoading(true);
     try {
       const response = await client.POST("/api/posts/{id}/like", {
-        params: { path: { id: post.id! } },
+        params: { path: { id: post.id } },
         credentials: "include",
       });
       if (response.error) {
@@ -210,11 +144,49 @@ export default function PostDetailPage() {
     }
   };
 
+  // 수정하기 버튼 핸들러 (작성자와 로그인된 회원의 id 비교)
+  const handleEdit = () => {
+    if (!post) return;
+    console.log("로그인된 회원:", loginMember);
+    console.log("게시글 작성자:", post.writerId);
+    if (post.writerId !== loginMember.id) {
+      alert("작성자만 수정할 수 있습니다.");
+      return;
+    }
+    router.push(`/posts/modify/${post.id}`);
+  };
+
+  // 게시글 삭제 핸들러
+  const handleDelete = async () => {
+    if (!post) return;
+    // 작성자 확인
+    if (post.writerId !== loginMember.id) {
+      alert("작성자만 삭제할 수 있습니다.");
+      return;
+    }
+    const isConfirmed = confirm("정말 게시글을 삭제하시겠습니까?");
+    if (!isConfirmed) return;
+    try {
+      const response = await client.DELETE("/api/posts/{id}", {
+        credentials: "include",
+        params: { path: { id: post.id! } },
+      });
+      if (response.error) {
+        alert("게시글 삭제에 실패했습니다: " + response.error.message);
+        return;
+      }
+      alert("게시글이 삭제되었습니다.");
+      router.push("/posts");
+    } catch (err) {
+      alert("삭제 중 오류가 발생했습니다.");
+      console.error(err);
+    }
+  };
+
   if (loading) return <div className="p-4">로딩 중...</div>;
   if (error) return <div className="p-4 text-red-500">{error}</div>;
   if (!post) return <div className="p-4">게시글 정보를 찾을 수 없습니다.</div>;
 
-  // 이미지 URL들을 소문자와 trim을 적용해 유효한 값만 필터링
   const images = post.imageUrls
     ? post.imageUrls
         .split(",")
@@ -223,7 +195,7 @@ export default function PostDetailPage() {
     : [];
 
   return (
-    <div className="p-4 w-full">
+    <div className="p-4">
       <div className="bg-gray-800 text-white p-4 rounded mb-4">
         <h1 className="text-2xl font-bold">길게 볼 장터</h1>
       </div>
@@ -313,7 +285,7 @@ export default function PostDetailPage() {
           </div>
         )}
       </div>
-      <div className="mt-4">
+      <div className="mt-4 flex gap-4">
         <button
           disabled={likeLoading || liked}
           onClick={handleLike}
@@ -332,13 +304,18 @@ export default function PostDetailPage() {
               ? "처리 중..."
               : "구매하기"}
         </button>
-      </div>
-      <div className="w-full">
-        <Comments
-          postId={post.id!}
-          initialComments={comments}
-          loadMoreComments={loadComments}
-        ></Comments>
+        <button
+          onClick={handleEdit}
+          className="px-4 py-2 bg-blue-500 text-white rounded"
+        >
+          수정하기
+        </button>
+        <button
+          onClick={handleDelete}
+          className="px-4 py-2 bg-gray-500 text-white rounded"
+        >
+          삭제하기
+        </button>
       </div>
     </div>
   );

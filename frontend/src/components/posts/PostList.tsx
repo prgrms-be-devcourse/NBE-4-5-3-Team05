@@ -19,7 +19,6 @@ export default function PostList({ posts }: PostListProps) {
   return (
     <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {posts.map((post) => {
-        // post.thumbNail 값이 "null" 문자열인 경우를 체크하여 빈 문자열로 처리
         const thumbNailRaw = post.thumbNail?.trim();
         const thumbNail =
           thumbNailRaw && thumbNailRaw !== "null" ? thumbNailRaw : "";
@@ -28,7 +27,6 @@ export default function PostList({ posts }: PostListProps) {
           <li key={post.id} className="border rounded p-4 shadow">
             <Link href={`/posts/${post.id}`} className="block hover:opacity-90">
               {thumbNail ? (
-                // Next.js Image 사용 시, 부모 요소에 relative, 고정 높이/너비가 필요합니다.
                 <div className="relative w-full h-40 mb-2 rounded">
                   <Image
                     src={thumbNail}

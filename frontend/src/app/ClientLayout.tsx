@@ -27,6 +27,11 @@ export default function ClientLayout({
     setNoLoginMember,
   } = useLoginMember();
 
+  // 로그인 상태가 변경될 때마다 콘솔에 출력
+  useEffect(() => {
+    console.log("LoginMemberContext 업데이트:", loginMember);
+  }, [loginMember]);
+
   const loginMemberContextValue = {
     loginMember,
     setLoginMember,

@@ -54,6 +54,7 @@ export default function ClientPage() {
     alert("로그인 성공하셨습니다.");
     if (response.data.data.item) {
       setLoginMember(response.data.data.item);
+      console.log("업데이트된 loginMember:", response.data.data.item);
     }
     router.replace("/");
   }
