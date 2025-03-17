@@ -49,6 +49,26 @@ export default function Comments({
     setContent("");
   };
 
+  const deleteComment = async (comment: commentDto) => {
+    const result = await client.DELETE(
+      "/api/posts/{post-id}/comments/{comment-id}",
+      {
+        params: {
+          path: {
+            "comment-id": comment.id!,
+            "post-id": postId!,
+          },
+        },
+        credentials: "include",
+      }
+    );
+    if (result.error) {
+      console.log(result.error);
+      return;
+    }
+    setComments((prev) => prev.filter((item) => item.id !== comment.id));
+  };
+
   useEffect(() => {
     console.log("Initial Comments Updated:", initialComments);
     setComments(initialComments);
@@ -71,7 +91,7 @@ export default function Comments({
             sendComment();
           }}
         >
-          "작성하기"
+          작성하기
         </Button>{" "}
       </div>
       <div className="space-y-2">
@@ -80,6 +100,14 @@ export default function Comments({
           return (
             <div key={comment.id} className="p-2 border-b">
               {comment.content}
+              <Button
+                onClick={(e) => {
+                  e.preventDefault();
+                  deleteComment(comment);
+                }}
+              >
+                삭제하기
+              </Button>
             </div>
           );
         })}
