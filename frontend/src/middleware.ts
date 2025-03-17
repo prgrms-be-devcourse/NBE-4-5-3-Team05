@@ -6,7 +6,18 @@ import { parseAccessToken } from "./app/util/auth";
 export async function middleware(request: NextRequest) {
   const myCookie = await cookies();
   const accessTokenCookie = myCookie.get("accessToken");
-
+  const nextResponse = NextResponse.next();
+ 
+   const response = await client.GET("/api/users/me", {
+     headers: {
+       cookie: (await cookies()).toString(),
+     },
+     credentials:"include";
+   });
+ 
+   const springCookie = response.response.headers.getSetCookie();
+   nextResponse.headers.set("set-cookie", String(springCookie));
+ 
   const { isLogin, isExpired } = parseAccessToken(accessTokenCookie);
 
   // ✅ 2. 로그인 상태이고, AccessToken이 유효하면 패스
