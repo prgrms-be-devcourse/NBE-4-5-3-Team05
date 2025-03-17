@@ -11,7 +11,6 @@ import {
   useLoginMember,
 } from "./stores/auth/loginMemberStore";
 
-
 export default function ClientLayout({
   children,
 }: Readonly<{
@@ -82,28 +81,39 @@ export default function ClientLayout({
             길게 볼 장터
           </Button>
         </Link>
-        {isLogin && (
-          <div className="flex gap-2">
+        {/* 로그인 여부에 따른 버튼 렌더링 */}
+        <div className="flex gap-2">
+          {/* 로그인 안한 경우 */}
+          {!isLogin && (
+            <Link href="/user/login">
+              <Button>로그인 및 회원가입</Button>
+            </Link>
+          )}
+
+          {/* 로그인한 경우 */}
+          {isLogin && (
             <div className="flex items-center gap-2">
-              <Link href={"/payments"}>
-                <p>{loginMember.cash}원</p>
-              </Link>
-            </div>
-            <div className="flex items-center gap-2">
-              <Link href="/user/me">
-                <Button>내 정보</Button>
-              </Link>
+              {/* 관리자 계정일 때 */}
+              {isAdmin && (
+                <Link href="/admin">
+                  <Button>관리자 페이지</Button>
+                </Link>
+              )}
+
+              {/* 일반 유저 */}
+              {!isAdmin && (
+                <Link href="/user/me">
+                  <Button>내 정보</Button>
+                </Link>
+              )}
+
+              {/* 로그아웃 버튼 (공통) */}
               <Button className="cursor-pointer" onClick={handleLogout}>
                 로그아웃
               </Button>
             </div>
-          </div>
-        )}
-        {!isLogin && (
-          <Link href="/user/login">
-            <Button>로그인 및 회원가입</Button>
-          </Link>
-        )}
+          )}
+        </div>
       </header>
       <div className="flex flex-1 flex-col items-center w-full">{children}</div>
       <footer>푸터</footer>

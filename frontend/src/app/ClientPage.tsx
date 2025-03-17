@@ -11,7 +11,7 @@ import { LoginMemberContext } from "./stores/auth/loginMemberStore";
 export default function ClientPage() {
   const [searchKeyword, setSearchKeyword] = useState("");
   const router = useRouter();
-  const { isLogin } = use(LoginMemberContext);
+  const { isLogin, isAdmin } = use(LoginMemberContext);
 
   const handleSearch = () => {
     router.push(`/posts?keyword=${encodeURIComponent(searchKeyword)}`);
