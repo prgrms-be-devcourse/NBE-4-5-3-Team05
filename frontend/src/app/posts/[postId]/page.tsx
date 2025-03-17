@@ -373,13 +373,13 @@ export default function PostDetailPage() {
         >
           삭제하기
         </button>
-        <div className="w-full">
-          <Comments
-            postId={post.id!}
-            initialComments={comments}
-            loadMoreComments={loadComments}
-          ></Comments>
-        </div>
+      </div>
+      <div className="w-full">
+        <Comments
+          postId={post.id!}
+          initialComments={comments}
+          loadMoreComments={loadComments}
+        ></Comments>
       </div>
     </div>
   );
