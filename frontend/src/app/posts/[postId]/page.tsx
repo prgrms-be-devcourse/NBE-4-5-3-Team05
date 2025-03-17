@@ -302,6 +302,7 @@ export default function PostDetailPage() {
           {images.length > 0 ? (
             <div className="relative w-full h-64">
               <Image
+              loader={()=>images[0]}
                 src={images[0]}
                 alt={post.title || "이미지"}
                 fill
@@ -373,6 +374,7 @@ export default function PostDetailPage() {
               {images.slice(1).map((imgUrl, idx) => (
                 <div key={idx} className="relative w-40 h-40">
                   <Image
+                  loader={()=>imgUrl}
                     src={imgUrl}
                     alt={`${post.title} - ${idx + 1}`}
                     fill

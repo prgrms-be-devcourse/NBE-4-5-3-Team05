@@ -29,6 +29,7 @@ export default function PostList({ posts }: PostListProps) {
               {thumbNail ? (
                 <div className="relative w-full h-40 mb-2 rounded">
                   <Image
+                    loader={() => thumbNail}
                     src={thumbNail}
                     alt={post.title || "이미지"}
                     fill
