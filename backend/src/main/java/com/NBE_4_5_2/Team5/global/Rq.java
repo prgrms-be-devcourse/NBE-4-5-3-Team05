@@ -52,7 +52,6 @@ public class Rq {
 
 		accsessTokenCookie.setPath("/");
 		accsessTokenCookie.setHttpOnly(true);
-		accsessTokenCookie.setSecure(true);
 		accsessTokenCookie.setAttribute("SameSite", "None");
 
 		response.addCookie(accsessTokenCookie);
@@ -63,7 +62,6 @@ public class Rq {
 		Cookie cookie = new Cookie(name, null);
 		cookie.setPath("/");
 		cookie.setHttpOnly(true);
-		cookie.setSecure(true);
 		cookie.setAttribute("SameSite", "None");
 		cookie.setMaxAge(0);
 
