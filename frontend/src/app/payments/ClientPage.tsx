@@ -14,7 +14,7 @@ export default function CheckoutPage() {
 
   const purchaseItem = async () => {
     const response = await fetch(
-      `http://${process.env.NEXT_PUBLIC_BACKEND_HOST}:${process.env.NEXT_PUBLIC_BACKEND_PORT}/api/payments`,
+      `${process.env.NEXT_PUBLIC_PROTOCOL}://${process.env.NEXT_PUBLIC_BACKEND_HOST}:${process.env.NEXT_PUBLIC_BACKEND_PORT}/api/payments`,
       {
         method: "POST",
         body: JSON.stringify({
@@ -32,7 +32,7 @@ export default function CheckoutPage() {
   useEffect(() => {
     const getPaymentOptions = async () => {
       const response = await fetch(
-        `http://${process.env.NEXT_PUBLIC_BACKEND_HOST}:${process.env.NEXT_PUBLIC_BACKEND_PORT}/paymentOptions.json`
+        `${process.env.NEXT_PUBLIC_PROTOCOL}://${process.env.NEXT_PUBLIC_BACKEND_HOST}:${process.env.NEXT_PUBLIC_BACKEND_PORT}/paymentOptions.json`
       );
 
       const data = await response.json();

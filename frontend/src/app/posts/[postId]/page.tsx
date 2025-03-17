@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import type { components } from "@/lib/backend/apiV1/schema";
 import client from "@/lib/client";
+import Comments from "./_pages/comments";
 
 type ProductPostResponse = components["schemas"]["ProductPostResponse"];
 
@@ -109,6 +110,12 @@ export default function PostDetailPage() {
       checkPurchased();
     }
   }, [post]);
+
+
+
+  const fetchComments = async()=>{
+    
+  }
 
   const handlePurchase = async () => {
     console.log("hi");
@@ -290,6 +297,9 @@ export default function PostDetailPage() {
             ? "처리 중..."
             : "구매하기"}
         </button>
+      </div>
+      <div>
+        <Comments initialComments={} loadMoreComments={}></Comments>
       </div>
     </div>
   );
