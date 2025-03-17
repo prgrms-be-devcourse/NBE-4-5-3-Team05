@@ -1,5 +1,7 @@
 package com.NBE_4_5_2.Team5.domain.post.comment.service;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,10 +34,10 @@ public class CommentService {
 				() -> new ProductPostNotFoundException("400-1", "id가 %s인 product post는 없습니다.".formatted(postId)));
 
 		Comment comment = Comment.builder()
-				.content(content)
-				.target(productPost)
-				.author(loggedInUser)
-				.build();
+			.content(content)
+			.target(productPost)
+			.author(loggedInUser)
+			.build();
 
 		Comment saved = commentRepository.save(comment);
 
@@ -69,5 +71,11 @@ public class CommentService {
 		comment.isMine(loggedInUser);
 
 		commentRepository.delete(comment);
+	}
+
+	public Slice<CommentDto> getComments(String postId, Pageable pageable) {
+		Slice<Comment> comments = commentRepository.findByTarget_Id(postId, pageable);
+
+		return comments.map(CommentDto::of);
 	}
 }

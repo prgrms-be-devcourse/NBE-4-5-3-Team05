@@ -56,12 +56,15 @@ export default function CheckoutButton({
   // ------ '결제하기' 버튼 누르면 결제창 띄우기 ------
   // @docs https://docs.tosspayments.com/sdk/v2/js#paymentrequestpayment
   async function requestPayment() {
-    const result = await fetch(
-      `http://${process.env.NEXT_PUBLIC_BACKEND_HOST}:${process.env.NEXT_PUBLIC_BACKEND_PORT}/api/payments/metadata?id=${orderId}&amount=${amount.value}`,
-      {
-        credentials: "include",
-      }
-    );
+    let url = "";
+    if (`${process.env.NEXT_PUBLIC_PROTOCOL}` === "https") {
+      url = `${process.env.NEXT_PUBLIC_PROTOCOL}://${process.env.NEXT_PUBLIC_BACKEND_HOST}/api/payments/metadata?id=${orderId}&amount=${amount.value}`;
+    } else {
+      url = `${process.env.NEXT_PUBLIC_PROTOCOL}://${process.env.NEXT_PUBLIC_BACKEND_HOST}:${process.env.NEXT_PUBLIC_BACKEND_PORT}/api/payments/metadata?id=${orderId}&amount=${amount.value}`;
+    }
+    const result = await fetch(url, {
+      credentials: "include",
+    });
     console.log("amount:", amount);
     // 결제를 요청하기 전에 orderId, amount를 서버에 저장하세요.
     // 결제 과정에서 악의적으로 결제 금액이 바뀌는 것을 확인하는 용도입니다.

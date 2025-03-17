@@ -1,5 +1,13 @@
 package com.NBE_4_5_2.Team5.domain.user.user.service;
 
+import java.util.Map;
+import java.util.Optional;
+
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
 import com.NBE_4_5_2.Team5.domain.user.user.dto.AuthToken;
 import com.NBE_4_5_2.Team5.domain.user.user.dto.UserDto;
 import com.NBE_4_5_2.Team5.domain.user.user.dto.UserUpdateRequest;
@@ -14,287 +22,281 @@ import com.NBE_4_5_2.Team5.global.exception.security.AuthenticationNotFoundExcep
 import com.NBE_4_5_2.Team5.global.exception.security.AuthenticationNotValidException;
 import com.NBE_4_5_2.Team5.global.exception.security.TokenNotFoundException;
 import com.NBE_4_5_2.Team5.global.security.SecurityUser;
+
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-
-import java.util.Map;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
 
-    private final EmailService emailService;
-    private final UserRepository userRepository;
-    private final AuthTokenService authTokenService;
-    private final RedisService redisService;
-    private final PasswordEncoder passwordEncoder;
-    private final UserValidator userValidator;
-    private final Rq rq;
+	private final EmailService emailService;
+	private final UserRepository userRepository;
+	private final AuthTokenService authTokenService;
+	private final RedisService redisService;
+	private final PasswordEncoder passwordEncoder;
+	private final UserValidator userValidator;
+	private final Rq rq;
 
-    public User createUser(String username, String password, String email,
-                           String nickname, String address, String profileUrl) {
+	public User createUser(String username, String password, String email,
+		String nickname, String address, String profileUrl) {
 
-        userValidator.duplicate(username, nickname);
-        userValidator.emailVerified(email);
+		userValidator.duplicate(username, nickname);
+		userValidator.emailVerified(email);
 
-        User user = User.builder()
-                .username(username)
-                .password(passwordEncoder.encode(password))
-                .email(email)
-                .nickname(nickname)
-                .address(address)
-                .profileUrl(profileUrl)
-                .role(Role.USER)
-                .build();
+		User user = User.builder()
+			.username(username)
+			.password(passwordEncoder.encode(password))
+			.email(email)
+			.nickname(nickname)
+			.address(address)
+			.profileUrl(profileUrl)
+			.role(Role.USER)
+			.build();
 
-        return userRepository.save(user);
-    }
+		return userRepository.save(user);
+	}
 
-    /**
-     * 로그인 검증
-     *
-     * @param username 사용자 아이디
-     * @param password 사용자 비밀번호
-     * @return 검증된 User 객체
-     */
-    public User loginUser(String username, String password) {
-        return userValidator.credentials(username, password);
-    }
+	/**
+	 * 로그인 검증
+	 *
+	 * @param username 사용자 아이디
+	 * @param password 사용자 비밀번호
+	 * @return 검증된 User 객체
+	 */
+	public User loginUser(String username, String password) {
+		return userValidator.credentials(username, password);
+	}
 
-    /**
-     * 로그아웃 처리 (redis에서 refreshToken 제거)
-     * <p>
-     * redis에 저장된 refreshToken을 제거합니다.
-     * 1. 로그인된 authentication의 UserId를 기반으로 삭제합니다.
-     * 2. 삭제 실패 시 사용자가 보유한 refreshToken을 기반으로 다시 삭제합니다.
-     */
-    public void logoutUser(User userIdentity) {
-        boolean isDeleted = redisService.deleteTokenByUserId(userIdentity.getId());
+	/**
+	 * 로그아웃 처리 (redis에서 refreshToken 제거)
+	 * <p>
+	 * redis에 저장된 refreshToken을 제거합니다.
+	 * 1. 로그인된 authentication의 UserId를 기반으로 삭제합니다.
+	 * 2. 삭제 실패 시 사용자가 보유한 refreshToken을 기반으로 다시 삭제합니다.
+	 */
+	public void logoutUser(User userIdentity) {
+		boolean isDeleted = redisService.deleteTokenByUserId(userIdentity.getId());
 
-        if (!isDeleted) {
-            rq.getRefreshToken().ifPresent(redisService::deleteTokenByRefreshToken);
-        }
-    }
+		if (!isDeleted) {
+			rq.getRefreshToken().ifPresent(redisService::deleteTokenByRefreshToken);
+		}
+	}
 
-    public Optional<User> getUserById(String id) {
-        return userRepository.findById(id);
-    }
+	public Optional<User> getUserById(String id) {
+		return userRepository.findById(id);
+	}
 
-    public Optional<User> getUserByUsername(String username) {
-        return userRepository.findByUsername(username);
-    }
+	public Optional<User> getUserByUsername(String username) {
+		return userRepository.findByUsername(username);
+	}
 
-    /**
-     * AccessToken payload에 저장된 id와 username, role만을 가진 User 객체를 반환
-     */
-    public Optional<User> getUserByAccessToken(String accessToken) {
+	/**
+	 * AccessToken payload에 저장된 id와 username, role만을 가진 User 객체를 반환
+	 */
+	public Optional<User> getUserByAccessToken(String accessToken) {
 
-        Map<String, Object> payload = authTokenService.getPayload(accessToken);
+		Map<String, Object> payload = authTokenService.getPayload(accessToken);
 
-        if (payload == null) {
-            return Optional.empty();
-        }
+		if (payload == null) {
+			return Optional.empty();
+		}
 
-        String id = (String) payload.get("id");
-        String username = (String) payload.get("username");
-        String nickname = (String) payload.get("nickname");
-        Role role = (Role) payload.get("role");
+		String id = (String)payload.get("id");
+		String username = (String)payload.get("username");
+		String nickname = (String)payload.get("nickname");
+		Role role = (Role)payload.get("role");
 
-        return Optional.of(
-                User.builder()
-                        .id(id)
-                        .username(username)
-                        .nickname(nickname)
-                        .role(role)
-                        .build()
-        );
-    }
+		return Optional.of(
+			User.builder()
+				.id(id)
+				.username(username)
+				.nickname(nickname)
+				.role(role)
+				.build()
+		);
+	}
 
-    /**
-     * Redis에 refreshToken 저장
-     *
-     * @param user         로그인한 사용자
-     * @param refreshToken 저장할 refreshToken
-     *                     기존에 userId로 저장된 refreshToken이 존재할 경우 덮어 씌웁니다.
-     */
-    public void saveRefreshToken(User user, String refreshToken) {
-        redisService.createToken(user, refreshToken);
-    }
+	/**
+	 * Redis에 refreshToken 저장
+	 *
+	 * @param user         로그인한 사용자
+	 * @param refreshToken 저장할 refreshToken
+	 *                     기존에 userId로 저장된 refreshToken이 존재할 경우 덮어 씌웁니다.
+	 */
+	public void saveRefreshToken(User user, String refreshToken) {
+		redisService.createToken(user, refreshToken);
+	}
 
-    /**
-     * refreshToken 검증
-     *
-     * @param user         로그인한 사용자
-     * @param refreshToken 검증할 refreshToken
-     * @throws ServiceException 사용자의 userId로 된 refreshToken이 존재하지 않거나 값이 일치하지 않을 경우
-     */
-    public String refreshAccessToken(String refreshToken) {
+	/**
+	 * refreshToken 검증
+	 *
+	 * @param user         로그인한 사용자
+	 * @param refreshToken 검증할 refreshToken
+	 * @throws ServiceException 사용자의 userId로 된 refreshToken이 존재하지 않거나 값이 일치하지 않을 경우
+	 */
+	public String refreshAccessToken(String refreshToken) {
 
-        Optional<RefreshToken> tokenByRefreshToken = redisService.getTokenByRefreshToken(refreshToken);
+		Optional<RefreshToken> tokenByRefreshToken = redisService.getTokenByRefreshToken(refreshToken);
 
-        if (tokenByRefreshToken.isEmpty()) {
-            throw new ServiceException("401-1", "유효하지 않은 RefreshToken입니다.");
-        }
+		if (tokenByRefreshToken.isEmpty()) {
+			throw new ServiceException("401-1", "유효하지 않은 RefreshToken입니다.");
+		}
 
-        String userId = tokenByRefreshToken.get().getUserId().substring("refreshToken:".length());
-        redisService.deleteTokenByUserId(userId);
+		String userId = tokenByRefreshToken.get().getUserId().substring("refreshToken:".length());
+		redisService.deleteTokenByUserId(userId);
 
-        return userRepository.findById(userId)
-                .map(authTokenService::generateAccessToken)
-                .orElseThrow(() -> new ServiceException("404-1", "존재하지 않는 회원의 refreshToken입니다."));
-    }
+		return userRepository.findById(userId)
+			.map(authTokenService::generateAccessToken)
+			.orElseThrow(() -> new ServiceException("404-1", "존재하지 않는 회원의 refreshToken입니다."));
+	}
 
-    /**
-     * User 정보로 AuthToken을 생성하여 반환
-     * refreshToken은 redis에 저장됨
-     *
-     * @param user 로그인한 사용자
-     * @return refreshToken, accessToken을 담은 AuthToken 객체
-     */
-    public AuthToken generateAuthtoken(User user) {
-        String refreshToken = authTokenService.generateRefreshToken();
-        String accessToken = authTokenService.generateAccessToken(user);
+	/**
+	 * User 정보로 AuthToken을 생성하여 반환
+	 * refreshToken은 redis에 저장됨
+	 *
+	 * @param user 로그인한 사용자
+	 * @return refreshToken, accessToken을 담은 AuthToken 객체
+	 */
+	public AuthToken generateAuthtoken(User user) {
+		String refreshToken = authTokenService.generateRefreshToken();
+		String accessToken = authTokenService.generateAccessToken(user);
 
-        saveRefreshToken(user, refreshToken);
-        return new AuthToken(refreshToken, accessToken);
-    }
+		saveRefreshToken(user, refreshToken);
+		return new AuthToken(refreshToken, accessToken);
+	}
 
-    /**
-     * User 정보로 AuthToken을 생성하여 String 형태로 반환
-     *
-     * @param user 로그인한 사용자
-     * @return refreshToken, accessToken을 공백으로 구분한 문자열
-     * refreshToken은 redis에 저장됨
-     */
-    public String generateAuthTokenAsString(User user) {
-        AuthToken authToken = generateAuthtoken(user);
-        return authToken.refreshToken() + " " + authToken.accessToken();
-    }
+	/**
+	 * User 정보로 AuthToken을 생성하여 String 형태로 반환
+	 *
+	 * @param user 로그인한 사용자
+	 * @return refreshToken, accessToken을 공백으로 구분한 문자열
+	 * refreshToken은 redis에 저장됨
+	 */
+	public String generateAuthTokenAsString(User user) {
+		AuthToken authToken = generateAuthtoken(user);
+		return authToken.refreshToken() + " " + authToken.accessToken();
+	}
 
-    public String getRefreshTokenByUserId(String userId) {
-        return redisService.getTokenByUserId(userId)
-                .map(RefreshToken::getRefreshToken)
-                .orElseThrow(() -> new TokenNotFoundException("401-1", "로그인이 필요합니다."));
-    }
+	public String getRefreshTokenByUserId(String userId) {
+		return redisService.getTokenByUserId(userId)
+			.map(RefreshToken::getRefreshToken)
+			.orElseThrow(() -> new TokenNotFoundException("401-1", "로그인이 필요합니다."));
+	}
 
-    /**
-     * refreshToken을 기반으로 User 객체를 반환
-     *
-     * @param refreshToken 검증할 refreshToken
-     *                     redis에 존재하지 않을 경우 Optional.empty() 반환
-     * @return refreshToken을 기반으로 찾은 User 객체
-     */
-    public Optional<User> getUserByRefreshToken(String refreshToken) {
-        Optional<RefreshToken> tokenByRefreshToken = redisService.getTokenByRefreshToken(refreshToken);
+	/**
+	 * refreshToken을 기반으로 User 객체를 반환
+	 *
+	 * @param refreshToken 검증할 refreshToken
+	 *                     redis에 존재하지 않을 경우 Optional.empty() 반환
+	 * @return refreshToken을 기반으로 찾은 User 객체
+	 */
+	public Optional<User> getUserByRefreshToken(String refreshToken) {
+		Optional<RefreshToken> tokenByRefreshToken = redisService.getTokenByRefreshToken(refreshToken);
 
-        if (tokenByRefreshToken.isEmpty()) {
-            return Optional.empty();
-        }
+		if (tokenByRefreshToken.isEmpty()) {
+			return Optional.empty();
+		}
 
-        String userId = tokenByRefreshToken.get()
-                .getUserId().substring("refreshToken:".length());
+		String userId = tokenByRefreshToken.get()
+			.getUserId().substring("refreshToken:".length());
 
-        return userRepository.findById(userId);
-    }
+		return userRepository.findById(userId);
+	}
 
-    public long count() {
-        return userRepository.count();
-    }
+	public long count() {
+		return userRepository.count();
+	}
 
-    public User getUserIdentity() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+	public User getUserIdentity() {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (authentication == null) {
-            throw new AuthenticationNotFoundException("401-2", "로그인이 필요합니다.");
-        }
+		if (authentication == null) {
+			throw new AuthenticationNotFoundException("401-2", "로그인이 필요합니다.");
+		}
 
-        Object principal = authentication.getPrincipal();
+		Object principal = authentication.getPrincipal();
 
-        if (!(principal instanceof SecurityUser)) {
-            throw new AuthenticationNotValidException("401-3", "잘못된 인증 정보입니다");
-        }
+		if (!(principal instanceof SecurityUser)) {
+			throw new AuthenticationNotValidException("401-3", "잘못된 인증 정보입니다");
+		}
 
-        SecurityUser user = (SecurityUser) principal;
+		SecurityUser user = (SecurityUser)principal;
 
-        return User.builder()
-                .id(user.getId())
-                .username(user.getUsername())
-                .nickname(user.getNickname())
-                .role(user.getRole())
-                .build();
-    }
+		return User.builder()
+			.id(user.getId())
+			.username(user.getUsername())
+			.nickname(user.getNickname())
+			.role(user.getRole())
+			.build();
+	}
 
-    // 내 프로필 수정
-    @Transactional
-    public UserDto updateMyProfile(User user, UserUpdateRequest updateRequest) {
+	// 내 프로필 수정
+	@Transactional
+	public UserDto updateMyProfile(User user, UserUpdateRequest updateRequest) {
 
-        // 닉네임 변경
-        String updateNickname = updateRequest.getNickname();
-        if (updateNickname != null && !updateNickname.equals(user.getNickname())) {
-            if (userRepository.existsByNickname(updateNickname)) {
-                throw new ServiceException("400-NICKNAME-ALREADY-EXISTS", "이미 사용중인 닉네임입니다.");
-            }
-            user.setNickname(updateNickname);
-        }
+		// 닉네임 변경
+		String updateNickname = updateRequest.getNickname();
+		if (updateNickname != null && !updateNickname.equals(user.getNickname())) {
+			if (userRepository.existsByNickname(updateNickname)) {
+				throw new ServiceException("400-NICKNAME-ALREADY-EXISTS", "이미 사용중인 닉네임입니다.");
+			}
+			user.setNickname(updateNickname);
+		}
 
-        // 주소 변경
-        if (updateRequest.getAddress() != null) {
-            user.setAddress(updateRequest.getAddress());
-        }
+		// 주소 변경
+		if (updateRequest.getAddress() != null) {
+			user.setAddress(updateRequest.getAddress());
+		}
 
-        // 프로필 이미지 변경
-        if (updateRequest.getProfileUrl() != null) {
-            user.setProfileUrl(updateRequest.getProfileUrl());
-        }
+		// 프로필 이미지 변경
+		if (updateRequest.getProfileUrl() != null) {
+			user.setProfileUrl(updateRequest.getProfileUrl());
+		}
 
-        // 이메일 변경 시 중복 체크
-        String updateEmail = updateRequest.getEmail();
-        if (updateEmail != null && !updateEmail.equals(user.getEmail())) {
-            // 이메일 중복 체크 & 인증된 이메일인지 검증 및 예외처리
-            userValidator.emailVerified(updateEmail);
-            user.setEmail(updateRequest.getEmail());
-        }
+		// 이메일 변경 시 중복 체크
+		String updateEmail = updateRequest.getEmail();
+		if (updateEmail != null && !updateEmail.equals(user.getEmail())) {
+			// 이메일 중복 체크 & 인증된 이메일인지 검증 및 예외처리
+			userValidator.emailVerified(updateEmail);
+			user.setEmail(updateRequest.getEmail());
+		}
 
-        return UserDto.fromEntity(user);
-    }
+		return UserDto.fromEntity(user);
+	}
 
-    // 회원 탈퇴
-    @Transactional
-    public void deleteMyProfile(User user) {
-        userRepository.delete(user);
-    }
+	// 회원 탈퇴
+	@Transactional
+	public void deleteMyProfile(User user) {
+		userRepository.delete(user);
+	}
 
-    public void sendAuthenticationCode(String email) {
+	public void sendAuthenticationCode(String email) {
 
-        if (userRepository.existsByEmail(email)) {
-            throw new ServiceException("400-1", "이미 사용중인 이메일입니다.");
-        }
+		if (userRepository.existsByEmail(email)) {
+			throw new ServiceException("400-1", "이미 사용중인 이메일입니다.");
+		}
 
-        emailService.sendAuthenticationCode(email);
-        emailService.checkBouncedEmail(email);
-    }
+		emailService.sendAuthenticationCode(email);
+		emailService.checkBouncedEmail(email);
+	}
 
-    /**
-     * 사용자가 입력한 인증코드를 검증하여 일치할 경우 해당 이메일을 verified로 저장
-     *
-     * @param email 검증할 이메일
-     * @param code  사용자가 입력한 인증 코드
-     * @throws ServiceException 인증코드가 일치하지 않는 경우
-     */
-    public void verifyAuthenticationCode(String email, String code) {
+	/**
+	 * 사용자가 입력한 인증코드를 검증하여 일치할 경우 해당 이메일을 verified로 저장
+	 *
+	 * @param email 검증할 이메일
+	 * @param code  사용자가 입력한 인증 코드
+	 * @throws ServiceException 인증코드가 일치하지 않는 경우
+	 */
+	public void verifyAuthenticationCode(String email, String code) {
 
-        String savedCode = emailService.getVerificationCode(email);
-        boolean verified = emailService.verifyAuthenticationCode(code, savedCode);
+		String savedCode = emailService.getVerificationCode(email);
+		boolean verified = emailService.verifyAuthenticationCode(code, savedCode);
 
-        if (!verified) {
-            throw new ServiceException("400-1", "인증코드가 틀렸습니다.");
-        }
+		if (!verified) {
+			throw new ServiceException("400-1", "인증코드가 틀렸습니다.");
+		}
 
-        emailService.saveVerificationCode(email, "verified");
-    }
+		emailService.saveVerificationCode(email, "verified");
+	}
 }

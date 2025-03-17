@@ -42,7 +42,7 @@ spring:
             scope: profile_nickname, profile_image
             client-name: Kakao
             authorization-grant-type: authorization_code
-            redirect-uri: http://${custom.server.host}:${server.port}/login/oauth2/code/kakao
+            redirect-uri: https://${custom.server.host}/login/oauth2/code/kakao
         provider:
           kakao:
             authorization-uri: https://kauth.kakao.com/oauth/authorize
@@ -72,7 +72,6 @@ springdoc:
 
 custom:
   server:
-    host: 3.35.108.184
+    host: backend.nbe-4-5-5-team5.shop
   front:
-    host: 3.37.172.144
-    port: 3000
+    host: www.nbe-4-5-5-team5.shop

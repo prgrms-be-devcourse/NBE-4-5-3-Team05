@@ -1,30 +1,17 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
 import type { components } from "@/lib/backend/apiV1/schema";
 import client from "@/lib/client";
 import fileUploadClient from "@/lib/fileUploadClient"; // 파일 업로드 전용 클라이언트
+import { LoginMemberContext } from "@/app/stores/auth/loginMemberStore";
 
 // OpenAPI 스키마의 Category 타입 사용
 type Category = components["schemas"]["Category"];
 
 export default function PostCreatePage() {
   const router = useRouter();
-
-  // 로그인 체크
-  useEffect(() => {
-    async function checkAuth() {
-      const response = await client.GET("/api/users/me", {
-        credentials: "include",
-      });
-      if (response.error && response.response.status === 401) {
-        alert("로그인을 먼저하세요.");
-        router.push("/user/login");
-      }
-    }
-    checkAuth();
-  }, [router]);
 
   // 입력값 state
   const [productName, setProductName] = useState("");
