@@ -1,4 +1,3 @@
-import { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import client from "./lib/client";
@@ -32,7 +31,7 @@ function forceLogout(request: NextRequest, redirectUrl: string = "/") {
   // 🟢 AccessToken 삭제
   nextResponse.headers.append(
     "Set-Cookie",
-    `accessToken=; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=0`
+    `accessToken=; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=0`
   );
 
   return nextResponse;

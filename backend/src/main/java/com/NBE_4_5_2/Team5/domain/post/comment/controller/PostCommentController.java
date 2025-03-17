@@ -1,7 +1,10 @@
 package com.NBE_4_5_2.Team5.domain.post.comment.controller;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -78,5 +81,12 @@ public class PostCommentController {
 		commentService.deleteComment(commentId);
 
 		return new RsData<>("204-1", "comment 삭제 성공.");
+	}
+
+	@GetMapping("/{id}/comments")
+	public RsData<Slice<CommentDto>> getComments(@PathVariable(name = "id") String postId, Pageable pageable) {
+		Slice<CommentDto> comments = commentService.getComments(postId, pageable);
+
+		return new RsData<>("200-1", "comment 조회 성공", comments);
 	}
 }

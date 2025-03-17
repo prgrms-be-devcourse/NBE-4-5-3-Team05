@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import type { components } from "@/lib/backend/apiV1/schema";
 import client from "@/lib/client";
+import Comments from "./_pages/comments";
 
 type ProductPostResponse = components["schemas"]["ProductPostResponse"];
 
@@ -19,6 +20,10 @@ export default function PostDetailPage() {
 
   const [purchased, setPurchased] = useState<boolean>(false);
   const [purchaseLoading, setPurchasedLoading] = useState<boolean>(false);
+
+  const [comments, setComments] = useState<
+    components["schemas"]["CommentDto"][]
+  >([]);
 
   const checkLoginStatus = async (): Promise<boolean> => {
     try {
@@ -107,8 +112,45 @@ export default function PostDetailPage() {
     if (post) {
       fetchUserFavorites();
       checkPurchased();
+      fetchComments();
     }
   }, [post]);
+
+  const fetchComments = async () => {
+    const result = await client.GET("/api/posts/{id}/comments", {
+      params: {
+        path: {
+          id: post!.id!,
+        },
+        query: {
+          pageable: {},
+          page: 0,
+          size: 10,
+        },
+      },
+      credentials: "include",
+    });
+    if (result.error) {
+      console.log(result.error);
+      return;
+    }
+    setComments(result.data.data.content!);
+  };
+
+  const loadComments = async (page: number) => {
+    const response = await client.GET("/api/posts/{id}/comments", {
+      params: {
+        path: {
+          id: post!.id!,
+        },
+        query: {
+          pageable: {},
+          page: page,
+        },
+      },
+    });
+    return response.data!.data.content!;
+  };
 
   const handlePurchase = async () => {
     console.log("hi");
@@ -290,6 +332,13 @@ export default function PostDetailPage() {
               ? "처리 중..."
               : "구매하기"}
         </button>
+      </div>
+      <div className="w-full">
+        <Comments
+          postId={post.id!}
+          initialComments={comments}
+          loadMoreComments={loadComments}
+        ></Comments>
       </div>
     </div>
   );

@@ -2,7 +2,7 @@ import createClient from "openapi-fetch";
 import { paths } from "./backend/apiV1/schema";
 
 const fileUploadClient = createClient<paths>({
-  baseUrl: `http://${process.env.NEXT_PUBLIC_BACKEND_HOST}:${process.env.NEXT_PUBLIC_BACKEND_PORT}`,
+  baseUrl: `${process.env.NEXT_PUBLIC_PROTOCOL}://${process.env.NEXT_PUBLIC_BACKEND_HOST}:${process.env.NEXT_PUBLIC_BACKEND_PORT}`,
   headers: {},
   // fetch 함수의 시그니처를 (input: RequestInfo, init?: RequestInit) => Promise<Response>로 맞춥니다.
   fetch: async (input: RequestInfo, init?: RequestInit): Promise<Response> => {
