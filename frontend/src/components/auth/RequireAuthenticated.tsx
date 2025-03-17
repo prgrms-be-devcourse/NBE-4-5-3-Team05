@@ -21,7 +21,7 @@ export default function RequireAuthenticated({
           </div>
           <div className="mt-2 flex justify-center">
             <Button variant="link" asChild>
-              <Link href="/">메인으로 돌아가기</Link>
+              <Link href="/user/login">로그인 페이지로 이동하기</Link>
             </Button>
           </div>
         </div>

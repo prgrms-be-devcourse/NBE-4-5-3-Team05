@@ -1,5 +1,10 @@
+import RequireAuthenticated from "@/components/auth/RequireAuthenticated";
 import ClientPage from "./ClientPage";
 
 export default function page() {
-  return <ClientPage></ClientPage>;
+  return (
+    <RequireAuthenticated>
+      <ClientPage></ClientPage>
+    </RequireAuthenticated>
+  );
 }

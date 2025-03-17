@@ -329,8 +329,8 @@ export default function PostDetailPage() {
           {purchased
             ? "구매 완료"
             : purchaseLoading
-            ? "처리 중..."
-            : "구매하기"}
+              ? "처리 중..."
+              : "구매하기"}
         </button>
       </div>
       <div className="w-full">
