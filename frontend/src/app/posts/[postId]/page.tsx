@@ -107,6 +107,9 @@ export default function PostDetailPage() {
     }
   }, [post]);
 
+  
+  
+
   const handleLike = async () => {
     if (!post) return;
     // 로그인 상태 체크

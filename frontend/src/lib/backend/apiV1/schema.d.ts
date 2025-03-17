@@ -811,10 +811,14 @@ export interface components {
             name?: string;
         };
         Comment: {
+            /** Format: date-time */
+            createdAt?: string;
+            /** Format: date-time */
+            modifiedAt?: string;
             id?: string;
-            content?: string;
             target?: components["schemas"]["ProductPost"];
             author?: components["schemas"]["User"];
+            content?: string;
         };
         GrantedAuthority: {
             authority?: string;
@@ -826,6 +830,10 @@ export interface components {
             category?: components["schemas"]["Category"];
         };
         ProductPost: {
+            /** Format: date-time */
+            createdAt?: string;
+            /** Format: date-time */
+            modifiedAt?: string;
             id?: string;
             productName?: string;
             /** Format: int32 */
@@ -844,10 +852,6 @@ export interface components {
             latitude?: number;
             /** Format: float */
             longitude?: number;
-            /** Format: date-time */
-            createdAt?: string;
-            /** Format: date-time */
-            modifiedAt?: string;
             productCategories?: components["schemas"]["ProductCategory"][];
             writer?: components["schemas"]["User"];
             commentList?: components["schemas"]["Comment"][];
@@ -859,11 +863,11 @@ export interface components {
             data: components["schemas"]["User"];
         };
         User: {
-            id?: string;
             /** Format: date-time */
             createdAt?: string;
             /** Format: date-time */
             modifiedAt?: string;
+            id?: string;
             username?: string;
             password?: string;
             email?: string;
