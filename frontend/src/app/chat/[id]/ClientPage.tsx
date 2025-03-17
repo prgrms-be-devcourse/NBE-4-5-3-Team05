@@ -1,7 +1,6 @@
 "use client";
 
 import { components } from "@/lib/backend/apiV1/schema";
-import client from "@/lib/backend/client"; 
 import { use, useEffect, useRef, useState } from "react";
 import SockJS from 'sockjs-client'; 
 import { Stomp } from "@stomp/stompjs"; 
@@ -19,6 +18,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button";
 import { LoginMemberContext } from "@/app/stores/auth/loginMemberStore";
+import client from "@/lib/client";
 
 
 export default function ClientPage({
