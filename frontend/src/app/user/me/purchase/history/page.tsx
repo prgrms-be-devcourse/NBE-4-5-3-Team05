@@ -25,6 +25,7 @@ export default async function Page({
     },
     credentials: "include",
   });
+  console.log(response);
 
   if (response.error) {
     console.log("서버 오류 : " + response.error.message);
