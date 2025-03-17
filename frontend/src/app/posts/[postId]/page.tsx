@@ -6,6 +6,7 @@ import Image from "next/image";
 import type { components } from "@/lib/backend/apiV1/schema";
 import client from "@/lib/client";
 import { LoginMemberContext } from "@/app/stores/auth/loginMemberStore";
+import Comments from "./_pages/comments";
 
 type ProductPostResponse = components["schemas"]["ProductPostResponse"];
 
@@ -23,6 +24,25 @@ export default function PostDetailPage() {
   const [purchased, setPurchased] = useState<boolean>(false);
   const [purchaseLoading, setPurchasedLoading] = useState<boolean>(false);
 
+  const [comments, setComments] = useState<
+    components["schemas"]["CommentDto"][]
+  >([]);
+
+  const checkLoginStatus = async (): Promise<boolean> => {
+    try {
+      const result = await client.GET("/api/users/me", {
+        credentials: "include",
+      });
+      if (result.error) {
+        console.log("로그인 상태 확인 실패:", result.error);
+        return false;
+      }
+      return true;
+    } catch (err) {
+      console.log("로그인 상태 확인 중 예외 발생:", err);
+      return false;
+    }
+  };
   // 게시글 상세 조회 API 호출
   const fetchPost = async () => {
     if (!postId) return;
@@ -93,8 +113,45 @@ export default function PostDetailPage() {
     if (post) {
       fetchUserFavorites();
       checkPurchased();
+      fetchComments();
     }
   }, [post]);
+
+  const fetchComments = async () => {
+    const result = await client.GET("/api/posts/{id}/comments", {
+      params: {
+        path: {
+          id: post!.id!,
+        },
+        query: {
+          pageable: {},
+          page: 0,
+          size: 10,
+        },
+      },
+      credentials: "include",
+    });
+    if (result.error) {
+      console.log(result.error);
+      return;
+    }
+    setComments(result.data.data!.content!);
+  };
+
+  const loadComments = async (page: number) => {
+    const response = await client.GET("/api/posts/{id}/comments", {
+      params: {
+        path: {
+          id: post!.id!,
+        },
+        query: {
+          pageable: {},
+          page: page,
+        },
+      },
+    });
+    return response.data!.data.content!;
+  };
 
   // 구매 처리 핸들러
   const handlePurchase = async () => {
@@ -195,7 +252,7 @@ export default function PostDetailPage() {
     : [];
 
   return (
-    <div className="p-4">
+    <div className="p-4  w-full">
       <div className="bg-gray-800 text-white p-4 rounded mb-4">
         <h1 className="text-2xl font-bold">길게 볼 장터</h1>
       </div>
@@ -301,8 +358,8 @@ export default function PostDetailPage() {
           {purchased
             ? "구매 완료"
             : purchaseLoading
-              ? "처리 중..."
-              : "구매하기"}
+            ? "처리 중..."
+            : "구매하기"}
         </button>
         <button
           onClick={handleEdit}
@@ -316,6 +373,13 @@ export default function PostDetailPage() {
         >
           삭제하기
         </button>
+        <div className="w-full">
+          <Comments
+            postId={post.id!}
+            initialComments={comments}
+            loadMoreComments={loadComments}
+          ></Comments>
+        </div>
       </div>
     </div>
   );
