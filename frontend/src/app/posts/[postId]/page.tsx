@@ -17,6 +17,9 @@ export default function PostDetailPage() {
   const [likeLoading, setLikeLoading] = useState<boolean>(false);
   const [liked, setLiked] = useState<boolean>(false);
 
+  const [purchased, setPurchased] = useState<boolean>(false);
+  const [purchaseLoading, setPurchasedLoading] = useState<boolean>(false);
+
   const checkLoginStatus = async (): Promise<boolean> => {
     try {
       const result = await client.GET("/api/users/me", {
@@ -54,6 +57,27 @@ export default function PostDetailPage() {
     }
   };
 
+  const checkPurchased = async () => {
+    const isLoggedIn = await checkLoginStatus();
+
+    if (!isLoggedIn) return;
+
+    const result = await client.GET("/api/payments", {
+      params: {
+        query: {
+          "post-id": post!.id!,
+        },
+      },
+      credentials: "include",
+    });
+    if (result.error) {
+      console.log(result);
+      setPurchased(false);
+      return;
+    }
+    setPurchased(true);
+  };
+
   const fetchUserFavorites = async () => {
     const isLoggedIn = await checkLoginStatus();
     if (!isLoggedIn) return;
@@ -80,11 +104,42 @@ export default function PostDetailPage() {
   }, [postId]);
 
   useEffect(() => {
-    if (post) fetchUserFavorites();
+    if (post) {
+      fetchUserFavorites();
+      checkPurchased();
+    }
   }, [post]);
 
-  
-  
+  const handlePurchase = async () => {
+    console.log("hi");
+    const isLoggedIn = await checkLoginStatus();
+    if (!isLoggedIn) {
+      alert("먼저 로그인을 해주세요.");
+      router.push("/user/login");
+      return;
+    }
+
+    const isConfirmed = confirm("정말 구매하시겠습니까?");
+
+    if (isConfirmed) {
+      setPurchasedLoading(true);
+      const response = await client.POST("/api/payments", {
+        body: {
+          productId: post!.id,
+        },
+        credentials: "include",
+      });
+      if (response.error) {
+        alert("구매에 실패했습니다.");
+        console.error("구매 처리 실패", response.error);
+        setPurchasedLoading(false);
+        return;
+      }
+      setPurchased(true);
+      setPurchasedLoading(false);
+    } else {
+    }
+  };
 
   const handleLike = async () => {
     if (!post) return;
@@ -126,7 +181,7 @@ export default function PostDetailPage() {
     : [];
 
   return (
-    <div className="p-4">
+    <div className="p-4 w-full">
       <div className="bg-gray-800 text-white p-4 rounded mb-4">
         <h1 className="text-2xl font-bold">길게 볼 장터</h1>
       </div>
@@ -223,6 +278,17 @@ export default function PostDetailPage() {
           className="px-4 py-2 bg-red-500 text-white rounded"
         >
           {liked ? "찜 완료" : likeLoading ? "처리 중..." : "찜하기"}
+        </button>
+        <button
+          disabled={purchaseLoading || purchased}
+          onClick={handlePurchase}
+          className="px-4 py-2 bg-red-500 text-white rounded"
+        >
+          {purchased
+            ? "구매 완료"
+            : purchaseLoading
+            ? "처리 중..."
+            : "구매하기"}
         </button>
       </div>
     </div>
