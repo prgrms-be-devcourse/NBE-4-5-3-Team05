@@ -83,7 +83,7 @@ public class PostCommentController {
 		return new RsData<>("204-1", "comment 삭제 성공.");
 	}
 
-	@GetMapping("/{id}")
+	@GetMapping("/{id}/comments")
 	public RsData<Slice<CommentDto>> getComments(@PathVariable(name = "id") String postId, Pageable pageable) {
 		Slice<CommentDto> comments = commentService.getComments(postId, pageable);
 

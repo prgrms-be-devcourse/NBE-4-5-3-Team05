@@ -22,7 +22,7 @@ public class CorsConfig implements CorsConfigurationSource {
 	public CorsConfiguration getCorsConfiguration(@NonNull HttpServletRequest request) {
 		CorsConfiguration config = new CorsConfiguration();
 		ALLOWED_ORIGIN = "http://%s".formatted(frontHost);
-		config.setAllowedOrigins(List.of(ALLOWED_ORIGIN));
+		config.setAllowedOrigins(List.of(ALLOWED_ORIGIN, "http://localhost:3000"));
 		config.setAllowedMethods(ALLOWED_METHODS);
 		config.setAllowCredentials(true);
 		config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "Origin"));

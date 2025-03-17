@@ -392,6 +392,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/posts/{id}/comments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getComments"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/posts/recently-viewed": {
         parameters: {
             query?: never;
@@ -884,8 +900,8 @@ export interface components {
             purchasedProducts?: components["schemas"]["ProductPost"][];
             writtenProducts?: components["schemas"]["ProductPost"][];
             wroteComments?: components["schemas"]["Comment"][];
-            authorities?: components["schemas"]["GrantedAuthority"][];
             admin?: boolean;
+            authorities?: components["schemas"]["GrantedAuthority"][];
             memberAuthoritiesAsString?: string[];
         };
         UpdateNoticeReq: {
@@ -1073,6 +1089,54 @@ export interface components {
             message: string;
             data: components["schemas"]["PageDtoPreviewPostResponse"];
         };
+        Pageable: {
+            /** Format: int32 */
+            page?: number;
+            /** Format: int32 */
+            size?: number;
+            sort?: string[];
+        };
+        CommentDto: {
+            id?: string;
+            author?: components["schemas"]["UserDto"];
+            content?: string;
+            postId?: string;
+        };
+        PageableObject: {
+            /** Format: int64 */
+            offset?: number;
+            sort?: components["schemas"]["SortObject"];
+            /** Format: int32 */
+            pageSize?: number;
+            paged?: boolean;
+            /** Format: int32 */
+            pageNumber?: number;
+            unpaged?: boolean;
+        };
+        RsDataSliceCommentDto: {
+            code: string;
+            message: string;
+            data: components["schemas"]["SliceCommentDto"];
+        };
+        SliceCommentDto: {
+            /** Format: int32 */
+            size?: number;
+            content?: components["schemas"]["CommentDto"][];
+            /** Format: int32 */
+            number?: number;
+            sort?: components["schemas"]["SortObject"];
+            first?: boolean;
+            last?: boolean;
+            /** Format: int32 */
+            numberOfElements?: number;
+            pageable?: components["schemas"]["PageableObject"];
+            empty?: boolean;
+        };
+        SortObject: {
+            empty?: boolean;
+            unsorted?: boolean;
+            sorted?: boolean;
+        };
         RsDataListPreviewPostResponse: {
             code: string;
             message: string;
@@ -1151,13 +1215,6 @@ export interface components {
             message: string;
             data: components["schemas"]["Category"][];
         };
-        Pageable: {
-            /** Format: int32 */
-            page?: number;
-            /** Format: int32 */
-            size?: number;
-            sort?: string[];
-        };
         PageUserDto: {
             /** Format: int64 */
             totalElements?: number;
@@ -1176,26 +1233,10 @@ export interface components {
             pageable?: components["schemas"]["PageableObject"];
             empty?: boolean;
         };
-        PageableObject: {
-            /** Format: int64 */
-            offset?: number;
-            sort?: components["schemas"]["SortObject"];
-            /** Format: int32 */
-            pageSize?: number;
-            paged?: boolean;
-            /** Format: int32 */
-            pageNumber?: number;
-            unpaged?: boolean;
-        };
         RsDataPageUserDto: {
             code: string;
             message: string;
             data: components["schemas"]["PageUserDto"];
-        };
-        SortObject: {
-            empty?: boolean;
-            unsorted?: boolean;
-            sorted?: boolean;
         };
         PageNoticeResBody: {
             /** Format: int64 */
@@ -2264,6 +2305,39 @@ export interface operations {
                 };
                 content: {
                     "application/json;charset=UTF-8": components["schemas"]["RsDataNoticeResBody"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataVoid"];
+                };
+            };
+        };
+    };
+    getComments: {
+        parameters: {
+            query: {
+                pageable: components["schemas"]["Pageable"];
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataSliceCommentDto"];
                 };
             };
             /** @description Internal Server Error */
