@@ -39,6 +39,7 @@ public class TestConfig {
         return redisTestContainer;
     }
 
+
     @Bean
     @Primary
     public RedisConnectionFactory redisConnectionFactory() {

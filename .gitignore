@@ -2,9 +2,9 @@
 db_dev.mv.db
 db_dev.trace.db
 api.json
+/backend/application.pid
 
 .idea/
 *.iws
 *.iml
 *.ipr
-

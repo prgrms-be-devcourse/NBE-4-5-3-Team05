@@ -1,49 +1,35 @@
 package com.NBE_4_5_2.Team5.domain.post.post.entity;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
+import com.NBE_4_5_2.Team5.domain.base.entity.BaseTime;
 import com.NBE_4_5_2.Team5.domain.post.category.entity.Category;
 import com.NBE_4_5_2.Team5.domain.post.comment.entity.Comment;
 import com.NBE_4_5_2.Team5.domain.post.post.enums.ProductStatus;
 import com.NBE_4_5_2.Team5.domain.user.user.entity.User;
 import com.NBE_4_5_2.Team5.global.exception.security.AuthenticationNotFoundException;
 import com.NBE_4_5_2.Team5.global.exception.security.ForbiddenAccessException;
+import jakarta.persistence.*;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EntityListeners;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @Entity
-@AllArgsConstructor
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-@Builder
+@SuperBuilder
+@NoArgsConstructor
+@AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
-public class ProductPost {
+@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
+public class ProductPost extends BaseTime {
 
 	@Id
+	@Builder.Default
+	@EqualsAndHashCode.Include
 	@Column(updatable = false, nullable = false)
-	private String id;
+	private String id = "ppost-" + UUID.randomUUID();
 
 	@Column(nullable = false)
 	@Setter
@@ -91,13 +77,6 @@ public class ProductPost {
 	@Setter
 	private Float longitude;
 
-	@CreatedDate
-	@Column(updatable = false)
-	private LocalDateTime createdAt;
-
-	@LastModifiedDate
-	private LocalDateTime modifiedAt;
-
 	@OneToMany(mappedBy = "productPost", cascade = CascadeType.ALL, orphanRemoval = true)
 	@Builder.Default
 	private List<ProductCategory> productCategories = new ArrayList<>();
@@ -112,7 +91,6 @@ public class ProductPost {
 	public static ProductPost create(User writer, String productName, Integer productPrice, String title,
 		String content, String image_urls, Float latitude, Float longitude) {
 		return ProductPost.builder()
-			.id("ppost-" + UUID.randomUUID())
 			.writer(writer)
 			.productName(productName)
 			.productPrice(productPrice)
@@ -132,7 +110,7 @@ public class ProductPost {
 
 	public void addCategories(List<Category> categories) {
 		List<ProductCategory> productCategories = categories.stream()
-			.map(category -> ProductCategory.builder()
+			.map(category -> (ProductCategory) ProductCategory.builder()
 				.productPost(this)
 				.category(category)
 				.build())

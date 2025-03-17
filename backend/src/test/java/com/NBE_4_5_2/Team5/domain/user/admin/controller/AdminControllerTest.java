@@ -13,7 +13,6 @@ import com.NBE_4_5_2.Team5.domain.user.user.entity.Role;
 import com.NBE_4_5_2.Team5.domain.user.user.entity.User;
 import com.NBE_4_5_2.Team5.domain.user.user.repository.UserRepository;
 import com.NBE_4_5_2.Team5.global.config.BaseTestConfig;
-import com.NBE_4_5_2.Team5.global.config.RedisTestContainerConfig;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;
 import org.assertj.core.api.Assertions;
@@ -39,7 +38,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @BaseTestConfig
 @Order(100)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class AdminControllerTest extends RedisTestContainerConfig {
+class AdminControllerTest  {
 
 	@Autowired
 	private MockMvc mockMvc;

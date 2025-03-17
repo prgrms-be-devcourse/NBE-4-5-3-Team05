@@ -1,43 +1,37 @@
 package com.NBE_4_5_2.Team5.domain.user.user.entity;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-
 import com.NBE_4_5_2.Team5.domain.base.entity.BaseTime;
 import com.NBE_4_5_2.Team5.domain.post.comment.entity.Comment;
 import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductPost;
 import com.NBE_4_5_2.Team5.domain.post.post.enums.ProductStatus;
 import com.NBE_4_5_2.Team5.global.exception.payment.InsufficientPayMoneyException;
-
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EntityListeners;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.persistence.*;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Getter
-@AllArgsConstructor
-@NoArgsConstructor
 @SuperBuilder
+@NoArgsConstructor
+@AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @Table(name = "member")
 public class User extends BaseTime {
+
+	@Id
+	@Builder.Default
+	@EqualsAndHashCode.Include
+	@Column(updatable = false, nullable = false)
+	private String id = "user-" + UUID.randomUUID();
 
 	@Column(length = 20, nullable = false, unique = true)
 	@Setter
@@ -206,6 +200,13 @@ public class User extends BaseTime {
 		this.nickname = nickname;
 		this.address = address;
 		this.profileUrl = profileUrl;
+		this.role = role;
+	}
+
+	public User(String id, String username, String nickname, Role role) {
+		this.id = id;
+		this.username = username;
+		this.nickname = nickname;
 		this.role = role;
 	}
 

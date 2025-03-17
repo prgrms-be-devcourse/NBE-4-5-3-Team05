@@ -1,27 +1,22 @@
 package com.NBE_4_5_2.Team5.domain.post.post.entity;
 
+import com.NBE_4_5_2.Team5.domain.base.entity.BaseLongIdEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 @Entity
 @Getter
-@NoArgsConstructor
+@SuperBuilder
 @AllArgsConstructor
-@Builder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "liked_post")
-public class LikedPost {
-
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+public class LikedPost extends BaseLongIdEntity {
 
 	@Column(nullable = false)
 	private String userId;  // 찜한 사용자 ID
