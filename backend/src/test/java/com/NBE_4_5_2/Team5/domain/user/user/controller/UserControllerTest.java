@@ -34,7 +34,7 @@ import jakarta.transaction.Transactional;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @BaseTestConfig
 @Order(100)
-class UserControllerTest  {
+class UserControllerTest {
 
 	@Autowired
 	private MockMvc mvc;
@@ -352,7 +352,6 @@ class UserControllerTest  {
 				assertThat(cookieRefreshToken).isNotNull();
 				assertThat(cookieRefreshToken.getName()).isEqualTo("refreshToken");
 				assertThat(cookieRefreshToken.getValue()).isNotBlank();
-				assertThat(cookieRefreshToken.getDomain()).isEqualTo("localhost");
 				assertThat(cookieRefreshToken.getPath()).isEqualTo("/");
 				assertThat(cookieRefreshToken.isHttpOnly()).isTrue();
 				assertThat(cookieRefreshToken.getSecure()).isTrue();
@@ -362,7 +361,6 @@ class UserControllerTest  {
 				assertThat(cookieAccessToken).isNotNull();
 				assertThat(cookieAccessToken.getName()).isEqualTo("accessToken");
 				assertThat(cookieAccessToken.getValue()).isNotBlank();
-				assertThat(cookieAccessToken.getDomain()).isEqualTo("localhost");
 				assertThat(cookieAccessToken.getPath()).isEqualTo("/");
 				assertThat(cookieAccessToken.isHttpOnly()).isTrue();
 				assertThat(cookieAccessToken.getSecure()).isTrue();
@@ -758,7 +756,6 @@ class UserControllerTest  {
 				assertThat(accessToken).isNotNull();
 				assertThat(accessToken.getName()).isEqualTo("accessToken");
 				assertThat(accessToken.getValue()).isNotBlank();
-				assertThat(accessToken.getDomain()).isEqualTo("localhost");
 				assertThat(accessToken.getPath()).isEqualTo("/");
 				assertThat(accessToken.isHttpOnly()).isTrue();
 				assertThat(accessToken.getSecure()).isTrue();

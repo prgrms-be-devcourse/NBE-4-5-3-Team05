@@ -5,6 +5,8 @@ import java.util.Optional;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.annotation.RequestScope;
 
+import com.NBE_4_5_2.Team5.domain.user.user.service.UserService;
+
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -17,6 +19,7 @@ public class Rq {
 
 	private final HttpServletResponse response;
 	private final HttpServletRequest request;
+	private final UserService userService;
 
 	public String getHeader(String name) {
 		return request.getHeader(name);
@@ -50,6 +53,7 @@ public class Rq {
 	public void addCookie(String name, String value) {
 		Cookie accsessTokenCookie = new Cookie(name, value);
 
+		accsessTokenCookie.setDomain("localhost");
 		accsessTokenCookie.setPath("/");
 		accsessTokenCookie.setHttpOnly(true);
 		accsessTokenCookie.setSecure(true);
@@ -61,6 +65,7 @@ public class Rq {
 	public void removeCookie(String name) {
 
 		Cookie cookie = new Cookie(name, null);
+		cookie.setDomain("localhost");
 		cookie.setPath("/");
 		cookie.setHttpOnly(true);
 		cookie.setSecure(true);
