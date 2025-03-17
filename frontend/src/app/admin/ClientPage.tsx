@@ -79,6 +79,7 @@ export default function SidebarLayout({
     if (!tab) {
       router.replace("?tab=ProductList"); // ✅ 초기 상태 설정
     }
+    setCurrentPage(tab as PageType);
   }, [tab, router]);
 
   // URL에서 현재 탭 상태 가져오기
