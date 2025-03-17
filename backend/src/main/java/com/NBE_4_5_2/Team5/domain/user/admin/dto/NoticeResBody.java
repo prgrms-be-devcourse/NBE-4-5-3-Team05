@@ -9,4 +9,5 @@ public record NoticeResBody(String id, String title, String content, AdminResBod
 		return new NoticeResBody(saved.getId(), saved.getTitle(), saved.getContent(),
 			new AdminResBody(saved.getAdmin()), saved.getCreatedAt());
 	}
+
 }
