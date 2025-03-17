@@ -1,14 +1,5 @@
 package com.NBE_4_5_2.Team5.domain.user.user.controller;
 
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.NBE_4_5_2.Team5.domain.user.user.dto.AuthToken;
 import com.NBE_4_5_2.Team5.domain.user.user.dto.SignUpUserForm;
 import com.NBE_4_5_2.Team5.domain.user.user.dto.UserDto;
@@ -19,20 +10,26 @@ import com.NBE_4_5_2.Team5.domain.user.user.service.UserService;
 import com.NBE_4_5_2.Team5.global.Rq;
 import com.NBE_4_5_2.Team5.global.dto.Empty;
 import com.NBE_4_5_2.Team5.global.dto.RsData;
-
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
+@Tag(name = "User API", description = "사용자 관련 API")
 public class UserController {
 
 	private final UserService userService;
 	private final Rq rq;
 	private final UserAuthService userAuthService;
 
+	@Operation(summary = "회원 가입", description = "새로운 사용자를 등록합니다.")
 	@PostMapping("/signup")
 	public RsData<UserDto> createUser(@RequestBody @Valid SignUpUserForm userForm) {
 
@@ -51,6 +48,7 @@ public class UserController {
 	public record LoginUserDto(String accessToken, String refreshToken, UserDto item) {
 	}
 
+	@Operation(summary = "로그인", description = "사용자가 로그인합니다.")
 	@PostMapping("/login")
 	public RsData<LoginUserDto> loginUser(@RequestBody @Valid LoginUserForm userForm) {
 
@@ -64,6 +62,8 @@ public class UserController {
 			new LoginUserDto(authToken.accessToken(), authToken.refreshToken(), new UserDto(user)));
 	}
 
+	@Operation(summary = "로그아웃", description = "현재 로그인된 사용자를 로그아웃합니다.")
+	@SecurityRequirement(name = "cookieAuth")
 	@PreAuthorize("isAuthenticated()")
 	@PostMapping("/logout")
 	public RsData<Void> logoutUser() {
@@ -77,7 +77,8 @@ public class UserController {
 		return new RsData<>("200-1", "로그아웃 되었습니다.");
 	}
 
-	//내 정보 조회
+	@Operation(summary = "내 정보 조회", description = "현재 로그인된 사용자의 정보를 조회합니다.")
+	@SecurityRequirement(name = "cookieAuth")
 	@PreAuthorize("isAuthenticated()")
 	@GetMapping("/me")
 	public RsData<UserDto> me() {
@@ -91,6 +92,7 @@ public class UserController {
 	record RefreshUserForm(@NotBlank(message = "refreshToken을 입력해주세요.") String refreshToken) {
 	}
 
+	@Operation(summary = "AccessToken 재발급", description = "RefreshToken을 이용하여 새로운 AccessToken을 발급받습니다.")
 	@PostMapping("/refresh")
 	public RsData<String> refreshAccessToken(@RequestBody @Valid RefreshUserForm userForm) {
 
@@ -101,7 +103,9 @@ public class UserController {
 		return new RsData<>("200-1", "AccessToken이 재발급되었습니다.", newAccessToken);
 	}
 
-	//  내 정보 수정
+
+	@Operation(summary = "내 정보 수정", description = "현재 로그인된 사용자의 정보를 수정합니다.")
+	@SecurityRequirement(name = "cookieAuth")
 	@PreAuthorize("isAuthenticated()")
 	@PutMapping("/me")
 	public RsData<UserDto> updateMyProfile(@RequestBody @Valid UserUpdateRequest updateRequest) {
@@ -111,7 +115,8 @@ public class UserController {
 		return new RsData<>("200", "사용자 정보가 성공적으로 수정되었습니다.", updatedUser);
 	}
 
-	// 회원 탈퇴
+	@Operation(summary = "회원 탈퇴", description = "현재 로그인된 사용자의 계정을 삭제합니다.")
+	@SecurityRequirement(name = "cookieAuth")
 	@PreAuthorize("isAuthenticated()")
 	@DeleteMapping("/me")
 	public RsData<?> deleteMyProfile() {
@@ -128,7 +133,7 @@ public class UserController {
 	record EmailCodeRequest(String email) {
 	}
 
-	//인증 코드 이메일 발송
+	@Operation(summary = "이메일 인증 코드 발송", description = "사용자의 이메일로 인증 코드를 발송합니다.")
 	@PostMapping("/email/code")
 	public RsData<Void> sendAuthenticationCode(@RequestBody EmailCodeRequest userForm) {
 		userService.sendAuthenticationCode(userForm.email());
@@ -138,7 +143,7 @@ public class UserController {
 	record VerifyCodeRequest(String email, String code) {
 	}
 
-	// 인증 코드 검증
+	@Operation(summary = "이메일 인증 코드 검증", description = "사용자가 입력한 인증 코드를 검증합니다.")
 	@PostMapping("/email/code/verify")
 	public RsData<Void> verifyAuthenticationCode(@RequestBody VerifyCodeRequest userForm) {
 

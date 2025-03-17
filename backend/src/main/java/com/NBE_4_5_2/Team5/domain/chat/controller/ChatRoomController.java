@@ -1,19 +1,5 @@
 package com.NBE_4_5_2.Team5.domain.chat.controller;
 
-import java.util.List;
-
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Controller;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-
 import com.NBE_4_5_2.Team5.domain.chat.dto.ChatRoomDto;
 import com.NBE_4_5_2.Team5.domain.chat.dto.MessageDto;
 import com.NBE_4_5_2.Team5.domain.chat.entity.AccessProvider;
@@ -31,12 +17,17 @@ import com.NBE_4_5_2.Team5.global.Rq;
 import com.NBE_4_5_2.Team5.global.dto.RsData;
 import com.NBE_4_5_2.Team5.global.exception.security.WrongRoleException;
 import com.NBE_4_5_2.Team5.global.exception.user.UserNotFoundException;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RequiredArgsConstructor
 @Controller
@@ -68,7 +59,6 @@ public class ChatRoomController {
 
 	// 채팅방 상세 페이지로 이동 (HTML 반환)
 	@Operation(summary = "채팅방 상세 페이지 조회", description = "채팅방 상세 페이지를 HTML로 반환합니다.")
-
 	@GetMapping("/room/{roomId}/show")
 	public String showRoomDetailPage(@PathVariable String roomId) {
 		String token = rq.getValueFromCookie("accessToken");
@@ -119,7 +109,7 @@ public class ChatRoomController {
 	}
 
 	// 고객센터
-	@Operation(summary = "관리자와의 채팅방을 생성합니다.", description = "id를 가진 관리자와의 채팅방을 생성합니다.")
+	@Operation(summary = "관리자와의 채팅방 생성", description = "관리자와의 채팅방을 생성합니다.")
 	@PreAuthorize("isAuthenticated()")
 	@SecurityRequirement(name = "cookieAuth")
 	@PostMapping("/admin/{adminId}")
@@ -191,7 +181,7 @@ public class ChatRoomController {
 	}
 
 	// 채팅방 삭제
-	@Operation(summary = "채팅방을 삭제합니다.", description = "유저가 속한 채팅방을 id로 삭제합니다.")
+	@Operation(summary = "채팅방 삭제", description = "유저가 속한 채팅방을 id로 삭제합니다.")
 	@PreAuthorize("isAuthenticated()")
 	@SecurityRequirement(name = "cookieAuth")
 	@DeleteMapping("/message")
@@ -226,6 +216,7 @@ public class ChatRoomController {
 	}
 
 	// 권한부여(임시)
+	@Operation(summary = "관리자 권한 부여", description = "특정 사용자의 계정을 관리자(Admin)로 설정합니다.")
 	@PreAuthorize("isAuthenticated()")
 	@SecurityRequirement(name = "cookieAuth")
 	@PutMapping("/admin")
