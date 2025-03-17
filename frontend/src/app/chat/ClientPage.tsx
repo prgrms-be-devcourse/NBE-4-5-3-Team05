@@ -7,7 +7,7 @@ import { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"; 
 import { faMagnifyingGlass,faHeadphones } from "@fortawesome/free-solid-svg-icons";
 import { Button } from "@/components/ui/button";
-import client from "@/lib/backend/client";
+import client from "@/lib/client";
 
 export default function ClientPage({
   chatRoom,
