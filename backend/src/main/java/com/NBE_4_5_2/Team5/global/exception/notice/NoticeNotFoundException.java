@@ -4,4 +4,8 @@ public class NoticeNotFoundException extends NoticeException {
 	public NoticeNotFoundException(String code, String message) {
 		super(code, message);
 	}
+
+	public NoticeNotFoundException() {
+		super("404-1", "그런 Notice Post는 없습니다.");
+	}
 }
