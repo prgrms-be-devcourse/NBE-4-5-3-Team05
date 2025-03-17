@@ -1,0 +1,22 @@
+[
+  {
+    "id": 1,
+    "amount": 1000,
+    "displayName": "1000원"
+  },
+  {
+    "id": 2,
+    "amount": 5000,
+    "displayName": "5000원"
+  },
+  {
+    "id": 3,
+    "amount": 10000,
+    "displayName": "10000원"
+  },
+  {
+    "id": 4,
+    "amount": 50000,
+    "displayName": "50000원"
+  }
+]

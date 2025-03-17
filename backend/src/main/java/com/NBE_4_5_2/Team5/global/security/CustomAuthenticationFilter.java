@@ -1,8 +1,9 @@
 package com.NBE_4_5_2.Team5.global.security;
 
-import com.NBE_4_5_2.Team5.domain.user.dto.AuthToken;
-import com.NBE_4_5_2.Team5.domain.user.entity.User;
-import com.NBE_4_5_2.Team5.domain.user.service.UserService;
+import com.NBE_4_5_2.Team5.domain.user.user.dto.AuthToken;
+import com.NBE_4_5_2.Team5.domain.user.user.entity.User;
+import com.NBE_4_5_2.Team5.domain.user.user.service.UserAuthService;
+import com.NBE_4_5_2.Team5.domain.user.user.service.UserService;
 import com.NBE_4_5_2.Team5.global.Rq;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -13,8 +14,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
@@ -22,12 +23,24 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
 
     private final Rq rq;
     private final UserService userService;
+    private final UserAuthService userAuthService;
+
+    private static final Set<String> EXCLUDED_URLS = Set.of(
+            "/api/users/login",
+            "/api/users/signup",
+            "/api/users/refresh",
+            "/api/users/email/code/verify",
+            "/api/users/email/code",
+            "/error",
+            "/actuator/**",
+            "/swagger-ui/**"
+    );
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
         String url = request.getRequestURI();
-        if (List.of("/api/users/login", "/api/users/signup", "/error").contains(url)) {
+        if (EXCLUDED_URLS.contains(url)) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -48,7 +61,7 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        rq.setLogin(actor);
+        userAuthService.setLogin(actor);
         filterChain.doFilter(request, response);
     }
 
@@ -98,16 +111,16 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
 
     /**
      * accessToken 재발급 로직
-     *
+     * <p>
      * accessToken 재발급 시 refreshToken 또한 재발급하며 기존 refreshToken을 Redis에서 제거한다.
      * - 현재 refreshToken은 로그아웃 시에만 삭제되므로,
      * 사용자가 로그아웃하지 않는다면 탈취된 refreshToken으로 지속적인 재발급이 가능해지는 보안 문제가 발생한다.
-     *
-     *  1. Redis에 refreshToken을 저장하고 만료 시간을 설정하여 1차 방지
-     *  2. accessToken 재발급 시 기존 refreshToken을 저장소에서 제거하는 것으로 재발급을 1회로 제한하여 2차 방지
-     *
+     * <p>
+     * 1. Redis에 refreshToken을 저장하고 만료 시간을 설정하여 1차 방지
+     * 2. accessToken 재발급 시 기존 refreshToken을 저장소에서 제거하는 것으로 재발급을 1회로 제한하여 2차 방지
+     * <p>
      * ⚠️ 실제 사용자도 재발급이 1회만 가능해지기 때문에 사용자 경험이 저하될 수 있다.
-     *     이는 accessToken의 유효기간을 1시간으로 설정하여 보완한다.
+     * 이는 accessToken의 유효기간을 1시간으로 설정하여 보완한다.
      */
     private User getUserByAccessToken(String accessToken, String refreshToken) {
 

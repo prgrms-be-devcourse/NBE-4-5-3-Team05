@@ -1,16 +1,28 @@
 server:
   port: 8080
 
+
+custom:
+  server:
+    host: localhost
+  front:
+    host: localhost
+    port: 3000
+
+    
 spring:
   jackson:
     serialization:
       fail-on-empty-beans: false
-  
+
   output:
     ansi:
       enabled: always
-  
-  
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
   datasource:
     url: jdbc:h2:./db_dev;MODE=MySQL
     username: sa
@@ -30,10 +42,18 @@ spring:
         use_sql_comments: true
         default_batch_fetch_size: 100
     open-in-view: false
-  data:
-    redis:
-      host: localhost
-      port: 6379
+
+  mail:
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connection-timeout: 5000                     # 클라이언트 -> SMTP 서버 연결 대기 시간
+          timeout: 5000                                # 클라이언트 <- SMTP 서버 응답 대기 시간
+          write-timeout: 5000                          # 클라이언트 작업 완료 대기 시간
 
   security:
     oauth2:

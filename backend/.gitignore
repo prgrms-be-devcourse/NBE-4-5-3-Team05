@@ -18,7 +18,7 @@ bin/
 !**/src/test/**/bin/
 
 ### IntelliJ IDEA ###
-.idea/
+.idea
 *.iws
 *.iml
 *.ipr
@@ -29,18 +29,32 @@ out/
 ### NetBeans ###
 /nbproject/private/
 /nbbuild/
-dist/
-nbdist/
-.nb-gradle/
+/dist/
+/nbdist/
+/.nb-gradle/
 
 ### VS Code ###
 .vscode/
 *.code-workspace
 
 ### 🛠 환경 설정 파일 ###
-/src/main/resources/application.properties
-/src/main/resources/*.yml
-gradle
+
+### 🚀 데이터베이스 관련 ###
+*.db
+*.sqlite
+*.s3db
+*.h2.db
+*.mv.db  # H2 데이터베이스 무시
+*.trace.db
+
+### 📝 로그 파일 ###
+logs/
+*.log
+*.log.*
+log/
+debug.log
+error.log
+
 
 ### custom ###
 gradlew
@@ -87,3 +101,6 @@ error.log
 # Generated OpenAPI Files
 apiV1.json
 frontend/src/lib/backend/api/schema.d.ts
+apiV1.json
+/application.pid
+src/main/resources/application-mysql.yml

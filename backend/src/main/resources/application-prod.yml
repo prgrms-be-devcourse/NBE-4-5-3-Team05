@@ -1,0 +1,78 @@
+server:
+  port: 8080
+
+
+spring:
+  jackson:
+    serialization:
+      fail-on-empty-beans: false
+
+  output:
+    ansi:
+      enabled: always
+
+  data:
+    redis:
+      port: ${REDIS_PORT}
+      host: ${REDIS_HOST}
+
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      auto-commit: false
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        default_batch_fetch_size: 100
+    open-in-view: false
+
+
+  security:
+    oauth2:
+      client:
+        registration:
+          kakao:
+            scope: profile_nickname, profile_image
+            client-name: Kakao
+            authorization-grant-type: authorization_code
+            redirect-uri: http://${custom.server.host}:${server.port}/login/oauth2/code/kakao
+        provider:
+          kakao:
+            authorization-uri: https://kauth.kakao.com/oauth/authorize
+            token-uri: https://kauth.kakao.com/oauth/token
+            user-info-uri: https://kapi.kakao.com/v2/user/me
+            user-name-attribute: id
+
+  mail:
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connection-timeout: 5000                     # 클라이언트 -> SMTP 서버 연결 대기 시간
+          timeout: 5000                                # 클라이언트 <- SMTP 서버 응답 대기 시간
+          write-timeout: 5000                          # 클라이언트 작업 완료 대기 시간
+
+logging:
+  level:
+    root: info
+
+
+springdoc:
+  default-produces-media-type: application/json;charset=UTF-8
+
+custom:
+  server:
+    host: 3.35.108.184
+  front:
+    host: 3.37.172.144
+    port: 3000

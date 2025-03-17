@@ -1,9 +1,8 @@
 package com.NBE_4_5_2.Team5.domain.post.post.repository;
 
 import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductPost;
-import com.NBE_4_5_2.Team5.domain.user.entity.User;
-import java.util.List;
-
+import com.NBE_4_5_2.Team5.domain.post.post.enums.ProductStatus;
+import com.NBE_4_5_2.Team5.domain.user.user.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -12,12 +11,15 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
 
-import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductPost;
-import com.NBE_4_5_2.Team5.domain.post.post.enums.ProductStatus;
-import com.NBE_4_5_2.Team5.domain.user.entity.User;
+import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ProductPostRepository extends JpaRepository<ProductPost, String> {
+
+	@EntityGraph(attributePaths = {"writer", "productCategories.category"})
+	@Query("select p from ProductPost p where p.id = :id")
+	Optional<ProductPost> findByIdWithWriter(String id);
 
 	@EntityGraph(attributePaths = {"productCategories.category"})
 	Page<ProductPost> findByTitleLike(String title, Pageable pageable);
@@ -38,7 +40,13 @@ public interface ProductPostRepository extends JpaRepository<ProductPost, String
 	List<ProductPost> findAllByStatus(ProductStatus status);
 
 	@EntityGraph(attributePaths = {"productCategories.category"})
-	List<ProductPost> findByBuyer(User buyer);
+	Page<ProductPost> findByBuyer(User buyer,Pageable pageable);
 
+	@EntityGraph(attributePaths = {"writer", "productCategories.category"})
+	Page<ProductPost> findByIdIn(List<String> postIds,Pageable pageable);
+
+	@EntityGraph(attributePaths = {"writer", "productCategories.category"})
 	List<ProductPost> findByIdIn(List<String> postIds);
+
+	Page<ProductPost> findByWriterAndStatus(User writer, ProductStatus status, Pageable pageable);
 }

@@ -1,48 +1,41 @@
 package com.NBE_4_5_2.Team5.domain.payment.entity;
 
-import java.time.LocalDateTime;
-
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
+import com.NBE_4_5_2.Team5.domain.base.entity.BaseTime;
+import com.NBE_4_5_2.Team5.domain.payment.enums.PaymentStatus;
+import com.NBE_4_5_2.Team5.domain.user.user.entity.User;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import com.NBE_4_5_2.Team5.domain.payment.enums.PaymentStatus;
-import com.NBE_4_5_2.Team5.domain.user.entity.User;
-
-import jakarta.persistence.Entity;
-import jakarta.persistence.EntityListeners;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
-import jakarta.validation.constraints.NotNull;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import java.util.UUID;
 
 @Entity
-@NoArgsConstructor
 @Getter
+@SuperBuilder
+@NoArgsConstructor
+@AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
-public class Payment {
+@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
+public class Payment extends BaseTime {
+
 	@Id
-	private String id;
+	@Builder.Default
+	@EqualsAndHashCode.Include
+	@Column(updatable = false, nullable = false)
+	private String id = "payment-" + UUID.randomUUID();
+
 	private String paymentKey;
+
 	@ManyToOne
 	private User buyer;
 
 	private int totalPrice;
 
-	@CreatedDate
-	private LocalDateTime createdAt;
-
-	@LastModifiedDate
-	private LocalDateTime modifiedAt;
-
 	@Enumerated(EnumType.STRING)
 	private PaymentStatus status;
 
-	@Builder
 	public Payment(String id, User buyer, int totalPrice, PaymentStatus status) {
 		this.id = id;
 		this.buyer = buyer;
