@@ -23,37 +23,6 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const myCookie = await cookies();
-  const { isLogin, payload } = parseAccessToken(myCookie.get("accessToken"));
-
-  const me: components["schemas"]["UserDto"] = isLogin
-    ? {
-        id: payload.id,
-        username: payload.username,
-        email: "", // 실제 이메일 등 필요한 값 채워주세요.
-        nickname: payload.nickname,
-        address: "",
-        profileUrl: "",
-        role: payload.role,
-        createdAt: "",
-        modifiedAt: "",
-        blocked: false,
-        blockedCount: 0,
-      }
-    : {
-        id: "",
-        username: "",
-        email: "",
-        nickname: "",
-        address: "",
-        profileUrl: "",
-        role: "USER",
-        createdAt: "",
-        modifiedAt: "",
-        blocked: false,
-        blockedCount: 0,
-      };
-
   return (
     <html
       lang="en"

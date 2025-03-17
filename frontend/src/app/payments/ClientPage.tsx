@@ -19,27 +19,28 @@ export default function CheckoutPage() {
     } else {
       url = `${process.env.NEXT_PUBLIC_PROTOCOL}://${process.env.NEXT_PUBLIC_BACKEND_HOST}:${process.env.NEXT_PUBLIC_BACKEND_PORT}/api/payments`;
     }
-    const response = await fetch(
-      url,
-      {
-        method: "POST",
-        body: JSON.stringify({
-          productId: productId,
-        }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
+    const response = await fetch(url, {
+      method: "POST",
+      body: JSON.stringify({
+        productId: productId,
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
     const json = await response.json();
     console.log(json);
   };
 
   useEffect(() => {
     const getPaymentOptions = async () => {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_PROTOCOL}://${process.env.NEXT_PUBLIC_BACKEND_HOST}:${process.env.NEXT_PUBLIC_BACKEND_PORT}/paymentOptions.json`
-      );
+      let url = "";
+      if (`${process.env.NEXT_PUBLIC_PROTOCOL}` === "https") {
+        url = `${process.env.NEXT_PUBLIC_PROTOCOL}://:${process.env.NEXT_PUBLIC_BACKEND_HOST}`;
+      } else {
+        url = `${process.env.NEXT_PUBLIC_PROTOCOL}://${process.env.NEXT_PUBLIC_BACKEND_HOST}:${process.env.NEXT_PUBLIC_BACKEND_PORT}`;
+      }
+      const response = await fetch(`${url}/paymentOptions.json`);
 
       const data = await response.json();
 

@@ -83,10 +83,7 @@ export default function ClientPage() {
             <Button className="w-full cursor-pointer">회원가입</Button>
           </Link>
           <Button variant="ghost" className="w-full mt-4 p-0">
-            <Link
-              href={`${process.env.NEXT_PUBLIC_PROTOCOL}://${process.env.NEXT_PUBLIC_BACKEND_HOST}:${process.env.NEXT_PUBLIC_BACKEND_PORT}`}
-              className="w-full"
-            >
+            <Link href={baseUrl} className="w-full">
               <img src="/kakao_login.png" className="w-full" />
             </Link>
           </Button>

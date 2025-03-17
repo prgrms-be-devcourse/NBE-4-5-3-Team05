@@ -162,14 +162,14 @@ export default function ClientPage({
                 <TableRow key={post.id}>
                   {/* 상품 이미지 */}
                   <TableCell>
-                    <Link href={`/post/${post.id}`}>
+                    <Link href={`/posts/${post.id}`}>
                       <img src={post.thumbNail} alt="사진 없음" />
                     </Link>
                   </TableCell>
 
                   {/* 상품명 */}
                   <TableCell>
-                    <Link href={`/post/${post.id}`}>{post.title}</Link>
+                    <Link href={`/posts/${post.id}`}>{post.title}</Link>
                   </TableCell>
 
                   {/* 가격 */}
