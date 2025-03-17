@@ -12,7 +12,7 @@ export async function middleware(request: NextRequest) {
      headers: {
        cookie: (await cookies()).toString(),
      },
-     credentials:"include";
+     credentials:"include"
    });
  
    const springCookie = response.response.headers.getSetCookie();
