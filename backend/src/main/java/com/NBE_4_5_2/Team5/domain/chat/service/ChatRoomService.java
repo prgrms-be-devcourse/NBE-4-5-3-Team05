@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.NBE_4_5_2.Team5.domain.chat.entity.ChatMessage;
 import com.NBE_4_5_2.Team5.domain.chat.entity.ChatRoom;
-import com.NBE_4_5_2.Team5.domain.chat.repository.MessageRepository;
+import com.NBE_4_5_2.Team5.domain.chat.repository.ChatMessageRepository;
 import com.NBE_4_5_2.Team5.domain.post.post.service.ProductPostService;
 import com.NBE_4_5_2.Team5.domain.user.user.service.UserService;
 import com.NBE_4_5_2.Team5.global.Rq;
@@ -39,13 +39,13 @@ public class ChatRoomService {
 	@Resource(name = "objectRedisTemplate")
 	private ValueOperations<String, String> valueOps;
 	@Autowired
-	private MessageRepository messageRepository;
-	@Autowired
 	private ProductPostService productPostService;
 	@Autowired
 	private Rq rq;
 	@Autowired
 	private UserService userService;
+	@Autowired
+	private ChatMessageRepository chatMessageRepository;
 
 	// 모든 채팅방 조회
 	public List<ChatRoom> findAllRoom() {
@@ -151,8 +151,8 @@ public class ChatRoomService {
 			throw new ForbiddenAccessException("404", "접근 권한 없는 채팅방");
 		}
 		ChatRoom chatRoom = findChatRoomByClient(roomId, username);
-
-		return messageRepository.findAllByClientAndRoomId(chatRoom.getId(), roomId);
+		List<ChatMessage> byRoomId = chatMessageRepository.findByRoomId(chatRoom.getRoomId());
+		return byRoomId;
 	}
 
 	// 채팅방 삭제
@@ -160,7 +160,6 @@ public class ChatRoomService {
 		ChatRoom chatRoom = findChatRoomByClient(roomId, username);
 		String client = chatRoom.getId();
 		hashOpsChatRoom.delete(CHAT_ROOMS, roomId + "_" + username);     // redis에서 삭제
-		messageRepository.deleteAllByClient(client);
 	}
 
 	// 유저가 입장한 채팅방ID와 유저 세션ID 맵핑 정보 저장
@@ -216,7 +215,7 @@ public class ChatRoomService {
 			}
 
 			if (chatRoom.getSender().equals(sender) && chatRoom.getReceiver().equals(receiver)
-					|| chatRoom.getSender().equals(receiver) && chatRoom.getReceiver().equals(sender)) {
+				|| chatRoom.getSender().equals(receiver) && chatRoom.getReceiver().equals(sender)) {
 				return chatRoom.getRoomId();
 			}
 		}
@@ -233,7 +232,7 @@ public class ChatRoomService {
 			}
 
 			if (chatRoom.getSender().equals(sender) && chatRoom.getReceiver().equals(receiver)
-					|| chatRoom.getSender().equals(receiver) && chatRoom.getReceiver().equals(sender)) {
+				|| chatRoom.getSender().equals(receiver) && chatRoom.getReceiver().equals(sender)) {
 				if (chatRoom.getClient().equals(sender)) {
 					return chatRoom;
 				}

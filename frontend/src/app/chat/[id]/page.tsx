@@ -26,6 +26,7 @@ export default async function Page({
     },
     credentials: "include",
   });
+  console.log("res1:", messageResponse);
 
   const roomResponse = await client.GET("/api/chat/room/{roomId}", {
     headers: {
@@ -38,8 +39,10 @@ export default async function Page({
     },
     credentials: "include",
   });
+  console.log("res2:", roomResponse);
 
   const roomData = roomResponse.data!!;
+
   if (!roomData || roomData.code != "200") {
     return {
       error: roomData?.message || "Room data is not available.",
@@ -50,7 +53,7 @@ export default async function Page({
   const messageData = messageResponse.data!!; // 변환할 데이터
   const title = messageData.message;
   const messages = messageData.data; // 메시지 데이터
-
+  console.log("message:", messages);
   return (
     <ClientPage
       messages={messages}
