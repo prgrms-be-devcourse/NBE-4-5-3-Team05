@@ -6,14 +6,13 @@ import java.util.UUID;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.experimental.SuperBuilder;
 
 @Getter
 @Setter
-@SuperBuilder
 @Entity
 @NoArgsConstructor
 public class ChatMessage {
@@ -31,8 +30,10 @@ public class ChatMessage {
 	private Float latitude = 0.0f;
 	private Float longitude = 0.0f;
 
+	@Builder
 	public ChatMessage(MessageType type, String roomId, String client, String sender, String message, String image,
 		long userCount, Float latitude, Float longitude) {
+		messageId = UUID.randomUUID().toString();
 		this.type = type;
 		this.roomId = roomId;
 		this.client = client;

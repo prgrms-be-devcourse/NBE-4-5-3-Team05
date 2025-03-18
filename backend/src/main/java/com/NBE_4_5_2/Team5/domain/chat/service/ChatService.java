@@ -1,6 +1,5 @@
 package com.NBE_4_5_2.Team5.domain.chat.service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.redis.core.RedisTemplate;
@@ -49,7 +48,6 @@ public class ChatService {
 			ChatRoom chatRoom = chatRoomService.createChatRoom(receiver, sender);
 			chatRooms.add(chatRoom);
 		}
-		chatMessageRepository.save(chatMessage);
 		for (ChatRoom chatRoom : chatRooms) {
 			if (ChatMessage.MessageType.TALK.equals(chatMessage.getType())) {
 
@@ -65,10 +63,9 @@ public class ChatService {
 					.image(chatMessage.getImage())
 					.latitude(0.0f)
 					.longitude(0.0f)
-					.timestamp(chatMessage.formatTimestamp(LocalDateTime.now()))
 					.build();
 				// DB에 저장
-
+				chatMessageRepository.save(message);
 			} else if (ChatMessage.MessageType.IMAGE.equals(chatMessage.getType())) {
 				chatMessage.setMessage("");
 
@@ -82,12 +79,11 @@ public class ChatService {
 					.image(chatMessage.getImage())
 					.latitude(0.0f)
 					.longitude(0.0f)
-					.timestamp(chatMessage.formatTimestamp(LocalDateTime.now()))
 					.build();
 
 				// redis로 메세지 발송
 				objectRedisTemplate.convertAndSend(channelTopic.getTopic(), message);
-				chatMessageRepository.save(chatMessage);
+				chatMessageRepository.save(message);
 			} else if (ChatMessage.MessageType.LOCATION.equals(chatMessage.getType())) {
 				// LOCATION 타입 처리를 위한 코드 추가
 				ChatMessage message = ChatMessage.builder()
@@ -99,12 +95,11 @@ public class ChatService {
 					.userCount(chatMessage.getUserCount())
 					.latitude(chatMessage.getLatitude()) // 위도 설정
 					.longitude(chatMessage.getLongitude()) // 경도 설정
-					.timestamp(chatMessage.formatTimestamp(LocalDateTime.now()))
 					.build();
 
 				// Redis로 메시지 발송
 				objectRedisTemplate.convertAndSend(channelTopic.getTopic(), message);
-				chatMessageRepository.save(chatMessage);
+				chatMessageRepository.save(message);
 			}
 		}
 	}

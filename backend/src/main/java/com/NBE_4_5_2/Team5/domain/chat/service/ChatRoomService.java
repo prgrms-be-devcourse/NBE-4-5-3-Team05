@@ -151,7 +151,7 @@ public class ChatRoomService {
 			throw new ForbiddenAccessException("404", "접근 권한 없는 채팅방");
 		}
 		ChatRoom chatRoom = findChatRoomByClient(roomId, username);
-		List<ChatMessage> byRoomId = chatMessageRepository.findByRoomId(chatRoom.getRoomId());
+		List<ChatMessage> byRoomId = chatMessageRepository.findByClientAndRoomId(chatRoom.getId(), roomId);
 		return byRoomId;
 	}
 

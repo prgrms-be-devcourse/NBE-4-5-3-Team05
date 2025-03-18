@@ -248,11 +248,6 @@ export default function PostModifyPage() {
           <div>
             <label className="block mb-1 font-semibold">위도</label>
 
-            <MapComponent
-              onLocationSelect={(lat, lng) => {
-                console.log(lat, lng);
-              }}
-            ></MapComponent>
             <input
               type="number"
               className="border w-full p-2"
