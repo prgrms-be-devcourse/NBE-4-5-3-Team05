@@ -27,6 +27,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { LoginMemberContext } from "@/app/stores/auth/loginMemberStore";
 import client from "@/lib/client";
+import MapComponent from "@/components/MapComponent";
 
 export default function ClientPage({
   messages,
@@ -49,9 +50,23 @@ export default function ClientPage({
   const [stompClient, setStompClient] = useState<any>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [visibleMessagesCount, setVisibleMessagesCount] = useState(20);
-  const [showDropdown, setShowDropdown] = useState(false);
   const messagesEndRef = useRef<null | HTMLDivElement>(null);
-  const { isLogin } = use(LoginMemberContext);
+
+  const [isOpen, setIsOpen] = useState(false);
+
+  const [latitude, setLatitude] = useState(0);
+  const [longitude, setLongitude] = useState(0);
+  const [zoom, setZoom] = useState(18);
+
+  // 2️⃣ 팝업 열기 버튼 핸들러
+  const openPopup = () => {
+    setIsOpen(true);
+  };
+
+  // 3️⃣ 팝업 닫기 버튼 핸들러
+  const closePopup = () => {
+    setIsOpen(false);
+  };
 
   useEffect(() => {
     const fetchUserInfoAndConnect = async () => {
@@ -131,6 +146,10 @@ export default function ClientPage({
     };
   }, [roomId, cookie]);
 
+  useEffect(() => {
+    getCurrentPostion();
+  }, []);
+
   const handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInputMessage(event.target.value);
   };
@@ -195,34 +214,31 @@ export default function ClientPage({
       return;
     }
 
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const latitude = position.coords.latitude;
-        const longitude = position.coords.longitude;
+    const message = {
+      roomId,
+      sender: userNickname,
+      type: "LOCATION",
+      latitude: latitude, // 위도
+      longitude: longitude, // 경도
+      messageId: null, // 필요 시 비워둡니다
+      image: null, // 필요 시 비워둡니다
+      timestamp: new Date().toISOString(), // 현재 시간 설정
+    };
 
-        const message = {
-          roomId,
-          sender: userNickname,
-          type: "LOCATION",
-          latitude, // 위도
-          longitude, // 경도
-          messageId: null, // 필요 시 비워둡니다
-          image: null, // 필요 시 비워둡니다
-          timestamp: new Date().toISOString(), // 현재 시간 설정
-        };
-
-        stompClient.send(
-          "/pub/chat/message",
-          { token: accessToken },
-          JSON.stringify(message)
-        );
-        alert("위치가 전송되었습니다!");
-      },
-      (error) => {
-        console.error("Error obtaining location:", error);
-        alert("위치를 가져오는 데 실패했습니다.");
-      }
+    stompClient.send(
+      "/pub/chat/message",
+      { token: accessToken },
+      JSON.stringify(message)
     );
+    alert("위치가 전송되었습니다!");
+    return;
+  };
+
+  const getCurrentPostion = () => {
+    navigator.geolocation.getCurrentPosition((position) => {
+      setLatitude(position.coords.latitude);
+      setLongitude(position.coords.longitude);
+    });
   };
 
   const handleFileSelect = () => {
@@ -316,7 +332,7 @@ export default function ClientPage({
           {chatMessages.map((message) => (
             <li
               key={`${message.messageId}-${chatRoom.id}`}
-              className={`border p-2 rounded shadow-sm text-sm 
+              className={`border p-2 rounded shadow-sm text-sm
         ${
           message.sender === userNickname
             ? "bg-gray-200 text-right w-3/4 ml-auto"
@@ -343,14 +359,24 @@ export default function ClientPage({
 
               {/* 위도, 경도 정보 표시 */}
               {message.latitude !== 0 && message.longitude !== 0 ? (
-                <div>
+                <div className="w-auto h-[30vh] flex flex-col items-end">
+                  <div className=" h-[30vh] w-[30vh]">
+                    <MapComponent
+                      currentPos={{
+                        lat: message.latitude!,
+                        lng: message.longitude!,
+                        zoom: 18,
+                      }}
+                      onLocationSelect={() => {}}
+                    ></MapComponent>
+                  </div>
                   <a
                     href={`https://www.google.com/maps?q=${message.latitude},${message.longitude}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-blue-500"
                   >
-                    지도
+                    구글 맵에서 보기
                   </a>
                 </div>
               ) : null}
@@ -385,6 +411,53 @@ export default function ClientPage({
       />
 
       <div className="fixed bottom-0 left-0 right-0 bg-white p-4 border-t flex items-center">
+        <div>
+          {/* 팝업이 열려 있다면 렌더링 */}
+          {isOpen && (
+            <div
+              style={{
+                position: "fixed",
+                top: 0,
+                left: 0,
+                width: "50vh",
+                height: "50vh",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: "rgba(0, 0, 0, 0.3)",
+              }}
+            >
+              <div
+                className="w-full h-full z-10"
+                style={{
+                  backgroundColor: "#fff",
+                  border: "1px solid #ccc",
+                  borderRadius: "4px",
+                }}
+              >
+                <MapComponent
+                  currentPos={{ lat: latitude, lng: longitude, zoom: zoom }}
+                  onLocationSelect={(lat, lng, zoom) => {
+                    setLatitude(lat);
+                    setLongitude(lng);
+                    setZoom(zoom);
+                  }}
+                ></MapComponent>
+                <div className="flex w-full justify-between">
+                  <Button
+                    onClick={(e) => {
+                      handleSendLocation();
+                      closePopup();
+                    }}
+                  >
+                    전송
+                  </Button>
+                  <Button onClick={closePopup}>취소</Button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
@@ -399,8 +472,11 @@ export default function ClientPage({
               <strong>첨부 파일</strong>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
+            {/* 팝업 열기 버튼 */}
+            <button onClick={openPopup}>팝업 열기</button>
+
             <DropdownMenuItem
-              onClick={handleSendLocation}
+              onClick={() => setIsOpen(true)}
               className="flex items-center"
             >
               <FontAwesomeIcon icon={faLocationDot} className="mr-2" />
@@ -415,7 +491,6 @@ export default function ClientPage({
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-
         <Textarea
           value={inputMessage}
           onChange={handleInputChange}
@@ -423,7 +498,6 @@ export default function ClientPage({
           placeholder="메시지를 입력하세요."
           className="border p-2 flex-grow mx-2 rounded-md resize-none"
         />
-
         <Button
           variant="outline"
           onClick={handleSendMessage}
