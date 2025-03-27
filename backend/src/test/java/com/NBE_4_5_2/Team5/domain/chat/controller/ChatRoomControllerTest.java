@@ -160,6 +160,25 @@ public class ChatRoomControllerTest {
     }
 
     @Test
+    @DisplayName("존재하지 않는 채팅방 조회")
+    void getNotExitChatRoom() throws Exception {
+        // Given
+        deleteAll();
+
+        // When: 채팅방 조회 요청
+        ResultActions action = mvc.perform(get("/api/chat/rooms")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(APPLICATION_JSON))
+                .andDo(print());
+
+        // Then
+        action.andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.message").value("채팅방 목록"))
+                .andExpect(jsonPath("$.data").isEmpty());
+    }
+
+    @Test
     @DisplayName("채팅방 삭제")
     void deleteRoom() throws Exception {
         // Given
