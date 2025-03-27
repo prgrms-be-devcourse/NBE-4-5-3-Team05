@@ -9,10 +9,7 @@ import com.NBE_4_5_2.Team5.domain.user.user.service.UserService;
 import com.NBE_4_5_2.Team5.global.config.BaseTestConfig;
 import com.jayway.jsonpath.JsonPath;
 import jakarta.transaction.Transactional;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -55,8 +52,13 @@ public class ChatRoomControllerTest {
     User loginedUser;
 
     @BeforeEach
-    @DisplayName("셋업")
-    void setUp() {
+    void setUp() throws Exception {
+        setUpUserAndPost();
+        setUpChatRoom();
+    }
+
+    @DisplayName("셋업_ 게시글,유저")
+    void setUpUserAndPost() {
         // 로그인 유저 설정
         loginedUser = userService.getUserByUsername("user3").orElseThrow(
                 () -> new RuntimeException("User not found")
@@ -72,16 +74,37 @@ public class ChatRoomControllerTest {
         receiver = post.getWriter().getUsername();
     }
 
+    @DisplayName("셋업_ 채팅방")
+    void setUpChatRoom() throws Exception {
+        ResultActions action = mvc.perform(post("/api/chat/room")
+                        .param("postId", postId) // 쿼리 파라미터
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(APPLICATION_JSON))
+                .andDo(print()); // 요청의 Content-Type
+        String roomId = JsonPath.read(action.andReturn().getResponse().getContentAsString(), "$.data.roomId");
+        System.out.println("임시 roomId: "+roomId);
+    }
+
+    @AfterEach
+    @DisplayName("초기화_ 채팅방 전체 비우기")
+    void deleteAll() throws Exception {
+        List<ChatRoom> chatRoomList = chatRoomService.findRoomByUser(sender);
+
+        for(ChatRoom chatRoom : chatRoomList){
+            String roomId = chatRoom.getRoomId();
+            mvc.perform(delete("/api/chat/message")
+                            .param("roomId", roomId) // 삭제할 채팅방 ID
+                            .header("Authorization", "Bearer " + token)
+                            .contentType(APPLICATION_JSON))
+                    .andDo(print());
+        }
+    }
+
     @Test
-    @Transactional
-    @Rollback
     @DisplayName("채팅방 생성")
     void createRoom() throws Exception {
         //Given
-//        System.out.println("sender: " + sender);
-//        System.out.println("receiver: " + receiver);
-//        System.out.println("token: " + token);
-//        System.out.println("postId: " + postId);
+        deleteAll();    // 채팅방 비우기
 
         // When: 채팅방 생성 요청
         ResultActions action = mvc.perform(post("/api/chat/room")
@@ -106,11 +129,9 @@ public class ChatRoomControllerTest {
     }
 
     @Test
-    @Transactional // 각 테스트 각각의 세션을 유지
-    @Rollback
     @DisplayName("채팅방 조회")
     void getChatRooms() throws Exception {
-        //Given
+        //Given: 채팅방 생성
 //        ResultActions createAction = mvc.perform(post("/api/chat/room")
 //                .param("postId", postId)
 //                .header("Authorization", "Bearer " + token)
@@ -177,6 +198,16 @@ public class ChatRoomControllerTest {
     }
 
 
+
+
+    // Given
+
+
+    // When
+
+
+    // Then
+
 //
 //    @Test
 //    void getRoomByRoomId() {
@@ -187,7 +218,4 @@ public class ChatRoomControllerTest {
 //    }
 //
 //
-//    @Test
-//    void findChatRooms() {
-//    }
 }

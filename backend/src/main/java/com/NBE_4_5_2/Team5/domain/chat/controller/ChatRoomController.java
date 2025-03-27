@@ -238,15 +238,15 @@ public class ChatRoomController {
 		User user = userAuthService.getRealActor(userIdentity);
 		ChatRoom chatRoom=chatRoomService.findByRoomIdByClients(user.getNickname(),receiver);
 //        ChatRoom chatRoom=chatRoomService.findChatRoomByClient(roomId,user.getNickname());
+		if (chatRoom == null) {
+			return new RsData<>("404", "존재하지 않는 대화방입니다.");
+		}
 		List<ChatMessage> messages= chatRoomService.getMessagesByUser(chatRoom.getRoomId(),user.getNickname());
 		String lastMessage="";
 		String lastTimestamp="";
 		if(messages.size()>0) {
 			lastMessage = messages.get(messages.size() - 1).getMessage();
 			lastTimestamp = messages.get(messages.size() - 1).getTimestamp();
-		}
-		if (chatRoom == null) {
-			return new RsData<>("404", "존재하지 않는 대화방입니다.");
 		}
 		ChatRoomDto chatRoomDto = new ChatRoomDto(
 				chatRoom.getId(),
