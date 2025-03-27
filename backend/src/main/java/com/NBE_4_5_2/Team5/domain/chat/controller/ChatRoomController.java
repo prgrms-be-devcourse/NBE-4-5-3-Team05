@@ -178,6 +178,9 @@ public class ChatRoomController {
 		User user = userAuthService.getRealActor(userIdentity);
 //        List<ChatMessage> messages=chatRoomService.getMessagesByUser(roomId,user.getNickname());
 		ChatRoom chatRoom=chatRoomService.findChatRoomByClient(roomId,user.getNickname());
+		if(chatRoom==null) {
+			return new RsData<>("404","존재하지 않는 채팅방");
+		}
 		return new RsData<>("200","채팅방 반환",chatRoom);
 	}
 

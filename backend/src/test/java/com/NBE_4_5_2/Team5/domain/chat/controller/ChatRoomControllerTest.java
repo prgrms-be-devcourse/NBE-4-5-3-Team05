@@ -75,7 +75,7 @@ public class ChatRoomControllerTest {
     }
 
     @DisplayName("셋업_ 채팅방")
-    void setUpChatRoom() throws Exception {
+    String setUpChatRoom() throws Exception {
         ResultActions action = mvc.perform(post("/api/chat/room")
                         .param("postId", postId) // 쿼리 파라미터
                         .header("Authorization", "Bearer " + token)
@@ -83,6 +83,7 @@ public class ChatRoomControllerTest {
                 .andDo(print()); // 요청의 Content-Type
         String roomId = JsonPath.read(action.andReturn().getResponse().getContentAsString(), "$.data.roomId");
         System.out.println("임시 roomId: "+roomId);
+        return roomId;
     }
 
     @AfterEach
@@ -270,6 +271,46 @@ public class ChatRoomControllerTest {
                 .andExpect(jsonPath("$.data").isEmpty());
     }
 
+    @Test
+    @DisplayName("roomId로 채팅방 검색")
+    void getRoomByRoomId() throws Exception {
+        // Given
+        String roomId = setUpChatRoom();
+        System.out.println("검색전, roomId: " + roomId);
+        // When
+        ResultActions action = mvc.perform(get("/api/chat/room/"+roomId)
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(APPLICATION_JSON))
+                .andDo(print());
+
+        // Then
+        action.andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.message").value("채팅방 반환"))
+                .andExpect(jsonPath("$.data").isNotEmpty())
+                .andExpect(jsonPath("$.data.roomId").value(roomId));
+    }
+
+    @Test
+    @DisplayName("roomId로 채팅방 검색_실패")
+    void getNotExistRoomByRoomId() throws Exception {
+        // Given
+        String roomId = setUpChatRoom();
+        System.out.println("검색전, roomId: " + roomId);
+        deleteAll();
+        // When
+        ResultActions action = mvc.perform(get("/api/chat/room/"+roomId)
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(APPLICATION_JSON))
+                .andDo(print());
+
+        // Then
+        action.andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("404"))
+                .andExpect(jsonPath("$.message").value("존재하지 않는 채팅방"))
+                .andExpect(jsonPath("$.data").isEmpty());
+    }
+
 
     // Given
 
@@ -280,9 +321,6 @@ public class ChatRoomControllerTest {
     // Then
 
 //
-//    @Test
-//    void getRoomByRoomId() {
-//    }
 //
 //    @Test
 //    void getMessages() {
