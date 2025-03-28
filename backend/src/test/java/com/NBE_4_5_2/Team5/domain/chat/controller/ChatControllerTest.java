@@ -173,7 +173,7 @@ class ChatControllerTest {
         });
 
         // Then
-        Thread.sleep(1000); // 비동기 처리 대기
+        Thread.sleep(50); // 비동기 처리 대기
         userCount = chatRoomService.getUserCount(roomId);
         assertEquals(1, userCount,"구독 실패\nDestination: "+destination + "\nuserCount: " + userCount);
         System.out.println("채팅방 구독 요청이 완료되었습니다. Destination: " + destination);
@@ -183,7 +183,7 @@ class ChatControllerTest {
     void setUp_DisConnect() throws Exception{
         stompSession.disconnect();
         System.out.println("종료");
-        Thread.sleep(1000); // 비동기 처리 대기
+//        Thread.sleep(50); // 비동기 처리 대기
     }
 
     //
@@ -244,7 +244,7 @@ class ChatControllerTest {
         // When
         stompSession.disconnect();
         System.out.println("종료");
-        Thread.sleep(1000); // 비동기 처리 대기
+        Thread.sleep(50); // 비동기 처리 대기
 
         // Then
         assertFalse(stompSession.isConnected(), "WebSocket 연결이 끊기지 않았습니다.");
@@ -286,7 +286,7 @@ class ChatControllerTest {
         });
 
         // Then
-        Thread.sleep(1000); // 비동기 처리 대기
+        Thread.sleep(50); // 비동기 처리 대기
         userCount = chatRoomService.getUserCount(roomId);
         assertEquals(1, userCount,"구독 실패\nDestination: "+destination + "\nuserCount: " + userCount);
         System.out.println("채팅방 구독 요청이 완료되었습니다. Destination: " + destination);
@@ -317,7 +317,7 @@ class ChatControllerTest {
         stompSession.send(headers, message);
 
         // Then
-        Thread.sleep(1000); // 비동기 처리
+        Thread.sleep(50); // 비동기 처리
         List<ChatMessage> messages = chatMessageRepository.findByRoomId(roomId);
         assertFalse(messages.isEmpty(),"메세지가 전송되지 않았습니다.");
         ChatMessage lastMessage = messages.get(messages.size()-1);
