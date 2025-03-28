@@ -49,11 +49,11 @@ public class ChatRoomControllerTest {
     String receiver;
     String token;
     User loginedUser;
-
+    String roomId;
     @BeforeEach
     void setUp() throws Exception {
         setUpUserAndPost();
-        setUpChatRoom();
+        roomId = setUpChatRoom();
     }
 
     @DisplayName("셋업_ 게시글,유저")
@@ -81,9 +81,9 @@ public class ChatRoomControllerTest {
                         .header("Authorization", "Bearer " + token)
                         .contentType(APPLICATION_JSON))
                 .andDo(print()); // 요청의 Content-Type
-        String roomId = JsonPath.read(action.andReturn().getResponse().getContentAsString(), "$.data.roomId");
+        roomId = JsonPath.read(action.andReturn().getResponse().getContentAsString(), "$.data.roomId");
         System.out.println("sender: " + sender);
-        System.out.println("임시 roomId: "+roomId);
+        System.out.println("roomId: "+roomId);
         return roomId;
     }
 
@@ -93,7 +93,7 @@ public class ChatRoomControllerTest {
         List<ChatRoom> chatRoomList = chatRoomService.findRoomByUser(sender);
 
         for(ChatRoom chatRoom : chatRoomList){
-            String roomId = chatRoom.getRoomId();
+            roomId = chatRoom.getRoomId();
             mvc.perform(delete("/api/chat/message")
                             .param("roomId", roomId) // 삭제할 채팅방 ID
                             .header("Authorization", "Bearer " + token)
@@ -125,7 +125,7 @@ public class ChatRoomControllerTest {
 
         System.out.println("sender: " + sender);
         System.out.println("receiver: " + receiver);
-        String roomId = JsonPath.read(action.andReturn().getResponse().getContentAsString(), "$.data.roomId");
+        roomId = JsonPath.read(action.andReturn().getResponse().getContentAsString(), "$.data.roomId");
         System.out.println("roomId: " + roomId);
         System.out.println("채팅방 생성테스트 완료");
     }
@@ -154,7 +154,7 @@ public class ChatRoomControllerTest {
                 .andExpect(jsonPath("$.data").isNotEmpty()) // 데이터가 비어 있지 않음을 검증
                 .andExpect(jsonPath("$.data[0].other").value(receiver));
 
-        String roomId = JsonPath.read(action.andReturn().getResponse().getContentAsString(), "$.data[0].roomId");
+        roomId = JsonPath.read(action.andReturn().getResponse().getContentAsString(), "$.data[0].roomId");
         String other = JsonPath.read(action.andReturn().getResponse().getContentAsString(), "$.data[0].other");
         System.out.println("roomId: " + roomId);
         System.out.println("other: " + other);
@@ -185,7 +185,7 @@ public class ChatRoomControllerTest {
     void deleteRoom() throws Exception {
         // Given
         List<ChatRoom> chatRoomList = chatRoomService.findRoomByUser(sender);
-        String roomId = chatRoomList.get(0).getRoomId();
+        roomId = chatRoomList.get(0).getRoomId();
 
         // When
         ResultActions action = mvc.perform(delete("/api/chat/message")
@@ -224,7 +224,7 @@ public class ChatRoomControllerTest {
         // Given
         createRoom();
         List<ChatRoom> chatRoomList = chatRoomService.findRoomByUser(sender);
-        String roomId = chatRoomList.get(0).getRoomId();
+        roomId = chatRoomList.get(0).getRoomId();
         receiver = chatRoomList.get(0).getReceiver();
         System.out.println("receiver1: " + receiver);
 
@@ -252,7 +252,7 @@ public class ChatRoomControllerTest {
         // Given
         createRoom();
         List<ChatRoom> chatRoomList = chatRoomService.findRoomByUser(sender);
-        String roomId = chatRoomList.get(0).getRoomId();
+        roomId = chatRoomList.get(0).getRoomId();
         receiver = chatRoomList.get(0).getReceiver();
         System.out.println("roomId: " + roomId);
         System.out.println("receiver: " + receiver);
@@ -276,7 +276,7 @@ public class ChatRoomControllerTest {
     @DisplayName("roomId로 채팅방 검색")
     void getRoomByRoomId() throws Exception {
         // Given
-        String roomId = setUpChatRoom();
+        roomId = setUpChatRoom();
         System.out.println("검색전, roomId: " + roomId);
         // When
         ResultActions action = mvc.perform(get("/api/chat/room/"+roomId)
@@ -296,7 +296,7 @@ public class ChatRoomControllerTest {
     @DisplayName("roomId로 채팅방 검색_실패")
     void getNotExistRoomByRoomId() throws Exception {
         // Given
-        String roomId = setUpChatRoom();
+        roomId = setUpChatRoom();
         System.out.println("검색전, roomId: " + roomId);
         deleteAll();
         // When
@@ -316,7 +316,7 @@ public class ChatRoomControllerTest {
     @DisplayName("채팅방 메세지 조회")
     void getMessages() throws Exception {
         // Given
-        String roomId = setUpChatRoom();
+        roomId = setUpChatRoom();
 
         // When
         ResultActions action = mvc.perform(get("/api/chat/message")
@@ -338,7 +338,7 @@ public class ChatRoomControllerTest {
     @DisplayName("접근 권한 없는 채팅방 메세지 조회")
     void CantAccessGetMessages() throws Exception {
         // Given
-        String roomId = setUpChatRoom();    // 채팅방 생성
+        roomId = setUpChatRoom();    // 채팅방 생성
         // 새로운 계정으로 로그인
         User loginedUser2 = userService.getUserByUsername("user2").orElseThrow(
                 () -> new RuntimeException("User not found")

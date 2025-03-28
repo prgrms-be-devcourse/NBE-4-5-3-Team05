@@ -12,16 +12,22 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import com.jayway.jsonpath.JsonPath;
+import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.simp.stomp.StompFrameHandler;
 import org.springframework.messaging.simp.stomp.StompHeaders;
 import org.springframework.messaging.simp.stomp.StompSession;
 import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -33,12 +39,17 @@ import org.springframework.web.socket.sockjs.client.WebSocketTransport;
 
 import java.lang.reflect.Type;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import static org.hamcrest.Matchers.hasItem;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
@@ -68,6 +79,8 @@ class ChatControllerTest {
     String token;
     String accessToken;
     User loginedUser;
+    String roomId;
+    long userCount;
 
     private WebSocketStompClient stompClient;
     private StompSession stompSession;
@@ -77,8 +90,8 @@ class ChatControllerTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        setUpUserAndPost();  // 기존 메소드 호출
-        String roomId = setUpChatRoom();  // 기존 메소드 호출
+        setUpUserAndPost();
+        roomId = setUpChatRoom();
     }
 
     @DisplayName("셋업_ 게시글,유저")
@@ -90,10 +103,8 @@ class ChatControllerTest {
         sender = loginedUser.getNickname();
         token = userService.generateAuthTokenAsString(loginedUser);
         String[] param = token.split(" ");
-//        String refreshToken = param[0];
         accessToken = param[1];
         System.out.println("accessToken: " + accessToken);
-//        System.out.println("refreshToken: " + refreshToken);
         System.out.println("토큰1: "+token);
 
         // 포스트 ID 설정
@@ -107,7 +118,7 @@ class ChatControllerTest {
     @DisplayName("셋업_ 채팅방")
     String setUpChatRoom() throws Exception {
         ResultActions action = mvc.perform(post("/api/chat/room")
-                        .param("postId", postId) // 쿼리 파라미터
+                        .param("postId", postId)
                         .header("Authorization", "Bearer " + token)
                         .contentType(APPLICATION_JSON))
                 .andDo(print()); // 요청의 Content-Type
@@ -117,28 +128,11 @@ class ChatControllerTest {
         return roomId;
     }
 
-//    @AfterEach
-//    @DisplayName("초기화_ 채팅방 전체 비우기")
-//    void deleteAll() throws Exception {
-//        List<ChatRoom> chatRoomList = chatRoomService.findRoomByUser(sender);
-//
-//        for(ChatRoom chatRoom : chatRoomList){
-//            String roomId = chatRoom.getRoomId();
-//            mvc.perform(delete("/api/chat/message")
-//                            .param("roomId", roomId) // 삭제할 채팅방 ID
-//                            .header("Authorization", "Bearer " + token)
-//                            .contentType(APPLICATION_JSON))
-//                    .andDo(print());
-//        }
-//    }
-
-    @Test
-    @DisplayName("웹소켓 연결")
-    void webSocketConnection() throws Exception {
-        // 웹소켓 연결 URL 설정 (WebSocketConfig의 엔드포인트 참고)
+    @DisplayName("셋업 _ 연결")
+    void setUp_Connect() throws Exception{
         String url = String.format("ws://localhost:%d/ws-stomp", port);
 
-        // WebSocketStompClient 인스턴스 생성 (SockJS 사용)
+        // WebSocketStompClient 인스턴스 생성
         stompClient = new WebSocketStompClient(new SockJsClient(List.of(new WebSocketTransport(new StandardWebSocketClient()))));
 
         // 메시지 컨버터 설정
@@ -147,60 +141,26 @@ class ChatControllerTest {
         objectMapper.registerModules(new JavaTimeModule(), new ParameterNamesModule());
         stompClient.setMessageConverter(messageConverter);
 
-        // 웹소켓 연결을 위한 StompHeaders 및 WebSocketHttpHeaders 설정
+        // StompHeaders 및 WebSocketHttpHeaders 설정
         StompHeaders stompHeaders = new StompHeaders();
         stompHeaders.add("accessToken", accessToken);
         WebSocketHttpHeaders webSocketHeaders = new WebSocketHttpHeaders();
 
+        // When
         // 웹소켓 연결 (비동기 방식)
         stompSession = stompClient.connectAsync(url, webSocketHeaders, stompHeaders, new StompSessionHandlerAdapter() {})
-                .get(2, TimeUnit.SECONDS); // 최대 2초 대기
-
-        // 연결 성공 여부 확인
-        assertNotNull(stompSession, "WebSocket 연결이 실패했습니다.");
-        assertTrue(stompSession.isConnected(), "WebSocket 연결이 활성화되지 않았습니다.");
-
-        // 연결 상태 로그 출력
-        System.out.println("WebSocket 연결 상태: " + stompSession.isConnected());
-//
-//        // 테스트 종료 시 웹소켓 연결 종료
-//        if (stompSession != null && stompSession.isConnected()) {
-//            stompSession.disconnect();
-//            System.out.println("WebSocket 연결이 종료되었습니다.");
-//        }
+                .get(2, TimeUnit.SECONDS);
     }
 
-    @Test
-    @DisplayName("웹소켓 연결 끊기")
-    void webSocketDisConnection() throws Exception {
-        // given : 연결
-//        webSocketConnection();
-        assertNotNull(stompSession,"given: 웹소켓이 연결되지 않음");
-        assertTrue(stompSession.isConnected(), "given: 웹소켓이 연결되지 않음");
-
-        // when
-        stompSession.disconnect();
-        System.out.println("종료");
-        //then
-        assertFalse(stompSession.isConnected(), "WebSocket 연결이 끊기지 않았습니다.");
-        System.out.println("연결상태: "+stompSession.isConnected());
-    }
-
-    @Test
-    @DisplayName("채팅방 구독 요청")
-    void SubscribeToChatRoom() throws Exception {
-        // 웹소켓 연결이 되어 있는지 확인
-        webSocketConnection();
+    @DisplayName("셋업 _ 구독")
+    void setUp_Subscribe() throws Exception{
+        // Given
+        setUp_Connect();
         assertNotNull(stompSession, "WebSocket 연결이 되어 있지 않습니다.");
         assertTrue(stompSession.isConnected(), "WebSocket 연결이 활성화되지 않았습니다.");
-
-        // 채팅방 구독 요청을 위한 destination 설정
-        String roomId = setUpChatRoom(); // 채팅방 ID 가져오기
-        System.out.println("roomId: "+roomId);
         String destination = "/sub/chat/room/" + roomId;
-        System.out.println("destination: " + destination);
 
-        // 구독 요청
+        // When
         stompSession.subscribe(destination, new StompFrameHandler() {
             @Override
             public Type getPayloadType(StompHeaders headers) {
@@ -214,9 +174,158 @@ class ChatControllerTest {
             }
         });
 
-        // 구독이 성공적으로 이루어졌는지 확인
+        // Then
+        Thread.sleep(1000); // 비동기 처리 대기
+        userCount = chatRoomService.getUserCount(roomId);
+        assertEquals(1, userCount,"구독 실패\nDestination: "+destination + "\nuserCount: " + userCount);
         System.out.println("채팅방 구독 요청이 완료되었습니다. Destination: " + destination);
-        webSocketDisConnection();
     }
+
+    @DisplayName("셋업 _ 연결해제")
+    void setUp_DisConnect() throws Exception{
+        stompSession.disconnect();
+        System.out.println("종료");
+        Thread.sleep(1000); // 비동기 처리 대기
+    }
+
+    //
+    //
+    //
+
+    @Test
+    @DisplayName("웹소켓 연결")
+    void webSocketConnection() throws Exception {
+        // Given
+        if(stompSession != null && stompSession.isConnected()) {
+            System.out.println("연결해제");
+            setUp_DisConnect();
+        }
+        // URL
+        String url = String.format("ws://localhost:%d/ws-stomp", port);
+
+        // WebSocketStompClient 인스턴스 생성
+        stompClient = new WebSocketStompClient(new SockJsClient(List.of(new WebSocketTransport(new StandardWebSocketClient()))));
+
+        // 메시지 컨버터 설정
+        MappingJackson2MessageConverter messageConverter = new MappingJackson2MessageConverter();
+        ObjectMapper objectMapper = messageConverter.getObjectMapper();
+        objectMapper.registerModules(new JavaTimeModule(), new ParameterNamesModule());
+        stompClient.setMessageConverter(messageConverter);
+
+        // StompHeaders 및 WebSocketHttpHeaders 설정
+        StompHeaders stompHeaders = new StompHeaders();
+        stompHeaders.add("accessToken", accessToken);
+        WebSocketHttpHeaders webSocketHeaders = new WebSocketHttpHeaders();
+
+        // When
+        // 웹소켓 연결 (비동기 방식)
+        stompSession = stompClient.connectAsync(url, webSocketHeaders, stompHeaders, new StompSessionHandlerAdapter() {})
+                .get(2, TimeUnit.SECONDS);
+
+        // Then
+        assertNotNull(stompSession, "WebSocket 연결이 실패했습니다.");
+        assertTrue(stompSession.isConnected(), "WebSocket 연결이 활성화되지 않았습니다.");
+        System.out.println("WebSocket 연결 상태: " + stompSession.isConnected());
+        // 연결 해제
+        setUp_DisConnect();
+    }
+
+    @Test
+    @DisplayName("연결 끊기")
+    void webSocketDisConnection() throws Exception {
+        System.out.println("==========================================");
+        // Given
+        // 구독
+        setUp_Subscribe();
+
+        assertNotNull(stompSession,"Given: 웹소켓이 연결되지 않음");
+        assertTrue(stompSession.isConnected(), "Given: 웹소켓이 연결되지 않음");
+        assertEquals(1, userCount,"Given: 구독 실패");
+        System.out.println("종료 전, userCount: "+userCount);
+
+        // When
+        stompSession.disconnect();
+        System.out.println("종료");
+        Thread.sleep(1000); // 비동기 처리 대기
+
+        // Then
+        assertFalse(stompSession.isConnected(), "WebSocket 연결이 끊기지 않았습니다.");
+        userCount = chatRoomService.getUserCount(roomId);
+        assertEquals(0, userCount, "채팅방 인원수가 감소되지 않았습니다.");
+        System.out.println("종료 후, userCount: "+userCount);
+
+        // 세션 정보 삭제 확인
+        String sessionId = stompSession.getSessionId();
+        assertNull(chatRoomService.getUserEnterRoomId(sessionId), "세션 정보가 삭제되지 않았습니다.");
+
+        // 로그 출력
+        System.out.println("STOMP DISCONNECT 테스트 완료. 세션 ID: " + sessionId);
+        System.out.println("==========================================");
+    }
+
+    @Test
+    @DisplayName("채팅방 구독 요청")
+    void subscribeToChatRoom() throws Exception {
+        // Given
+        // 연결
+        setUp_Connect();
+        assertNotNull(stompSession, "WebSocket 연결이 되어 있지 않습니다.");
+        assertTrue(stompSession.isConnected(), "WebSocket 연결이 활성화되지 않았습니다.");
+        String destination = "/sub/chat/room/" + roomId;
+
+        // When
+        stompSession.subscribe(destination, new StompFrameHandler() {
+            @Override
+            public Type getPayloadType(StompHeaders headers) {
+                return ChatMessage.class;
+            }
+
+            @Override
+            public void handleFrame(StompHeaders headers, Object payload) {
+                ChatMessage message = (ChatMessage) payload;
+                System.out.println("Received message: " + message.getMessage());
+            }
+        });
+
+        // Then
+        Thread.sleep(1000); // 비동기 처리 대기
+        userCount = chatRoomService.getUserCount(roomId);
+        assertEquals(1, userCount,"구독 실패\nDestination: "+destination + "\nuserCount: " + userCount);
+        System.out.println("채팅방 구독 요청이 완료되었습니다. Destination: " + destination);
+        // 연결 해제
+        setUp_DisConnect();
+    }
+
+    @Test
+    @DisplayName("메세지 전송")
+    void sendMessage() throws Exception {
+        // Given
+        // 구독
+        setUp_Subscribe();
+        String content = "테스트 메세지";
+        String destination = "/pub/chat/message";
+        ChatMessage message = new ChatMessage();
+        message.setType(ChatMessage.MessageType.TALK);
+        message.setMessage(content);
+        message.setRoomId(roomId);
+        message.setSender(sender);
+
+        // When
+        StompHeaders headers = new StompHeaders();
+        headers.setDestination(destination);
+        headers.add("token", accessToken);
+
+        stompSession.send(headers, message);
+
+        // Then
+        Thread.sleep(1000); // 비동기 처리
+        List<ChatMessage> messages = chatMessageRepository.findByRoomId(roomId);
+        assertFalse(messages.isEmpty(),"메세지가 전송되지 않았습니다.");
+        assertEquals(content, messages.get(0).getMessage(),"메세지 내용이 일치하지 않습니다.");
+        System.out.println("messages: " + messages.get(0).getMessage());
+
+        setUp_DisConnect(); // 연결 해제
+    }
+
 
 }
