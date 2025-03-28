@@ -12,22 +12,21 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import com.jayway.jsonpath.JsonPath;
-import jakarta.transaction.Transactional;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.simp.stomp.StompFrameHandler;
 import org.springframework.messaging.simp.stomp.StompHeaders;
 import org.springframework.messaging.simp.stomp.StompSession;
 import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter;
-import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -39,7 +38,6 @@ import org.springframework.web.socket.sockjs.client.WebSocketTransport;
 
 import java.lang.reflect.Type;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.Matchers.hasItem;
@@ -296,13 +294,14 @@ class ChatControllerTest {
         setUp_DisConnect();
     }
 
-    @Test
+    @ParameterizedTest
+    @ValueSource(strings = {"메세지 1", "메세지 2", "메세지 3"})
     @DisplayName("메세지 전송")
-    void sendMessage() throws Exception {
+    void sendMessage(String content) throws Exception {
         // Given
         // 구독
         setUp_Subscribe();
-        String content = "테스트 메세지";
+
         String destination = "/pub/chat/message";
         ChatMessage message = new ChatMessage();
         message.setType(ChatMessage.MessageType.TALK);
@@ -321,11 +320,11 @@ class ChatControllerTest {
         Thread.sleep(1000); // 비동기 처리
         List<ChatMessage> messages = chatMessageRepository.findByRoomId(roomId);
         assertFalse(messages.isEmpty(),"메세지가 전송되지 않았습니다.");
-        assertEquals(content, messages.get(0).getMessage(),"메세지 내용이 일치하지 않습니다.");
-        System.out.println("messages: " + messages.get(0).getMessage());
+        ChatMessage lastMessage = messages.get(messages.size()-1);
+        assertEquals(content, lastMessage.getMessage(),"메세지 내용이 일치하지 않습니다.");
+        System.out.println("messages: " + lastMessage.getMessage());
 
         setUp_DisConnect(); // 연결 해제
     }
-
 
 }
