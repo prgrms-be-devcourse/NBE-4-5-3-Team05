@@ -1,6 +1,7 @@
 package com.NBE_4_5_2.Team5.domain.chat.controller;
 
 import com.NBE_4_5_2.Team5.domain.chat.entity.ChatMessage;
+import com.NBE_4_5_2.Team5.domain.chat.entity.ChatRoom;
 import com.NBE_4_5_2.Team5.domain.chat.repository.ChatMessageRepository;
 import com.NBE_4_5_2.Team5.domain.chat.service.ChatRoomService;
 import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductPost;
@@ -40,11 +41,11 @@ import java.lang.reflect.Type;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -186,6 +187,36 @@ class ChatControllerTest {
 //        Thread.sleep(50); // 비동기 처리 대기
     }
 
+    @DisplayName("셋업 - 메세지 전송")
+    void setUp_SendMessage(String content) throws Exception {
+        // Given
+        // 구독
+        setUp_Subscribe();
+
+        String destination = "/pub/chat/message";
+        ChatMessage message = new ChatMessage();
+        message.setType(ChatMessage.MessageType.TALK);
+        message.setMessage(content);
+        message.setRoomId(roomId);
+        message.setSender(sender);
+
+        // When
+        StompHeaders headers = new StompHeaders();
+        headers.setDestination(destination);
+        headers.add("token", accessToken);
+        stompSession.send(headers, message);
+    }
+
+    @DisplayName("셋업 _채팅방 삭제")
+    void setUp_DeleteRoom() throws Exception {
+        // When
+        mvc.perform(delete("/api/chat/message")
+                        .param("roomId", roomId) // 삭제할 채팅방 ID
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(APPLICATION_JSON))
+                .andDo(print());
+    }
+
     //
     //
     //
@@ -325,6 +356,29 @@ class ChatControllerTest {
         System.out.println("messages: " + lastMessage.getMessage());
 
         setUp_DisConnect(); // 연결 해제
+    }
+
+    @Test
+    @DisplayName("채팅방 메세지 조회")
+    void getMessages() throws Exception {
+        // Given
+        setUp_DeleteRoom(); // 채팅방 삭제
+        String content = "테스트 메세지1";
+        setUp_SendMessage(content);
+        roomId = setUpChatRoom();
+
+        // When
+        ResultActions action = mvc.perform(get("/api/chat/message")
+                        .param("roomId", roomId)
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(APPLICATION_JSON))
+                .andDo(print());
+
+        // Then
+        action.andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.message").value(receiver+"와의 대화방"))
+                .andExpect(jsonPath("$.data[*].message").value(content));
     }
 
 }
