@@ -1,20 +1,13 @@
 package com.NBE_4_5_2.Team5.domain.user.admin.controller;
 
-import com.NBE_4_5_2.Team5.domain.post.category.entity.Category;
-import com.NBE_4_5_2.Team5.domain.post.category.repository.CategoryRepository;
-import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductPost;
-import com.NBE_4_5_2.Team5.domain.post.post.repository.ProductPostRepository;
-import com.NBE_4_5_2.Team5.domain.user.admin.entity.BanList;
-import com.NBE_4_5_2.Team5.domain.user.admin.entity.NoticePost;
-import com.NBE_4_5_2.Team5.domain.user.admin.repository.BanListRepository;
-import com.NBE_4_5_2.Team5.domain.user.admin.repository.NoticePostRepository;
-import com.NBE_4_5_2.Team5.domain.user.admin.service.AdminService;
-import com.NBE_4_5_2.Team5.domain.user.user.entity.Role;
-import com.NBE_4_5_2.Team5.domain.user.user.entity.User;
-import com.NBE_4_5_2.Team5.domain.user.user.repository.UserRepository;
-import com.NBE_4_5_2.Team5.global.config.BaseTestConfig;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.servlet.http.Cookie;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -23,60 +16,50 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
-import java.util.*;
+import com.NBE_4_5_2.Team5.domain.post.post.service.ProductPostService;
+import com.NBE_4_5_2.Team5.domain.user.admin.dto.NoticeResBody;
+import com.NBE_4_5_2.Team5.domain.user.admin.entity.BanList;
+import com.NBE_4_5_2.Team5.domain.user.admin.repository.BanListRepository;
+import com.NBE_4_5_2.Team5.domain.user.admin.service.AdminService;
+import com.NBE_4_5_2.Team5.domain.user.user.entity.User;
+import com.NBE_4_5_2.Team5.domain.user.user.service.UserService;
+import com.NBE_4_5_2.Team5.global.config.BaseTestConfig;
+import com.NBE_4_5_2.Team5.global.exception.post.product.ProductPostNotFoundException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import jakarta.servlet.http.Cookie;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 @BaseTestConfig
 @Order(100)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class AdminControllerTest  {
+class AdminControllerTest {
 
 	@Autowired
 	private MockMvc mockMvc;
 	@Autowired
-	private NoticePostRepository noticePostRepository;
-	@Autowired
-	private AdminService adminService;
+	private BanListRepository banListRepository;
 	@Autowired
 	private ObjectMapper objectMapper;
 	@Autowired
-	private CategoryRepository categoryRepository;
+	private UserService userService;
 	@Autowired
-	private BanListRepository banListRepository;
+	private ProductPostService productPostService;
 	@Autowired
-	private ProductPostRepository productPostRepository;
-
-	@Autowired
-	private PasswordEncoder passwordEncoder;
-	@Autowired
-	private UserRepository userRepository;
+	private AdminService adminService;
 
 	@Test
 	void writeNotice() throws Exception {
 		//given
-		User admin = userRepository.save(
-			User.builder()
-				.id("user-" + UUID.randomUUID())
-				.username("username")
-				.password(passwordEncoder.encode("password"))
-				.email("email")
-				.nickname("nickname")
-				.address("address")
-				.role(Role.ADMIN)
-				.profileUrl("url")
-				.build());
-		Map<String, Cookie> cookieMap = login(admin.getUsername(), "password");
+		// 관리자로 로그인
+		Map<String, Cookie> cookieMap = login("user4", "user41234@");
 
 		// when
+		// API 호출
 		ResultActions perform = mockMvc.perform(post("/api/admin/notices")
 			.content("""
 				{
@@ -90,7 +73,10 @@ class AdminControllerTest  {
 		String id = objectMapper.readTree(perform.andReturn().getResponse().getContentAsString())
 			.get("data").get("id").asText();
 
-		NoticePost noticePost = noticePostRepository.findById(id).get();
+		NoticeResBody notice = adminService.getNotice(id);
+
+		User admin = userService.getUserByUsername("user4")
+			.orElseThrow(() -> new RuntimeException());
 
 		// then
 		perform
@@ -99,9 +85,9 @@ class AdminControllerTest  {
 			.andExpect(handler().methodName("writeNotice"))
 			.andExpect(jsonPath("$.code").value("200-1"))
 			.andExpect(jsonPath("$.message").value("공지사항 등록 성공."))
-			.andExpect(jsonPath("$.data.id").value(noticePost.getId()))
-			.andExpect(jsonPath("$.data.title").value(noticePost.getTitle()))
-			.andExpect(jsonPath("$.data.content").value(noticePost.getContent()))
+			.andExpect(jsonPath("$.data.id").value(notice.id()))
+			.andExpect(jsonPath("$.data.title").value(notice.title()))
+			.andExpect(jsonPath("$.data.content").value(notice.content()))
 			.andExpect(jsonPath("$.data.admin.id").value(admin.getId()));
 	}
 
@@ -127,29 +113,15 @@ class AdminControllerTest  {
 	@Test
 	void banUser() throws Exception {
 		//given
-		User admin = userRepository.save(
-			User.builder()
-				.id("user-" + UUID.randomUUID())
-				.username("admin")
-				.password(passwordEncoder.encode("password"))
-				.email("email1@email.com")
-				.nickname("nickname1")
-				.address("address")
-				.role(Role.ADMIN)
-				.profileUrl("url")
-				.build());
-		User user = userRepository.save(User.builder()
-			.id("user-" + UUID.randomUUID())
-			.username("username")
-			.password(passwordEncoder.encode("password"))
-			.email("email2@email.com")
-			.nickname("nickname2")
-			.address("address")
-			.profileUrl("url")
-			.role(Role.USER)
-			.build());
+		// 관리자 로그인
+		Map<String, Cookie> cookieMap = login("user4", "user41234@");
 
-		Map<String, Cookie> cookieMap = login(admin.getUsername(), "password");
+		// when
+		// user1을 밴함
+
+		User user = userService.getUserByUsername("user1")
+			.orElseThrow(() -> new RuntimeException());
+
 		ResultActions perform = mockMvc.perform(post("/api/admin/users/%s/ban".formatted(user.getId()))
 			.content("""
 				{
@@ -163,7 +135,10 @@ class AdminControllerTest  {
 			.get("data").get("banListId").asText();
 
 		BanList banList = banListRepository.findById(id).get();
-		Optional<User> foundedUser = userRepository.findById(user.getId());
+
+		// then
+
+		Optional<User> foundedUser = userService.getUserByUsername("user1");
 
 		perform
 			.andExpect(status().isOk())
@@ -182,20 +157,30 @@ class AdminControllerTest  {
 	@Test
 	void deletePost() throws Exception {
 		//given
-		Category category = categoryRepository.save(Category.builder().name("cat1").build());
-		User user = adminService.signUpAdmin("user5", "password", "admin231", "email");
-		ProductPost post = productPostRepository.save(
-			ProductPost.create(user, "name", 5000, "title", "content", "url", 30F, 40F)
-		);
-
-		Map<String, Cookie> cookieMap = login("user5", "password");
+		// 로그인
+		Map<String, Cookie> cookieMap = login("user4", "user41234@");
 
 		//when
-		mockMvc.perform(delete("/api/admin/posts/%s".formatted(post.getId()))
-				.cookie(cookieMap.get("accessToken"), cookieMap.get("refreshToken")))
+		// id를 가진 post를 삭제
+
+		String id = productPostService.getPosts(1, 1, "", "asc")
+			.getItems().get(0).getId();
+
+		ResultActions result = mockMvc.perform(delete("/api/admin/posts/%s".formatted(id))
+			.cookie(cookieMap.get("accessToken"), cookieMap.get("refreshToken")));
+
+		// then
+
+		// 삭제된 product post 조회 시 오류 발생해야 한다.
+
+		Assertions.assertThatThrownBy(
+			() -> productPostService.getPost(id)
+		).isInstanceOf(ProductPostNotFoundException.class);
+
+		result
 			.andExpect(status().isOk())
-			.andExpect(handler().handlerType(AdminController.class))
-			.andExpect(handler().methodName("deletePost"));
+			.andExpect(jsonPath("$.code").value("204-1"))
+			.andExpect(jsonPath("$.message").value("게시글 삭제 성공."));
 
 	}
 }
