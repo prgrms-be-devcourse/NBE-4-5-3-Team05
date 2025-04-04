@@ -1,8 +1,10 @@
 package com.NBE_4_5_2.Team5.domain.user.user.service;
 
-import java.util.List;
-import java.util.Optional;
-
+import com.NBE_4_5_2.Team5.domain.user.user.dto.UserDto;
+import com.NBE_4_5_2.Team5.domain.user.user.entity.User;
+import com.NBE_4_5_2.Team5.global.exception.security.AuthenticationNotValidException;
+import com.NBE_4_5_2.Team5.global.security.SecurityUser;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -10,12 +12,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
-import com.NBE_4_5_2.Team5.domain.user.user.dto.UserDto;
-import com.NBE_4_5_2.Team5.domain.user.user.entity.User;
-import com.NBE_4_5_2.Team5.global.exception.security.AuthenticationNotValidException;
-import com.NBE_4_5_2.Team5.global.security.SecurityUser;
-
-import lombok.RequiredArgsConstructor;
+import java.util.List;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
@@ -57,12 +55,12 @@ public class UserAuthService {
 
 		SecurityUser user = (SecurityUser)principal;
 
-		return User.builder()
-			.id(user.getId())
-			.username(user.getUsername())
-			.nickname(user.getNickname())
-			.role(user.getRole())
-			.build();
+		return new User(
+			user.getId(),
+			user.getUsername(),
+			user.getNickname(),
+			user.getRole()
+		);
 	}
 
 	public UserDto getMe() {

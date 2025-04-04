@@ -1,13 +1,5 @@
 package com.NBE_4_5_2.Team5.domain.user.user.service;
 
-import java.util.Map;
-import java.util.Optional;
-
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-
 import com.NBE_4_5_2.Team5.domain.user.user.dto.AuthToken;
 import com.NBE_4_5_2.Team5.domain.user.user.dto.UserDto;
 import com.NBE_4_5_2.Team5.domain.user.user.dto.UserUpdateRequest;
@@ -22,9 +14,15 @@ import com.NBE_4_5_2.Team5.global.exception.security.AuthenticationNotFoundExcep
 import com.NBE_4_5_2.Team5.global.exception.security.AuthenticationNotValidException;
 import com.NBE_4_5_2.Team5.global.exception.security.TokenNotFoundException;
 import com.NBE_4_5_2.Team5.global.security.SecurityUser;
-
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import java.util.Map;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -44,15 +42,15 @@ public class UserService {
 		userValidator.duplicate(username, nickname);
 		userValidator.emailVerified(email);
 
-		User user = User.builder()
-			.username(username)
-			.password(passwordEncoder.encode(password))
-			.email(email)
-			.nickname(nickname)
-			.address(address)
-			.profileUrl(profileUrl)
-			.role(Role.USER)
-			.build();
+		User user = new User(
+			username,
+			passwordEncoder.encode(password),
+			email,
+			nickname,
+			address,
+			profileUrl,
+			Role.USER
+		);
 
 		return userRepository.save(user);
 	}
@@ -108,12 +106,12 @@ public class UserService {
 		Role role = (Role)payload.get("role");
 
 		return Optional.of(
-			User.builder()
-				.id(id)
-				.username(username)
-				.nickname(nickname)
-				.role(role)
-				.build()
+				new User(
+					id,
+					username,
+					nickname,
+					role
+				)
 		);
 	}
 
@@ -131,7 +129,6 @@ public class UserService {
 	/**
 	 * refreshToken 검증
 	 *
-	 * @param user         로그인한 사용자
 	 * @param refreshToken 검증할 refreshToken
 	 * @throws ServiceException 사용자의 userId로 된 refreshToken이 존재하지 않거나 값이 일치하지 않을 경우
 	 */
@@ -223,12 +220,12 @@ public class UserService {
 
 		SecurityUser user = (SecurityUser)principal;
 
-		return User.builder()
-			.id(user.getId())
-			.username(user.getUsername())
-			.nickname(user.getNickname())
-			.role(user.getRole())
-			.build();
+		return new User(
+				user.getId(),
+				user.getUsername(),
+				user.getNickname(),
+				user.getRole()
+		);
 	}
 
 	// 내 프로필 수정

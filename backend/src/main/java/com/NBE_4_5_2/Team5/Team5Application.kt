@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing
 
 @SpringBootApplication
 @EnableJpaAuditing
-class Team5Application {}
+class Team5Application
 
 fun main(args: Array<String>) {
 
