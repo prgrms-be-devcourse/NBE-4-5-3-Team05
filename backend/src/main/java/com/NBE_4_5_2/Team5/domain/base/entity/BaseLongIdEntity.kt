@@ -1,21 +1,31 @@
-package com.NBE_4_5_2.Team5.domain.base.entity;
+package com.NBE_4_5_2.Team5.domain.base.entity
 
-import jakarta.persistence.*;
-import lombok.*;
-import lombok.experimental.SuperBuilder;
+import jakarta.persistence.*
+import org.hibernate.Hibernate
 
-@Getter
-@SuperBuilder
 @MappedSuperclass
-@AllArgsConstructor
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class BaseLongIdEntity {
+abstract class BaseLongIdEntity {
+    @Id // PRIMARY KEY
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // AUTO_INCREMENT
+    @Column(name = "id")
+    private var _id: Long? = null // TODO: 추후에 전환 과정에서 해결 (private->public)
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Setter(AccessLevel.PROTECTED)
-    @EqualsAndHashCode.Include
-    private Long id;
+    var id: Long
+    get() = _id ?: 0
+    set(value) {
+        _id = value
+    }
 
+    override fun equals(other: Any?): Boolean {
+
+        if (other == null || Hibernate.getClass(this) != Hibernate.getClass(other)) return false
+
+        other as BaseLongIdEntity
+
+        return id == other.id
+    }
+
+    override fun hashCode(): Int {
+        return id.hashCode() ?: System.identityHashCode(this)
+    }
 }
