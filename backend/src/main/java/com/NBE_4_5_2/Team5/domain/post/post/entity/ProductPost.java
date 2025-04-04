@@ -1,11 +1,5 @@
 package com.NBE_4_5_2.Team5.domain.post.post.entity;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
 import com.NBE_4_5_2.Team5.domain.base.entity.BaseTime;
 import com.NBE_4_5_2.Team5.domain.post.category.entity.Category;
 import com.NBE_4_5_2.Team5.domain.post.comment.entity.Comment;
@@ -13,28 +7,16 @@ import com.NBE_4_5_2.Team5.domain.post.post.enums.ProductStatus;
 import com.NBE_4_5_2.Team5.domain.user.user.entity.User;
 import com.NBE_4_5_2.Team5.global.exception.security.AuthenticationNotFoundException;
 import com.NBE_4_5_2.Team5.global.exception.security.ForbiddenAccessException;
+import jakarta.persistence.*;
+import lombok.*;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EntityListeners;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.experimental.SuperBuilder;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Getter
-@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
@@ -42,7 +24,6 @@ import lombok.experimental.SuperBuilder;
 public class ProductPost extends BaseTime {
 
 	@Id
-	@Builder.Default
 	@EqualsAndHashCode.Include
 	@Column(updatable = false, nullable = false)
 	private String id = "ppost-" + UUID.randomUUID();
@@ -72,17 +53,14 @@ public class ProductPost extends BaseTime {
 
 	//조회수
 	@Column(nullable = false)
-	@Builder.Default
 	private Integer viewCount = 0;
 
-	@Builder.Default
 	@Column(nullable = false)
 	private Integer likeCount = 0;
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
 	@Setter
-	@Builder.Default
 	private ProductStatus status = ProductStatus.AVAILABLE;
 
 	@Column(nullable = false)
@@ -94,28 +72,37 @@ public class ProductPost extends BaseTime {
 	private Float longitude;
 
 	@OneToMany(mappedBy = "productPost", cascade = CascadeType.ALL, orphanRemoval = true)
-	@Builder.Default
 	private List<ProductCategory> productCategories = new ArrayList<>();
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	private User writer;
 
 	@OneToMany(mappedBy = "target", cascade = CascadeType.REMOVE, orphanRemoval = true)
-	@Builder.Default
 	private final List<Comment> commentList = new ArrayList<>();
+
+	public ProductPost(User writer, String productName, Integer productPrice, String title, String content, String imageUrls, Float latitude, Float longitude) {
+		this.writer = writer;
+		this.productName = productName;
+		this.productPrice = productPrice;
+		this.title = title;
+		this.content = content;
+		this.image_urls = imageUrls;
+		this.latitude = latitude;
+		this.longitude = longitude;
+	}
 
 	public static ProductPost create(User writer, String productName, Integer productPrice, String title,
 		String content, String image_urls, Float latitude, Float longitude) {
-		return ProductPost.builder()
-			.writer(writer)
-			.productName(productName)
-			.productPrice(productPrice)
-			.title(title)
-			.content(content)
-			.image_urls(image_urls)
-			.latitude(latitude)
-			.longitude(longitude)
-			.build();
+		return new ProductPost(
+				writer,
+				productName,
+				productPrice,
+				title,
+				content,
+				image_urls,
+				latitude,
+				longitude
+		);
 	}
 
 	// 구매 처리 메서드
