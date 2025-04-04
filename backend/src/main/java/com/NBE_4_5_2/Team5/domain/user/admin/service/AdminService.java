@@ -75,11 +75,11 @@ public class AdminService {
 
         isAdmin(admin);
 
-        NoticePost noticePost = NoticePost.builder()
-                .title(title)
-                .content(content)
-                .admin(admin)
-                .build();
+        NoticePost noticePost = new NoticePost(
+                title,
+                content,
+                admin
+        );
 
         NoticePost saved = noticePostRepository.save(noticePost);
 
