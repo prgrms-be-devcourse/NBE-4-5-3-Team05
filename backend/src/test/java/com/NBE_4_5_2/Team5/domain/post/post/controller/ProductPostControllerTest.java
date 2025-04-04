@@ -107,10 +107,10 @@ public class ProductPostControllerTest  {
 		ProductPost post = createPost(seller, "찜 테스트 상품");
 
 		// buyer가 이 게시글을 찜한 상태로 만들기
-		LikedPost likedPost = LikedPost.builder()
-			.userId(buyer.getId())
-			.productPostId(post.getId())
-			.build();
+		LikedPost likedPost = new LikedPost(
+				buyer.getId(),
+				post.getId()
+		);
 		likedPostRepository.save(likedPost);
 
 		// WHEN: buyer 토큰으로 /api/posts/my/favorites 호출
