@@ -193,7 +193,7 @@ public class AdminService {
 	public List<NoticePost> getLatestNotices(int limit) {
 		List<NoticePost> notices = noticePostRepository.findAll();
 		return notices.stream()
-			.sorted(Comparator.comparing(NoticePost::getCreatedAt).reversed())
+			.sorted(Comparator.comparing(NoticePost::getCreatedDate).reversed())
 			.limit(limit)
 			.collect(Collectors.toList());
 	}

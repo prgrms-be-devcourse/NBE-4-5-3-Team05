@@ -11,7 +11,7 @@ import java.util.UUID;
 
 @Entity
 @Getter
-@SuperBuilder
+@Builder
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)

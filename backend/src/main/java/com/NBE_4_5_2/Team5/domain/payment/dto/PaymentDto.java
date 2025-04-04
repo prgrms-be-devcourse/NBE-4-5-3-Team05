@@ -10,6 +10,6 @@ public record PaymentDto(
 	PaymentStatus status) {
 	public static PaymentDto of(Payment payment) {
 		return new PaymentDto(payment.getId(), payment.getBuyer().getId(), payment.getTotalPrice(),
-			payment.getCreatedAt(), payment.getModifiedAt(), payment.getStatus());
+			payment.createdDate, payment.modifiedDate, payment.getStatus());
 	}
 }

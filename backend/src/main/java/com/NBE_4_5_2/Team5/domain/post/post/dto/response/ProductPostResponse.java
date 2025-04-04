@@ -38,14 +38,14 @@ public class ProductPostResponse {
 			post.getProductPrice(),
 			post.getTitle(),
 			post.getContent(),
-			post.getImage_urls(),
+			post.imageUrls,
 			post.getLatitude(),
 			post.getLongitude(),
 			post.getProductCategories().stream()
 				.map(pc -> pc.getCategory().getName())
 				.collect(Collectors.toList()),
-			post.getCreatedAt(),
-			post.getModifiedAt(),
+			post.createdDate,
+			post.modifiedDate,
 			post.getViewCount(),
 			0
 
@@ -61,14 +61,14 @@ public class ProductPostResponse {
 				post.getProductPrice(),
 				post.getTitle(),
 				post.getContent(),
-				post.getImage_urls(),
+				post.imageUrls,
 				post.getLatitude(),
 				post.getLongitude(),
 				post.getProductCategories().stream()
 						.map(pc -> pc.getCategory().getName())
 						.collect(Collectors.toList()),
-				post.getCreatedAt(),
-				post.getModifiedAt(),
+				post.createdDate,
+				post.modifiedDate,
 				post.getViewCount(),
 				likedCount
 		);

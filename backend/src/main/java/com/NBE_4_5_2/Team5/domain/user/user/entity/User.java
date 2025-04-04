@@ -19,7 +19,7 @@ import java.util.UUID;
 
 @Entity
 @Getter
-@SuperBuilder
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)

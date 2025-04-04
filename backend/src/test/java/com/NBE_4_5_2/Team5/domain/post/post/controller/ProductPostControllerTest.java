@@ -155,7 +155,7 @@ public class ProductPostControllerTest  {
 	// ---------------------------
 	// 테스트용 게시글 생성 메서드
 	private ProductPost createPost(User writer, String title) {
-		ProductPost post = ProductPost.create(
+		ProductPost post = new ProductPost(
 			writer,
 			"상품명",
 			10000,

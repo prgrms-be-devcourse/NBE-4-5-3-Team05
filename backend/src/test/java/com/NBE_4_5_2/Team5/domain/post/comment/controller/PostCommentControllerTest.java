@@ -36,163 +36,163 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @BaseTestConfig
 @Order(102)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class PostCommentControllerTest  {
+class PostCommentControllerTest {
 
-	@Autowired
-	private Util util;
-	@Autowired
-	private UserService userService;
-	@Autowired
-	private ProductPostRepository productPostRepository;
-	@Autowired
-	private MockMvc mockMvc;
-	@Autowired
-	private ObjectMapper objectMapper;
-	@Autowired
-	private CommentRepository commentRepository;
-	@Autowired
-	EmailService emailService;
+    @Autowired
+    private Util util;
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private ProductPostRepository productPostRepository;
+    @Autowired
+    private MockMvc mockMvc;
+    @Autowired
+    private ObjectMapper objectMapper;
+    @Autowired
+    private CommentRepository commentRepository;
+    @Autowired
+    EmailService emailService;
 
-	@BeforeEach
-	void setUp() {
-		emailService.saveVerificationCode("emasdfasdail", "verified"); // 이메일 인증이 통과되었다고 가정
-	}
+    @BeforeEach
+    void setUp() {
+        emailService.saveVerificationCode("emasdfasdail", "verified"); // 이메일 인증이 통과되었다고 가정
+    }
 
-	@Test
-	void writeComment() throws Exception {
-		// given
-		User author = userService.createUser("useasdfasde", "password", "emasdfasdail", "nicsdfdakname", "address",
-				"url");
+    @Test
+    void writeComment() throws Exception {
+        // given
+        User author = userService.createUser("useasdfasde", "password", "emasdfasdail", "nicsdfdakname", "address",
+                "url");
 
-		ProductPost productPost = productPostRepository.save(
-				ProductPost.create(author, "name", 5000, "title", "content", "url", 50F, 50F)
-		);
+        ProductPost productPost = productPostRepository.save(
+                new ProductPost(author, "name", 5000, "title", "content", "url", 50F, 50F)
+        );
 
-		Map<String, Cookie> cookieMap = login(author.getUsername(), "password");
+        Map<String, Cookie> cookieMap = login(author.getUsername(), "password");
 
-		// when
-		ResultActions action = mockMvc.perform(post("/api/posts/%s/comments".formatted(productPost.getId()))
-				.contentType(MediaType.APPLICATION_JSON)
-				.cookie(cookieMap.get("accessToken"), cookieMap.get("refreshToken"))
-				.content("""
-				{
-					"content": "wow"
-				}"""));
+        // when
+        ResultActions action = mockMvc.perform(post("/api/posts/%s/comments".formatted(productPost.getId()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .cookie(cookieMap.get("accessToken"), cookieMap.get("refreshToken"))
+                .content("""
+                        {
+                        	"content": "wow"
+                        }"""));
 
-		//then
-		action
-				.andExpect(status().isOk())
-				.andExpect(handler().handlerType(PostCommentController.class))
-				.andExpect(handler().methodName("writeComment"))
-				.andExpect(jsonPath("$.code").value("200-1"))
-				.andExpect(jsonPath("$.message").value("댓글 작성 성공."))
-				.andExpect(jsonPath("$.data.content").value("wow"))
-				.andExpect(jsonPath("$.data.author.id").value(author.getId()));
-	}
+        //then
+        action
+                .andExpect(status().isOk())
+                .andExpect(handler().handlerType(PostCommentController.class))
+                .andExpect(handler().methodName("writeComment"))
+                .andExpect(jsonPath("$.code").value("200-1"))
+                .andExpect(jsonPath("$.message").value("댓글 작성 성공."))
+                .andExpect(jsonPath("$.data.content").value("wow"))
+                .andExpect(jsonPath("$.data.author.id").value(author.getId()));
+    }
 
-	@Test
-	void updateTest() throws Exception {
-		//given
-		User author = userService.createUser("userasdasname", "password", "emasdfasdail", "nicknfasdfasdaame",
-				"address",
-				"url");
+    @Test
+    void updateTest() throws Exception {
+        //given
+        User author = userService.createUser("userasdasname", "password", "emasdfasdail", "nicknfasdfasdaame",
+                "address",
+                "url");
 
-		ProductPost productPost = productPostRepository.save(
-				ProductPost.create(author, "name", 5000, "title", "content", "url", 50F, 50F)
-		);
+        ProductPost productPost = productPostRepository.save(
+                new ProductPost(author, "name", 5000, "title", "content", "url", 50F, 50F)
+        );
 
-		Map<String, Cookie> cookieMap = login(author.getUsername(), "password");
+        Map<String, Cookie> cookieMap = login(author.getUsername(), "password");
 
-		String content = mockMvc.perform(post("/api/posts/%s/comments".formatted(productPost.getId()))
-						.contentType(MediaType.APPLICATION_JSON)
-						.cookie(cookieMap.get("accessToken"), cookieMap.get("refreshToken"))
-						.content("""
-					{
-						"content": "before"
-					}
-					"""))
-				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.data.id").exists())
-				.andReturn().getResponse().getContentAsString();
+        String content = mockMvc.perform(post("/api/posts/%s/comments".formatted(productPost.getId()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .cookie(cookieMap.get("accessToken"), cookieMap.get("refreshToken"))
+                        .content("""
+                                {
+                                	"content": "before"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.id").exists())
+                .andReturn().getResponse().getContentAsString();
 
-		String commentId = objectMapper.readTree(content).get("data").get("id").asText();
+        String commentId = objectMapper.readTree(content).get("data").get("id").asText();
 
-		//when
+        //when
 
-		ResultActions action = mockMvc.perform(
-				put("/api/posts/%s/comments/%s".formatted(productPost.getId(), commentId))
-						.contentType(MediaType.APPLICATION_JSON)
-						.cookie(cookieMap.get("accessToken"), cookieMap.get("refreshToken"))
-						.content("""
-					{
-						"content": "changedContent"
-					}"""));
-		//then
+        ResultActions action = mockMvc.perform(
+                put("/api/posts/%s/comments/%s".formatted(productPost.getId(), commentId))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .cookie(cookieMap.get("accessToken"), cookieMap.get("refreshToken"))
+                        .content("""
+                                {
+                                	"content": "changedContent"
+                                }"""));
+        //then
 
-		action
-				.andExpect(status().isOk())
-				.andExpect(handler().handlerType(PostCommentController.class))
-				.andExpect(handler().methodName("updateComment"))
-				.andExpect(jsonPath("$.code").value("200-1"))
-				.andExpect(jsonPath("$.data.content").value("changedContent"))
-				.andExpect(jsonPath("$.message").value("comment 수정 성공."));
+        action
+                .andExpect(status().isOk())
+                .andExpect(handler().handlerType(PostCommentController.class))
+                .andExpect(handler().methodName("updateComment"))
+                .andExpect(jsonPath("$.code").value("200-1"))
+                .andExpect(jsonPath("$.data.content").value("changedContent"))
+                .andExpect(jsonPath("$.message").value("comment 수정 성공."));
 
-	}
+    }
 
-	private Map<String, Cookie> login(String username, String password) throws Exception {
-		MockHttpServletResponse response = mockMvc.perform(post("/api/users/login")
-						.contentType(MediaType.APPLICATION_JSON)
-						.content("""
-					{
-						"username": "%s",
-						"password": "%s"
-					}""".formatted(username, password))).andExpect(status().isOk())
-				.andReturn().getResponse();
+    private Map<String, Cookie> login(String username, String password) throws Exception {
+        MockHttpServletResponse response = mockMvc.perform(post("/api/users/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                	"username": "%s",
+                                	"password": "%s"
+                                }""".formatted(username, password))).andExpect(status().isOk())
+                .andReturn().getResponse();
 
-		return Map.of("accessToken", Objects.requireNonNull(response.getCookie("accessToken")),
-				"refreshToken", Objects.requireNonNull(response.getCookie("refreshToken")));
-	}
+        return Map.of("accessToken", Objects.requireNonNull(response.getCookie("accessToken")),
+                "refreshToken", Objects.requireNonNull(response.getCookie("refreshToken")));
+    }
 
-	@Test
-	void deleteTest() throws Exception {
-		//given
-		User author = userService.createUser("userdasfasdname", "password", "emasdfasdail", "nicknawqeqwdcame",
-				"address", "url");
+    @Test
+    void deleteTest() throws Exception {
+        //given
+        User author = userService.createUser("userdasfasdname", "password", "emasdfasdail", "nicknawqeqwdcame",
+                "address", "url");
 
-		ProductPost productPost = productPostRepository.save(
-				ProductPost.create(author, "name", 5000, "title", "content", "url", 50F, 50F)
-		);
+        ProductPost productPost = productPostRepository.save(
+                new ProductPost(author, "name", 5000, "title", "content", "url", 50F, 50F)
+        );
 
-		Map<String, Cookie> cookieMap = login(author.getUsername(), "password");
+        Map<String, Cookie> cookieMap = login(author.getUsername(), "password");
 
-		String result = mockMvc.perform(post("/api/posts/%s/comments".formatted(productPost.getId()))
-						.contentType(MediaType.APPLICATION_JSON)
-						.cookie(cookieMap.get("accessToken"), cookieMap.get("refreshToken"))
-						.content("""
-					{
-						"content": "wow"
-					}"""))
-				.andExpect(status().isOk())
-				.andReturn().getResponse().getContentAsString();
+        String result = mockMvc.perform(post("/api/posts/%s/comments".formatted(productPost.getId()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .cookie(cookieMap.get("accessToken"), cookieMap.get("refreshToken"))
+                        .content("""
+                                {
+                                	"content": "wow"
+                                }"""))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
 
-		String commentId = objectMapper.readTree(result).get("data").get("id").asText();
+        String commentId = objectMapper.readTree(result).get("data").get("id").asText();
 
-		//when
-		// 삭제
-		ResultActions action = mockMvc.perform(
-				delete("/api/posts/%s/comments/%s".formatted(productPost.getId(), commentId))
-						.cookie(cookieMap.get("accessToken"), cookieMap.get("refreshToken")));
+        //when
+        // 삭제
+        ResultActions action = mockMvc.perform(
+                delete("/api/posts/%s/comments/%s".formatted(productPost.getId(), commentId))
+                        .cookie(cookieMap.get("accessToken"), cookieMap.get("refreshToken")));
 
-		//then
-		// 204 return
+        //then
+        // 204 return
 
-		action
-				.andExpect(status().isNoContent())
-				.andExpect(handler().handlerType(PostCommentController.class))
-				.andExpect(handler().methodName("deleteComment"))
-				.andExpect(jsonPath("$.code").value("204-1"));
+        action
+                .andExpect(status().isNoContent())
+                .andExpect(handler().handlerType(PostCommentController.class))
+                .andExpect(handler().methodName("deleteComment"))
+                .andExpect(jsonPath("$.code").value("204-1"));
 
-		Optional<Comment> byId = commentRepository.findById(commentId);
-		Assertions.assertThat(byId).isEmpty();
-	}
+        Optional<Comment> byId = commentRepository.findById(commentId);
+        Assertions.assertThat(byId).isEmpty();
+    }
 }
