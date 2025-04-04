@@ -1,9 +1,7 @@
 package com.NBE_4_5_2.Team5.domain.user.user.repository;
 
-import static org.assertj.core.api.Assertions.*;
-
-import java.util.Optional;
-
+import com.NBE_4_5_2.Team5.domain.user.user.entity.RefreshToken;
+import com.NBE_4_5_2.Team5.global.config.BaseTestConfig;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,8 +10,9 @@ import org.springframework.data.redis.connection.RedisConnectionCommands;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
-import com.NBE_4_5_2.Team5.domain.user.user.entity.RefreshToken;
-import com.NBE_4_5_2.Team5.global.config.BaseTestConfig;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @BaseTestConfig
@@ -79,11 +78,11 @@ class RedisContainersTest  {
 		String refreshToken = "refresh-token-abc";
 		Long expiration = 3600L;
 
-		RefreshToken token = RefreshToken.builder()
-			.userId(userId)
-			.refreshToken(refreshToken)
-			.expiration(expiration)
-			.build();
+		RefreshToken token = new RefreshToken(
+				userId,
+				refreshToken,
+				expiration
+		);
 
 		// When
 		redisRepository.save(token);
@@ -103,14 +102,10 @@ class RedisContainersTest  {
 		String key = "shared-key";
 		String value = "shared-value";
 
-		// StringRedisTemplate으로 저장
-		stringRedisTemplate.opsForValue().set(key, value);
-
-		// RedisTemplate으로 조회
-		String redisTemplateValue = redisTemplate.opsForValue().get(key);
-
-		// RedisRepository에서 확인
-		Optional<RefreshToken> foundToken = redisRepository.findById(key);
+		// When
+		stringRedisTemplate.opsForValue().set(key, value); // StringRedisTemplate으로 저장
+		String redisTemplateValue = redisTemplate.opsForValue().get(key); // RedisTemplate으로 조회
+		Optional<RefreshToken> foundToken = redisRepository.findById(key); // RedisRepository에서 확인
 
 		// Then
 		assertThat(redisTemplateValue).isEqualTo(value); // RedisTemplate 조회
@@ -123,15 +118,14 @@ class RedisContainersTest  {
 		// Given
 		String userId = "userToDelete";
 
-		RefreshToken token = RefreshToken.builder()
-			.userId(userId)
-			.refreshToken("token-to-delete")
-			.expiration(3600L)
-			.build();
-
-		redisRepository.save(token);
+		RefreshToken token = new RefreshToken(
+				userId,
+				"token-to-delete",
+				3600L
+		);
 
 		// When
+		redisRepository.save(token);
 		redisRepository.deleteById(userId);
 		Optional<RefreshToken> foundToken = redisRepository.findById(userId);
 
@@ -142,18 +136,22 @@ class RedisContainersTest  {
 	@Test
 	@DisplayName("redis : redisRepository : RefreshToken으로 조회 테스트")
 	void test8() {
+
+		// Given
 		String userId = "userWithRefreshToken";
 		String refreshToken = "unique-refresh-token";
-		RefreshToken token = RefreshToken.builder()
-			.userId(userId)
-			.refreshToken(refreshToken)
-			.expiration(3600L)
-			.build();
 
+		RefreshToken token = new RefreshToken(
+				userId,
+				refreshToken,
+				3600L
+		);
+
+		// When
 		redisRepository.save(token);
-
 		Optional<RefreshToken> foundToken = redisRepository.findByRefreshToken(refreshToken);
 
+		// Then
 		assertThat(foundToken).isPresent();
 		assertThat(foundToken.get().getUserId()).isEqualTo(userId);
 		assertThat(foundToken.get().getRefreshToken()).isEqualTo(refreshToken);

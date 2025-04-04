@@ -84,26 +84,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/chat/admin": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /**
-         * 관리자 권한 부여
-         * @description 특정 사용자의 계정을 관리자(Admin)로 설정합니다.
-         */
-        put: operations["grantAdmin"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/admin/notices/{notice-id}": {
         parameters: {
             query?: never;
@@ -384,7 +364,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/chat/admin/{adminId}": {
+    "/api/chat/admin": {
         parameters: {
             query?: never;
             header?: never;
@@ -905,89 +885,6 @@ export interface components {
             message: string;
             data: components["schemas"]["ProductPostResponse"];
         };
-        Category: {
-            /** Format: int64 */
-            id?: number;
-            name?: string;
-        };
-        Comment: {
-            /** Format: date-time */
-            createdAt?: string;
-            /** Format: date-time */
-            modifiedAt?: string;
-            id?: string;
-            target?: components["schemas"]["ProductPost"];
-            author?: components["schemas"]["User"];
-            content?: string;
-        };
-        GrantedAuthority: {
-            authority?: string;
-        };
-        ProductCategory: {
-            /** Format: int64 */
-            id?: number;
-            productPost?: components["schemas"]["ProductPost"];
-            category?: components["schemas"]["Category"];
-        };
-        ProductPost: {
-            /** Format: date-time */
-            createdAt?: string;
-            /** Format: date-time */
-            modifiedAt?: string;
-            id?: string;
-            productName?: string;
-            /** Format: int32 */
-            productPrice?: number;
-            buyer?: components["schemas"]["User"];
-            title?: string;
-            content?: string;
-            image_urls?: string;
-            /** Format: int32 */
-            viewCount?: number;
-            /** Format: int32 */
-            likeCount?: number;
-            /** @enum {string} */
-            status?: "RESERVED" | "AVAILABLE" | "PURCHASED";
-            /** Format: float */
-            latitude?: number;
-            /** Format: float */
-            longitude?: number;
-            productCategories?: components["schemas"]["ProductCategory"][];
-            writer?: components["schemas"]["User"];
-            commentList?: components["schemas"]["Comment"][];
-            available?: boolean;
-        };
-        RsDataUser: {
-            code: string;
-            message: string;
-            data: components["schemas"]["User"];
-        };
-        User: {
-            /** Format: date-time */
-            createdAt?: string;
-            /** Format: date-time */
-            modifiedAt?: string;
-            id?: string;
-            username?: string;
-            password?: string;
-            email?: string;
-            nickname?: string;
-            address?: string;
-            profileUrl?: string;
-            /** Format: int32 */
-            cash?: number;
-            /** @enum {string} */
-            role?: "ADMIN" | "USER";
-            blocked?: boolean;
-            /** Format: int32 */
-            blockedCount?: number;
-            purchasedProducts?: components["schemas"]["ProductPost"][];
-            writtenProducts?: components["schemas"]["ProductPost"][];
-            wroteComments?: components["schemas"]["Comment"][];
-            admin?: boolean;
-            authorities?: components["schemas"]["GrantedAuthority"][];
-            memberAuthoritiesAsString?: string[];
-        };
         UpdateNoticeReq: {
             title?: string;
             content?: string;
@@ -1189,15 +1086,15 @@ export interface components {
             postId?: string;
         };
         PageableObject: {
-            /** Format: int64 */
-            offset?: number;
-            sort?: components["schemas"]["SortObject"];
-            paged?: boolean;
             /** Format: int32 */
             pageSize?: number;
+            paged?: boolean;
             /** Format: int32 */
             pageNumber?: number;
             unpaged?: boolean;
+            /** Format: int64 */
+            offset?: number;
+            sort?: components["schemas"]["SortObject"];
         };
         RsDataSliceCommentDto: {
             code: string;
@@ -1205,23 +1102,23 @@ export interface components {
             data: components["schemas"]["SliceCommentDto"];
         };
         SliceCommentDto: {
+            first?: boolean;
+            last?: boolean;
+            /** Format: int32 */
+            numberOfElements?: number;
+            pageable?: components["schemas"]["PageableObject"];
             /** Format: int32 */
             size?: number;
             content?: components["schemas"]["CommentDto"][];
             /** Format: int32 */
             number?: number;
             sort?: components["schemas"]["SortObject"];
-            first?: boolean;
-            last?: boolean;
-            /** Format: int32 */
-            numberOfElements?: number;
-            pageable?: components["schemas"]["PageableObject"];
             empty?: boolean;
         };
         SortObject: {
-            empty?: boolean;
-            unsorted?: boolean;
             sorted?: boolean;
+            unsorted?: boolean;
+            empty?: boolean;
         };
         RsDataListPreviewPostResponse: {
             code: string;
@@ -1311,6 +1208,11 @@ export interface components {
             message: string;
             data: components["schemas"]["MessageDto"][];
         };
+        Category: {
+            name?: string;
+            /** Format: int64 */
+            id: number;
+        };
         RsDataListCategory: {
             code: string;
             message: string;
@@ -1321,17 +1223,17 @@ export interface components {
             totalElements?: number;
             /** Format: int32 */
             totalPages?: number;
+            first?: boolean;
+            last?: boolean;
+            /** Format: int32 */
+            numberOfElements?: number;
+            pageable?: components["schemas"]["PageableObject"];
             /** Format: int32 */
             size?: number;
             content?: components["schemas"]["UserDto"][];
             /** Format: int32 */
             number?: number;
             sort?: components["schemas"]["SortObject"];
-            first?: boolean;
-            last?: boolean;
-            /** Format: int32 */
-            numberOfElements?: number;
-            pageable?: components["schemas"]["PageableObject"];
             empty?: boolean;
         };
         RsDataPageUserDto: {
@@ -1344,17 +1246,17 @@ export interface components {
             totalElements?: number;
             /** Format: int32 */
             totalPages?: number;
+            first?: boolean;
+            last?: boolean;
+            /** Format: int32 */
+            numberOfElements?: number;
+            pageable?: components["schemas"]["PageableObject"];
             /** Format: int32 */
             size?: number;
             content?: components["schemas"]["NoticeResBody"][];
             /** Format: int32 */
             number?: number;
             sort?: components["schemas"]["SortObject"];
-            first?: boolean;
-            last?: boolean;
-            /** Format: int32 */
-            numberOfElements?: number;
-            pageable?: components["schemas"]["PageableObject"];
             empty?: boolean;
         };
         RsDataPageNoticeResBody: {
@@ -1640,37 +1542,6 @@ export interface operations {
                 };
                 content: {
                     "application/json;charset=UTF-8": components["schemas"]["RsDataEmpty"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": components["schemas"]["RsDataVoid"];
-                };
-            };
-        };
-    };
-    grantAdmin: {
-        parameters: {
-            query: {
-                userId: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": components["schemas"]["RsDataUser"];
                 };
             };
             /** @description Internal Server Error */
@@ -2288,13 +2159,7 @@ export interface operations {
         parameters: {
             query?: never;
             header?: never;
-            path: {
-                /**
-                 * @description 관리자 id
-                 * @example user-1231jkj-g04hi8gah-123hixfdh9
-                 */
-                adminId: string;
-            };
+            path?: never;
             cookie?: never;
         };
         requestBody?: never;

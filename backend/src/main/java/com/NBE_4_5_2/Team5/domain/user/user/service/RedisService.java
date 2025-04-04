@@ -1,15 +1,13 @@
 package com.NBE_4_5_2.Team5.domain.user.user.service;
 
-import java.util.Optional;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
 import com.NBE_4_5_2.Team5.domain.user.user.entity.RefreshToken;
 import com.NBE_4_5_2.Team5.domain.user.user.entity.User;
 import com.NBE_4_5_2.Team5.domain.user.user.repository.RedisRepository;
-
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -28,11 +26,11 @@ public class RedisService {
 	public void createToken(User user, String refreshToken) {
 		String key = REFRESH_TOKEN_KEY + user.getId();
 
-		RefreshToken token = RefreshToken.builder()
-			.userId(key)
-			.refreshToken(refreshToken)
-			.expiration(expireSeconds)
-			.build();
+		RefreshToken token = new RefreshToken(
+				key,
+				refreshToken,
+				expireSeconds
+		);
 
 		redisRepository.save(token);
 	}
