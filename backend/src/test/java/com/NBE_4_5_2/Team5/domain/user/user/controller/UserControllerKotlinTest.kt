@@ -354,20 +354,27 @@ internal open class UserControllerKotlinTest {
         resultActions.andExpect { mvcResult: MvcResult ->
             val cookieRefreshToken = mvcResult.response.getCookie("refreshToken")
             assertThat(cookieRefreshToken).isNotNull
-            assertThat(cookieRefreshToken.name).isEqualTo("refreshToken")
-            assertThat(cookieRefreshToken.value).isNotBlank
-            assertThat(cookieRefreshToken.path).isEqualTo("/")
-            assertThat(cookieRefreshToken.isHttpOnly).isTrue
-            assertThat(cookieRefreshToken.secure).isTrue
+
+            cookieRefreshToken?.let {
+                assertThat(it.name).isEqualTo("refreshToken")
+                assertThat(it.value).isNotBlank()
+                assertThat(it.path).isEqualTo("/")
+                assertThat(it.isHttpOnly).isTrue
+                assertThat(it.secure).isTrue
+            }
 
             val cookieAccessToken = mvcResult.response.getCookie("accessToken")
             assertThat(cookieAccessToken).isNotNull
-            assertThat(cookieAccessToken.name).isEqualTo("accessToken")
-            assertThat(cookieAccessToken.value).isNotBlank
-            assertThat(cookieAccessToken.path).isEqualTo("/")
-            assertThat(cookieAccessToken.isHttpOnly).isTrue
-            assertThat(cookieAccessToken.secure).isTrue
+
+            cookieAccessToken?.let {
+                assertThat(it.name).isEqualTo("accessToken")
+                assertThat(it.value).isNotBlank()
+                assertThat(it.path).isEqualTo("/")
+                assertThat(it.isHttpOnly).isTrue
+                assertThat(it.secure).isTrue
+            }
         }
+
     }
 
     @Test
@@ -473,11 +480,11 @@ internal open class UserControllerKotlinTest {
             .andExpect(jsonPath("$.message").value("로그아웃 되었습니다."))
 
         resultActions.andExpect { mvcResult: MvcResult ->
-            val refreshToken = mvcResult.response.getCookie("refreshToken")
+            val refreshToken = mvcResult.response.getCookie("refreshToken")!!
             assertThat(refreshToken).isNotNull
             assertThat(refreshToken.maxAge).isLessThanOrEqualTo(0)
 
-            val accessToken = mvcResult.response.getCookie("accessToken")
+            val accessToken = mvcResult.response.getCookie("accessToken")!!
             assertThat(accessToken).isNotNull
             assertThat(accessToken.maxAge).isLessThanOrEqualTo(0)
         }
@@ -500,11 +507,11 @@ internal open class UserControllerKotlinTest {
             .andExpect(jsonPath("$.message").value("로그아웃 되었습니다."))
 
         resultActions.andExpect { mvcResult: MvcResult ->
-            val refreshToken = mvcResult.response.getCookie("refreshToken")
+            val refreshToken = mvcResult.response.getCookie("refreshToken")!!
             assertThat(refreshToken).isNotNull
             assertThat(refreshToken.maxAge).isLessThanOrEqualTo(0)
 
-            val accessToken = mvcResult.response.getCookie("accessToken")
+            val accessToken = mvcResult.response.getCookie("accessToken")!!
             assertThat(accessToken).isNotNull
             assertThat(accessToken.maxAge).isLessThanOrEqualTo(0)
         }
@@ -717,7 +724,7 @@ internal open class UserControllerKotlinTest {
             .andExpect(jsonPath("$.data").exists())
 
         resultActions.andExpect { mvcResult: MvcResult ->
-            val accessToken = mvcResult.response.getCookie("accessToken")
+            val accessToken = mvcResult.response.getCookie("accessToken")!!
             assertThat(accessToken).isNotNull
             assertThat(accessToken.name).isEqualTo("accessToken")
             assertThat(accessToken.value).isNotBlank
