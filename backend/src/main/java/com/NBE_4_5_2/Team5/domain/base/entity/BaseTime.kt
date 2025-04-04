@@ -13,13 +13,13 @@ import java.time.LocalDateTime
 )
 abstract class BaseTime {
     @CreatedDate
-    lateinit var createdDate: LocalDateTime
+    lateinit var createdAt: LocalDateTime
 
     @LastModifiedDate
-    lateinit var modifiedDate: LocalDateTime
+    lateinit var modifiedAt: LocalDateTime
 
     fun setCreateDateNow() {
-        this.createdDate = LocalDateTime.now()
-        this.modifiedDate = createdDate
+        this.createdAt = LocalDateTime.now()
+        this.modifiedAt = createdAt
     }
 }
