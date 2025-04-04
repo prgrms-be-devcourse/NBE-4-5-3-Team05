@@ -1,6 +1,5 @@
 package com.NBE_4_5_2.Team5.domain.payment.controller;
 
-import static org.assertj.core.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -27,8 +26,6 @@ import com.NBE_4_5_2.Team5.domain.payment.enums.PaymentStatus;
 import com.NBE_4_5_2.Team5.domain.payment.service.PaymentProviderAdapter;
 import com.NBE_4_5_2.Team5.domain.post.post.dto.response.PreviewPostResponse;
 import com.NBE_4_5_2.Team5.domain.post.post.service.ProductPostService;
-import com.NBE_4_5_2.Team5.domain.user.user.entity.User;
-import com.NBE_4_5_2.Team5.domain.user.user.service.UserService;
 import com.NBE_4_5_2.Team5.global.config.BaseTestConfig;
 import com.NBE_4_5_2.Team5.global.config.Util;
 

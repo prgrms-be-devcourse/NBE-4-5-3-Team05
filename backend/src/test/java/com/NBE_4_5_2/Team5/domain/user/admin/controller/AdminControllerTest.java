@@ -24,8 +24,6 @@ import com.NBE_4_5_2.Team5.domain.user.admin.dto.NoticeResBody;
 import com.NBE_4_5_2.Team5.domain.user.admin.entity.BanList;
 import com.NBE_4_5_2.Team5.domain.user.admin.repository.BanListRepository;
 import com.NBE_4_5_2.Team5.domain.user.admin.service.AdminService;
-import com.NBE_4_5_2.Team5.domain.user.user.entity.User;
-import com.NBE_4_5_2.Team5.domain.user.user.service.UserService;
 import com.NBE_4_5_2.Team5.global.config.BaseTestConfig;
 import com.NBE_4_5_2.Team5.global.exception.post.product.ProductPostNotFoundException;
 import com.fasterxml.jackson.databind.ObjectMapper;

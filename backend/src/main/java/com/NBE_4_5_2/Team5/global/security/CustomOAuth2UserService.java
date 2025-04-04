@@ -11,9 +11,6 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.NBE_4_5_2.Team5.domain.user.user.entity.User;
-import com.NBE_4_5_2.Team5.domain.user.user.service.UserService;
-import com.NBE_4_5_2.Team5.domain.user.user.service.UserValidator;
 import com.NBE_4_5_2.Team5.domain.user.user.service.email.EmailService;
 
 import lombok.RequiredArgsConstructor;

@@ -1,7 +1,6 @@
 package com.NBE_4_5_2.Team5.domain.post.comment.dto;
 
 import com.NBE_4_5_2.Team5.domain.post.comment.entity.Comment;
-import com.NBE_4_5_2.Team5.domain.user.user.dto.UserDto;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

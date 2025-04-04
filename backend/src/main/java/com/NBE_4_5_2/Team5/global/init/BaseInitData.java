@@ -22,9 +22,6 @@ import com.NBE_4_5_2.Team5.domain.user.admin.entity.NoticePost;
 import com.NBE_4_5_2.Team5.domain.user.admin.repository.NoticePostRepository;
 import com.NBE_4_5_2.Team5.domain.user.admin.service.AdminService;
 import com.NBE_4_5_2.Team5.domain.user.user.entity.Role;
-import com.NBE_4_5_2.Team5.domain.user.user.entity.User;
-import com.NBE_4_5_2.Team5.domain.user.user.repository.UserRepository;
-import com.NBE_4_5_2.Team5.domain.user.user.service.UserService;
 import com.NBE_4_5_2.Team5.domain.user.user.service.email.EmailService;
 
 import jakarta.transaction.Transactional;
