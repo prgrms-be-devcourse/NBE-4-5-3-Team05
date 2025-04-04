@@ -38,7 +38,7 @@ export default function ClientPage({
   };
 
   const handleCreateAdminRoom= async()=>{
-    const adminId = "user-4e8d79c9-1adc-4bbf-b30f-8e251635bdcb"; 
+    const adminId = "user-e01ca213-f07f-421f-aa15-4809495e6cdd"; 
     let adminRoom;
     const createAdminRoomResponse = await client.POST(`/api/chat/admin/{adminId}`,{
       headers: {
