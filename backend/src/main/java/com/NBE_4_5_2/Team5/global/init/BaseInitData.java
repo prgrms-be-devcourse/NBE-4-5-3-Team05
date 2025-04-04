@@ -1,17 +1,5 @@
 package com.NBE_4_5_2.Team5.global.init;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.ApplicationRunner;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.context.annotation.Profile;
-import org.springframework.core.annotation.Order;
-
 import com.NBE_4_5_2.Team5.domain.post.category.entity.Category;
 import com.NBE_4_5_2.Team5.domain.post.category.repository.CategoryRepository;
 import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductCategory;
@@ -26,9 +14,19 @@ import com.NBE_4_5_2.Team5.domain.user.user.entity.User;
 import com.NBE_4_5_2.Team5.domain.user.user.repository.UserRepository;
 import com.NBE_4_5_2.Team5.domain.user.user.service.UserService;
 import com.NBE_4_5_2.Team5.domain.user.user.service.email.EmailService;
-
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.ApplicationRunner;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Profile;
+import org.springframework.core.annotation.Order;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Configuration
 @Profile("!monitor")
@@ -118,21 +116,22 @@ public class BaseInitData {
 		}
 
 		List<Category> categories = List.of(
-			Category.builder().id(null).name("전자제품").build(),
-			Category.builder().id(null).name("가구").build(),
-			Category.builder().id(null).name("의류").build(),
-			Category.builder().id(null).name("스포츠 용품").build(),
-			Category.builder().id(null).name("도서").build(),
-			Category.builder().id(null).name("생활용품").build(),
-			Category.builder().id(null).name("자동차 용품").build(),
-			Category.builder().id(null).name("식품").build(),
-			Category.builder().id(null).name("악기").build(),
-			Category.builder().id(null).name("반려동물 용품").build(),
-			Category.builder().id(null).name("뷰티/미용").build(),
-			Category.builder().id(null).name("티켓/쿠폰").build(),
-			Category.builder().id(null).name("수집/예술").build(),
-			Category.builder().id(null).name("게임").build(),
-			Category.builder().id(null).name("기타").build()
+
+				new Category(null, "전자제품"),
+				new Category(null, "가구"),
+				new Category(null, "의류"),
+				new Category(null, "스포츠 용품"),
+				new Category(null, "도서"),
+				new Category(null, "생활용품"),
+				new Category(null, "자동차 용품"),
+				new Category(null, "식품"),
+				new Category(null, "악기"),
+				new Category(null, "반려동물 용품"),
+				new Category(null, "뷰티/미용"),
+				new Category(null, "티켓/쿠폰"),
+				new Category(null, "수집/예술"),
+				new Category(null, "게임"),
+				new Category(null, "기타")
 
 		);
 
