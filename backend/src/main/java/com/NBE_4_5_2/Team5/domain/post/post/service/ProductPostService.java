@@ -183,10 +183,10 @@ public class ProductPostService {
         if (likedPostRepository.existsByUserIdAndProductPostId(actor.getId(), postId)) {
             throw new ServiceException("400", "이미 찜한 게시글입니다.");
         }
-        LikedPost likedPost = LikedPost.builder()
-                .userId(actor.getId())
-                .productPostId(postId)
-                .build();
+        LikedPost likedPost = new LikedPost(
+                actor.getId(),
+                postId
+        );
         likedPostRepository.save(likedPost);
         int likedCount = likedPostRepository.countByProductPostId(postId);
         return ProductPostResponse.fromEntityWithLikeCount(post, likedCount);
