@@ -203,9 +203,4 @@ public class User extends BaseTime {
 		this.nickname = nickname;
 		this.role = role;
 	}
-
-	public void setAdmin() {
-		this.role = Role.ADMIN;
-	}
-
 }
