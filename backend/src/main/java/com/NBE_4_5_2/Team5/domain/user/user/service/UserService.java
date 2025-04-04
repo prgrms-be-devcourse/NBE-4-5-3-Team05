@@ -1,5 +1,15 @@
 package com.NBE_4_5_2.Team5.domain.user.user.service;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import com.NBE_4_5_2.Team5.global.exception.user.UserNotFoundException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
 import com.NBE_4_5_2.Team5.domain.user.user.dto.AuthToken;
 import com.NBE_4_5_2.Team5.domain.user.user.dto.UserDto;
 import com.NBE_4_5_2.Team5.domain.user.user.dto.UserUpdateRequest;
@@ -295,5 +305,13 @@ public class UserService {
 		}
 
 		emailService.saveVerificationCode(email, "verified");
+	}
+
+	// 관리자 유저 한명 반환
+	public User getAdminUsers() {
+		Optional<User> adminUser=userRepository.findAllByRole(Role.ADMIN).stream().findFirst();
+		if(adminUser.isPresent()) {
+			return adminUser.get();
+		}else throw new UserNotFoundException("404","관리자 유저가 없습니다.");
 	}
 }

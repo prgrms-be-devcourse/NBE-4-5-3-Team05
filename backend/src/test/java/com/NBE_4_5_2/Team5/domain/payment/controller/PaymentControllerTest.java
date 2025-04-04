@@ -31,6 +31,7 @@ import com.NBE_4_5_2.Team5.domain.user.user.entity.User;
 import com.NBE_4_5_2.Team5.domain.user.user.service.UserService;
 import com.NBE_4_5_2.Team5.global.config.BaseTestConfig;
 import com.NBE_4_5_2.Team5.global.config.Util;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.http.Cookie;
 
@@ -54,6 +55,8 @@ class PaymentControllerTest {
 	@Autowired
 	private Util util;
 
+	@Autowired
+	private ObjectMapper objectMapper;
 	@Autowired
 	private UserService userService;
 
