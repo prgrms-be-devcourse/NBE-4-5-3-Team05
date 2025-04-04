@@ -161,10 +161,12 @@ public class ProductPostService {
             post.getProductCategories().clear(); // 기존 카테고리 삭제
 
             List<ProductCategory> newProductCategories = categories.stream()
-                    .map(category -> (ProductCategory) ProductCategory.builder()
-                            .productPost(post)
-                            .category(category)
-                            .build())
+                    .map(category ->
+                            (ProductCategory) new ProductCategory(
+                                    post,
+                                    category
+                            )
+                    )
                     .toList();
 
             post.getProductCategories().addAll(newProductCategories);

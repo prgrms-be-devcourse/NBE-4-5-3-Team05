@@ -23,150 +23,151 @@ import java.util.UUID;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 public class ProductPost extends BaseTime {
 
-	@Id
-	@EqualsAndHashCode.Include
-	@Column(updatable = false, nullable = false)
-	private String id = "ppost-" + UUID.randomUUID();
+    @Id
+    @EqualsAndHashCode.Include
+    @Column(updatable = false, nullable = false)
+    private String id = "ppost-" + UUID.randomUUID();
 
-	@Column(nullable = false)
-	@Setter
-	private String productName;
+    @Column(nullable = false)
+    @Setter
+    private String productName;
 
-	@Column(nullable = false)
-	@Setter
-	private Integer productPrice;
+    @Column(nullable = false)
+    @Setter
+    private Integer productPrice;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	private User buyer; // 구매자(NULL이면 아직 구매 안 된 상태)
+    @ManyToOne(fetch = FetchType.LAZY)
+    private User buyer; // 구매자(NULL이면 아직 구매 안 된 상태)
 
-	@Column(nullable = false)
-	@Setter
-	private String title;
+    @Column(nullable = false)
+    @Setter
+    private String title;
 
-	@Column(nullable = false, columnDefinition = "TEXT")
-	@Setter
-	private String content;
+    @Column(nullable = false, columnDefinition = "TEXT")
+    @Setter
+    private String content;
 
-	@Column(nullable = false, columnDefinition = "TEXT")
-	@Setter
-	private String image_urls; // 쉼표가 포함된 url 문자열
+    @Column(nullable = false, columnDefinition = "TEXT")
+    @Setter
+    private String image_urls; // 쉼표가 포함된 url 문자열
 
-	//조회수
-	@Column(nullable = false)
-	private Integer viewCount = 0;
+    //조회수
+    @Column(nullable = false)
+    private Integer viewCount = 0;
 
-	@Column(nullable = false)
-	private Integer likeCount = 0;
+    @Column(nullable = false)
+    private Integer likeCount = 0;
 
-	@Enumerated(EnumType.STRING)
-	@Column(nullable = false)
-	@Setter
-	private ProductStatus status = ProductStatus.AVAILABLE;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @Setter
+    private ProductStatus status = ProductStatus.AVAILABLE;
 
-	@Column(nullable = false)
-	@Setter
-	private Float latitude;
+    @Column(nullable = false)
+    @Setter
+    private Float latitude;
 
-	@Column(nullable = false)
-	@Setter
-	private Float longitude;
+    @Column(nullable = false)
+    @Setter
+    private Float longitude;
 
-	@OneToMany(mappedBy = "productPost", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<ProductCategory> productCategories = new ArrayList<>();
+    @OneToMany(mappedBy = "productPost", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ProductCategory> productCategories = new ArrayList<>();
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	private User writer;
+    @ManyToOne(fetch = FetchType.LAZY)
+    private User writer;
 
-	@OneToMany(mappedBy = "target", cascade = CascadeType.REMOVE, orphanRemoval = true)
-	private final List<Comment> commentList = new ArrayList<>();
+    @OneToMany(mappedBy = "target", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private final List<Comment> commentList = new ArrayList<>();
 
-	public ProductPost(User writer, String productName, Integer productPrice, String title, String content, String imageUrls, Float latitude, Float longitude) {
-		this.writer = writer;
-		this.productName = productName;
-		this.productPrice = productPrice;
-		this.title = title;
-		this.content = content;
-		this.image_urls = imageUrls;
-		this.latitude = latitude;
-		this.longitude = longitude;
-	}
+    public ProductPost(User writer, String productName, Integer productPrice, String title, String content, String imageUrls, Float latitude, Float longitude) {
+        this.writer = writer;
+        this.productName = productName;
+        this.productPrice = productPrice;
+        this.title = title;
+        this.content = content;
+        this.image_urls = imageUrls;
+        this.latitude = latitude;
+        this.longitude = longitude;
+    }
 
-	public static ProductPost create(User writer, String productName, Integer productPrice, String title,
-		String content, String image_urls, Float latitude, Float longitude) {
-		return new ProductPost(
-				writer,
-				productName,
-				productPrice,
-				title,
-				content,
-				image_urls,
-				latitude,
-				longitude
-		);
-	}
+    public static ProductPost create(User writer, String productName, Integer productPrice, String title,
+                                     String content, String image_urls, Float latitude, Float longitude) {
+        return new ProductPost(
+                writer,
+                productName,
+                productPrice,
+                title,
+                content,
+                image_urls,
+                latitude,
+                longitude
+        );
+    }
 
-	// 구매 처리 메서드
-	public void setBuyer(User buyer) {
-		this.buyer = buyer;
-		this.status = ProductStatus.PURCHASED;
-	}
+    // 구매 처리 메서드
+    public void setBuyer(User buyer) {
+        this.buyer = buyer;
+        this.status = ProductStatus.PURCHASED;
+    }
 
-	public void addCategories(List<Category> categories) {
-		List<ProductCategory> productCategories = categories.stream()
-			.map(category -> (ProductCategory)ProductCategory.builder()
-				.productPost(this)
-				.category(category)
-				.build())
-			.toList();
+    public void addCategories(List<Category> categories) {
+        List<ProductCategory> productCategories = categories.stream()
+                .map(category -> (ProductCategory) new ProductCategory(
+                                this,
+                                category
+                        )
+                )
+                .toList();
 
-		this.productCategories.addAll(productCategories);
-	}
+        this.productCategories.addAll(productCategories);
+    }
 
-	public void canModify(User writer) {
-		if (writer == null) {
-			throw new AuthenticationNotFoundException("401-1", "인증 정보가 없습니다.");
-		}
+    public void canModify(User writer) {
+        if (writer == null) {
+            throw new AuthenticationNotFoundException("401-1", "인증 정보가 없습니다.");
+        }
 
-		if (writer.isAdmin() || writer.equals(this.getWriter())) {
-			return;
-		}
+        if (writer.isAdmin() || writer.equals(this.getWriter())) {
+            return;
+        }
 
-		throw new ForbiddenAccessException("403-1", "자신이 작성한 글만 수정 가능합니다.");
-	}
+        throw new ForbiddenAccessException("403-1", "자신이 작성한 글만 수정 가능합니다.");
+    }
 
-	public void canDelete(User writer) {
-		if (writer == null) {
-			throw new AuthenticationNotFoundException("401-1", "인증 정보가 없습니다.");
-		}
+    public void canDelete(User writer) {
+        if (writer == null) {
+            throw new AuthenticationNotFoundException("401-1", "인증 정보가 없습니다.");
+        }
 
-		if (writer.isAdmin() || writer.equals(this.getWriter())) {
-			return;
-		}
+        if (writer.isAdmin() || writer.equals(this.getWriter())) {
+            return;
+        }
 
-		throw new ForbiddenAccessException("403-1", "자신이 작성한 글만 삭제 가능합니다.");
-	}
+        throw new ForbiddenAccessException("403-1", "자신이 작성한 글만 삭제 가능합니다.");
+    }
 
-	public boolean isAvailable() {
-		return status == ProductStatus.AVAILABLE;
-	}
+    public boolean isAvailable() {
+        return status == ProductStatus.AVAILABLE;
+    }
 
-	public void updateStatus(ProductStatus status) {
-		this.status = status;
-	}
+    public void updateStatus(ProductStatus status) {
+        this.status = status;
+    }
 
-	public void addComment(Comment comment) {
-		commentList.add(comment);
-	}
+    public void addComment(Comment comment) {
+        commentList.add(comment);
+    }
 
-	//조회수 증가
-	public void incrementViewCount() {
-		this.viewCount++;
-	}
+    //조회수 증가
+    public void incrementViewCount() {
+        this.viewCount++;
+    }
 
-	public Boolean isPurchasedBy(User loggedInUser) {
-		if (buyer == null) {
-			return false;
-		}
-		return buyer.equals(loggedInUser);
-	}
+    public Boolean isPurchasedBy(User loggedInUser) {
+        if (buyer == null) {
+            return false;
+        }
+        return buyer.equals(loggedInUser);
+    }
 }

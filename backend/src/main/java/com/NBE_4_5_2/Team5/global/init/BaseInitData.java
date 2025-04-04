@@ -32,183 +32,184 @@ import java.util.List;
 @Profile("!monitor")
 @RequiredArgsConstructor
 public class BaseInitData {
-	private final CategoryRepository categoryRepository;
-	private final ProductPostRepository postRepository;
-	private final ProductCategoryRepository productCategoryRepository;
-	private final UserService userService;
-	private final UserRepository userRepository;
-	private final AdminService adminService;
-	private final NoticePostRepository noticePostRepository;
-	private final EmailService emailService;
+    private final CategoryRepository categoryRepository;
+    private final ProductPostRepository postRepository;
+    private final ProductCategoryRepository productCategoryRepository;
+    private final UserService userService;
+    private final UserRepository userRepository;
+    private final AdminService adminService;
+    private final NoticePostRepository noticePostRepository;
+    private final EmailService emailService;
 
-	@Autowired
-	@Lazy
-	private BaseInitData self;
+    @Autowired
+    @Lazy
+    private BaseInitData self;
 
-	@Bean
-	@Order(1)
-	public ApplicationRunner applicationRunner1() {
-		return args -> {
-			self.userInit();
-		};
-	}
+    @Bean
+    @Order(1)
+    public ApplicationRunner applicationRunner1() {
+        return args -> {
+            self.userInit();
+        };
+    }
 
-	@Bean
-	@Order(2)
-	public ApplicationRunner applicationRunner2() {
-		return args -> {
-			self.categoryInit();
-		};
-	}
+    @Bean
+    @Order(2)
+    public ApplicationRunner applicationRunner2() {
+        return args -> {
+            self.categoryInit();
+        };
+    }
 
-	@Bean
-	@Order(3)
-	public ApplicationRunner applicationRunner3() {
-		return args -> {
-			self.postInit();
-		};
-	}
+    @Bean
+    @Order(3)
+    public ApplicationRunner applicationRunner3() {
+        return args -> {
+            self.postInit();
+        };
+    }
 
-	@Bean
-	@Order(4)
-	public ApplicationRunner applicationRunner4() {
-		return args -> {
-			self.noticeInit();
-		};
-	}
+    @Bean
+    @Order(4)
+    public ApplicationRunner applicationRunner4() {
+        return args -> {
+            self.noticeInit();
+        };
+    }
 
-	@Value("${custom.server.host}")
-	private String serverHost;
+    @Value("${custom.server.host}")
+    private String serverHost;
 
-	@Transactional
-	public void userInit() {
+    @Transactional
+    public void userInit() {
 
-		if (userRepository.count() > 0) {
-			return;
-		}
-		emailService.saveVerificationCode("user1@gmail.com", "verified");
-		emailService.saveVerificationCode("user2@gmail.com", "verified");
-		emailService.saveVerificationCode("user3@gmail.com", "verified");
-		emailService.saveVerificationCode("user4@gmail.com", "verified");
-		emailService.saveVerificationCode("admin2@gmail.com", "verified");
+        if (userRepository.count() > 0) {
+            return;
+        }
+        emailService.saveVerificationCode("user1@gmail.com", "verified");
+        emailService.saveVerificationCode("user2@gmail.com", "verified");
+        emailService.saveVerificationCode("user3@gmail.com", "verified");
+        emailService.saveVerificationCode("user4@gmail.com", "verified");
+        emailService.saveVerificationCode("admin2@gmail.com", "verified");
 
-		String baseUrl =
-			serverHost.startsWith("backend.nbe-4-5-5-team5.shop") ? "https://%s/images".formatted(serverHost) :
-				"http://localhost:8080/images/";
-		String imageUrl = baseUrl + "default_profile" + ".jpg"; // ✅ 하나의 이미지만 저장
+        String baseUrl =
+                serverHost.startsWith("backend.nbe-4-5-5-team5.shop") ? "https://%s/images".formatted(serverHost) :
+                        "http://localhost:8080/images/";
+        String imageUrl = baseUrl + "default_profile" + ".jpg"; // ✅ 하나의 이미지만 저장
 
-		userService.createUser("user1", "user11234@", "user1@gmail.com", "user1", "서울시 강남구",
-			imageUrl);
-		userService.createUser("user2", "user21234@", "user2@gmail.com", "user2", "서울시 강서구",
-			imageUrl);
-		userService.createUser("user3", "user31234@", "user3@gmail.com", "user3", "서울시 광진구",
-			imageUrl);
+        userService.createUser("user1", "user11234@", "user1@gmail.com", "user1", "서울시 강남구",
+                imageUrl);
+        userService.createUser("user2", "user21234@", "user2@gmail.com", "user2", "서울시 강서구",
+                imageUrl);
+        userService.createUser("user3", "user31234@", "user3@gmail.com", "user3", "서울시 광진구",
+                imageUrl);
 
-		adminService.signUpAdmin("admin2", "password2", "admin2", "admin2@gmail.com");
-		adminService.signUpAdmin("user4", "user41234@", "admin4", "user4@gmail.com");
+        adminService.signUpAdmin("admin2", "password2", "admin2", "admin2@gmail.com");
+        adminService.signUpAdmin("user4", "user41234@", "admin4", "user4@gmail.com");
 
-	}
+    }
 
-	@Transactional
-	public void categoryInit() {
-		if (categoryRepository.count() > 0) {
-			return; // 이미 카테고리가 존재하면 초기화하지 않음
-		}
+    @Transactional
+    public void categoryInit() {
+        if (categoryRepository.count() > 0) {
+            return; // 이미 카테고리가 존재하면 초기화하지 않음
+        }
 
-		List<Category> categories = List.of(
+        List<Category> categories = List.of(
 
-				new Category(null, "전자제품"),
-				new Category(null, "가구"),
-				new Category(null, "의류"),
-				new Category(null, "스포츠 용품"),
-				new Category(null, "도서"),
-				new Category(null, "생활용품"),
-				new Category(null, "자동차 용품"),
-				new Category(null, "식품"),
-				new Category(null, "악기"),
-				new Category(null, "반려동물 용품"),
-				new Category(null, "뷰티/미용"),
-				new Category(null, "티켓/쿠폰"),
-				new Category(null, "수집/예술"),
-				new Category(null, "게임"),
-				new Category(null, "기타")
+                new Category(null, "전자제품"),
+                new Category(null, "가구"),
+                new Category(null, "의류"),
+                new Category(null, "스포츠 용품"),
+                new Category(null, "도서"),
+                new Category(null, "생활용품"),
+                new Category(null, "자동차 용품"),
+                new Category(null, "식품"),
+                new Category(null, "악기"),
+                new Category(null, "반려동물 용품"),
+                new Category(null, "뷰티/미용"),
+                new Category(null, "티켓/쿠폰"),
+                new Category(null, "수집/예술"),
+                new Category(null, "게임"),
+                new Category(null, "기타")
 
-		);
+        );
 
-		categoryRepository.saveAll(categories);
-	}
+        categoryRepository.saveAll(categories);
+    }
 
-	@Transactional
-	public void postInit() {
-		if (postRepository.count() > 0) {
-			return;
-		}
+    @Transactional
+    public void postInit() {
+        if (postRepository.count() > 0) {
+            return;
+        }
 
-		List<User> users = userRepository.findAll();
-		List<Category> categories = categoryRepository.findAll();
+        List<User> users = userRepository.findAll();
+        List<Category> categories = categoryRepository.findAll();
 
-		List<ProductPost> posts = new ArrayList<>();
+        List<ProductPost> posts = new ArrayList<>();
 
-		String baseUrl =
-			serverHost.startsWith("backend.nbe-4-5-5-team5.shop") ? "https://%s/images".formatted(serverHost) :
-				"http://localhost:8080/images/";
+        String baseUrl =
+                serverHost.startsWith("backend.nbe-4-5-5-team5.shop") ? "https://%s/images".formatted(serverHost) :
+                        "http://localhost:8080/images/";
 
-		for (int i = 1; i <= 50; i++) {
-			User writer = users.get((i - 1) % users.size());
+        for (int i = 1; i <= 50; i++) {
+            User writer = users.get((i - 1) % users.size());
 
-			// ✅ 단순한 이미지 파일명 지정 (productX.jpg)
-			String imageUrl = baseUrl + "default" + ".jpg"; // ✅ 하나의 이미지만 저장
+            // ✅ 단순한 이미지 파일명 지정 (productX.jpg)
+            String imageUrl = baseUrl + "default" + ".jpg"; // ✅ 하나의 이미지만 저장
 
-			posts.add(ProductPost.create(
-				writer,
-				"상품 " + i,
-				(i * 10000) % 200000 + 10000, // 가격 랜덤화
-				"제목 " + i,
-				"이것은 테스트 상품 " + i + " 입니다.",
-				imageUrl, // ✅ 하나의 이미지 URL 적용
-				37.5f + (i % 10) * 0.01f, // 위치 랜덤화
-				127.0f + (i % 10) * 0.01f
-			));
-		}
+            posts.add(ProductPost.create(
+                    writer,
+                    "상품 " + i,
+                    (i * 10000) % 200000 + 10000, // 가격 랜덤화
+                    "제목 " + i,
+                    "이것은 테스트 상품 " + i + " 입니다.",
+                    imageUrl, // ✅ 하나의 이미지 URL 적용
+                    37.5f + (i % 10) * 0.01f, // 위치 랜덤화
+                    127.0f + (i % 10) * 0.01f
+            ));
+        }
 
-		postRepository.saveAll(posts);
+        postRepository.saveAll(posts);
 
-		// ✅ `ProductCategory` 생성하여 게시글과 랜덤 카테고리 연결
-		List<ProductCategory> productCategories = new ArrayList<>();
+        // ✅ `ProductCategory` 생성하여 게시글과 랜덤 카테고리 연결
+        List<ProductCategory> productCategories = new ArrayList<>();
 
-		for (int i = 0; i < posts.size(); i++) {
-			Category randomCategory = categories.get(i % categories.size()); // ✅ 순환하면서 랜덤 카테고리 적용
-			productCategories.add(ProductCategory.builder()
-				.productPost(posts.get(i))
-				.category(randomCategory)
-				.build());
-		}
+        for (int i = 0; i < posts.size(); i++) {
+            Category randomCategory = categories.get(i % categories.size()); // ✅ 순환하면서 랜덤 카테고리 적용
+            productCategories.add(
+                    new ProductCategory(
+                            posts.get(i),
+                            randomCategory
+                    ));
+        }
 
-		productCategoryRepository.saveAll(productCategories);
-	}
+        productCategoryRepository.saveAll(productCategories);
+    }
 
-	@Transactional
-	public void noticeInit() {
-		if (noticePostRepository.count() > 0) {
-			return;
-		}
+    @Transactional
+    public void noticeInit() {
+        if (noticePostRepository.count() > 0) {
+            return;
+        }
 
-		// 공지사항 생성: 총 10개의 공지사항 생성
-		User admin = userRepository.findAll().stream()
-			.filter(u -> u.getRole().equals(Role.ADMIN))
-			.findFirst()
-			.orElse(null);
-		if (admin == null && !userRepository.findAll().isEmpty()) {
-			admin = userRepository.findAll().get(0);
-		}
+        // 공지사항 생성: 총 10개의 공지사항 생성
+        User admin = userRepository.findAll().stream()
+                .filter(u -> u.getRole().equals(Role.ADMIN))
+                .findFirst()
+                .orElse(null);
+        if (admin == null && !userRepository.findAll().isEmpty()) {
+            admin = userRepository.findAll().get(0);
+        }
 
-		for (int i = 1; i <= 10; i++) {
-			NoticePost notice = NoticePost.builder()
-				.admin(admin)
-				.title("공지사항 제목 " + i)
-				.content("공지사항 내용 " + i + " - 중요한 공지사항 내용입니다.")
-				.build();
-			noticePostRepository.save(notice);
-		}
-	}
+        for (int i = 1; i <= 10; i++) {
+            NoticePost notice = NoticePost.builder()
+                    .admin(admin)
+                    .title("공지사항 제목 " + i)
+                    .content("공지사항 내용 " + i + " - 중요한 공지사항 내용입니다.")
+                    .build();
+            noticePostRepository.save(notice);
+        }
+    }
 }
