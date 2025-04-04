@@ -117,21 +117,21 @@ public class BaseInitData {
 
         List<Category> categories = List.of(
 
-                new Category(null, "전자제품"),
-                new Category(null, "가구"),
-                new Category(null, "의류"),
-                new Category(null, "스포츠 용품"),
-                new Category(null, "도서"),
-                new Category(null, "생활용품"),
-                new Category(null, "자동차 용품"),
-                new Category(null, "식품"),
-                new Category(null, "악기"),
-                new Category(null, "반려동물 용품"),
-                new Category(null, "뷰티/미용"),
-                new Category(null, "티켓/쿠폰"),
-                new Category(null, "수집/예술"),
-                new Category(null, "게임"),
-                new Category(null, "기타")
+                new Category("전자제품"),
+                new Category("가구"),
+                new Category("의류"),
+                new Category("스포츠 용품"),
+                new Category("도서"),
+                new Category("생활용품"),
+                new Category("자동차 용품"),
+                new Category("식품"),
+                new Category("악기"),
+                new Category("반려동물 용품"),
+                new Category("뷰티/미용"),
+                new Category("티켓/쿠폰"),
+                new Category("수집/예술"),
+                new Category("게임"),
+                new Category("기타")
 
         );
 
@@ -204,11 +204,12 @@ public class BaseInitData {
         }
 
         for (int i = 1; i <= 10; i++) {
-            NoticePost notice = NoticePost.builder()
-                    .admin(admin)
-                    .title("공지사항 제목 " + i)
-                    .content("공지사항 내용 " + i + " - 중요한 공지사항 내용입니다.")
-                    .build();
+            NoticePost notice = new NoticePost(
+                    "공지사항 제목 " + i,
+                    "공지사항 내용 " + i + " - 중요한 공지사항 내용입니다.",
+                    admin
+            );
+
             noticePostRepository.save(notice);
         }
     }

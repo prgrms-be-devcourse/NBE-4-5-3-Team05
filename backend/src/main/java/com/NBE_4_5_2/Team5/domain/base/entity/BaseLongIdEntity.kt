@@ -26,6 +26,6 @@ abstract class BaseLongIdEntity {
     }
 
     override fun hashCode(): Int {
-        return id.hashCode() ?: System.identityHashCode(this)
+        return id?.hashCode() ?: System.identityHashCode(this)
     }
 }

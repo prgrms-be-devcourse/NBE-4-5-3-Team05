@@ -17,8 +17,4 @@ public class Category extends BaseLongIdEntity {
 	@Column(nullable = false, unique = true)
 	private String name;
 
-	public Category(Long id, String name){
-		setId(id);
-		this.name = name;
-	}
 }
