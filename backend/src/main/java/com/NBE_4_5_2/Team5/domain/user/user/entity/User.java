@@ -33,6 +33,14 @@ public class User extends BaseTime {
 	@Column(updatable = false, nullable = false)
 	private String id = "user-" + UUID.randomUUID();
 
+	public String getId() {
+		return id;
+	}
+
+	public String getNickname() {
+		return nickname;
+	}
+
 	@Column(length = 20, nullable = false, unique = true)
 	@Setter
 	private String username;

@@ -41,22 +41,22 @@ public class ProductPostService {
 
     @Transactional
     public ProductPostResponse write(User actor, ProductPostWriteForm body) {
-        String imageUrlStr = String.join(",", body.imageUrlList());
+        String imageUrlStr = String.join(",", body.getImageUrlList());
 
         // 글 작성
         ProductPost productPost = new ProductPost(
                 actor,
-                body.productName(),
-                body.productPrice(),
-                body.title(),
-                body.content(),
+                body.getProductName(),
+                body.getProductPrice(),
+                body.getTitle(),
+                body.getContent(),
                 imageUrlStr,
-                body.latitude(),
-                body.longitude()
+                body.getLatitude(),
+                body.getLongitude()
         );
 
         // 상품글에 카테고리 체크 및 추가
-        List<Long> reqCategoryIdList = body.categoryIds();
+        List<Long> reqCategoryIdList = body.getCategoryIds();
         List<Category> realCategoryList = categoryRepository.findAllById(reqCategoryIdList);
         if (realCategoryList.size() != reqCategoryIdList.size()) {
             throw new CategoryNotFoundException("400", "존재하지 않는 카테고리가 포함되어있습니다.");
@@ -140,38 +140,25 @@ public class ProductPostService {
 
         post.canModify(actor);
 
-        if (body.productName() != null) {
-            post.setProductName(body.productName());
-        }
-        if (body.productPrice() != null) {
-            post.setProductPrice(body.productPrice());
-        }
-        if (body.title() != null) {
-            post.setTitle(body.title());
-        }
-        if (body.content() != null) {
-            post.setContent(body.content());
-        }
-        if (body.imageUrlList() != null && !body.imageUrlList().isEmpty()) {
-            post.setImageUrls(String.join(",", body.imageUrlList()));
-        }
-        if (body.latitude() != null) {
-            post.setLatitude(body.latitude());
-        }
-        if (body.longitude() != null) {
-            post.setLongitude(body.longitude());
-        }
+        // 상품글에 카테고리 체크 및 추가
+        List<Long> reqCategoryIdList = body.getCategoryIds();
 
-        if (body.categoryIds() != null) {
-            List<Category> categories = categoryRepository.findAllById(body.categoryIds());
-            post.getProductCategories().clear(); // 기존 카테고리 삭제
+        post.setProductName(body.getProductName());
+        post.setProductPrice(body.getProductPrice());
+        post.setTitle(body.getTitle());
+        post.setContent(body.getContent());
+        post.setImageUrls(String.join(",", body.getImageUrlList()));
+        post.setLatitude(body.getLatitude());
+        post.setLongitude(body.getLongitude());
 
-            List<ProductCategory> newProductCategories = categories.stream()
-                    .map(category -> ProductCategory.of(post, category))
-                    .toList();
+        List<Category> categories = categoryRepository.findAllById(body.getCategoryIds());
+        post.getProductCategories().clear(); // 기존 카테고리 삭제
 
-            post.getProductCategories().addAll(newProductCategories);
-        }
+        List<ProductCategory> newProductCategories = categories.stream()
+                .map(category -> ProductCategory.of(post, category))
+                .toList();
+
+        post.getProductCategories().addAll(newProductCategories);
 
         return ProductPostResponse.fromEntity(post);
     }
@@ -184,10 +171,7 @@ public class ProductPostService {
         if (likedPostRepository.existsByUserIdAndProductPostId(actor.getId(), postId)) {
             throw new ServiceException("400", "이미 찜한 게시글입니다.");
         }
-        LikedPost likedPost = LikedPost.builder()
-                .userId(actor.getId())
-                .productPostId(postId)
-                .build();
+        LikedPost likedPost = LikedPost.of(actor.getId(), postId);
         likedPostRepository.save(likedPost);
         int likedCount = likedPostRepository.countByProductPostId(postId);
         return ProductPostResponse.fromEntityWithLikeCount(post, likedCount);
