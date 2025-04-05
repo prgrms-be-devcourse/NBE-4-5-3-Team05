@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size
 
-@JvmRecord
+@JvmRecord // TODO: 코틀린 변환 완료 후 제거
 data class SignUpUserForm(
     @field:Pattern(
         regexp = "^[a-zA-Z0-9]+$",
