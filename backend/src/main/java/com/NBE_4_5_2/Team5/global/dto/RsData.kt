@@ -1,31 +1,22 @@
-package com.NBE_4_5_2.Team5.global.dto;
+package com.NBE_4_5_2.Team5.global.dto
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import org.springframework.lang.NonNull;
+import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.JsonInclude
 
-@NoArgsConstructor
-@Getter
-@AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class RsData<T> {
-    @NonNull
-    private String code;
-    @NonNull
-    private String message;
-    @NonNull
-    private T data;
+class RsData<T>(
+    val code: String,
+    val message: String,
+    val data: T
+) {
 
-    public RsData(String code, String message) {
-        this(code, message, (T) new Empty());
-    }
+    constructor(code: String, message: String) : this(code, message, Empty() as T)
 
-    @JsonIgnore
-    public int getStatusCode() {
-        String statusCodeStr = code.split("-")[0];
-        return Integer.parseInt(statusCodeStr);
-    }
+    @get:JsonIgnore
+    val statusCode: Int
+        get() {
+            val statusCodeStr =
+                code.split("-".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()[0]
+            return statusCodeStr.toInt()
+        }
 }
