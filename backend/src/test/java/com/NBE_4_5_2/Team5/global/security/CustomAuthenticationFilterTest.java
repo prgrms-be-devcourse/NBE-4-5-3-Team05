@@ -1,11 +1,11 @@
 package com.NBE_4_5_2.Team5.global.security;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
-import java.util.List;
-
+import com.NBE_4_5_2.Team5.domain.user.user.dto.AuthToken;
+import com.NBE_4_5_2.Team5.domain.user.user.entity.User;
+import com.NBE_4_5_2.Team5.domain.user.user.service.UserService;
+import com.NBE_4_5_2.Team5.global.config.BaseTestConfig;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -19,13 +19,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
-import com.NBE_4_5_2.Team5.domain.user.user.dto.AuthToken;
-import com.NBE_4_5_2.Team5.domain.user.user.entity.User;
-import com.NBE_4_5_2.Team5.domain.user.user.service.UserService;
-import com.NBE_4_5_2.Team5.global.config.BaseTestConfig;
+import java.util.List;
 
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
