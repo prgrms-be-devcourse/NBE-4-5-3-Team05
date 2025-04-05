@@ -1,206 +1,179 @@
-package com.NBE_4_5_2.Team5.domain.user.user.entity;
+package com.NBE_4_5_2.Team5.domain.user.user.entity
 
-import com.NBE_4_5_2.Team5.domain.base.entity.BaseTime;
-import com.NBE_4_5_2.Team5.domain.post.comment.entity.Comment;
-import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductPost;
-import com.NBE_4_5_2.Team5.domain.post.post.enums.ProductStatus;
-import com.NBE_4_5_2.Team5.global.exception.payment.InsufficientPayMoneyException;
-import jakarta.persistence.*;
-import lombok.*;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
+import com.NBE_4_5_2.Team5.domain.base.entity.BaseTime
+import com.NBE_4_5_2.Team5.domain.post.comment.entity.Comment
+import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductPost
+import com.NBE_4_5_2.Team5.domain.post.post.enums.ProductStatus
+import com.NBE_4_5_2.Team5.global.exception.payment.InsufficientPayMoneyException
+import jakarta.persistence.*
+import org.hibernate.Hibernate
+import org.springframework.security.core.GrantedAuthority
+import org.springframework.security.core.authority.SimpleGrantedAuthority
+import java.util.*
 
 @Entity
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
-@EntityListeners(AuditingEntityListener.class)
-@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @Table(name = "member")
-public class User extends BaseTime {
+class User() : BaseTime() {
 
 	@Id
-	@EqualsAndHashCode.Include
 	@Column(updatable = false, nullable = false)
-	private String id = "user-" + UUID.randomUUID();
+	var id: String = "user-" + UUID.randomUUID()
 
 	@Column(length = 20, nullable = false, unique = true)
-	@Setter
-	private String username;
+	lateinit var username: String
 
 	@Column(length = 255, nullable = false)
-	@Setter
-	private String password;
+	lateinit var password: String
 
 	@Column(length = 50, nullable = false, unique = true)
-	@Setter
-	private String email;
+	lateinit var email: String
 
 	@Column(length = 50, nullable = false, unique = true)
-	@Setter
-	private String nickname;
+	lateinit var nickname: String
 
 	@Column(length = 255)
-	@Setter
-	private String address;
+	lateinit var address: String
 
 	@Column(name = "profile_url", length = 255)
-	@Setter
-	private String profileUrl;
+	lateinit var profileUrl: String
 
-	private int cash;
+	var cash: Int = 0
 
 	@Column(nullable = false)
 	@Enumerated(EnumType.ORDINAL)
-	private Role role = Role.USER;
+	var role: Role = Role.USER;
 
 	@Column(nullable = false)
-	private Boolean blocked = false;
+	var blocked: Boolean = false;
 
 	@Column(name = "blocked_count", nullable = false)
-	private Integer blockedCount = 0;
+	var blockedCount: Int = 0;
 
-	@OneToMany(mappedBy = "buyer", cascade = CascadeType.REMOVE)
-	private final List<ProductPost> purchasedProducts = new ArrayList<>();
+	@OneToMany(mappedBy = "buyer", cascade = [CascadeType.REMOVE])
+	val purchasedProducts: MutableList<ProductPost> = mutableListOf()
 
-	@OneToMany(mappedBy = "writer", cascade = CascadeType.REMOVE)
-	private final List<ProductPost> writtenProducts = new ArrayList<>();
+	@OneToMany(mappedBy = "writer", cascade = [CascadeType.REMOVE])
+	val writtenProducts: MutableList<ProductPost> = mutableListOf()
 
-	@OneToMany(mappedBy = "author", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, orphanRemoval = true)
-	private final List<Comment> wroteComments = new ArrayList<>();
+	@OneToMany(mappedBy = "author", fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE], orphanRemoval = true)
+	val wroteComments: MutableList<Comment> = mutableListOf()
 
-	public boolean isAdmin() {
-		return role.equals(Role.ADMIN);
+	val isAdmin: Boolean
+	get() = role == Role.ADMIN
+
+	constructor(id: String, username: String, nickname: String, role: Role): this() {
+		this.id = id
+		this.username = username
+		this.nickname = nickname
+		this.role = role
 	}
 
-	public void ban() {
-		this.blocked = true;
-		this.blockedCount++;
+	constructor(username: String, password: String, email: String, nickname: String,
+			address: String, profileUrl: String, role: Role): this() {
+		this.username = username
+		this.password = password
+		this.email = email
+		this.blocked = false
+		this.blockedCount = 0
+		this.nickname = nickname
+		this.address = address
+		this.profileUrl = profileUrl
+		this.role = role
 	}
 
-	public void unBan() {
+	fun ban() {
+		this.blocked = true
+		this.blockedCount ++
+	}
 
-		if (!this.blocked) {
-			return;
-		}
-		blocked = false;
+	fun unBan() {
+		if (!blocked) return
+				blocked = false
 	}
 
 	/**
-	 * {@link User#cash cash}에 {@code totalAmount} 만큼 추가합니다.
+	 * [cash][User.cash]에 `totalAmount` 만큼 추가합니다.
 	 *
 	 * @param totalAmount 충전할 금액
 	 */
-	public void chargeCash(Integer totalAmount) {
-		this.cash += totalAmount;
+	fun chargeCash(totalAmount: Int) {
+		this.cash += totalAmount
 	}
 
-	public void buy(ProductPost product, Integer amount) {
-		pay(amount);
-		addToPurchasedProductList(product);
-		product.updateStatus(ProductStatus.PURCHASED);
-		product.setBuyer(this);
+	fun buy(product: ProductPost, amount: Int) {
+		pay(amount)
+		addToPurchasedProductList(product)
+		product.updateStatus(ProductStatus.PURCHASED)
+		product.setBuyer(this)
 	}
 
 	//TODO : Member 객체의 구현에 따라 구매 상품을 담을 list에 업데이트 필요
 
 	/**
-	 * 유저의 구매 이력에 {@link ProductPost}를 추가하는 메서드
+	 * 유저의 구매 이력에 [ProductPost]를 추가하는 메서드
 	 * @param product 구매 이력에 추가할 구매한 상품 객체
 	 */
-	private void addToPurchasedProductList(ProductPost product) {
-		purchasedProducts.add(product);
+	private fun addToPurchasedProductList(product: ProductPost) {
+		purchasedProducts.add(product)
 	}
 
-	private void pay(Integer amount) {
-		cash -= amount;
+	private fun pay(amount: Int) {
+		cash -= amount
 	}
 
 	/**
-	 * {@link ProductPost product}를 {@link Integer amount}로 구매할 수 있는지 판단하는 메서드.
+	 * [product][ProductPost]를 [amount][Integer]로 구매할 수 있는지 판단하는 메서드.
 	 *
 	 * @param product 구매할 상품 객체
 	 * @param amount  결제할 총 가격
-	 * @throws InsufficientPayMoneyException 총 결제 가격 {@code amount}보다 가지고 있는 잔액인 {@code cash}가 적을 경우 발생
+	 * @throws InsufficientPayMoneyException 총 결제 가격 `amount`보다 가지고 있는 잔액인 `cash`가 적을 경우 발생
 	 * @throws IllegalArgumentException      상품의 판매 상태가
-	 *                                       {@link com.NBE_4_5_2.Team5.domain.post.post.enums.ProductStatus#AVAILABLE ProductStatus.AVAILABLE}이<br/>
+	 *                                       [ProductStatus.AVAILABLE][ProductStatus]이
 	 *                                       아닌 경우 발생
 	 */
-	public void canBuy(ProductPost product, Integer amount) {
-		if (!this.hasEnoughPayMoney(amount)) {
-			throw new InsufficientPayMoneyException("잔액이 부족합니다.");
-		}
-
-		if (!product.isAvailable()) {
-			throw new IllegalStateException("판매중인 상품이 아닙니다.");
-		}
+	fun canBuy(product: ProductPost, amount: Int) {
+		if (!hasEnoughPayMoney(amount)) throw InsufficientPayMoneyException("잔액이 부족합니다.")
+		if (!product.isAvailable()) throw IllegalStateException("판매중인 상품이 아닙니다.")
 	}
 
-	public void addWroteComments(Comment comment) {
-		wroteComments.add(comment);
+	fun addWroteComments(comment: Comment) {
+		wroteComments.add(comment)
 	}
 
 	/**
 	 * 해당 유저가 페이머니가 충분한지 검사하는 메서드.
 	 *
 	 * @param amount 비교할 금액
-	 * @return {@link User#cash cash}가 비교할 금액보다 많다면 {@code true}, 그렇지 않다면 {@code false}를 반환
-	 **/
-	private boolean hasEnoughPayMoney(Integer amount) {
-		return cash >= amount;
+	 * @return [cash][User.cash]가 비교할 금액보다 많다면 `true`, 그렇지 않다면 `false`를 반환
+	 */
+	private fun hasEnoughPayMoney(amount: Int): Boolean {
+		return cash >= amount
 	}
 
-	public void update(String nickname) {
-		this.nickname = nickname;
+	fun update(nickname: String) {
+		this.nickname = nickname
 	}
 
-	public Collection<? extends GrantedAuthority> getAuthorities() {
+	val authorities: List<GrantedAuthority>
+	get() = memberAuthoritiesAsString.map { SimpleGrantedAuthority(it) }
 
-		return getMemberAuthoritiesAsString()
-			.stream()
-			.map(SimpleGrantedAuthority::new)
-			.toList();
+	val memberAuthoritiesAsString: List<String>
+	get() = if (isAdmin) listOf("ROLE_ADMIN") else emptyList()
 
+	fun addWrittenPost(saved: ProductPost) {
+		purchasedProducts.add(saved)
 	}
 
-	public List<String> getMemberAuthoritiesAsString() {
+	override fun equals(other: Any?): Boolean {
+		if (other == null || Hibernate.getClass(this) != Hibernate.getClass(other))
+			return false
 
-		List<String> authorities = new ArrayList<>();
-
-		if (isAdmin()) {
-			authorities.add("ROLE_ADMIN");
-		}
-
-		return authorities;
+		other as User
+		return id == other.id
 	}
 
-	public void addWrittenPost(ProductPost saved) {
-		this.purchasedProducts.add(saved);
+	override fun hashCode(): Int {
+		return id.hashCode()
 	}
 
-	public User(String username, String password, String email, String nickname, String address, String profileUrl,
-		Role role) {
-		this.username = username;
-		this.password = password;
-		this.email = email;
-		this.blocked = false;
-		this.blockedCount = 0;
-		this.nickname = nickname;
-		this.address = address;
-		this.profileUrl = profileUrl;
-		this.role = role;
-	}
-
-	public User(String id, String username, String nickname, Role role) {
-		this.id = id;
-		this.username = username;
-		this.nickname = nickname;
-		this.role = role;
-	}
 }
