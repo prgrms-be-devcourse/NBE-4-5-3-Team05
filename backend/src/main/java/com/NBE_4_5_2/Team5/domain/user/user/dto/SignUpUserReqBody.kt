@@ -6,7 +6,7 @@ import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size
 
 @JvmRecord // TODO: 코틀린 변환 완료 후 제거
-data class SignUpUserForm(
+data class SignUpUserReqBody(
     @field:Pattern(
         regexp = "^[a-zA-Z0-9]+$",
         message = "아이디는 영문과 숫자만 사용할 수 있습니다."
