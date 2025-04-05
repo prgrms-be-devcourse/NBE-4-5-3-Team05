@@ -34,7 +34,7 @@ public class UserController {
 	public RsData<UserDto> createUser(@RequestBody @Valid SignUpUserForm userForm) {
 
 		User user = userService.createUser(userForm.username(), userForm.password(), userForm.email(),
-			userForm.nickname(), userForm.address(), userForm.profileUrl());
+				userForm.nickname(), userForm.address(), userForm.profileUrl());
 
 		return new RsData<>("201-1", "회원 가입이 완료되었습니다.", new UserDto(user));
 	}
