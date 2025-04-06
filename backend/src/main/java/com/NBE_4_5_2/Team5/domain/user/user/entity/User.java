@@ -7,7 +7,6 @@ import com.NBE_4_5_2.Team5.domain.post.post.enums.ProductStatus;
 import com.NBE_4_5_2.Team5.global.exception.payment.InsufficientPayMoneyException;
 import jakarta.persistence.*;
 import lombok.*;
-import lombok.experimental.SuperBuilder;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -19,7 +18,6 @@ import java.util.UUID;
 
 @Entity
 @Getter
-@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
@@ -28,7 +26,6 @@ import java.util.UUID;
 public class User extends BaseTime {
 
 	@Id
-	@Builder.Default
 	@EqualsAndHashCode.Include
 	@Column(updatable = false, nullable = false)
 	private String id = "user-" + UUID.randomUUID();
@@ -60,16 +57,13 @@ public class User extends BaseTime {
 	private int cash;
 
 	@Column(nullable = false)
-	@Builder.Default
 	@Enumerated(EnumType.ORDINAL)
 	private Role role = Role.USER;
 
 	@Column(nullable = false)
-	@Builder.Default
 	private Boolean blocked = false;
 
 	@Column(name = "blocked_count", nullable = false)
-	@Builder.Default
 	private Integer blockedCount = 0;
 
 	@OneToMany(mappedBy = "buyer", cascade = CascadeType.REMOVE)

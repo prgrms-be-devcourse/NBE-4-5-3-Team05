@@ -161,10 +161,12 @@ public class ProductPostService {
             post.getProductCategories().clear(); // 기존 카테고리 삭제
 
             List<ProductCategory> newProductCategories = categories.stream()
-                    .map(category -> (ProductCategory) ProductCategory.builder()
-                            .productPost(post)
-                            .category(category)
-                            .build())
+                    .map(category ->
+                            (ProductCategory) new ProductCategory(
+                                    post,
+                                    category
+                            )
+                    )
                     .toList();
 
             post.getProductCategories().addAll(newProductCategories);
@@ -181,10 +183,10 @@ public class ProductPostService {
         if (likedPostRepository.existsByUserIdAndProductPostId(actor.getId(), postId)) {
             throw new ServiceException("400", "이미 찜한 게시글입니다.");
         }
-        LikedPost likedPost = LikedPost.builder()
-                .userId(actor.getId())
-                .productPostId(postId)
-                .build();
+        LikedPost likedPost = new LikedPost(
+                actor.getId(),
+                postId
+        );
         likedPostRepository.save(likedPost);
         int likedCount = likedPostRepository.countByProductPostId(postId);
         return ProductPostResponse.fromEntityWithLikeCount(post, likedCount);
