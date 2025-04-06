@@ -1,69 +1,52 @@
-package com.NBE_4_5_2.Team5.domain.user.user.service;
+package com.NBE_4_5_2.Team5.domain.user.user.service
 
-import com.NBE_4_5_2.Team5.domain.user.user.dto.UserDto;
-import com.NBE_4_5_2.Team5.domain.user.user.entity.User;
-import com.NBE_4_5_2.Team5.global.exception.security.AuthenticationNotValidException;
-import com.NBE_4_5_2.Team5.global.security.SecurityUser;
-import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Service;
+import com.NBE_4_5_2.Team5.domain.user.user.entity.User
+import com.NBE_4_5_2.Team5.global.exception.security.AuthenticationNotValidException
+import com.NBE_4_5_2.Team5.global.security.SecurityUser
+import org.springframework.security.authentication.AnonymousAuthenticationToken
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.core.userdetails.UserDetails
+import org.springframework.stereotype.Service
 
-import java.util.List;
-import java.util.Optional;
-
-@RequiredArgsConstructor
 @Service
-public class UserAuthService {
-	private final UserService userService;
+class UserAuthService(
+    private val userService: UserService
+) {
 
-	public void setLogin(User actor) {
+    fun setLogin(actor: User) {
+        val user: UserDetails = SecurityUser(actor.id, actor.username, "", "", actor.role, listOf())
 
-		UserDetails user = new SecurityUser(actor.getId(), actor.getUsername(), "", "", actor.getRole(), List.of());
+        SecurityContextHolder.getContext().authentication =
+            UsernamePasswordAuthenticationToken(user, null, user.authorities)
+    }
 
-		SecurityContextHolder.getContext().setAuthentication(
-			new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities())
-		);
+    fun getRealActor(actor: User): User {
+        return userService.getUserById(actor.id).get()
+    }
 
-	}
+    val userIdentity: User
+        get() {
+            val authentication = SecurityContextHolder.getContext().authentication
 
-	public User getRealActor(User actor) {
-		Optional<User> userById = userService.getUserById(actor.getId());
-		assert userById.isPresent();
-		return userById.get();
-	}
+            /**
+             * Spring Security에서는 인증되지 않은 사용자를 자동으로 `AnonymousAuthenticationToken`으로 설정
+             * 따라서 `authentication == null`이 아닐 수 있으므로 추가적인 확인을 진행함
+             */
+            if (authentication == null || authentication is AnonymousAuthenticationToken) {
+                throw AuthenticationNotValidException("401-1", "로그인이 필요합니다.")
+            }
 
-	public User getUserIdentity() {
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            val principal = authentication.principal as? SecurityUser
+                ?: throw AuthenticationNotValidException("401-3", "잘못된 인증 정보입니다")
 
-		/**
-		 * Spring Security에서는 인증되지 않은 사용자를 자동으로 `AnonymousAuthenticationToken`으로 설정
-		 * 따라서 `authentication == null`이 아닐 수 있으므로 추가적인 확인을 진행함
-		 */
-		if (authentication == null || authentication instanceof AnonymousAuthenticationToken) {
-			throw new AuthenticationNotValidException("401-1", "로그인이 필요합니다.");
-		}
+            val user = principal
 
-		Object principal = authentication.getPrincipal();
-
-		if (!(principal instanceof SecurityUser)) {
-			throw new AuthenticationNotValidException("401-3", "잘못된 인증 정보입니다");
-		}
-
-		SecurityUser user = (SecurityUser)principal;
-
-		return new User(
-			user.getId(),
-			user.getUsername(),
-			user.getNickname(),
-			user.getRole()
-		);
-	}
-
-	public UserDto getMe() {
-		return new UserDto(getRealActor(getUserIdentity()));
-	}
+            return User(
+                user.id,
+                user.username,
+                user.nickname,
+                user.role
+            )
+        }
 }
