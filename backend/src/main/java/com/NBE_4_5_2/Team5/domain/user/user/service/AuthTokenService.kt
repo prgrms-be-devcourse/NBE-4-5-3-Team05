@@ -1,86 +1,64 @@
-package com.NBE_4_5_2.Team5.domain.user.user.service;
+package com.NBE_4_5_2.Team5.domain.user.user.service
 
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
-import com.NBE_4_5_2.Team5.domain.user.user.entity.Role;
-import com.NBE_4_5_2.Team5.domain.user.user.entity.User;
-import com.NBE_4_5_2.Team5.domain.user.user.repository.UserRepository;
-import com.NBE_4_5_2.Team5.global.standard.util.Ut;
-
-import lombok.RequiredArgsConstructor;
+import com.NBE_4_5_2.Team5.domain.user.user.entity.Role
+import com.NBE_4_5_2.Team5.domain.user.user.entity.User
+import com.NBE_4_5_2.Team5.domain.user.user.repository.UserRepository
+import com.NBE_4_5_2.Team5.global.standard.util.Ut
+import com.NBE_4_5_2.Team5.global.standard.util.Ut.Jwt.createToken
+import com.NBE_4_5_2.Team5.global.standard.util.Ut.Jwt.isValidToken
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.stereotype.Service
+import java.util.*
 
 @Service
-@RequiredArgsConstructor
-public class AuthTokenService {
+class AuthTokenService(
+    private val userRepository: UserRepository,
+) {
 
-	@Value("${custom.jwt.secret-key}")
-	private String keyString;
+    @Value("\${custom.jwt.secret-key}")
+    private lateinit var keyString: String
 
-	@Value("${custom.jwt.expire-seconds}")
-	private int expireSeconds;
+    @Value("\${custom.jwt.expire-seconds}")
+    private var expireSeconds: Int = 0
 
-	String generateRefreshToken() {
-		return UUID.randomUUID().toString();
-	}
+    fun generateRefreshToken(): String = UUID.randomUUID().toString()
 
-	// id, username, role 정보를 담은 accessToken 생성
-	private final UserRepository userRepository;
+    fun generateAccessToken(user: User): String =
+        createToken(
+            keyString,
+            expireSeconds,
+            mapOf<String, Any>(
+                "id" to user.id,
+                "username" to user.username,
+                "nickname" to user.nickname,
+                "role" to user.role.name
+            )
+        )
 
-	public String generateAccessToken(User user) {
+    fun getPayload(accessToken: String): Map<String, Any>? {
+        if (!isValidToken(keyString, accessToken)) return null
 
-		return Ut.Jwt.createToken(
-			keyString,
-			expireSeconds,
-			Map.of(
-				"id", user.getId(),
-				"username", user.getUsername(),
-				"nickname", user.getNickname(),
-				"role", user.getRole().name()
-			)
-		);
-	}
+        val payload = Ut.Jwt.getPayload(keyString, accessToken)
+        val id = payload["id"] as String
+        val username = payload["username"] as String
+        val nickname = payload["nickname"] as String
+        val roleStr = payload["role"] as String
+        val role = Role.valueOf(roleStr)
 
-	public Map<String, Object> getPayload(String accessToken) {
+        return mapOf(
+            "id" to id,
+            "username" to username,
+            "nickname" to nickname,
+            "role" to role
+        )
+    }
 
-		if (!Ut.Jwt.isValidToken(keyString, accessToken)) {
-			return null;
-		}
+    fun getUsernameFromToken(accessToken: String): String? {
+        return getPayload(accessToken)?.let { payload ->
+            getNicknameFromName((payload["username"] as String))
+        }
+    }
 
-		Map<String, Object> payload = Ut.Jwt.getPayload(keyString, accessToken);
-
-		String id = (String)payload.get("id");
-		String username = (String)payload.get("username");
-		String nickname = (String)payload.get("nickname");
-		String roleStr = (String)payload.get("role");
-		Role role = Role.valueOf(roleStr);
-
-		return Map.of(
-			"id", id,
-			"username", username,
-			"nickname", nickname,
-			"role", role
-		);
-	}
-
-	public String getUsernameFromToken(String accesstoken) {
-		Map<String, Object> payload = getPayload(accesstoken);
-		if (payload != null) {
-			return getNicknameFromName((String)payload.get("username"));
-		}
-		return null;
-	}
-
-	public String getNicknameFromName(String username) {
-		Optional<User> optionalUser = userRepository.findByUsername(username);
-		if (optionalUser.isPresent()) {
-			User user = optionalUser.get();
-			return user.getNickname();
-		}
-		return null;
-	}
+    fun getNicknameFromName(username: String): String? =
+        userRepository.findByUsername(username).orElse(null)?.nickname
 }

@@ -9,10 +9,11 @@ import java.util.*
 
 @Service
 class RedisService(
-    private val redisRepository: RedisRepository,
-    @Value("\${custom.refreshToken.expire-seconds}")
-    private val expireSeconds: Long
+    private val redisRepository: RedisRepository
 ) {
+
+    @Value("\${custom.refreshToken.expire-seconds}")
+    private var expireSeconds: Long = 0
 
     companion object {
         private const val REFRESH_TOKEN_KEY = "refreshToken:"
@@ -47,18 +48,11 @@ class RedisService(
     fun getTokenByRefreshToken(refreshToken: String): Optional<RefreshToken> =
         redisRepository.findByRefreshToken(refreshToken)
 
-
     /**
      * refreshToken 삭제
      * @param userId 삭제할 userId
      * @return 삭제 성공 여부
      */
-//    fun deleteTokenByUserId(userId: String): Boolean {
-//        val key = createRefreshTokenKey(userId)
-//        if (!redisRepository.existsById(key)) { return false }
-//        redisRepository.deleteById(key)
-//        return true
-//    }
     fun deleteTokenByUserId(userId: String): Boolean =
         createRefreshTokenKey(userId)
             .takeIf { redisRepository.existsById(it) } // 값이 존재하는경우 createRefreshTokenKey으로 생성된 key를 넘김
