@@ -1,94 +1,83 @@
-package com.NBE_4_5_2.Team5.global.config;
+package com.NBE_4_5_2.Team5.global.config
 
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Primary;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.data.redis.listener.ChannelTopic;
-import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
-import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.boot.test.context.TestConfiguration
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Primary
+import org.springframework.data.redis.connection.RedisConnectionFactory
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory
+import org.springframework.data.redis.core.RedisTemplate
+import org.springframework.data.redis.core.StringRedisTemplate
+import org.springframework.data.redis.listener.ChannelTopic
+import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer
+import org.springframework.data.redis.serializer.StringRedisSerializer
+import org.testcontainers.containers.GenericContainer
+import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper
+import org.testcontainers.utility.DockerImageName
 
 @TestConfiguration
-public class TestConfig {
+class TestConfig {
 
-	@Bean
-	public Util util() {
-		return new Util();
-	}
+    @Bean
+    fun util(): Util = Util()
 
-	@Bean
-	public ObjectMapper objectMapper() {
-		return new ObjectMapper();
-	}
+    @Bean
+    fun objectMapper(): ObjectMapper = ObjectMapper()
 
-	/**
-	 * Redis TestContainer 설정
-	 */
-	private static final GenericContainer<?> redisTestContainer =
-		new GenericContainer<>("redis:7.0.8-alpine")
-			.withExposedPorts(6379)
-			.withReuse(true);
+    companion object {
+        private val redisTestContainer = GenericContainer(
+            DockerImageName.parse("redis:latest")
+        )
+            .withExposedPorts(6379)
+            .withReuse(true)
 
-	static {
-		redisTestContainer.start();
-		System.setProperty("spring.data.redis.host", redisTestContainer.getHost());
-		System.setProperty("spring.data.redis.port", redisTestContainer.getMappedPort(6379).toString());
-	}
+        init {
+            redisTestContainer.start()
+            System.setProperty("spring.data.redis.host", redisTestContainer.host)
+            System.setProperty("spring.data.redis.port", redisTestContainer.getMappedPort(6379).toString())
+        }
+    }
 
-	@Bean
-	public GenericContainer<?> redisContainer() {
-		return redisTestContainer;
-	}
+    @Bean
+    fun redisContainer(): GenericContainer<*> = redisTestContainer
 
-	@Bean
-	@Primary
-	public RedisConnectionFactory redisConnectionFactory() {
-		LettuceConnectionFactory factory = new LettuceConnectionFactory(
-			redisTestContainer.getHost(), redisTestContainer.getMappedPort(6379)
-		);
-		factory.setValidateConnection(true);
-		factory.afterPropertiesSet();
-		return factory;
-	}
+    @Bean
+    @Primary
+    fun redisConnectionFactory(): RedisConnectionFactory {
+        val factory = LettuceConnectionFactory(redisTestContainer.host, redisTestContainer.getMappedPort(6379))
+        factory.setValidateConnection(true)
+        factory.afterPropertiesSet()
+        return factory
+    }
 
-	@Bean
-	public StringRedisTemplate stringRedisTemplate(RedisConnectionFactory redisConnectionFactory) {
-		return new StringRedisTemplate(redisConnectionFactory);
-	}
+    @Bean
+    fun stringRedisTemplate(redisConnectionFactory: RedisConnectionFactory): StringRedisTemplate =
+        StringRedisTemplate(redisConnectionFactory)
 
-	@Bean
-	@Primary
-	public RedisTemplate<String, String> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
-		RedisTemplate<String, String> template = new RedisTemplate<>();
-		template.setConnectionFactory(redisConnectionFactory);
+    @Bean
+    @Primary
+    fun redisTemplate(redisConnectionFactory: RedisConnectionFactory): RedisTemplate<String, String> {
+        val template = RedisTemplate<String, String>()
+        template.connectionFactory = redisConnectionFactory
 
-		StringRedisSerializer stringSerializer = new StringRedisSerializer();
-		template.setKeySerializer(stringSerializer);
-		template.setValueSerializer(stringSerializer);
-		template.setHashKeySerializer(stringSerializer);
-		template.setHashValueSerializer(stringSerializer);
+        val stringSerializer = StringRedisSerializer()
+        template.keySerializer = stringSerializer
+        template.valueSerializer = stringSerializer
+        template.hashKeySerializer = stringSerializer
+        template.hashValueSerializer = stringSerializer
 
-		template.afterPropertiesSet();
-		return template;
-	}
+        template.afterPropertiesSet()
+        return template
+    }
 
-	@Bean
-	public RedisTemplate<String, Object> objectRedisTemplate(RedisConnectionFactory connectionFactory) {
-		RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
-		redisTemplate.setConnectionFactory(connectionFactory);
-		redisTemplate.setKeySerializer(new StringRedisSerializer());
-		redisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer<>(String.class));
-		return redisTemplate;
-	}
+    @Bean
+    fun objectRedisTemplate(connectionFactory: RedisConnectionFactory): RedisTemplate<String, Any> {
+        val redisTemplate = RedisTemplate<String, Any>()
+        redisTemplate.setConnectionFactory(connectionFactory)
+        redisTemplate.keySerializer = StringRedisSerializer()
+        redisTemplate.valueSerializer = Jackson2JsonRedisSerializer(String::class.java)
+        return redisTemplate
+    }
 
-	@Bean
-	public ChannelTopic channelTopic() {
-		return new ChannelTopic("test-chatroom");
-	}
-
+    @Bean
+    fun channelTopic(): ChannelTopic = ChannelTopic("test-chatroom")
 }
