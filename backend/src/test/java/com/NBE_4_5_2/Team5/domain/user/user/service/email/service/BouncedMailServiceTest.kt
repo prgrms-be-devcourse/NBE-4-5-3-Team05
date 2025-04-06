@@ -1,88 +1,81 @@
-package com.NBE_4_5_2.Team5.domain.user.user.service.email.service;
+package com.NBE_4_5_2.Team5.domain.user.user.service.email.service
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import com.NBE_4_5_2.Team5.global.config.email.TimeProvider
+import com.NBE_4_5_2.Team5.global.config.email.properties.Pop3
+import jakarta.mail.Flags
+import jakarta.mail.Folder
+import jakarta.mail.Message
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.InjectMocks
+import org.mockito.Mock
+import org.mockito.Mockito.*
+import org.mockito.junit.jupiter.MockitoExtension
+import java.time.LocalDateTime
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
-import java.time.LocalDateTime;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import com.NBE_4_5_2.Team5.global.config.email.properties.Pop3;
-import com.NBE_4_5_2.Team5.global.config.email.TimeProvider;
-
-import jakarta.mail.Flags;
-import jakarta.mail.Folder;
-import jakarta.mail.Message;
-
-@ExtendWith(MockitoExtension.class)
+/**
+ * BouncedMailServiceTest 클래스는 이메일 반송 처리를 테스트합니다.
+ * - 반송 이메일이 존재하면 false를 반환하고, 해당 이메일이 삭제되어 폴더가 닫혀야 합니다.
+ * - 반송 이메일이 없으면 true를 반환하며, 폴더는 열린 상태여야 합니다.
+ */
+@ExtendWith(MockitoExtension::class)
 class BouncedMailServiceTest {
 
-	@Mock
-	private Pop3 pop3;
-	@Mock
-	private TimeProvider timeProvider;
-	@InjectMocks
-	private BouncedEmailService bouncedEmailService;
+    @Mock
+    private lateinit var pop3: Pop3                 // Pop3 프로퍼티 모킹
 
-	private Folder mockFolder;
-	private Message mockMessage;
-	private BouncedEmailService spyService;
+    @Mock
+    private lateinit var timeProvider: TimeProvider  // 시간 제공자 모킹
 
-	@BeforeEach
-	void setUp() throws Exception {
-		mockFolder = mock(Folder.class);
-		mockMessage = mock(Message.class);
-		spyService = spy(bouncedEmailService);
+    @InjectMocks
+    private lateinit var bouncedEmailService: BouncedEmailService  // 테스트 대상 반송 이메일 서비스
 
-		// 가짜 폴더를 반환하도록 설정
-		doReturn(mockFolder).when(spyService).getEmailFolder();
+    private lateinit var mockFolder: Folder           // 가짜 폴더
+    private lateinit var mockMessage: Message         // 가짜 메시지
+    private lateinit var spyService: BouncedEmailService // 스파이 객체 (부분 모킹)
 
-		// 폴더에서 메시지를 가져올 때 가짜 메시지 반환
-		when(mockFolder.getMessages()).thenReturn(new Message[] {mockMessage});
+    @BeforeEach
+    fun setUp() {
+        mockFolder = mock(Folder::class.java)  // Folder 목 객체 생성
+        mockMessage = mock(Message::class.java)  // Message 목 객체 생성
+        spyService = spy(bouncedEmailService)     // 부분 모킹을 위한 스파이 객체 생성
 
-		// 메세지의 발송 시간을 검증할 때 항상 현재시간 - 10초 반환
-		doReturn(LocalDateTime.now().minusSeconds(10)).when(spyService).getMessageTime(mockMessage);
+        doReturn(mockFolder).`when`(spyService).emailFolder // getEmailFolder() 호출 시 가짜 폴더 반환
+        `when`(mockFolder.messages).thenReturn(arrayOf(mockMessage))  // 폴더의 메시지 배열 반환 설정
+        doReturn(LocalDateTime.now().minusSeconds(10)).`when`(spyService).getMessageTime(mockMessage)  // getMessageTime() 호출 시 현재 시간에서 10초 전 반환
+        `when`(pop3.untilTime).thenReturn(120)  // pop3.getUntilTime() 호출 시 120초 반환
+    }
 
-		// yml에 설정된 인증메일 만료 시간을 2분으로 설정
-		when(pop3.getUntilTime()).thenReturn(120);
-	}
+    /**
+     * 반송된 이메일이 존재하면 false를 반환하는지 테스트합니다.
+     */
+    @Test
+    @DisplayName("email : bounced : 반송된 이메일이 존재하면 false 반환")
+    fun test1() {
+        val testEmail = "bounced@example.com"  // 테스트용 반송 이메일 주소
+        `when`(mockMessage.getHeader("X-Failed-Recipients")).thenReturn(arrayOf(testEmail))
+        val result = spyService.checkBouncedEmail(testEmail)  // 반송 이메일 체크 실행
+        assertFalse(result)  // 반송된 이메일 존재 시 false 반환 검증
+        verify(mockFolder, times(1)).close(true)  // 폴더 닫기 호출 검증
+        verify(mockMessage, times(1)).setFlag(Flags.Flag.DELETED, true)  // 메시지 삭제 플래그 설정 검증
+    }
 
-	@Test
-	@DisplayName("email : bounced : 반송된 이메일이 존재하면 false 반환")
-	void test1() throws Exception {
-		// given
-		String testEmail = "bounced@example.com";
-		when(mockMessage.getHeader("X-Failed-Recipients")).thenReturn(new String[] {testEmail});
+    /**
+     * 반송된 이메일이 없으면 true를 반환하는지 테스트합니다.
+     */
+    @Test
+    @DisplayName("email : not bounced : 반송된 이메일이 없으면 true 반환")
+    fun test2() {
+        val testEmail = "valid@example.com"  // 테스트용 유효한 이메일 주소
+        `when`(mockMessage.getHeader("X-Failed-Recipients")).thenReturn(null)
+        doReturn(true).`when`(mockFolder).isOpen()  // 폴더가 열린 상태로 설정
 
-		// when
-		boolean result = spyService.checkBouncedEmail(testEmail);
-
-		// then
-		assertFalse(result); // 반송된 이메일이 존재하면 false 반환
-		verify(mockFolder, times(1)).close(true); // 폴더 닫기 실행 확인
-		verify(mockMessage, times(1)).setFlag(Flags.Flag.DELETED, true); // 반송된 이메일 삭제 확인
-	}
-
-	@Test
-	@DisplayName("email : not bounced : 반송된 이메일이 없으면 true 반환")
-	void test2() throws Exception {
-		// given
-		String testEmail = "valid@example.com";
-
-		when(mockMessage.getHeader("X-Failed-Recipients")).thenReturn(null); // 반송 메일이 없도록 설정
-		doReturn(true).when(mockFolder).isOpen();
-
-		// when
-		boolean result = spyService.checkBouncedEmail(testEmail);
-
-		// then
-		assertTrue(result); // 반송된 이메일이 없으면 true 반환
-		verify(mockFolder, never()).close(true); // 폴더가 닫히지 않아야 함
-	}
+        val result = spyService.checkBouncedEmail(testEmail)  // 반송 이메일 체크 실행
+        assertTrue(result)  // 반송된 이메일이 없으면 true 반환 검증
+        verify(mockFolder, never()).close(true)  // 폴더 닫기 호출 없음 검증
+    }
 }
