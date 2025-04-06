@@ -1,77 +1,75 @@
-package com.NBE_4_5_2.Team5.domain.user.user.service;
+package com.NBE_4_5_2.Team5.domain.user.user.service
 
-import com.NBE_4_5_2.Team5.domain.user.user.entity.RefreshToken;
-import com.NBE_4_5_2.Team5.domain.user.user.entity.User;
-import com.NBE_4_5_2.Team5.domain.user.user.repository.RedisRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
-import java.util.Optional;
+import com.NBE_4_5_2.Team5.domain.user.user.entity.RefreshToken
+import com.NBE_4_5_2.Team5.domain.user.user.entity.User
+import com.NBE_4_5_2.Team5.domain.user.user.repository.RedisRepository
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.stereotype.Service
+import java.util.*
 
 @Service
-@RequiredArgsConstructor
-public class RedisService {
+class RedisService(
+    private val redisRepository: RedisRepository,
+    @Value("\${custom.refreshToken.expire-seconds}")
+    private val expireSeconds: Long
+) {
 
-	private static final String REFRESH_TOKEN_KEY = "refreshToken:";
+    companion object {
+        private const val REFRESH_TOKEN_KEY = "refreshToken:"
+    }
 
-	private final RedisRepository redisRepository;
+    private fun createRefreshTokenKey(userId: String): String {
+        // "refreshToken:userId" 형태의 redis key 생성
+        return "${REFRESH_TOKEN_KEY}${userId}"
+    }
 
-	@Value("${custom.refreshToken.expire-seconds}")
-	private Long expireSeconds;
+    /**
+     * redis에 userId와 refreshToken 저장 (expireSeconds 적용)
+     */
+    fun createToken(user: User, refreshToken: String) {
+        val token = RefreshToken(
+            createRefreshTokenKey(user.id),
+            refreshToken,
+            expireSeconds
+        )
+        redisRepository.save(token)
+    }
 
-	/**
-	 * redis에 userId와 refreshToken 저장 (expireSeconds 적용)
-	 */
-	public void createToken(User user, String refreshToken) {
-		String key = REFRESH_TOKEN_KEY + user.getId();
+    /**
+     * userId로 Token 조회
+     */
+    fun getTokenByUserId(userId: String): Optional<RefreshToken> =
+        redisRepository.findById(createRefreshTokenKey(userId))
 
-		RefreshToken token = new RefreshToken(
-				key,
-				refreshToken,
-				expireSeconds
-		);
+    /**
+     * refreshToken으로 Token 조회
+     */
+    fun getTokenByRefreshToken(refreshToken: String): Optional<RefreshToken> =
+        redisRepository.findByRefreshToken(refreshToken)
 
-		redisRepository.save(token);
-	}
 
-	/**
-	 * userId로 Token 조회
-	 */
-	public Optional<RefreshToken> getTokenByUserId(String userId) {
-		String key = REFRESH_TOKEN_KEY + userId;
-		return redisRepository.findById(key);
-	}
+    /**
+     * refreshToken 삭제
+     * @param userId 삭제할 userId
+     * @return 삭제 성공 여부
+     */
+//    fun deleteTokenByUserId(userId: String): Boolean {
+//        val key = createRefreshTokenKey(userId)
+//        if (!redisRepository.existsById(key)) { return false }
+//        redisRepository.deleteById(key)
+//        return true
+//    }
+    fun deleteTokenByUserId(userId: String): Boolean =
+        createRefreshTokenKey(userId)
+            .takeIf { redisRepository.existsById(it) } // 값이 존재하는경우 createRefreshTokenKey으로 생성된 key를 넘김
+            ?.also { redisRepository.deleteById(it) } // 넘겨받은 key 값으로 deleteById 실행
+            ?.let { true } ?: false
 
-	/**
-	 * refreshToken으로 Token 조회
-	 */
-	public Optional<RefreshToken> getTokenByRefreshToken(String refreshToken) {
-		return redisRepository.findByRefreshToken(refreshToken);
-	}
-
-	/**
-	 * refreshToken 삭제
-	 * @param userId 삭제할 userId
-	 * @return 삭제 성공 여부
-	 */
-	public boolean deleteTokenByUserId(String userId) {
-		String key = REFRESH_TOKEN_KEY + userId;
-
-		if (!redisRepository.existsById(key)) {
-			return false;
-		}
-
-		redisRepository.deleteById(key);
-		return true;
-	}
-
-	/**
-	 * Refresh Token 삭제
-	 * @param refreshToken 삭제할 Refresh Token
-	 */
-	public void deleteTokenByRefreshToken(String refreshToken) {
-		redisRepository.deleteByRefreshToken(refreshToken);
-	}
-
+    /**
+     * Refresh Token 삭제
+     * @param refreshToken 삭제할 Refresh Token
+     */
+    fun deleteTokenByRefreshToken(refreshToken: String) {
+        redisRepository.deleteByRefreshToken(refreshToken)
+    }
 }
