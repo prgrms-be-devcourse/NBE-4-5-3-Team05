@@ -1,18 +1,19 @@
-package com.NBE_4_5_2.Team5.api;
+package com.NBE_4_5_2.Team5.api
 
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/api/test")
-public class TestErrorController {
-
+class TestErrorController {
     @GetMapping("/bad-request")
-    public void triggerBadRequest() {
-        throw new IllegalArgumentException();
+    fun triggerBadRequest() {
+        throw IllegalArgumentException()
     }
 
     @GetMapping("/nullPointer-error")
-    public void triggerNullPointerException() {
-        throw new NullPointerException();
+    fun triggerNullPointerException() {
+        throw NullPointerException()
     }
 }
