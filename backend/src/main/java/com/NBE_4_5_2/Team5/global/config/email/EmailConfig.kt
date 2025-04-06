@@ -1,70 +1,53 @@
-package com.NBE_4_5_2.Team5.global.config.email;
+package com.NBE_4_5_2.Team5.global.config.email
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
-
-import java.util.Properties;
+import com.NBE_4_5_2.Team5.global.config.email.properties.Mail
+import com.NBE_4_5_2.Team5.global.config.email.properties.Pop3
+import com.NBE_4_5_2.Team5.global.config.email.properties.Smtm
+import org.springframework.boot.context.properties.EnableConfigurationProperties
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
+import org.springframework.mail.javamail.JavaMailSender
+import org.springframework.mail.javamail.JavaMailSenderImpl
+import java.util.*
 
 @Configuration
-@RequiredArgsConstructor
-@EnableConfigurationProperties(Pop3Properties.class)
-public class EmailConfig {
-
-    private final Pop3Properties pop3Properties;
-
-    @Value("${spring.mail.host}") private String host;
-    @Value("${spring.mail.port}") private int port;
-    @Value("${spring.mail.username}") private String username;
-    @Value("${spring.mail.password}") private String password;
-    @Value("${spring.mail.properties.mail.smtp.auth}") private boolean auth;
-    @Value("${spring.mail.properties.mail.smtp.starttls.enable}") private boolean starttlsEnable;
-    @Value("${spring.mail.properties.mail.smtp.starttls.required}") private boolean starttlsRequired;
-    @Value("${spring.mail.properties.mail.smtp.connectiontimeout}") private int connectionTimeout;
-    @Value("${spring.mail.properties.mail.smtp.timeout}") private int timeout;
-    @Value("${spring.mail.properties.mail.smtp.writetimeout}") private int writeTimeout;
+@EnableConfigurationProperties(Pop3::class,Mail::class, Smtm::class)
+class EmailConfig(
+    private val pop3: Pop3,
+    private val mail: Mail,
+    private val smtm: Smtm,
+) {
 
     @Bean
-    public JavaMailSender javaMailSender() {
-        JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
-        mailSender.setHost(host);
-        mailSender.setPort(port);
-        mailSender.setUsername(username);
-        mailSender.setPassword(password);
-        mailSender.setDefaultEncoding("UTF-8");
-        mailSender.setJavaMailProperties(getMailProperties());
+    fun javaMailSender(): JavaMailSender  = JavaMailSenderImpl().apply {
+            host= mail.host
+            port = mail.port
+            username = mail.username
+            password = mail.password
+            defaultEncoding = "UTF-8"
+            javaMailProperties = mailProperties()
+        }
 
-        return mailSender;
-    }
-
-    private Properties getMailProperties() {
-        Properties properties = new Properties();
-        properties.put("mail.smtp.auth", auth);
-        properties.put("mail.smtp.starttls.enable", starttlsEnable);
-        properties.put("mail.smtp.starttls.required", starttlsRequired);
-        properties.put("mail.smtp.connectiontimeout", connectionTimeout);
-        properties.put("mail.smtp.timeout", timeout);
-        properties.put("mail.smtp.writetimeout", writeTimeout);
-
-        return properties;
-    }
+    fun mailProperties(): Properties =
+        Properties().apply {
+            put("mail.smtp.auth", smtm.auth)
+            put("mail.smtp.starttls.enable", smtm.starttlsEnable)
+            put("mail.smtp.starttls.required", smtm.starttlsRequired)
+            put("mail.smtp.connectiontimeout", smtm.connectionTimeout)
+            put("mail.smtp.timeout", smtm.timeout)
+            put("mail.smtp.writetimeout", smtm.writeTimeout)
+        }
 
     @Bean
-    public Properties pop3MailProperties() {
-        Properties properties = new Properties();
+    fun pop3MailProperties(): Properties =
+        Properties().apply {
+            put("mail.pop3.host", pop3.host)
+            put("mail.pop3.port", pop3.port.toString())
+            put("mail.pop3.protocol", pop3.protocol)
+            put("mail.pop3.folder", pop3.folder)
+            put("mail.pop3.username", pop3.username)
+            put("mail.pop3.password", pop3.password)
+            put("mail.pop3.untilTime", pop3.untilTime.toString())
+        }
 
-        properties.put("mail.pop3.host", pop3Properties.getHost());
-        properties.put("mail.pop3.port", String.valueOf(pop3Properties.getPort()));
-        properties.put("mail.pop3.protocol", pop3Properties.getProtocol());
-        properties.put("mail.pop3.folder", pop3Properties.getFolder());
-        properties.put("mail.pop3.username", pop3Properties.getUsername());
-        properties.put("mail.pop3.password", pop3Properties.getPassword());
-        properties.put("mail.pop3.untilTime", String.valueOf(pop3Properties.getUntilTime()));
-
-        return properties;
-    }
 }
