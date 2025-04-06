@@ -21,7 +21,7 @@ import jakarta.mail.internet.MimeMessage;
 
 @SpringBootTest
 @BaseTestConfig
-class EmailServiceTest  {
+class MailServiceTest {
 
 	@MockitoBean
 	private JavaMailSender mailSender;

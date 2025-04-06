@@ -11,7 +11,7 @@ import org.springframework.mail.javamail.JavaMailSenderImpl
 import java.util.*
 
 @Configuration
-@EnableConfigurationProperties(Pop3::class,Mail::class, Smtm::class)
+@EnableConfigurationProperties(Pop3::class, Mail::class, Smtm::class)
 class EmailConfig(
     private val pop3: Pop3,
     private val mail: Mail,
@@ -19,14 +19,14 @@ class EmailConfig(
 ) {
 
     @Bean
-    fun javaMailSender(): JavaMailSender  = JavaMailSenderImpl().apply {
-            host= mail.host
-            port = mail.port
-            username = mail.username
-            password = mail.password
-            defaultEncoding = "UTF-8"
-            javaMailProperties = mailProperties()
-        }
+    fun javaMailSender(): JavaMailSender = JavaMailSenderImpl().apply {
+        host = mail.host
+        port = mail.port
+        username = mail.username
+        password = mail.password
+        defaultEncoding = "UTF-8"
+        javaMailProperties = mailProperties()
+    }
 
     fun mailProperties(): Properties =
         Properties().apply {

@@ -13,7 +13,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.NBE_4_5_2.Team5.global.config.email.Pop3Properties;
+import com.NBE_4_5_2.Team5.global.config.email.properties.Pop3;
 import com.NBE_4_5_2.Team5.global.config.email.TimeProvider;
 
 import jakarta.mail.Flags;
@@ -21,10 +21,10 @@ import jakarta.mail.Folder;
 import jakarta.mail.Message;
 
 @ExtendWith(MockitoExtension.class)
-class BouncedEmailServiceTest  {
+class BouncedMailServiceTest {
 
 	@Mock
-	private Pop3Properties pop3Properties;
+	private Pop3 pop3;
 	@Mock
 	private TimeProvider timeProvider;
 	@InjectMocks
@@ -50,7 +50,7 @@ class BouncedEmailServiceTest  {
 		doReturn(LocalDateTime.now().minusSeconds(10)).when(spyService).getMessageTime(mockMessage);
 
 		// yml에 설정된 인증메일 만료 시간을 2분으로 설정
-		when(pop3Properties.getUntilTime()).thenReturn(120);
+		when(pop3.getUntilTime()).thenReturn(120);
 	}
 
 	@Test

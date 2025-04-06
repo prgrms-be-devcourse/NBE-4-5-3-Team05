@@ -1,10 +1,10 @@
 package com.NBE_4_5_2.Team5.domain.user.user.service.email;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.time.Duration;
-
+import com.NBE_4_5_2.Team5.domain.user.user.service.email.service.BouncedEmailService;
+import com.NBE_4_5_2.Team5.global.exception.ServiceException;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -12,12 +12,10 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
-import com.NBE_4_5_2.Team5.domain.user.user.service.email.service.BouncedEmailService;
-import com.NBE_4_5_2.Team5.global.exception.ServiceException;
-
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
-import lombok.RequiredArgsConstructor;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.time.Duration;
 
 @Service
 @RequiredArgsConstructor
@@ -93,16 +91,6 @@ public class EmailService {
 	public void saveVerificationCode(String email, String code) {
 		String key = EMAIL_KEY + email;
 		redisTemplate.opsForValue().set(key, code, Duration.ofSeconds(expireSeconds));
-	}
-
-	public void deleteVerificationCode(String email) {
-		String key = EMAIL_KEY + email;
-		redisTemplate.delete(key);
-	}
-
-	public boolean existsEmail(String email) {
-		String key = EMAIL_KEY + email;
-		return redisTemplate.hasKey(key);
 	}
 
 }
