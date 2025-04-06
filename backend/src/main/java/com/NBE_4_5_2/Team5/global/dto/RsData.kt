@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonInclude
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
+// TODO: global/response에도 RsData가 있음 중복 제거해야함
 class RsData<T>(
     val code: String,
     val message: String,
