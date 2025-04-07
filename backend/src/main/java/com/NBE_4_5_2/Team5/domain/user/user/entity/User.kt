@@ -60,7 +60,7 @@ class User(
 ) : BaseTime() {
 
     val isAdmin: Boolean
-        get() = role == Role.USER.not() // or (role == Role.ADMIN) depending on your Role implementation
+        get() = role == Role.ADMIN // or (role == Role.ADMIN) depending on your Role implementation
 
     fun ban() {
         blocked = true

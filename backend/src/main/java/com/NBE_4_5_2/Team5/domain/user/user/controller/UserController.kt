@@ -36,7 +36,7 @@ class UserController(
             userForm.address,
             userForm.profileUrl
         )
-        return RsData("201-1", "회원 가입이 완료되었습니다.", UserDto(user))
+        return RsData("201-1", "회원 가입이 완료되었습니다.", UserDto.fromEntity(user))
     }
 
     @JvmRecord
@@ -64,7 +64,7 @@ class UserController(
         return RsData(
             "200-1",
             "${user.nickname}님 환영합니다.",
-            LoginUserDto(authToken.accessToken, authToken.refreshToken, UserDto(user))
+            LoginUserDto(authToken.accessToken, authToken.refreshToken, UserDto.fromEntity(user))
         )
     }
 
@@ -87,7 +87,7 @@ class UserController(
     fun me(): RsData<UserDto> {
         val userIdentity = userAuthService.userIdentity
         val user = userAuthService.getRealActor(userIdentity)
-        return RsData("200-1", "내 정보 조회가 완료되었습니다.", UserDto(user))
+        return RsData("200-1", "내 정보 조회가 완료되었습니다.", UserDto.fromEntity(user))
     }
 
     @JvmRecord

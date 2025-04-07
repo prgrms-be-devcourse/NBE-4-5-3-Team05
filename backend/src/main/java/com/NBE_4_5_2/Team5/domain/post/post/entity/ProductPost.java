@@ -4,9 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import com.NBE_4_5_2.Team5.domain.base.entity.BaseTime;
+import com.NBE_4_5_2.Team5.domain.user.user.entity.User;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import com.NBE_4_5_2.Team5.domain.base.entity.BaseTime;
 import com.NBE_4_5_2.Team5.domain.post.category.entity.Category;
 import com.NBE_4_5_2.Team5.domain.post.comment.entity.Comment;
 import com.NBE_4_5_2.Team5.domain.post.post.enums.ProductStatus;

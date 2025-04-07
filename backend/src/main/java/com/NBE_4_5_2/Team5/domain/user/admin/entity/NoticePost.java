@@ -1,6 +1,5 @@
 package com.NBE_4_5_2.Team5.domain.user.admin.entity;
 
-import com.NBE_4_5_2.Team5.domain.base.entity.BaseTime;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;

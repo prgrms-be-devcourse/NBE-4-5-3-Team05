@@ -1,6 +1,5 @@
 package com.NBE_4_5_2.Team5.global.security;
 
-import com.NBE_4_5_2.Team5.global.dto.RsData;
 import com.NBE_4_5_2.Team5.global.standard.util.Ut;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;

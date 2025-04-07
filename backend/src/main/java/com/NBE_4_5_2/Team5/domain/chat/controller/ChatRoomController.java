@@ -10,7 +10,6 @@ import com.NBE_4_5_2.Team5.domain.post.post.dto.response.ProductPostResponse;
 import com.NBE_4_5_2.Team5.domain.post.post.service.ProductPostService;
 import com.NBE_4_5_2.Team5.global.Rq;
 import com.NBE_4_5_2.Team5.global.dto.Empty;
-import com.NBE_4_5_2.Team5.global.dto.RsData;
 import com.NBE_4_5_2.Team5.global.exception.security.WrongRoleException;
 import com.NBE_4_5_2.Team5.global.exception.user.UserNotFoundException;
 import io.swagger.v3.oas.annotations.Operation;

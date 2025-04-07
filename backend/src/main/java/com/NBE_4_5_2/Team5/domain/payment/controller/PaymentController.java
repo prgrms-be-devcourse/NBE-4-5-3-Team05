@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.NBE_4_5_2.Team5.domain.payment.dto.PaymentDto;
 import com.NBE_4_5_2.Team5.domain.payment.dto.PaymentMetaData;
 import com.NBE_4_5_2.Team5.domain.payment.service.PaymentService;
-import com.NBE_4_5_2.Team5.global.dto.RsData;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
