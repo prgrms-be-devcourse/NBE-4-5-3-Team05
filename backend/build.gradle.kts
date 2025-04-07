@@ -2,12 +2,10 @@ plugins {
     kotlin("jvm") version "1.9.25"
     kotlin("plugin.spring") version "1.9.25"
     kotlin("plugin.jpa") version "1.9.25"
-    kotlin("kapt") version "1.9.25"
 
     java
     id("org.springframework.boot") version "3.4.3"
     id("io.spring.dependency-management") version "1.1.7"
-    id("io.freefair.lombok") version "8.0.1"
 }
 
 group = "com.NBE-4-5-2"
@@ -52,10 +50,9 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-batch:3.4.3")
     implementation("com.mysql:mysql-connector-j:9.2.0")
-    implementation("com.sun.mail:jakarta.mail:2.0.1")
 
-    compileOnly("org.projectlombok:lombok:1.18.26")
-    annotationProcessor("org.projectlombok:lombok:1.18.26")
+    compileOnly("org.projectlombok:lombok")
+    annotationProcessor("org.projectlombok:lombok")
 
     developmentOnly("org.springframework.boot:spring-boot-devtools")
 
@@ -63,6 +60,7 @@ dependencies {
     testImplementation("org.springframework.security:spring-security-test")
     testImplementation("org.testcontainers:junit-jupiter")
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
+    implementation("org.springframework.boot:spring-boot-starter-mail")
     testImplementation("com.icegreen:greenmail-junit5:2.1.3")
 
     runtimeOnly("com.h2database:h2")

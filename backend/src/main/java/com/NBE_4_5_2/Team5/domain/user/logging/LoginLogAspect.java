@@ -24,7 +24,7 @@ public class LoginLogAspect {
 	public Object userLoginAspect(ProceedingJoinPoint joinPoint) throws Throwable {
 		LocalDateTime now = LocalDateTime.now();
 
-		UserController.LoginUserForm userForm = (UserController.LoginUserForm)joinPoint.getArgs()[0];
+		UserController.LoginUserReqBody userForm = (UserController.LoginUserReqBody)joinPoint.getArgs()[0];
 		String ip = request.getRemoteAddr();
 		String accessToken = "";
 		String refreshToken = "";
@@ -32,7 +32,7 @@ public class LoginLogAspect {
 
 		try {
 			Object result = joinPoint.proceed();
-			RsData<UserController.LoginUserDto> loginUserDto = (RsData<UserController.LoginUserDto>)result;
+			RsData<UserController.LoginUserResBody> loginUserDto = (RsData<UserController.LoginUserResBody>)result;
 			accessToken = loginUserDto.getData().accessToken();
 			refreshToken = loginUserDto.getData().refreshToken();
 			return result;

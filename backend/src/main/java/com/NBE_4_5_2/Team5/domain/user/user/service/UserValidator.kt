@@ -18,31 +18,30 @@ class UserValidator(
 ) {
 
     fun duplicate(username: String, nickname: String) {
-        if (userRepository.existsByUsername(username)) {
-            throw AlreadyUsedException("409-1", "이미 사용중인 아이디입니다.")
-        }
-        if (userRepository.existsByNickname(nickname)) {
-            throw AlreadyUsedException("409-3", "이미 사용중인 닉네임입니다.")
+        when {
+            userRepository.existsByUsername(username) ->
+                throw AlreadyUsedException("409-1", "이미 사용중인 아이디입니다.")
+
+            userRepository.existsByNickname(nickname) ->
+                throw AlreadyUsedException("409-3", "이미 사용중인 닉네임입니다.")
         }
     }
 
-    fun credentials(username: String, password: String): User {
-        val user = userRepository.findByUsername(username)
-            ?: throw UserNotFoundException("401-1", "잘못된 아이디입니다.")
-        if (!passwordEncoder.matches(password, user.password)) {
-            throw WrongPasswordException("401-2", "비밀번호가 일치하지 않습니다.")
-        }
-        return user
-    }
+    fun credentials(username: String, password: String): User =
+        userRepository.findByUsername(username)
+            .orElseThrow { UserNotFoundException("401-1", "잘못된 아이디입니다.") }
+            .also {
+                if (!passwordEncoder.matches(password, it.password)) {
+                    throw WrongPasswordException("401-2", "비밀번호가 일치하지 않습니다.")
+                }
+            }
 
     fun emailVerified(email: String) {
-        if (userRepository.existsByEmail(email)) {
-            throw ServiceException("409-2", "이미 사용중인 이메일입니다.")
-        }
-        // 해당 이메일에 대한 인증이 완료되었는지 검증
-        val verificationCode = emailService.getVerificationCode(email)
-        if (verificationCode == null || verificationCode != "verified") {
-            throw ServiceException("409", "이메일 인증이 완료되지 않았습니다. 인증 후 다시 시도해주세요.")
+        when {
+            userRepository.existsByEmail(email) ->
+                throw ServiceException("409-2", "이미 사용중인 이메일입니다.")
+            emailService.getVerificationCode(email) != "verified" ->
+                throw ServiceException("409", "이메일 인증이 완료되지 않았습니다. 인증 후 다시 시도해주세요.")
         }
     }
 }

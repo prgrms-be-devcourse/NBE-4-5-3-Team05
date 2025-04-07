@@ -2,14 +2,12 @@ package com.NBE_4_5_2.Team5.domain.user.admin.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import lombok.experimental.SuperBuilder;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.util.UUID;
 
 @Entity
 @Getter
-@SuperBuilder
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -18,7 +16,6 @@ import java.util.UUID;
 public class NoticePost extends BaseTime {
 
 	@Id
-	@Builder.Default
 	@EqualsAndHashCode.Include
 	@Column(updatable = false, nullable = false)
 	private String id = "npost-" + UUID.randomUUID();
@@ -28,6 +25,12 @@ public class NoticePost extends BaseTime {
 
 	private String title;
 	private String content;
+
+	public NoticePost( String title, String content, User admin) {
+		this.title = title;
+		this.content = content;
+		this.admin = admin;
+	}
 
 	public NoticePost update(String title, String content) {
 		this.title = title;

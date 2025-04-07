@@ -107,22 +107,14 @@ public class ChatRoomController {
 	@Operation(summary = "관리자와의 채팅방 생성", description = "관리자와의 채팅방을 생성합니다.")
 	@PreAuthorize("isAuthenticated()")
 	@SecurityRequirement(name = "cookieAuth")
-	@PostMapping("/admin/{adminId}")
+	@PostMapping("/admin")
 	@ResponseBody
 	@Transactional
-	public RsData<ChatRoom> createRoomAdmin(
-			@Parameter(description = "관리자 id", example = "user-1231jkj-g04hi8gah-123hixfdh9") @PathVariable String adminId) {
+	public RsData<ChatRoom> createRoomAdmin(){
 		User userIdentity = userAuthService.getUserIdentity();
 		User sender = userAuthService.getRealActor(userIdentity);
 
-		User admin = userService.getUserById(adminId).orElseThrow(
-				() -> new UserNotFoundException("404", "잘못된 ID")
-		);
-
-		if (!admin.isAdmin()) {
-			throw new WrongRoleException("404", "옳지 않은 사용자"); // 권한 없음 예외
-		}
-
+		User admin = userService.getAdminUsers();
 		String receiver = admin.getNickname();
 
 		ChatRoom chatRoom = chatRoomService.createChatRoom(sender.getNickname(), receiver);
@@ -172,6 +164,9 @@ public class ChatRoomController {
 		User user = userAuthService.getRealActor(userIdentity);
 //        List<ChatMessage> messages=chatRoomService.getMessagesByUser(roomId,user.getNickname());
 		ChatRoom chatRoom=chatRoomService.findChatRoomByClient(roomId,user.getNickname());
+		if(chatRoom==null) {
+			return new RsData<>("404","존재하지 않는 채팅방");
+		}
 		return new RsData<>("200","채팅방 반환",chatRoom);
 	}
 
@@ -232,15 +227,15 @@ public class ChatRoomController {
 		User user = userAuthService.getRealActor(userIdentity);
 		ChatRoom chatRoom=chatRoomService.findByRoomIdByClients(user.getNickname(),receiver);
 //        ChatRoom chatRoom=chatRoomService.findChatRoomByClient(roomId,user.getNickname());
+		if (chatRoom == null) {
+			return new RsData<>("404", "존재하지 않는 대화방입니다.");
+		}
 		List<ChatMessage> messages= chatRoomService.getMessagesByUser(chatRoom.getRoomId(),user.getNickname());
 		String lastMessage="";
 		String lastTimestamp="";
 		if(messages.size()>0) {
 			lastMessage = messages.get(messages.size() - 1).getMessage();
 			lastTimestamp = messages.get(messages.size() - 1).getTimestamp();
-		}
-		if (chatRoom == null) {
-			return new RsData<>("404", "존재하지 않는 대화방입니다.");
 		}
 		ChatRoomDto chatRoomDto = new ChatRoomDto(
 				chatRoom.getId(),
@@ -252,18 +247,5 @@ public class ChatRoomController {
 				receiver
 		);
 		return new RsData<>("200","success",chatRoomDto);
-	}
-
-	// 권한부여(임시)
-	@Operation(summary = "관리자 권한 부여", description = "특정 사용자의 계정을 관리자(Admin)로 설정합니다.")
-	@PreAuthorize("isAuthenticated()")
-	@SecurityRequirement(name = "cookieAuth")
-	@PutMapping("/admin")
-	@ResponseBody
-	public RsData<User> grantAdmin(@RequestParam String userId) {
-		User user = userService.getUserById(userId).orElseThrow(() -> new UserNotFoundException("404", "존재하지 않는 사용자"));
-		user.setAdmin();
-		userRepository.save(user);
-		return new RsData<>("200", "권한부여", user);
 	}
 }

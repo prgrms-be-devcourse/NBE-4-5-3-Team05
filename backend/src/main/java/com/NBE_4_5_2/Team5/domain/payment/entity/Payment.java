@@ -3,15 +3,16 @@ package com.NBE_4_5_2.Team5.domain.payment.entity;
 import com.NBE_4_5_2.Team5.domain.payment.enums.PaymentStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.*;
-import lombok.experimental.SuperBuilder;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.util.UUID;
 
 @Entity
 @Getter
-@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
@@ -19,7 +20,6 @@ import java.util.UUID;
 public class Payment extends BaseTime {
 
 	@Id
-	@Builder.Default
 	@EqualsAndHashCode.Include
 	@Column(updatable = false, nullable = false)
 	private String id = "payment-" + UUID.randomUUID();
@@ -33,6 +33,12 @@ public class Payment extends BaseTime {
 
 	@Enumerated(EnumType.STRING)
 	private PaymentStatus status;
+
+	public Payment(User buyer, int totalPrice, PaymentStatus status) {
+		this.buyer = buyer;
+		this.totalPrice = totalPrice;
+		this.status = status;
+	}
 
 	public Payment(String id, User buyer, int totalPrice, PaymentStatus status) {
 		this.id = id;

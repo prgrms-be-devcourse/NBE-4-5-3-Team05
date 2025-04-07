@@ -8,11 +8,9 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 @Entity
 @Getter
-@SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "liked_post")
@@ -23,4 +21,5 @@ public class LikedPost extends BaseLongIdEntity {
 
 	@Column(nullable = false)
 	private String productPostId;  // 찜한 상품 ID
+
 }

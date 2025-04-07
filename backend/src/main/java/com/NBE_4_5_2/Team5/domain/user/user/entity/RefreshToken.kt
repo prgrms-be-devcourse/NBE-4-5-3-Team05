@@ -7,10 +7,8 @@ import org.springframework.data.redis.core.index.Indexed
 
 @RedisHash("token")
 data class RefreshToken(
-    @Id
-    var userId: String = "",
-    @Indexed
-    var refreshToken: String = "",
-    @TimeToLive
-    var expiration: Long = 0L
+    @Id val userId: String,
+    // 이메일 인증 여부를 판단하기 위해 refreshToken을 "verified"로 수정하게 되므로 var 선언
+    @Indexed var refreshToken: String,
+    @TimeToLive val expiration: Long
 )
