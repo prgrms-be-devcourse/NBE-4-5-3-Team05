@@ -38,7 +38,7 @@ class PaymentController(
     @GetMapping("/request")
     fun requestPayment(
         @Parameter(description = "결제 id") @RequestParam(name = "orderId") id: @NotNull String,
-        @Parameter(description = "PG사에서 생성한 paymentKey") @RequestParam(name = "paymentKey") paymentKey: @NotNull String?,
+        @Parameter(description = "PG사에서 생성한 paymentKey") @RequestParam(name = "paymentKey") paymentKey: @NotNull String,
         @Parameter(description = "총 구매 가격") @RequestParam(name = "amount") amount: @NotNull Int
     ): RsData<Void> {
         paymentService.requestCharge(id, paymentKey, amount)

@@ -12,5 +12,5 @@ interface PaymentProviderAdapter {
      * @param paymentKey
      * @param amount
      */
-    fun requestPayment(id: String?, paymentKey: String?, amount: Int?): ResponseEntity<Map<String?, Any?>?>?
+    fun requestPayment(id: String, paymentKey: String, amount: Int): ResponseEntity<Map<String?, Any?>?>?
 }

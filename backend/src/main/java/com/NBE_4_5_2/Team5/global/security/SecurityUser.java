@@ -16,6 +16,18 @@ public class SecurityUser extends User implements OAuth2User {
 	@Getter
 	private String id;
 
+	public String getId() {
+		return id;
+	}
+
+	public Role getRole() {
+		return role;
+	}
+
+	public String getNickname() {
+		return nickname;
+	}
+
 	@Getter
 	private Role role;
 

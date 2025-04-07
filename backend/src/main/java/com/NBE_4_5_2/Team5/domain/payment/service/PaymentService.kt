@@ -75,7 +75,7 @@ class PaymentService(
         return PaymentDto.of(saved)
     }
 
-    fun requestCharge(id: @NotNull String, paymentKey: @NotNull String?, amount: @NotNull Int) {
+    fun requestCharge(id: @NotNull String, paymentKey:  String, amount: @NotNull Int) {
         val loggedInUser = loggedInUser
 
         val loggedInUserEntity = userRepository.findById(loggedInUser.id).get()
