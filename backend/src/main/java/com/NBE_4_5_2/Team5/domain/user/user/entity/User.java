@@ -75,6 +75,62 @@ public class User extends BaseTime {
 	@OneToMany(mappedBy = "author", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, orphanRemoval = true)
 	private final List<Comment> wroteComments = new ArrayList<>();
 
+	public String getId() {
+		return id;
+	}
+
+	public String getUsername() {
+		return username;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public String getNickname() {
+		return nickname;
+	}
+
+	public String getAddress() {
+		return address;
+	}
+
+	public String getProfileUrl() {
+		return profileUrl;
+	}
+
+	public int getCash() {
+		return cash;
+	}
+
+	public Role getRole() {
+		return role;
+	}
+
+	public Boolean getBlocked() {
+		return blocked;
+	}
+
+	public Integer getBlockedCount() {
+		return blockedCount;
+	}
+
+	public List<ProductPost> getPurchasedProducts() {
+		return purchasedProducts;
+	}
+
+	public List<ProductPost> getWrittenProducts() {
+		return writtenProducts;
+	}
+
+	public List<Comment> getWroteComments() {
+		return wroteComments;
+	}
+
 	public boolean isAdmin() {
 		return role.equals(Role.ADMIN);
 	}

@@ -2,11 +2,7 @@ package com.NBE_4_5_2.Team5.domain.user.admin.entity
 
 import com.NBE_4_5_2.Team5.domain.user.user.entity.User
 import com.querydsl.core.types.Projections.constructor
-import jakarta.persistence.Entity
-import jakarta.persistence.EntityListeners
-import jakarta.persistence.Id
-import jakarta.persistence.JoinColumn
-import jakarta.persistence.OneToOne
+import jakarta.persistence.*
 import lombok.Builder
 import org.springframework.boot.actuate.autoconfigure.cloudfoundry.CloudFoundryAuthorizationException.Reason
 import org.springframework.data.annotation.CreatedDate
@@ -19,6 +15,7 @@ import java.util.*
 class BanList(
     @Id
     private val _id: String = "ban-" + UUID.randomUUID(),
+    @Column(name="reason")
     private var _reason: String,
     @OneToOne
     @JoinColumn(name = "user_id")
@@ -26,6 +23,7 @@ class BanList(
     @CreatedDate
     private val _startDate: LocalDateTime=LocalDateTime.now(),
 
+    @Column(name="endDate")
     private var _endDate: LocalDateTime,
 ) {
     val id:String
