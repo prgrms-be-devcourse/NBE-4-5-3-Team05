@@ -180,7 +180,7 @@ class ProductPostService(
             throw ForbiddenAccessException("403", "자신이 작성한 상품을 구매할 수 없습니다.")
         }
 
-//        post.setBuyer(buyer)
+        post.purchaseBy(buyer)
         productPostRepository.save(post)
 
         return ProductPostResponse.fromEntity(post)

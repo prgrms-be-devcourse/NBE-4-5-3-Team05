@@ -98,7 +98,7 @@ class ProductPost() : BaseTime() {
     fun canModify(writer: User?) {
         when {
             writer == null -> throw AuthenticationNotFoundException("401-1", "인증 정보가 없습니다.")
-            writer.isAdmin() || writer == this.writer -> return
+            writer.isAdmin || writer == this.writer -> return
             else -> throw ForbiddenAccessException("403-1", "자신이 작성한 글만 수정 가능합니다.")
         }
     }
@@ -106,7 +106,7 @@ class ProductPost() : BaseTime() {
     fun canDelete(writer: User?) {
         when {
             writer == null -> throw AuthenticationNotFoundException("401-1", "인증 정보가 없습니다.")
-            writer.isAdmin() || writer == this.writer -> return
+            writer.isAdmin || writer == this.writer -> return
             else -> throw ForbiddenAccessException("403-1", "자신이 작성한 글만 삭제 가능합니다.")
         }
     }
