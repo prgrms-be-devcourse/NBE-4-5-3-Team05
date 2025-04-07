@@ -1,31 +1,28 @@
-package com.NBE_4_5_2.Team5.global.aspect;
+package com.NBE_4_5_2.Team5.global.aspect
 
-import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.annotation.Around;
-import org.aspectj.lang.annotation.Aspect;
-import org.springframework.stereotype.Component;
-
-import com.NBE_4_5_2.Team5.global.dto.RsData;
-
-import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
+import com.NBE_4_5_2.Team5.global.dto.RsData
+import jakarta.servlet.http.HttpServletResponse
+import org.aspectj.lang.ProceedingJoinPoint
+import org.aspectj.lang.annotation.Around
+import org.aspectj.lang.annotation.Aspect
+import org.springframework.stereotype.Component
 
 @Aspect
 @Component
-@RequiredArgsConstructor
-public class ResponseAspect {
-    private final HttpServletResponse response;
+class ResponseAspect(
+    private val response: HttpServletResponse
+) {
 
     @Around("execution(* com.NBE_4_5_2.Team5..*Controller.*(..))")
-    public Object responseAspect(ProceedingJoinPoint joinPoint) throws Throwable {
-        Object result = joinPoint.proceed();
+    @Throws(Throwable::class)
+    fun responseAspect(joinPoint: ProceedingJoinPoint): Any? {
+        val result = joinPoint.proceed()
 
-        // 응답코드를 설정해준다
-        if (result instanceof RsData<?> rsData) {
-            int statusCode = rsData.getStatusCode();
-            response.setStatus(statusCode);
+        // 응답코드를 설정해준다.
+        if (result is RsData<*>) {
+            val statusCode = result.statusCode
+            response.status = statusCode
         }
-
-        return result;
+        return result
     }
 }
