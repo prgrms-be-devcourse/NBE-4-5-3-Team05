@@ -24,9 +24,7 @@ class TestConfig {
     fun objectMapper(): ObjectMapper = ObjectMapper()
 
     companion object {
-        private val redisTestContainer = GenericContainer(
-            DockerImageName.parse("redis:latest")
-        )
+        private val redisTestContainer = GenericContainer(DockerImageName.parse("redis:latest"))
             .withExposedPorts(6379)
             .withReuse(true)
 
@@ -37,16 +35,20 @@ class TestConfig {
         }
     }
 
-    @Bean
+    @Bean(initMethod = "start", destroyMethod = "stop")
     fun redisContainer(): GenericContainer<*> = redisTestContainer
 
-    @Bean
+    @Bean(destroyMethod = "")
     @Primary
     fun redisConnectionFactory(): RedisConnectionFactory {
-        val factory = LettuceConnectionFactory(redisTestContainer.host, redisTestContainer.getMappedPort(6379))
-        factory.setValidateConnection(true)
-        factory.afterPropertiesSet()
-        return factory
+        return LettuceConnectionFactory(
+            redisTestContainer.host,
+            redisTestContainer.getMappedPort(6379)
+        ).apply {
+            setValidateConnection(true)
+            afterPropertiesSet()
+            start()
+        }
     }
 
     @Bean
@@ -56,26 +58,24 @@ class TestConfig {
     @Bean
     @Primary
     fun redisTemplate(redisConnectionFactory: RedisConnectionFactory): RedisTemplate<String, String> {
-        val template = RedisTemplate<String, String>()
-        template.connectionFactory = redisConnectionFactory
-
-        val stringSerializer = StringRedisSerializer()
-        template.keySerializer = stringSerializer
-        template.valueSerializer = stringSerializer
-        template.hashKeySerializer = stringSerializer
-        template.hashValueSerializer = stringSerializer
-
-        template.afterPropertiesSet()
-        return template
+        return RedisTemplate<String, String>().apply {
+            setConnectionFactory(redisConnectionFactory)
+            val stringSerializer = StringRedisSerializer()
+            keySerializer = stringSerializer
+            valueSerializer = stringSerializer
+            hashKeySerializer = stringSerializer
+            hashValueSerializer = stringSerializer
+            afterPropertiesSet()
+        }
     }
 
     @Bean
     fun objectRedisTemplate(connectionFactory: RedisConnectionFactory): RedisTemplate<String, Any> {
-        val redisTemplate = RedisTemplate<String, Any>()
-        redisTemplate.setConnectionFactory(connectionFactory)
-        redisTemplate.keySerializer = StringRedisSerializer()
-        redisTemplate.valueSerializer = Jackson2JsonRedisSerializer(String::class.java)
-        return redisTemplate
+        return RedisTemplate<String, Any>().apply {
+            setConnectionFactory(connectionFactory)
+            keySerializer = StringRedisSerializer()
+            valueSerializer = Jackson2JsonRedisSerializer(String::class.java)
+        }
     }
 
     @Bean
