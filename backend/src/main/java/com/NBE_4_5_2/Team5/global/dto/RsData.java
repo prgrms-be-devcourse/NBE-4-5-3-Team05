@@ -28,4 +28,19 @@ public class RsData<T> {
         String statusCodeStr = code.split("-")[0];
         return Integer.parseInt(statusCodeStr);
     }
+
+    @NonNull
+    public String getCode() {
+        return code;
+    }
+
+    @NonNull
+    public String getMessage() {
+        return message;
+    }
+
+    @NonNull
+    public T getData() {
+        return data;
+    }
 }
