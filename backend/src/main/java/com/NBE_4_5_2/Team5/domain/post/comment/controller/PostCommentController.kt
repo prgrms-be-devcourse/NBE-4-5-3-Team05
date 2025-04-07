@@ -1,93 +1,89 @@
-package com.NBE_4_5_2.Team5.domain.post.comment.controller;
+package com.NBE_4_5_2.Team5.domain.post.comment.controller
 
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.NBE_4_5_2.Team5.domain.post.comment.dto.CommentDto;
-import com.NBE_4_5_2.Team5.domain.post.comment.service.CommentService;
-import com.NBE_4_5_2.Team5.domain.user.user.dto.UserDto;
-import com.NBE_4_5_2.Team5.global.dto.RsData;
-
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.RequiredArgsConstructor;
+import com.NBE_4_5_2.Team5.domain.post.comment.dto.CommentDto
+import com.NBE_4_5_2.Team5.domain.post.comment.service.CommentService
+import com.NBE_4_5_2.Team5.domain.user.user.dto.UserDto
+import com.NBE_4_5_2.Team5.global.dto.RsData
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.Parameter
+import io.swagger.v3.oas.annotations.security.SecurityRequirement
+import io.swagger.v3.oas.annotations.tags.Tag
+import lombok.RequiredArgsConstructor
+import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Slice
+import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.web.bind.annotation.*
 
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("/api/posts")
 @Tag(name = "Comment API", description = "댓글 API")
-public class PostCommentController {
+class PostCommentController(
+    private val commentService: CommentService
 
-	private final CommentService commentService;
+) {
+    @JvmRecord
+    data class WriteCommentResBody(val id: String, val content: String, val author: UserDto)
 
-	public record WriteCommentResBody(String id, String content, UserDto author) {
-	}
+    @JvmRecord
+    data class WriteCommentReqBody(
+        @Parameter(description = "댓글 내용") @Parameter(
+            description = "댓글 내용"
+        ) val content: String
+    )
 
-	public record WriteCommentReqBody(
-		@Parameter(description = "댓글 내용") String content) {
-	}
+    @Operation(summary = "댓글 작성", description = "상품에 댓글을 작성합니다.")
+    @PostMapping("/{post-id}/comments")
+    @PreAuthorize("isAuthenticated()")
+    @SecurityRequirement(name = "cookieAuth")
+    fun writeComment(
+        @Parameter(description = "작성할 상품 게시글 id") @PathVariable(name = "post-id") postId: String,
+        @RequestBody body: WriteCommentReqBody
+    ): RsData<WriteCommentResBody> {
+        val commentDto = commentService.writeComment(postId, body.content)
 
-	@Operation(summary = "댓글 작성", description = "상품에 댓글을 작성합니다.")
-	@PostMapping("/{post-id}/comments")
-	@PreAuthorize("isAuthenticated()")
-	@SecurityRequirement(name = "cookieAuth")
-	public RsData<WriteCommentResBody> writeComment(
-		@Parameter(description = "작성할 상품 게시글 id")
-		@PathVariable(name = "post-id") String postId,
-		@RequestBody WriteCommentReqBody body) {
+        return RsData(
+            "200-1", "댓글 작성 성공.",
+            WriteCommentResBody(commentDto.id, commentDto.content, commentDto.author)
+        )
+    }
 
-		CommentDto commentDto = commentService.writeComment(postId, body.content());
+    @JvmRecord
+    data class UpdateCommentResBody(val content: String, val author: UserDto)
 
-		return new RsData<>("200-1", "댓글 작성 성공.",
-			new WriteCommentResBody(commentDto.getId(), commentDto.getContent(), commentDto.getAuthor()));
+    @JvmRecord
+    data class UpdateCommentReqBody(val content: String)
 
-	}
+    @Operation(summary = "댓글 수정", description = "댓글 내용을 수정합니다.")
+    @PreAuthorize("isAuthenticated()")
+    @SecurityRequirement(name = "cookieAuth")
+    @PutMapping("/{post-id}/comments/{comment-id}")
+    fun updateComment(
+        @PathVariable(name = "comment-id") commentId: String,
+        @RequestBody body: UpdateCommentReqBody
+    ): RsData<UpdateCommentResBody> {
+        val commentDto = commentService.updateComment(commentId, body.content)
 
-	public record UpdateCommentResBody(String content, UserDto author) {
-	}
+        return RsData(
+            "200-1", "comment 수정 성공.",
+            UpdateCommentResBody(commentDto.content, commentDto.author)
+        )
+    }
 
-	public record UpdateCommentReqBody(String content) {
-	}
+    @Operation(summary = "댓글 삭제", description = "댓글을 삭제합니다.")
+    @PreAuthorize("isAuthenticated()")
+    @SecurityRequirement(name = "cookieAuth")
+    @DeleteMapping("/{post-id}/comments/{comment-id}")
+    fun deleteComment(@PathVariable(name = "comment-id") commentId: String): RsData<Void> {
+        commentService.deleteComment(commentId)
 
-	@Operation(summary = "댓글 수정", description = "댓글 내용을 수정합니다.")
-	@PreAuthorize("isAuthenticated()")
-	@SecurityRequirement(name = "cookieAuth")
-	@PutMapping("/{post-id}/comments/{comment-id}")
-	public RsData<UpdateCommentResBody> updateComment(@PathVariable(name = "comment-id") String commentId,
-		@RequestBody UpdateCommentReqBody body) {
+        return RsData("204-1", "comment 삭제 성공.")
+    }
 
-		CommentDto commentDto = commentService.updateComment(commentId, body.content);
+    @Operation(summary = "댓글 목록 조회", description = "특정 게시글의 댓글 목록을 조회합니다.")
+    @GetMapping("/{id}/comments")
+    fun getComments(@PathVariable(name = "id") postId: String, pageable: Pageable): RsData<Slice<CommentDto>> {
+        val comments = commentService.getComments(postId, pageable)
 
-		return new RsData<>("200-1", "comment 수정 성공.",
-			new UpdateCommentResBody(commentDto.getContent(), commentDto.getAuthor()));
-	}
-
-	@Operation(summary = "댓글 삭제", description = "댓글을 삭제합니다.")
-	@PreAuthorize("isAuthenticated()")
-	@SecurityRequirement(name = "cookieAuth")
-	@DeleteMapping("/{post-id}/comments/{comment-id}")
-	public RsData<Void> deleteComment(@PathVariable(name = "comment-id") String commentId) {
-		commentService.deleteComment(commentId);
-
-		return new RsData<>("204-1", "comment 삭제 성공.");
-	}
-
-	@Operation(summary = "댓글 목록 조회", description = "특정 게시글의 댓글 목록을 조회합니다.")
-	@GetMapping("/{id}/comments")
-	public RsData<Slice<CommentDto>> getComments(@PathVariable(name = "id") String postId, Pageable pageable) {
-		Slice<CommentDto> comments = commentService.getComments(postId, pageable);
-
-		return new RsData<>("200-1", "comment 조회 성공", comments);
-	}
+        return RsData("200-1", "comment 조회 성공", comments)
+    }
 }
