@@ -27,6 +27,54 @@ public class UserDto {
 	private boolean blocked;
 	private int blockedCount;
 
+	public String getId() {
+		return id;
+	}
+
+	public String getUsername() {
+		return username;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public String getNickname() {
+		return nickname;
+	}
+
+	public String getAddress() {
+		return address;
+	}
+
+	public String getProfileUrl() {
+		return profileUrl;
+	}
+
+	public Role getRole() {
+		return role;
+	}
+
+	public int getCash() {
+		return cash;
+	}
+
+	public LocalDateTime getCreatedAt() {
+		return createdAt;
+	}
+
+	public LocalDateTime getModifiedAt() {
+		return modifiedAt;
+	}
+
+	public boolean isBlocked() {
+		return blocked;
+	}
+
+	public int getBlockedCount() {
+		return blockedCount;
+	}
+
 	public UserDto(User admin) {
 		this.id = admin.getId();
 		this.role = admin.getRole();

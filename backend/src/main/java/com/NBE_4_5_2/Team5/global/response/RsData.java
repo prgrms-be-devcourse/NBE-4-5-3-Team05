@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
 @Getter
-@AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class RsData<T> {
 	@NonNull
@@ -29,5 +28,11 @@ public class RsData<T> {
 	public int getStatusCode() {
 		String statusCodeStr = code.split("-")[0];
 		return Integer.parseInt(statusCodeStr);
+	}
+
+	public RsData(@NonNull String code, @NonNull String message, @NonNull T data) {
+		this.code = code;
+		this.message = message;
+		this.data = data;
 	}
 }
