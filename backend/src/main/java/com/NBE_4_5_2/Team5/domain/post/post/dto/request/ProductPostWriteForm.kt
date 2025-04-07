@@ -1,27 +1,29 @@
 package com.NBE_4_5_2.Team5.domain.post.post.dto.request;
 
-import java.util.List;
-
-import org.springframework.lang.NonNull;
-
 import io.swagger.v3.oas.annotations.Parameter;
 
-public record ProductPostWriteForm(
+data class ProductPostWriteForm(
 	@Parameter(description = "상품 이름")
-	@NonNull String productName,
+	val productName: String,
+
 	@Parameter(description = "상품 가격")
-	@NonNull Integer productPrice,
+	val productPrice: Int,
+
 	@Parameter(description = "글 제목")
-	@NonNull String title,
+	val title: String,
+
 	@Parameter(description = "글 내용")
-	@NonNull String content,
+	val content: String,
+
 	@Parameter(description = "카테고리 id")
-	@NonNull List<Long> categoryIds,
+	val categoryIds: List<Long>,
+
 	@Parameter(description = "상품 사진 url")
-	@NonNull List<String> imageUrlList,
+	val imageUrlList: List<String>,
+
 	@Parameter(description = "위도")
-	@NonNull Float latitude,
+	val latitude: Float,
+
 	@Parameter(description = "경도")
-	@NonNull Float longitude
-) {
-}
+	val longitude: Float
+)

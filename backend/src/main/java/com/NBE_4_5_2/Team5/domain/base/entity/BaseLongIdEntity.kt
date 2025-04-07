@@ -1,6 +1,9 @@
 package com.NBE_4_5_2.Team5.domain.base.entity
 
+import com.NBE_4_5_2.Team5.global.standard.util.Ut
 import jakarta.persistence.*
+import lombok.*
+import lombok.experimental.SuperBuilder
 import org.hibernate.Hibernate
 
 @MappedSuperclass
@@ -11,10 +14,10 @@ abstract class BaseLongIdEntity {
     private var _id: Long? = null // TODO: 추후에 전환 과정에서 해결 (private->public)
 
     var id: Long
-    get() = _id ?: 0
-    set(value) {
-        _id = value
-    }
+        get() = _id ?: 0
+        set(value) {
+            _id = value
+        }
 
     override fun equals(other: Any?): Boolean {
 
@@ -26,6 +29,6 @@ abstract class BaseLongIdEntity {
     }
 
     override fun hashCode(): Int {
-        return id?.hashCode() ?: System.identityHashCode(this)
+        return id.hashCode() ?: System.identityHashCode(this)
     }
 }
