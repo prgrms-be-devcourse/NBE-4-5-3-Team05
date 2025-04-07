@@ -71,13 +71,13 @@ public class BaseInitData {
         };
     }
 
-//    @Bean
-//    @Order(4)
-//    public ApplicationRunner applicationRunner4() {
-//        return args -> {
-//            self.noticeInit();
-//        };
-//    }
+    @Bean
+    @Order(4)
+    public ApplicationRunner applicationRunner4() {
+        return args -> {
+            self.noticeInit();
+        };
+    }
 
     @Value("${custom.server.host}")
     private String serverHost;
@@ -190,28 +190,28 @@ public class BaseInitData {
         productCategoryRepository.saveAll(productCategories);
     }
 
-//    @Transactional
-//    public void noticeInit() {
-//        if (noticePostRepository.count() > 0) {
-//            return;
-//        }
-//
-//        // 공지사항 생성: 총 10개의 공지사항 생성
-//        User admin = userRepository.findAll().stream()
-//                .filter(u -> u.getRole().equals(Role.ADMIN))
-//                .findFirst()
-//                .orElse(null);
-//        if (admin == null && !userRepository.findAll().isEmpty()) {
-//            admin = userRepository.findAll().get(0);
-//        }
-//
-//        for (int i = 1; i <= 10; i++) {
-//            NoticePost notice = NoticePost.builder()
-//                    .admin(admin)
-//                    .title("공지사항 제목 " + i)
-//                    .content("공지사항 내용 " + i + " - 중요한 공지사항 내용입니다.")
-//                    .build();
-//            noticePostRepository.save(notice);
-//        }
-//    }
+    @Transactional
+    public void noticeInit() {
+        if (noticePostRepository.count() > 0) {
+            return;
+        }
+
+        // 공지사항 생성: 총 10개의 공지사항 생성
+        User admin = userRepository.findAll().stream()
+                .filter(u -> u.getRole().equals(Role.ADMIN))
+                .findFirst()
+                .orElse(null);
+        if (admin == null && !userRepository.findAll().isEmpty()) {
+            admin = userRepository.findAll().get(0);
+        }
+
+        for (int i = 1; i <= 10; i++) {
+            NoticePost notice = NoticePost.builder()
+                    .admin(admin)
+                    .title("공지사항 제목 " + i)
+                    .content("공지사항 내용 " + i + " - 중요한 공지사항 내용입니다.")
+                    .build();
+            noticePostRepository.save(notice);
+        }
+    }
 }
