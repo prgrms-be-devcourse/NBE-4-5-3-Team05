@@ -1,7 +1,4 @@
-package com.NBE_4_5_2.Team5.global.exception.security;
+package com.NBE_4_5_2.Team5.global.exception.security
 
-public class TokenNotValidException extends SecurityException {
-	public TokenNotValidException(String code, String msg) {
-		super(code, msg);
-	}
-}
+class TokenNotValidException(code: String, msg: String) :
+    SecurityException(code, msg)

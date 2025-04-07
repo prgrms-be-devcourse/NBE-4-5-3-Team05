@@ -1,56 +1,47 @@
-package com.NBE_4_5_2.Team5.global.exception;
+package com.NBE_4_5_2.Team5.global.exception
 
-import java.util.stream.Collectors;
-
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
-
-import com.NBE_4_5_2.Team5.global.dto.RsData;
+import com.NBE_4_5_2.Team5.global.dto.RsData
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
+import org.springframework.http.converter.HttpMessageNotReadableException
+import org.springframework.web.bind.MethodArgumentNotValidException
+import org.springframework.web.bind.annotation.ExceptionHandler
+import org.springframework.web.bind.annotation.ResponseStatus
+import org.springframework.web.bind.annotation.RestControllerAdvice
 
 @RestControllerAdvice
-public class GlobalExceptionHandler {
+class GlobalExceptionHandler {
 
-	@ExceptionHandler(ServiceException.class)
-	@ResponseStatus // Spring Docs 핸들러 인식
-	public ResponseEntity<RsData<Void>> serviceExceptionHandle(ServiceException e) {
-		return ResponseEntity
-			.status(e.getStatusCode())
-			.body(
-				new RsData<>(
-					e.getCode(),
-					e.getMessage()
-				)
-			);
-	}
+    @ExceptionHandler(ServiceException::class)
+    @ResponseStatus
+    fun serviceExceptionHandle(e: ServiceException): ResponseEntity<RsData<Void>> {
+        return ResponseEntity
+            .status(e.statusCode)
+            .body(
+                RsData(e.code, e.message)
+            )
+    }
 
-	@ExceptionHandler(MethodArgumentNotValidException.class)
-	public ResponseEntity<RsData<Void>> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+    @ExceptionHandler(MethodArgumentNotValidException::class)
+    fun handleMethodArgumentNotValidException(e: MethodArgumentNotValidException): ResponseEntity<RsData<Void>> {
+        val message = e.bindingResult.fieldErrors
+            .map { fieldError -> "${fieldError.field} : ${fieldError.defaultMessage}" }
+            .sorted()
+            .joinToString("\n")
 
-		String message = e.getBindingResult().getFieldErrors()
-			.stream()
-			.map(fe -> fe.getField() + " : " + fe.getDefaultMessage())
-			.sorted()
-			.collect(Collectors.joining("\n"));
+        return ResponseEntity
+            .status(HttpStatus.BAD_REQUEST)
+            .body(
+                RsData("400-1", message)
+            )
+    }
 
-		return ResponseEntity
-			.status(HttpStatus.BAD_REQUEST)
-			.body(
-				new RsData<>(
-					"400-1",
-					message
-				)
-			);
-	}
-
-	@ExceptionHandler(HttpMessageNotReadableException.class)
-	public ResponseEntity<RsData<Void>> handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
-		return ResponseEntity
-			.status(HttpStatus.BAD_REQUEST)
-			.body(new RsData<>("400-1", "값을 입력해주세요."));
-	}
+    @ExceptionHandler(HttpMessageNotReadableException::class)
+    fun handleHttpMessageNotReadableException(e: HttpMessageNotReadableException): ResponseEntity<RsData<Void>> {
+        return ResponseEntity
+            .status(HttpStatus.BAD_REQUEST)
+            .body(
+                RsData("400-1", "값을 입력해주세요.")
+            )
+    }
 }

@@ -1,7 +1,4 @@
-package com.NBE_4_5_2.Team5.global.exception.post.product;
+package com.NBE_4_5_2.Team5.global.exception.post.product
 
-public class PurchasedProductException extends ProductPostException {
-	public PurchasedProductException(String code, String message) {
-		super(code, message);
-	}
-}
+class PurchasedProductException(code: String, message: String)
+    : ProductPostException(code, message)

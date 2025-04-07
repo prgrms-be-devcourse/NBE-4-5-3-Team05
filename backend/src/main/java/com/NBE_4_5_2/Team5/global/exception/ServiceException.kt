@@ -1,24 +1,22 @@
-package com.NBE_4_5_2.Team5.global.exception;
+package com.NBE_4_5_2.Team5.global.exception
 
-import com.NBE_4_5_2.Team5.global.dto.RsData;
+import com.NBE_4_5_2.Team5.global.dto.Empty
+import com.NBE_4_5_2.Team5.global.dto.RsData
 
-public class ServiceException extends RuntimeException {
-	private final RsData<?> rsData;
+open class ServiceException(
+    private val _code: String,
+    override val message: String
+): RuntimeException(message) {
 
-	public ServiceException(String code, String message) {
-		super(message);
-		rsData = new RsData<>(code, message);
-	}
+    private var rsData: RsData<Empty> = RsData(_code, message)
 
-	public String getCode() {
-		return rsData.getCode();
-	}
+    val code: String
+        get() = rsData.code
 
-	public String getMsg() {
-		return rsData.getMessage();
-	}
+    val msg: String
+        get() = rsData.message
 
-	public int getStatusCode() {
-		return rsData.getStatusCode();
-	}
+    val statusCode: Int
+        get() = rsData.statusCode
+
 }
