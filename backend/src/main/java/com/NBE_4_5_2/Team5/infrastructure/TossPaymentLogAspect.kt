@@ -1,9 +1,11 @@
 package com.NBE_4_5_2.Team5.infrastructure
 
 import com.NBE_4_5_2.Team5.global.security.SecurityUser
+import lombok.extern.slf4j.Slf4j
 import org.aspectj.lang.ProceedingJoinPoint
 import org.aspectj.lang.annotation.Around
 import org.aspectj.lang.annotation.Aspect
+import org.hibernate.query.sqm.tree.SqmNode.log
 import org.slf4j.LoggerFactory
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
@@ -13,37 +15,45 @@ import java.time.LocalDateTime
 @Component
 class TossPaymentLogAspect {
 
-    private val log = LoggerFactory.getLogger(javaClass)
+    private val log = LoggerFactory.getLogger(this.javaClass)
 
     @Around("execution(* com.NBE_4_5_2.Team5.infrastructure.*.*(..))")
     @Throws(Throwable::class)
-    fun logExecution(joinPoint: ProceedingJoinPoint): Any? {
-        val className = joinPoint.target.javaClass.simpleName
+    fun responseAspect(joinPoint: ProceedingJoinPoint): Any? {
         val methodName = joinPoint.signature.name
+        val className = joinPoint.target.javaClass.simpleName
+
+        val authentication = SecurityContextHolder.getContext().authentication
         val now = LocalDateTime.now()
+        var res: Any? = null
+
         val startTime = System.currentTimeMillis()
+        val securityUser = authentication.principal as SecurityUser
 
-        // SecurityContext에서 사용자 정보 안전하게 꺼내기
-        val principal = SecurityContextHolder.getContext().authentication.principal
-        val user = principal as? SecurityUser
-        val userId = user?.id ?: "Anonymous"
-        val role = user?.role ?: "N/A"
-
-        log.info("[$now] : [$userId/$role] $className.$methodName 시작")
+        log.info("[{}] : [{}/{}] {}.{} 시작", now, securityUser.id, securityUser.role,
+            className,
+            methodName
+        )
 
         try {
-            return joinPoint.proceed()
+            res = joinPoint.proceed()
+            return res
         } finally {
-            val elapsed = System.currentTimeMillis() - startTime
-            // 안전하게 인자 꺼내기
-            val args = joinPoint.args
-            val orderId    = args.getOrNull(0) ?: "unknown"
-            val paymentKey = args.getOrNull(1) ?: "unknown"
-            val amount     = args.getOrNull(2) ?: "unknown"
-
+            val endTime = System.currentTimeMillis()
             log.info(
-                "[$now] : [$userId/$role] $className.$methodName 종료. " +
-                        "elapsed=${elapsed}ms, orderId=$orderId, paymentKey=$paymentKey, amount=$amount"
+                """
+					[{}] : [{}/{}] {}.{} 종료.
+					elapsed:{}ms,
+					orderId : {},
+					paymentKey : {},
+					amount : {}
+					
+					""".trimIndent(),
+                now, securityUser.id, securityUser.role, className, methodName,
+                endTime - startTime,
+                joinPoint.args[0],
+                joinPoint.args[1],
+                joinPoint.args[2]
             )
         }
     }

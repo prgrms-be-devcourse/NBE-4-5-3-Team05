@@ -21,7 +21,7 @@ public class BanListBatchScheduler {
 	@Scheduled(cron = "0 0 0 * * *")
 	@Transactional
 	public void schedule() {
-		List<BanList> allByEndDateAfter = banListRepository.findAllByEndDateAfter(LocalDate.now().atStartOfDay());
+		List<BanList> allByEndDateAfter = banListRepository.findAllBy_endDateIsAfter(LocalDate.now().atStartOfDay());
 		allByEndDateAfter.forEach(item -> item.getBannedUser().unBan());
 	}
 }

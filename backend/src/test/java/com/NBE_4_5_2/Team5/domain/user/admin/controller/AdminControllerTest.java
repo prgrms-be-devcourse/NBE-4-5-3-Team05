@@ -85,9 +85,9 @@ class AdminControllerTest {
 			.andExpect(handler().methodName("writeNotice"))
 			.andExpect(jsonPath("$.code").value("200-1"))
 			.andExpect(jsonPath("$.message").value("공지사항 등록 성공."))
-			.andExpect(jsonPath("$.data.id").value(notice.id()))
-			.andExpect(jsonPath("$.data.title").value(notice.title()))
-			.andExpect(jsonPath("$.data.content").value(notice.content()))
+			.andExpect(jsonPath("$.data.id").value(notice.id))
+			.andExpect(jsonPath("$.data.title").value(notice.title))
+			.andExpect(jsonPath("$.data.content").value(notice.content))
 			.andExpect(jsonPath("$.data.admin.id").value(admin.getId()));
 	}
 
