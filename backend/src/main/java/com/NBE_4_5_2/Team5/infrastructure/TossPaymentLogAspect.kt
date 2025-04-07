@@ -1,59 +1,60 @@
-package com.NBE_4_5_2.Team5.infrastructure;
+package com.NBE_4_5_2.Team5.infrastructure
 
-import java.time.LocalDateTime;
-
-import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.annotation.Around;
-import org.aspectj.lang.annotation.Aspect;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Component;
-
-import com.NBE_4_5_2.Team5.global.security.SecurityUser;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import com.NBE_4_5_2.Team5.global.security.SecurityUser
+import lombok.extern.slf4j.Slf4j
+import org.aspectj.lang.ProceedingJoinPoint
+import org.aspectj.lang.annotation.Around
+import org.aspectj.lang.annotation.Aspect
+import org.hibernate.query.sqm.tree.SqmNode.log
+import org.slf4j.LoggerFactory
+import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.stereotype.Component
+import java.time.LocalDateTime
 
 @Aspect
 @Component
-@RequiredArgsConstructor
-@Slf4j
-public class TossPaymentLogAspect {
+class TossPaymentLogAspect {
 
-	@Around("execution(* com.NBE_4_5_2.Team5.infrastructure.*.*(..))")
-	public Object responseAspect(ProceedingJoinPoint joinPoint) throws Throwable {
-		String methodName = joinPoint.getSignature().getName();
-		String className = joinPoint.getTarget().getClass().getSimpleName();
+    private val log = LoggerFactory.getLogger(this.javaClass)
 
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		LocalDateTime now = LocalDateTime.now();
-		Object res = null;
+    @Around("execution(* com.NBE_4_5_2.Team5.infrastructure.*.*(..))")
+    @Throws(Throwable::class)
+    fun responseAspect(joinPoint: ProceedingJoinPoint): Any? {
+        val methodName = joinPoint.signature.name
+        val className = joinPoint.target.javaClass.simpleName
 
-		long startTime = System.currentTimeMillis();
-		SecurityUser securityUser = (SecurityUser)authentication.getPrincipal();
+        val authentication = SecurityContextHolder.getContext().authentication
+        val now = LocalDateTime.now()
+        var res: Any? = null
 
-		log.info("[{}] : [{}/{}] {}.{} 시작", now, securityUser.getId(), securityUser.getRole(),
-			className,
-			methodName);
-		try {
-			res = joinPoint.proceed();
-			return res;
-		} finally {
-			long endTime = System.currentTimeMillis();
-			log.info("""
+        val startTime = System.currentTimeMillis()
+        val securityUser = authentication.principal as SecurityUser
+
+        log.info("[{}] : [{}/{}] {}.{} 시작", now, securityUser.id, securityUser.role,
+            className,
+            methodName
+        )
+
+        try {
+            res = joinPoint.proceed()
+            return res
+        } finally {
+            val endTime = System.currentTimeMillis()
+            log.info(
+                """
 					[{}] : [{}/{}] {}.{} 종료.
 					elapsed:{}ms,
 					orderId : {},
 					paymentKey : {},
 					amount : {}
-					""",
-				now, securityUser.getId(), securityUser.getRole(), className, methodName,
-				endTime - startTime,
-				joinPoint.getArgs()[0],
-				joinPoint.getArgs()[1],
-				joinPoint.getArgs()[2]
-			);
-		}
-	}
-
+					
+					""".trimIndent(),
+                now, securityUser.id, securityUser.role, className, methodName,
+                endTime - startTime,
+                joinPoint.args[0],
+                joinPoint.args[1],
+                joinPoint.args[2]
+            )
+        }
+    }
 }
