@@ -1,112 +1,110 @@
-package com.NBE_4_5_2.Team5.domain.payment.service;
+package com.NBE_4_5_2.Team5.domain.payment.service
 
-import com.NBE_4_5_2.Team5.domain.payment.dto.PaymentDto;
-import com.NBE_4_5_2.Team5.domain.payment.dto.PaymentMetaData;
-import com.NBE_4_5_2.Team5.domain.payment.entity.Payment;
-import com.NBE_4_5_2.Team5.domain.payment.enums.PaymentStatus;
-import com.NBE_4_5_2.Team5.domain.payment.repository.PaymentRepository;
-import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductPost;
-import com.NBE_4_5_2.Team5.domain.post.post.repository.ProductPostRepository;
-import com.NBE_4_5_2.Team5.domain.user.user.entity.User;
-import com.NBE_4_5_2.Team5.domain.user.user.repository.UserRepository;
-import com.NBE_4_5_2.Team5.domain.user.user.service.UserService;
-import com.NBE_4_5_2.Team5.global.exception.payment.PaymentChargeException;
-import com.NBE_4_5_2.Team5.global.exception.payment.PaymentNotFoundException;
-import com.NBE_4_5_2.Team5.global.exception.post.product.ProductPostNotFoundException;
-import jakarta.validation.constraints.NotNull;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import com.NBE_4_5_2.Team5.domain.payment.dto.PaymentDto
+import com.NBE_4_5_2.Team5.domain.payment.dto.PaymentMetaData
+import com.NBE_4_5_2.Team5.domain.payment.entity.Payment
+import com.NBE_4_5_2.Team5.domain.payment.enums.PaymentStatus
+import com.NBE_4_5_2.Team5.domain.payment.repository.PaymentRepository
+import com.NBE_4_5_2.Team5.domain.post.post.repository.ProductPostRepository
+import com.NBE_4_5_2.Team5.domain.user.user.entity.User
+import com.NBE_4_5_2.Team5.domain.user.user.repository.UserRepository
+import com.NBE_4_5_2.Team5.domain.user.user.service.UserService
+import com.NBE_4_5_2.Team5.global.exception.payment.PaymentChargeException
+import com.NBE_4_5_2.Team5.global.exception.payment.PaymentNotFoundException
+import com.NBE_4_5_2.Team5.global.exception.post.product.ProductPostNotFoundException
+import jakarta.validation.constraints.NotNull
+import lombok.RequiredArgsConstructor
+import lombok.extern.slf4j.Slf4j
+import org.hibernate.query.sqm.tree.SqmNode.log
+import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 @Transactional
-@RequiredArgsConstructor
 @Slf4j
-public class PaymentService {
+class PaymentService(
+    private val paymentRepository: PaymentRepository,
+    private val productRepository: ProductPostRepository,
+    private val paymentProviderAdapter: PaymentProviderAdapter,
+    private val userService: UserService,
+    private val userRepository: UserRepository,
+    private val productPostRepository: ProductPostRepository,
+) {
+    private val loggedInUser: User
+        get() = userService.userIdentity
 
-    private final PaymentRepository paymentRepository;
-    private final ProductPostRepository productRepository;
-    // TODO : custom annotation으로 다른 PG사의 Adapter bean을 구분해서 가져오게 한다면?
-    private final PaymentProviderAdapter paymentProviderAdapter;
-    private final UserService userService;
-    private final UserRepository userRepository;
-    private final ProductPostRepository productPostRepository;
-
-    public PaymentMetaData saveMetaData(String paymentId, Integer amount) {
-        User user = getLoggedInUser();
-        Payment saved = paymentRepository.save(
-                new Payment(
-                        paymentId,
-                        user,
-                        amount,
-                        PaymentStatus.IN_PROGRESS
-                ));
-        return new PaymentMetaData(saved);
+    fun saveMetaData(paymentId: String, amount: Int): PaymentMetaData {
+        val user = loggedInUser
+        return paymentRepository.save(
+            Payment(
+                paymentId,
+                user,
+                amount
+            )
+        ).let{
+            PaymentMetaData(it)
+        }
     }
 
-    private User getLoggedInUser() {
-        return userService.getUserIdentity();
-    }
 
-    public PaymentDto purchase(String productId) {
-
-        User loggedInUser = getLoggedInUser();
-
-        User loggedInUserEntity = userRepository.findById(loggedInUser.getId()).get();
-        ProductPost product = productRepository.findById(productId)
-                .orElseThrow(() -> new PaymentNotFoundException("404", "id가 %s인 Payment를 찾을 수 없습니다.".formatted(productId)));
+    fun purchase(productId: String): PaymentDto {
+        // TODO : userRepository가 optional 반환안하면 !!붙이기
+        val loggedInUserEntity = userRepository.findById(loggedInUser.id).get()
+        val product = productRepository.findById(productId)
+            .orElseThrow {
+                PaymentNotFoundException(
+                    "404",
+                    "id가 $productId 인 Payment를 찾을 수 없습니다."
+                )
+            }
 
         // 할인 등 product 가격과 총 결제 금액이 다를 수 있으므로 amount를 따로 받음.
-        loggedInUserEntity.canBuy(product, product.getProductPrice());
-        loggedInUserEntity.buy(product, product.getProductPrice());
+        loggedInUserEntity.canBuy(product, product.productPrice)
+        loggedInUserEntity.buy(product, product.productPrice)
 
-        Payment purchasedPayment = new Payment(
-                loggedInUser,
-                -1 * product.getProductPrice(),
-                PaymentStatus.DONE
-        );
+        val purchasedPayment = Payment(
+            loggedInUser,
+            -1 * product.productPrice,
+            PaymentStatus.DONE
+        )
 
-        purchasedPayment.updatePaymentKey(productId);
+        purchasedPayment.updatePaymentKey(productId)
 
-        Payment saved = paymentRepository.save(purchasedPayment);
+        val saved = paymentRepository.save(purchasedPayment)
 
-        return PaymentDto.of(saved);
+        return PaymentDto.of(saved)
     }
 
-    public void requestCharge(@NotNull String id, @NotNull String paymentKey, @NotNull Integer amount) {
+    fun requestCharge(id: @NotNull String, paymentKey: @NotNull String?, amount: @NotNull Int) {
+        val loggedInUser = loggedInUser
 
-        User loggedInUser = getLoggedInUser();
-
-        User loggedInUserEntity = userRepository.findById(loggedInUser.getId()).get();
-        Payment payment = paymentRepository.findById(id)
-                .orElseThrow(() -> new PaymentNotFoundException("404", "Payment를 찾을 수 없습니다."));
+        val loggedInUserEntity = userRepository.findById(loggedInUser.id).get()
+        val payment = paymentRepository.findById(id)
+            .orElseThrow { PaymentNotFoundException("404", "Payment를 찾을 수 없습니다.") }
 
         if (!payment.checkValid(amount)) {
-            throw new PaymentChargeException("404", "총 가격이 맞지 않습니다.");
+            throw PaymentChargeException("404", "총 가격이 맞지 않습니다.")
         }
 
-        Payment update = payment.updatePaymentKey(paymentKey);
+        val update = payment.updatePaymentKey(paymentKey)
 
         try {
-            paymentProviderAdapter.requestPayment(id, paymentKey, amount);
+            paymentProviderAdapter.requestPayment(id, paymentKey, amount)
 
-            loggedInUserEntity.chargeCash(amount);
+            loggedInUserEntity.chargeCash(amount)
 
-            payment.updateState(PaymentStatus.DONE);
-
-        } catch (RuntimeException e) {
-            log.error(e.getMessage());
+            payment.updateState(PaymentStatus.DONE)
+        } catch (e: RuntimeException) {
+            log.error(e.message)
         }
     }
 
-    public Boolean isPurchased(String postId) {
+    fun isPurchased(postId: String): Boolean {
+        val loggedInUser = loggedInUser
 
-        User loggedInUser = getLoggedInUser();
+        val productPost = productPostRepository.findById(postId)
+            .orElseThrow { ProductPostNotFoundException("404", "product post를 찾을 수 없습니다.") }
 
-        ProductPost productPost = productPostRepository.findById(postId)
-                .orElseThrow(() -> new ProductPostNotFoundException("404", "product post를 찾을 수 없습니다."));
-
-        return productPost.isPurchasedBy(loggedInUser);
+        return productPost.isPurchasedBy(loggedInUser)
     }
 }
