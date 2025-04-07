@@ -36,6 +36,10 @@ public class ProductPost extends BaseTime {
     @Setter
     private Integer productPrice;
 
+    public Integer getProductPrice() {
+        return productPrice;
+    }
+
     @ManyToOne(fetch = FetchType.LAZY)
     private User buyer; // 구매자(NULL이면 아직 구매 안 된 상태)
 
