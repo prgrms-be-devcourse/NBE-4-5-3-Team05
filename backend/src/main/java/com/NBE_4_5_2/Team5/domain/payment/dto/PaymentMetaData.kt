@@ -6,11 +6,9 @@ import lombok.Getter
 import lombok.NoArgsConstructor
 import lombok.Setter
 
-@NoArgsConstructor
-@Getter
-@Setter
-@AllArgsConstructor
-class PaymentMetaData(payment: Payment) {
-    private var paymentId = payment.id
-    private var amount = payment.totalPrice
+class PaymentMetaData(
+    var paymentId: String,
+    var amount: Int
+) {
+    constructor(payment: Payment) : this(payment.id, payment.totalPrice)
 }
