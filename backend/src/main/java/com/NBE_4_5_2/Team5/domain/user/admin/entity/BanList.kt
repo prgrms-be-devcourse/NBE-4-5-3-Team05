@@ -1,45 +1,51 @@
-package com.NBE_4_5_2.Team5.domain.user.admin.entity;
+package com.NBE_4_5_2.Team5.domain.user.admin.entity
 
-import java.time.LocalDateTime;
-import java.util.UUID;
-
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import com.NBE_4_5_2.Team5.domain.user.user.entity.User;
-
-import jakarta.persistence.Entity;
-import jakarta.persistence.EntityListeners;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import com.NBE_4_5_2.Team5.domain.user.user.entity.User
+import com.querydsl.core.types.Projections.constructor
+import jakarta.persistence.Entity
+import jakarta.persistence.EntityListeners
+import jakarta.persistence.Id
+import jakarta.persistence.JoinColumn
+import jakarta.persistence.OneToOne
+import lombok.Builder
+import org.springframework.boot.actuate.autoconfigure.cloudfoundry.CloudFoundryAuthorizationException.Reason
+import org.springframework.data.annotation.CreatedDate
+import org.springframework.data.jpa.domain.support.AuditingEntityListener
+import java.time.LocalDateTime
+import java.util.*
 
 @Entity
-@EntityListeners(AuditingEntityListener.class)
-@NoArgsConstructor
-@Getter
-public class BanList {
-	@Id
-	private final String id = "ban-" + UUID.randomUUID();
+@EntityListeners(AuditingEntityListener::class)
+class BanList(
+    @Id
+    private val _id: String = "ban-" + UUID.randomUUID(),
+    private var _reason: String,
+    @OneToOne
+    @JoinColumn(name = "user_id")
+    private var _bannedUser: User,
+    @CreatedDate
+    private val _startDate: LocalDateTime=LocalDateTime.now(),
 
-	private String reason;
+    private var _endDate: LocalDateTime,
+) {
+    val id:String
+        get()=_id
 
-	@OneToOne
-	@JoinColumn(name = "user_id")
-	private User bannedUser;
+    val reason:String
+        get()=_reason
 
-	@CreatedDate
-	private LocalDateTime startDate;
+    val bannedUser:User
+        get()=_bannedUser
 
-	private LocalDateTime endDate;
+    val startDate:LocalDateTime
+        get()=_startDate
 
-	@Builder
-	public BanList(String reason, User bannedUser, LocalDateTime endDate) {
-		this.reason = reason;
-		this.bannedUser = bannedUser;
-		this.endDate = endDate;
-	}
+    val endDate:LocalDateTime
+        get()=_endDate
+
+    constructor(reason:String, bannedUser:User, endDate:LocalDateTime):this(
+        _reason=reason,
+        _bannedUser=bannedUser,
+        _endDate=endDate
+    )
 }
