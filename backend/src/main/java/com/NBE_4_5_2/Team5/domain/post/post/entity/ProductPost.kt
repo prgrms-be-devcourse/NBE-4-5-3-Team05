@@ -80,6 +80,7 @@ class ProductPost() : BaseTime() {
         this.imageUrls = imageUrls
         this.latitude = latitude
         this.longitude = longitude
+        setCreateDateNow();
     }
 
     fun addCategories(categories: List<Category>) {

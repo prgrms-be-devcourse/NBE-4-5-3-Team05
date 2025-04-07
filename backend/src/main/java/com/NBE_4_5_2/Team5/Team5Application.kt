@@ -7,12 +7,10 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing
 
 @SpringBootApplication
 @EnableJpaAuditing
-class Team5Application {
+class Team5Application
 
-    fun main(args: Array<String>) {
-        val app = SpringApplication(Team5Application::class.java)
-        // PID 파일을 기본 경로 (현재 디렉터리의 application.pid)로 저장
-        app.addListeners(ApplicationPidFileWriter())
-        app.run(*args)
-    }
+fun main(args: Array<String>) {
+    val app = org.springframework.boot.SpringApplication(Team5Application::class.java)
+    app.addListeners(ApplicationPidFileWriter())
+    app.run(*args)
 }

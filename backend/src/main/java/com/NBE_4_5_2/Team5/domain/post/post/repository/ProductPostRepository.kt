@@ -29,7 +29,7 @@ interface ProductPostRepository : JpaRepository<ProductPost, String> {
     fun findByWriter(writer: User, pageable: Pageable): Page<ProductPost>
 
     // 페이징 없이 전체 조회
-    @EntityGraph(attributePaths = ["productCategories.category"])
+    @EntityGraph(attributePaths = ["writer", "productCategories.category"])
     fun findByWriter(writer: User): List<ProductPost>
 
     //구매된(판매 완료) 상품들 조회
