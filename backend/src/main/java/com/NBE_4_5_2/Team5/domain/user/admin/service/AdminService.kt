@@ -1,204 +1,200 @@
-package com.NBE_4_5_2.Team5.domain.user.admin.service;
+package com.NBE_4_5_2.Team5.domain.user.admin.service
 
-import com.NBE_4_5_2.Team5.domain.post.post.repository.ProductPostRepository;
-import com.NBE_4_5_2.Team5.domain.user.admin.controller.AdminController;
-import com.NBE_4_5_2.Team5.domain.user.admin.dto.BanListDto;
-import com.NBE_4_5_2.Team5.domain.user.admin.dto.NoticeResBody;
-import com.NBE_4_5_2.Team5.domain.user.admin.entity.BanList;
-import com.NBE_4_5_2.Team5.domain.user.admin.entity.NoticePost;
-import com.NBE_4_5_2.Team5.domain.user.admin.repository.BanListRepository;
-import com.NBE_4_5_2.Team5.domain.user.admin.repository.NoticePostRepository;
-import com.NBE_4_5_2.Team5.domain.user.user.dto.UserDto;
-import com.NBE_4_5_2.Team5.domain.user.user.entity.Role;
-import com.NBE_4_5_2.Team5.domain.user.user.entity.User;
-import com.NBE_4_5_2.Team5.domain.user.user.repository.UserRepository;
-import com.NBE_4_5_2.Team5.domain.user.user.service.UserService;
-import com.NBE_4_5_2.Team5.global.exception.notice.NoticeNotFoundException;
-import com.NBE_4_5_2.Team5.global.exception.security.WrongRoleException;
-import jakarta.persistence.EntityNotFoundException;
-import jakarta.validation.constraints.NotEmpty;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.util.Comparator;
-import java.util.List;
-import java.util.stream.Collectors;
+import com.NBE_4_5_2.Team5.domain.post.post.repository.ProductPostRepository
+import com.NBE_4_5_2.Team5.domain.user.admin.controller.AdminController.UpdateNoticeReq
+import com.NBE_4_5_2.Team5.domain.user.admin.dto.BanListDto
+import com.NBE_4_5_2.Team5.domain.user.admin.dto.NoticeResBody
+import com.NBE_4_5_2.Team5.domain.user.admin.entity.BanList
+import com.NBE_4_5_2.Team5.domain.user.admin.entity.NoticePost
+import com.NBE_4_5_2.Team5.domain.user.admin.repository.BanListRepository
+import com.NBE_4_5_2.Team5.domain.user.admin.repository.NoticePostRepository
+import com.NBE_4_5_2.Team5.domain.user.user.dto.UserDto
+import com.NBE_4_5_2.Team5.domain.user.user.entity.Role
+import com.NBE_4_5_2.Team5.domain.user.user.entity.User
+import com.NBE_4_5_2.Team5.domain.user.user.repository.UserRepository
+import com.NBE_4_5_2.Team5.domain.user.user.service.UserService
+import com.NBE_4_5_2.Team5.global.exception.notice.NoticeNotFoundException
+import com.NBE_4_5_2.Team5.global.exception.security.WrongRoleException
+import jakarta.persistence.EntityNotFoundException
+import jakarta.validation.constraints.NotEmpty
+import lombok.RequiredArgsConstructor
+import lombok.extern.slf4j.Slf4j
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
+import org.springframework.http.HttpStatus
+import org.springframework.security.core.userdetails.UsernameNotFoundException
+import org.springframework.security.crypto.password.PasswordEncoder
+import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDateTime
+import java.util.stream.Collectors
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class AdminService {
-    private static final int BAN_DURATION_WEIGHT = 7;
-    private final BanListRepository banListRepository;
-    private final UserRepository userRepository;
-    private final NoticePostRepository noticePostRepository;
-    private final UserService userService;
-    private final PasswordEncoder passwordEncoder;
-    private final ProductPostRepository productPostRepository;
+class AdminService(
+    private val banListRepository: BanListRepository,
+    private val userRepository: UserRepository,
+    private val noticePostRepository: NoticePostRepository,
+    private val userService: UserService,
+    private val passwordEncoder: PasswordEncoder,
+    private val productPostRepository: ProductPostRepository
+) {
 
-    public User signUpAdmin(String username, String password, String nickname, String email) {
-        User admin =
-                new User(
-                        username,
-                        passwordEncoder.encode(password),
-                        email,
-                        nickname,
-                        "addr",
-                        "url",
-                        Role.ADMIN
-                );
+
+    fun signUpAdmin(username: String, password: String, nickname: String, email: String): User {
+        return User(
+            username,
+            passwordEncoder.encode(password),
+            email,
+            nickname,
+            "addr",
+            "url",
+            Role.ADMIN
+        ).let {
+            userService.generateAuthtoken(it)
+            userRepository.save(it)
+        }
 
         /**
-         *  기존 코드
-         * 	admin.setRefreshToken(UUID.randomUUID().toString());
+         * 기존 코드
+         * admin.setRefreshToken(UUID.randomUUID().toString());
          *
          * refreshToken을 login 할 때 발급하여 redis에 저장하는 방식으로 변경했습니다.
          * 이에 따라 기존에 setRefreshToken 하던 방식에서 generateAuthtoken 하여 redis에 저장하는 방식으로
          * 변경했습니다.
-         * */
-        userService.generateAuthtoken(admin);
-
-        return userRepository.save(admin);
-    }
-
-    public NoticeResBody writeNotice(@NotEmpty String title, @NotEmpty String content) {
-        User admin = getUser();
-
-        isAdmin(admin);
-
-        NoticePost noticePost = new NoticePost(
-                title,
-                content,
-                admin
-        );
-
-        NoticePost saved = noticePostRepository.save(noticePost);
-
-        return NoticeResBody.of(saved);
+         */
 
     }
 
-    public BanListDto banUser(String userId, @NotEmpty String reason) {
-        User loggedInUser = getUser();
-        User bannedUser = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("id가 %s인 user를 찾을 수 없습니다.".formatted(userId)));
+    fun writeNotice(title: @NotEmpty String, content: @NotEmpty String): NoticeResBody {
 
-        isAdmin(loggedInUser);
+        isAdmin(loggedInUser)
 
-        BanList saved = addNewBanList(reason, bannedUser);
+        val noticePost = NoticePost(
+            title,
+            content,
+            loggedInUser
+        )
 
-        bannedUser.ban();
+        val saved = noticePostRepository.save(noticePost)
 
-        return new BanListDto(saved);
+        return NoticeResBody.of(saved)
     }
 
-    private BanList addNewBanList(String reason, User bannedUser) {
+    fun banUser(userId: String, reason: @NotEmpty String): BanListDto {
 
-        BanList banList = new BanList(
+        isAdmin(loggedInUser)
+
+        return userRepository.findById(userId)
+            .orElseThrow { EntityNotFoundException("id가 ${userId}인 user를 찾을 수 없습니다.") }
+            .let {
+
+                it.ban()
+                addNewBanList(reason, it)
+            }.let {
+                BanListDto(it)
+            }
+    }
+
+    private fun addNewBanList(reason: String, bannedUser: User): BanList {
+        return BanList(
             reason,
             bannedUser,
-            LocalDateTime.now().plusDays((long)(bannedUser.getBlockedCount() + 1) * BAN_DURATION_WEIGHT)
-        );
-        return banListRepository.save(banList);
+            LocalDateTime.now().plusDays((bannedUser.blockedCount + 1).toLong() * BAN_DURATION_WEIGHT)
+        )
+            .let {
+                banListRepository.save(it)
+            }
     }
 
-    private User getUser() {
-        return userService.getUserIdentity();
-    }
+    private val loggedInUser: User
+        get() = userService.userIdentity
 
-    private void isAdmin(User admin) {
-        if (!admin.getRole().equals(Role.ADMIN)) {
-            throw new WrongRoleException(HttpStatus.BAD_REQUEST.toString(), "관리자만 작성할 수 있는 글입니다.");
+    private fun isAdmin(admin: User) {
+        if (admin.role != Role.ADMIN) {
+            throw WrongRoleException(HttpStatus.BAD_REQUEST.toString(), "관리자만 작성할 수 있는 글입니다.")
         }
     }
 
-    public void deletePost(String postId) {
-        User loggedInAdmin = getUser();
+    fun deletePost(postId: String) {
 
-        isAdmin(loggedInAdmin);
+        isAdmin(loggedInUser)
 
-        productPostRepository.deleteById(postId);
+        productPostRepository.deleteById(postId)
     }
 
-    public Page<UserDto> getUsers(Pageable pageable) {
-        Page<User> all = userRepository.findAll(pageable);
-        return all.map(UserDto::new);
+    fun getUsers(pageable: Pageable): Page<UserDto> {
+        val all = userRepository.findAll(pageable)
+        return all.map { admin: User? -> UserDto(admin) }
     }
 
-    public void unBanUser(String userId) {
-        User loggedInUser = getUser();
+    fun unBanUser(userId: String) {
 
-        isAdmin(loggedInUser);
+        isAdmin(loggedInUser)
 
-        User unBanUser = userRepository.findById(userId)
-                .orElseThrow(() -> new UsernameNotFoundException("유저를 찾을 수 없습니다."));
+        userRepository.findById(userId)
+            .orElseThrow { UsernameNotFoundException("유저를 찾을 수 없습니다.") }
+            .let{
 
-        if (!unBanUser.getBlocked()) {
-            throw new IllegalStateException("계정 정지 상태가 아닙니다.");
-        }
+                check(it.blocked) { "계정 정지 상태가 아닙니다." }
 
-        unBanUser.unBan();
+                it.unBan()
+                removeBanInfo(userId)
+            }
 
-        removeBanInfo(userId);
     }
 
     /**
-     * {@code userId}를 가진 유저의 밴 이력을 삭제한다.
+     * `userId`를 가진 유저의 밴 이력을 삭제한다.
      *
      * @param userId
      */
-    private void removeBanInfo(String userId) {
-        banListRepository.deleteBy_bannedUser_Id(userId);
+    private fun removeBanInfo(userId: String) {
+        banListRepository.deleteBy_bannedUser_Id(userId)
     }
 
-    public Page<NoticeResBody> getNotices(Pageable pageable) {
-        User loggedInAdmin = getUser();
-        isAdmin(loggedInAdmin);
+    fun getNotices(pageable: Pageable): Page<NoticeResBody> {
+        isAdmin(loggedInUser)
 
-        Page<NoticePost> all = noticePostRepository.findAll(pageable);
-        return all.map(notice -> NoticeResBody.of(notice));
+        val all = noticePostRepository.findAll(pageable)
+        return all.map { notice: NoticePost? -> NoticeResBody.of(notice) }
     }
 
-    public NoticeResBody updateNotice(String noticeId, AdminController.UpdateNoticeReq body) {
-        User admin = getUser();
+    fun updateNotice(noticeId: String, body: UpdateNoticeReq): NoticeResBody {
 
-        isAdmin(admin);
+        isAdmin(loggedInUser)
 
-        NoticePost noticePost = noticePostRepository.findById(noticeId)
-                .orElseThrow(() -> new NoticeNotFoundException("404-1", "Notice post를 찾을 수 없습니다."));
+        val noticePost = noticePostRepository.findById(noticeId)
+            .orElseThrow { NoticeNotFoundException("404-1", "Notice post를 찾을 수 없습니다.") }
 
-        return NoticeResBody.of(noticePost.update(body.title(), body.content()));
+        return NoticeResBody.of(noticePost.update(body.title, body.content))
     }
 
-    public void deleteNotice(String noticeId) {
-        User user = getUser();
-        isAdmin(user);
-        noticePostRepository.deleteById(noticeId);
+    fun deleteNotice(noticeId: String) {
+        isAdmin(loggedInUser)
+        noticePostRepository.deleteById(noticeId)
     }
 
     // 최신 공지사항을 조회하는 메서드 (최신순 정렬 후 상위 limit 개 반환)
     @Transactional(readOnly = true)
-    public List<NoticePost> getLatestNotices(int limit) {
-        List<NoticePost> notices = noticePostRepository.findAll();
+    fun getLatestNotices(limit: Int): List<NoticePost> {
+        val notices = noticePostRepository.findAll()
         return notices.stream()
-                .sorted(Comparator.comparing(NoticePost::getCreatedDate).reversed())
-                .limit(limit)
-                .collect(Collectors.toList());
+            .sorted(Comparator.comparing(NoticePost::createdDate).reversed())
+            .limit(limit.toLong())
+            .collect(Collectors.toList())
     }
 
-    public NoticeResBody getNotice(String noticeId) {
-        NoticePost noticePost = noticePostRepository.findById(noticeId)
-                .orElseThrow(() -> new NoticeNotFoundException());
+    fun getNotice(noticeId: String): NoticeResBody {
+        val noticePost = noticePostRepository.findById(noticeId)
+            .orElseThrow { NoticeNotFoundException() }
 
-        return NoticeResBody.of(noticePost);
+        return NoticeResBody.of(noticePost)
+    }
+
+    companion object {
+        private const val BAN_DURATION_WEIGHT = 7
     }
 }
