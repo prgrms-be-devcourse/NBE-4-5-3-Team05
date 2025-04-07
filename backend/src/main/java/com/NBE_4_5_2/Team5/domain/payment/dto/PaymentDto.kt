@@ -17,7 +17,7 @@ data class PaymentDto(
         fun of(payment: Payment): PaymentDto {
             return PaymentDto(
                 payment.id, payment.buyer.id, payment.totalPrice,
-                payment.createdAt, payment.modifiedAt, payment.status
+                payment.createdDate, payment.modifiedDate, payment.status
             )
         }
     }

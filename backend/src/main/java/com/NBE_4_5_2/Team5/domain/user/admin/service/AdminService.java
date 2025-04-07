@@ -103,12 +103,11 @@ public class AdminService {
 
     private BanList addNewBanList(String reason, User bannedUser) {
 
-        BanList banList = BanList.builder()
-                .reason(reason)
-                .bannedUser(bannedUser)
-                .endDate(LocalDateTime.now().plusDays((long) (bannedUser.getBlockedCount() + 1) * BAN_DURATION_WEIGHT))
-                .build();
-
+        BanList banList = new BanList(
+            reason,
+            bannedUser,
+            LocalDateTime.now().plusDays((long)(bannedUser.getBlockedCount() + 1) * BAN_DURATION_WEIGHT)
+        );
         return banListRepository.save(banList);
     }
 
@@ -158,7 +157,7 @@ public class AdminService {
      * @param userId
      */
     private void removeBanInfo(String userId) {
-        banListRepository.deleteByBannedUser_Id(userId);
+        banListRepository.deleteBy_bannedUser_Id(userId);
     }
 
     public Page<NoticeResBody> getNotices(Pageable pageable) {
