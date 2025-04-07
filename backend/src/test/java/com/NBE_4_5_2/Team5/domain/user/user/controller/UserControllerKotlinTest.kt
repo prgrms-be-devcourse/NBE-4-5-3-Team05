@@ -68,12 +68,12 @@ internal open class UserControllerKotlinTest {
             .andExpect(jsonPath("$.data.role").value(user.role.toString()))
             .andExpect(
                 jsonPath("$.data.createdAt").value(
-                    Matchers.matchesPattern(user.createdAt.toString().replace("0+$".toRegex(), "") + ".*")
+                    Matchers.matchesPattern(user.createdDate.toString().replace("0+$".toRegex(), "") + ".*")
                 )
             )
             .andExpect(
                 jsonPath("$.data.modifiedAt").value(
-                    Matchers.matchesPattern(user.modifiedAt.toString().replace("0+$".toRegex(), "") + ".*")
+                    Matchers.matchesPattern(user.modifiedDate.toString().replace("0+$".toRegex(), "") + ".*")
                 )
             )
     }
@@ -342,12 +342,12 @@ internal open class UserControllerKotlinTest {
             .andExpect(jsonPath("$.data.item.role").value(user.role.toString()))
             .andExpect(
                 jsonPath("$.data.item.createdAt").value(
-                    Matchers.matchesPattern(user.createdAt.toString().replace("0+$".toRegex(), "") + ".*")
+                    Matchers.matchesPattern(user.createdDate.toString().replace("0+$".toRegex(), "") + ".*")
                 )
             )
             .andExpect(
                 jsonPath("$.data.item.modifiedAt").value(
-                    Matchers.matchesPattern(user.modifiedAt.toString().replace("0+$".toRegex(), "") + ".*")
+                    Matchers.matchesPattern(user.modifiedDate.toString().replace("0+$".toRegex(), "") + ".*")
                 )
             )
 

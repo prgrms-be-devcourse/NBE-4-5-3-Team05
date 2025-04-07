@@ -1,5 +1,6 @@
 package com.NBE_4_5_2.Team5.domain.user.admin.service;
 
+import com.NBE_4_5_2.Team5.domain.post.post.repository.ProductPostRepository;
 import com.NBE_4_5_2.Team5.domain.user.admin.controller.AdminController;
 import com.NBE_4_5_2.Team5.domain.user.admin.dto.BanListDto;
 import com.NBE_4_5_2.Team5.domain.user.admin.dto.NoticeResBody;
@@ -190,7 +191,7 @@ public class AdminService {
     public List<NoticePost> getLatestNotices(int limit) {
         List<NoticePost> notices = noticePostRepository.findAll();
         return notices.stream()
-                .sorted(Comparator.comparing(NoticePost::getCreatedAt).reversed())
+                .sorted(Comparator.comparing(NoticePost::getCreatedDate).reversed())
                 .limit(limit)
                 .collect(Collectors.toList());
     }

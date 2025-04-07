@@ -5,6 +5,8 @@ import com.NBE_4_5_2.Team5.domain.payment.dto.PaymentMetaData;
 import com.NBE_4_5_2.Team5.domain.payment.entity.Payment;
 import com.NBE_4_5_2.Team5.domain.payment.enums.PaymentStatus;
 import com.NBE_4_5_2.Team5.domain.payment.repository.PaymentRepository;
+import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductPost;
+import com.NBE_4_5_2.Team5.domain.post.post.repository.ProductPostRepository;
 import com.NBE_4_5_2.Team5.domain.user.user.entity.User;
 import com.NBE_4_5_2.Team5.domain.user.user.repository.UserRepository;
 import com.NBE_4_5_2.Team5.domain.user.user.service.UserService;

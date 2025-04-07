@@ -39,7 +39,7 @@ data class PreviewPostResponse(
                 latitude = post.latitude,
                 longitude = post.longitude,
                 thumbNail = post.imageUrls.split(",").firstOrNull().orEmpty(),
-                createdAt = post.createdAt,
+                createdAt = post.createdDate,
                 imageUrls = post.imageUrls,
                 viewCount = post.viewCount,
                 likedCount = 0,
@@ -65,7 +65,7 @@ data class PreviewPostResponse(
                 latitude = post.latitude,
                 longitude = post.longitude,
                 thumbNail = thumbNail,
-                createdAt = post.createdAt,
+                createdAt = post.createdDate,
                 imageUrls = post.imageUrls,
                 viewCount = post.viewCount,
                 likedCount = likedCount,
@@ -74,3 +74,4 @@ data class PreviewPostResponse(
         }
     }
 }
+

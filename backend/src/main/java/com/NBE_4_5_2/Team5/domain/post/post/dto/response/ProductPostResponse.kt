@@ -38,8 +38,8 @@ class ProductPostResponse(
                 post.latitude,
                 post.longitude,
                 post.productCategories.map { it.category?.name ?: "" },
-                post.createdAt,
-                post.modifiedAt,
+                post.createdDate,
+                post.modifiedDate,
                 post.viewCount,
                 0
 
@@ -61,8 +61,8 @@ class ProductPostResponse(
                 post.latitude,
                 post.longitude,
                 post.productCategories.map { it.category?.name ?: "" },
-                post.createdAt,
-                post.modifiedAt,
+                post.createdDate,
+                post.modifiedDate,
                 post.viewCount,
                 likedCount
             )
