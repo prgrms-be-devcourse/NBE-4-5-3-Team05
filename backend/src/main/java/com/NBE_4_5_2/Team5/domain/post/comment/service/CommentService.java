@@ -10,8 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.NBE_4_5_2.Team5.domain.post.comment.dto.CommentDto;
 import com.NBE_4_5_2.Team5.domain.post.comment.entity.Comment;
 import com.NBE_4_5_2.Team5.domain.post.comment.repository.CommentRepository;
-import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductPost;
-import com.NBE_4_5_2.Team5.domain.post.post.repository.ProductPostRepository;
 import com.NBE_4_5_2.Team5.global.exception.post.product.ProductPostNotFoundException;
 
 import jakarta.persistence.EntityNotFoundException;

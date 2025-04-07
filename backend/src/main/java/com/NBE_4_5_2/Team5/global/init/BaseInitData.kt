@@ -92,21 +92,21 @@ class BaseInitData(
         if (categoryRepository.count() > 0) return  // 이미 카테고리 존재 시 초기화 생략
 
         val categories = listOf(
-            Category("전자제품"),
-            Category("가구"),
-            Category("의류"),
-            Category("스포츠 용품"),
-            Category("도서"),
-            Category("생활용품"),
-            Category("자동차 용품"),
-            Category("식품"),
-            Category("악기"),
-            Category("반려동물 용품"),
-            Category("뷰티/미용"),
-            Category("티켓/쿠폰"),
-            Category("수집/예술"),
-            Category("게임"),
-            Category("기타")
+            Category().apply { name = "전자제품" },
+            Category().apply { name = "가구" },
+            Category().apply { name = "의류" },
+            Category().apply { name = "스포츠용품" },
+            Category().apply { name = "도서" },
+            Category().apply { name = "생활용품" },
+            Category().apply { name = "자동차 용품" },
+            Category().apply { name = "식품" },
+            Category().apply { name = "악기" },
+            Category().apply { name = "반려동물 용품" },
+            Category().apply { name = "뷰티/미용" },
+            Category().apply { name = "티켓/쿠폰" },
+            Category().apply { name = "수집/예술" },
+            Category().apply { name = "게임" },
+            Category().apply { name = "기타" },
         )
         categoryRepository.saveAll(categories)
     }

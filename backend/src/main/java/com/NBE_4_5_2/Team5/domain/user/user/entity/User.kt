@@ -59,7 +59,7 @@ class User() : BaseTime() {
 	val wroteComments: MutableList<Comment> = mutableListOf()
 
 	val isAdmin: Boolean
-	get() = role == Role.ADMIN
+		get() = role == Role.ADMIN
 
 	constructor(id: String, username: String, nickname: String, role: Role): this() {
 		this.id = id
@@ -69,7 +69,7 @@ class User() : BaseTime() {
 	}
 
 	constructor(username: String, password: String, email: String, nickname: String,
-			address: String, profileUrl: String, role: Role): this() {
+				address: String, profileUrl: String, role: Role): this() {
 		this.username = username
 		this.password = password
 		this.email = email
@@ -88,7 +88,7 @@ class User() : BaseTime() {
 
 	fun unBan() {
 		if (!blocked) return
-				blocked = false
+		blocked = false
 	}
 
 	/**
@@ -104,7 +104,7 @@ class User() : BaseTime() {
 		pay(amount)
 		addToPurchasedProductList(product)
 		product.updateStatus(ProductStatus.PURCHASED)
-		product.setBuyer(this)
+		product.purchaseBy(this)
 	}
 
 	//TODO : Member 객체의 구현에 따라 구매 상품을 담을 list에 업데이트 필요
@@ -155,10 +155,10 @@ class User() : BaseTime() {
 	}
 
 	val authorities: List<GrantedAuthority>
-	get() = memberAuthoritiesAsString.map { SimpleGrantedAuthority(it) }
+		get() = memberAuthoritiesAsString.map { SimpleGrantedAuthority(it) }
 
 	val memberAuthoritiesAsString: List<String>
-	get() = if (isAdmin) listOf("ROLE_ADMIN") else emptyList()
+		get() = if (isAdmin) listOf("ROLE_ADMIN") else emptyList()
 
 	fun addWrittenPost(saved: ProductPost) {
 		purchasedProducts.add(saved)

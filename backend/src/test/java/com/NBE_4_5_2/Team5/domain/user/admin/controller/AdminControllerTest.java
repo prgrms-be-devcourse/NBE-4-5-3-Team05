@@ -19,7 +19,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
-import com.NBE_4_5_2.Team5.domain.post.post.service.ProductPostService;
 import com.NBE_4_5_2.Team5.domain.user.admin.dto.NoticeResBody;
 import com.NBE_4_5_2.Team5.domain.user.admin.entity.BanList;
 import com.NBE_4_5_2.Team5.domain.user.admin.repository.BanListRepository;

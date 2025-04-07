@@ -1,6 +1,5 @@
 package com.NBE_4_5_2.Team5.domain.user.admin.service;
 
-import com.NBE_4_5_2.Team5.domain.post.post.repository.ProductPostRepository;
 import com.NBE_4_5_2.Team5.domain.user.admin.controller.AdminController;
 import com.NBE_4_5_2.Team5.domain.user.admin.dto.BanListDto;
 import com.NBE_4_5_2.Team5.domain.user.admin.dto.NoticeResBody;

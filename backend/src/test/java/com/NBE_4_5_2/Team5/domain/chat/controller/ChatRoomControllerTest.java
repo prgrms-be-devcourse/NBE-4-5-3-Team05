@@ -2,8 +2,6 @@ package com.NBE_4_5_2.Team5.domain.chat.controller;
 
 import com.NBE_4_5_2.Team5.domain.chat.entity.ChatRoom;
 import com.NBE_4_5_2.Team5.domain.chat.service.ChatRoomService;
-import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductPost;
-import com.NBE_4_5_2.Team5.domain.post.post.repository.ProductPostRepository;
 import com.NBE_4_5_2.Team5.domain.user.user.entity.Role;
 import com.NBE_4_5_2.Team5.domain.user.user.entity.User;
 import com.NBE_4_5_2.Team5.domain.user.user.service.UserService;
