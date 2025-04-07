@@ -1,81 +1,92 @@
-package com.NBE_4_5_2.Team5.domain.post.comment.service;
+package com.NBE_4_5_2.Team5.domain.post.comment.service
 
-import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductPost;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.NBE_4_5_2.Team5.domain.post.comment.dto.CommentDto;
-import com.NBE_4_5_2.Team5.domain.post.comment.entity.Comment;
-import com.NBE_4_5_2.Team5.domain.post.comment.repository.CommentRepository;
-import com.NBE_4_5_2.Team5.domain.post.post.repository.ProductPostRepository;
-import com.NBE_4_5_2.Team5.domain.user.user.entity.User;
-import com.NBE_4_5_2.Team5.domain.user.user.service.UserService;
-import com.NBE_4_5_2.Team5.global.exception.post.product.ProductPostNotFoundException;
-
-import jakarta.persistence.EntityNotFoundException;
-import lombok.RequiredArgsConstructor;
+import com.NBE_4_5_2.Team5.domain.post.comment.dto.CommentDto
+import com.NBE_4_5_2.Team5.domain.post.comment.entity.Comment
+import com.NBE_4_5_2.Team5.domain.post.comment.repository.CommentRepository
+import com.NBE_4_5_2.Team5.domain.post.post.repository.ProductPostRepository
+import com.NBE_4_5_2.Team5.domain.user.user.entity.User
+import com.NBE_4_5_2.Team5.domain.user.user.service.UserService
+import com.NBE_4_5_2.Team5.global.exception.post.product.ProductPostNotFoundException
+import jakarta.persistence.EntityNotFoundException
+import lombok.RequiredArgsConstructor
+import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Slice
+import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 @RequiredArgsConstructor
-public class CommentService {
+class CommentService(
+    private val userService: UserService,
+    private val productPostRepository: ProductPostRepository,
+    private val commentRepository: CommentRepository,
+) {
 
-	private final UserService userService;
-	private final ProductPostRepository productPostRepository;
-	private final CommentRepository commentRepository;
+    @Transactional
+    fun writeComment(postId: String, content: String): CommentDto {
+        return productPostRepository.findById(postId)
+            .orElseThrow {
+                ProductPostNotFoundException(
+                    "400-1",
+                    "id가 $postId 인 product post는 없습니다."
+                )
+            }
+            .let {
+                Comment(
+                    content,
+                    it,
+                    loggedInUser
+                )
+            }.let {
+                commentRepository.save(it)
 
-	@Transactional
-	public CommentDto writeComment(String postId, String content) {
-		User loggedInUser = getUser();
+            }.let {
+                CommentDto.of(it)
+            }
+    }
 
-		ProductPost productPost = productPostRepository.findById(postId)
-			.orElseThrow(
-				() -> new ProductPostNotFoundException("400-1", "id가 %s인 product post는 없습니다.".formatted(postId)));
+    private val loggedInUser: User
+        get() = userService.userIdentity
 
-		Comment comment = new Comment(
-				content,
-				productPost,
-				loggedInUser
-		);
+    @Transactional
+    fun updateComment(commentId: String, content: String): CommentDto {
 
-		Comment saved = commentRepository.save(comment);
+        return commentRepository.findById(commentId)
+            .orElseThrow {
+                EntityNotFoundException(
+                    "id가 $commentId 인 comment를 찾을 수 없습니다."
+                )
+            }
+            .apply {
+                isMine(loggedInUser)
+                update(content)
+            }.let {
+                CommentDto.of(it)
+            }
 
-		return CommentDto.of(saved);
-	}
+    }
 
-	private User getUser() {
-		return userService.getUserIdentity();
-	}
+    fun deleteComment(commentId: String) {
 
-	@Transactional
-	public CommentDto updateComment(String commentId, String content) {
-		User loggedInUser = getUser();
+        commentRepository.findById(commentId)
+            .orElseThrow {
+                EntityNotFoundException(
+                    "id가 $commentId 인 comment를 찾을 수 없습니다."
+                )
+            }
+            .apply {
+                isMine(loggedInUser)
+            }.run {
+                commentRepository.delete(this)
+            }
+    }
 
-		Comment comment = commentRepository.findById(commentId)
-			.orElseThrow(() -> new EntityNotFoundException("id가 %s인 comment를 찾을 수 없습니다.".formatted(commentId)));
-
-		comment.isMine(loggedInUser);
-
-		comment.update(content);
-
-		return CommentDto.of(comment);
-	}
-
-	public void deleteComment(String commentId) {
-		User loggedInUser = getUser();
-
-		Comment comment = commentRepository.findById(commentId)
-			.orElseThrow(() -> new EntityNotFoundException("id가 %s인 comment를 찾을 수 없습니다.".formatted(commentId)));
-
-		comment.isMine(loggedInUser);
-
-		commentRepository.delete(comment);
-	}
-
-	public Slice<CommentDto> getComments(String postId, Pageable pageable) {
-		Slice<Comment> comments = commentRepository.findByTarget_Id(postId, pageable);
-
-		return comments.map(CommentDto::of);
-	}
+    fun getComments(postId: String, pageable: Pageable): Slice<CommentDto> {
+        return commentRepository.findByTarget_Id(postId, pageable)
+            .map { comment: Comment? ->
+                CommentDto.of(
+                    comment
+                )
+            }
+    }
 }
