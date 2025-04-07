@@ -18,6 +18,5 @@ data class NoticeResBody(
                 AdminResBody(saved.admin), saved.createdDate
             )
         }
-
     }
 }

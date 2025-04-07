@@ -7,9 +7,6 @@ import lombok.Getter
 import lombok.NoArgsConstructor
 import java.time.LocalDateTime
 
-@NoArgsConstructor
-@Getter
-@AllArgsConstructor
 class BanListDto(
     var id: String,
     var reason: String,

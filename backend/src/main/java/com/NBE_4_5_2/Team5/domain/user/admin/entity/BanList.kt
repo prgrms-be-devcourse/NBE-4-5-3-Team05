@@ -1,10 +1,8 @@
 package com.NBE_4_5_2.Team5.domain.user.admin.entity
 
 import com.NBE_4_5_2.Team5.domain.user.user.entity.User
-import com.querydsl.core.types.Projections.constructor
 import jakarta.persistence.*
 import lombok.Builder
-import org.springframework.boot.actuate.autoconfigure.cloudfoundry.CloudFoundryAuthorizationException.Reason
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
 import java.time.LocalDateTime

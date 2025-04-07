@@ -83,14 +83,15 @@ class AdminService(
 
         isAdmin(loggedInUser)
 
-        val bannedUser = userRepository.findById(userId)
-            .orElseThrow { EntityNotFoundException("id가 $userId 인 user를 찾을 수 없습니다.") }
+        return userRepository.findById(userId)
+            .orElseThrow { EntityNotFoundException("id가 ${userId}인 user를 찾을 수 없습니다.") }
+            .let {
 
-        val saved = addNewBanList(reason, bannedUser)
-
-        bannedUser.ban()
-
-        return BanListDto(saved)
+                it.ban()
+                addNewBanList(reason, it)
+            }.let {
+                BanListDto(it)
+            }
     }
 
     private fun addNewBanList(reason: String, bannedUser: User): BanList {
@@ -98,9 +99,10 @@ class AdminService(
             reason,
             bannedUser,
             LocalDateTime.now().plusDays((bannedUser.blockedCount + 1).toLong() * BAN_DURATION_WEIGHT)
-        ).let {
-            banListRepository.save(it)
-        }
+        )
+            .let {
+                banListRepository.save(it)
+            }
     }
 
     private val loggedInUser: User
@@ -127,14 +129,16 @@ class AdminService(
 
         isAdmin(loggedInUser)
 
-        val unBanUser = userRepository.findById(userId)
+        userRepository.findById(userId)
             .orElseThrow { UsernameNotFoundException("유저를 찾을 수 없습니다.") }
+            .let{
 
-        check(unBanUser.blocked) { "계정 정지 상태가 아닙니다." }
+                check(it.blocked) { "계정 정지 상태가 아닙니다." }
 
-        unBanUser.unBan()
+                it.unBan()
+                removeBanInfo(userId)
+            }
 
-        removeBanInfo(userId)
     }
 
     /**
