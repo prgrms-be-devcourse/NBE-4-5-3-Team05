@@ -1,14 +1,11 @@
-package com.NBE_4_5_2.Team5.domain.user.admin.repository;
+package com.NBE_4_5_2.Team5.domain.user.admin.repository
 
-import java.time.LocalDateTime;
-import java.util.List;
+import com.NBE_4_5_2.Team5.domain.user.admin.entity.BanList
+import org.springframework.data.jpa.repository.JpaRepository
+import java.time.LocalDateTime
 
-import org.springframework.data.jpa.repository.JpaRepository;
+interface BanListRepository : JpaRepository<BanList, String> {
+    fun findAllBy_endDateIsAfter(endDateAfter: LocalDateTime): List<BanList>
 
-import com.NBE_4_5_2.Team5.domain.user.admin.entity.BanList;
-
-public interface BanListRepository extends JpaRepository<BanList, String> {
-	List<BanList> findAllBy_endDateIsAfter(LocalDateTime endDateAfter);
-
-	void deleteBy_bannedUser_Id(String bannedUserId);
+    fun deleteBy_bannedUser_Id(bannedUserId: String)
 }
