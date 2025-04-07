@@ -2,6 +2,11 @@ package com.NBE_4_5_2.Team5.domain.post.post.service;
 
 import java.util.List;
 
+
+import com.NBE_4_5_2.Team5.domain.post.category.entity.Category;
+import com.NBE_4_5_2.Team5.domain.post.post.entity.LikedPost;
+import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductCategory;
+import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductPost;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -9,15 +14,11 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.NBE_4_5_2.Team5.domain.post.category.entity.Category;
 import com.NBE_4_5_2.Team5.domain.post.category.repository.CategoryRepository;
 import com.NBE_4_5_2.Team5.domain.post.post.dto.request.ProductPostModifyForm;
 import com.NBE_4_5_2.Team5.domain.post.post.dto.request.ProductPostWriteForm;
 import com.NBE_4_5_2.Team5.domain.post.post.dto.response.PreviewPostResponse;
 import com.NBE_4_5_2.Team5.domain.post.post.dto.response.ProductPostResponse;
-import com.NBE_4_5_2.Team5.domain.post.post.entity.LikedPost;
-import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductCategory;
-import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductPost;
 import com.NBE_4_5_2.Team5.domain.post.post.enums.ProductStatus;
 import com.NBE_4_5_2.Team5.domain.post.post.repository.LikedPostRepository;
 import com.NBE_4_5_2.Team5.domain.post.post.repository.ProductPostRepository;

@@ -4,12 +4,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductPost;
 import org.springframework.data.redis.core.ListOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import com.NBE_4_5_2.Team5.domain.post.post.dto.response.PreviewPostResponse;
-import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductPost;
 import com.NBE_4_5_2.Team5.domain.post.post.repository.ProductPostRepository;
 
 import lombok.RequiredArgsConstructor;
