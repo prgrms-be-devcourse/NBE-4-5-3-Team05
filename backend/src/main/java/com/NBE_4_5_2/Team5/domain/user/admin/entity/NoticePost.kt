@@ -1,44 +1,51 @@
-package com.NBE_4_5_2.Team5.domain.user.admin.entity;
+package com.NBE_4_5_2.Team5.domain.user.admin.entity
 
-import com.NBE_4_5_2.Team5.domain.base.entity.BaseTime;
-import com.NBE_4_5_2.Team5.domain.user.user.entity.User;
-import jakarta.persistence.*;
-import lombok.*;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import java.util.UUID;
+import com.NBE_4_5_2.Team5.domain.base.entity.BaseTime
+import com.NBE_4_5_2.Team5.domain.user.user.entity.User
+import jakarta.persistence.*
+import java.util.*
 
 @Entity
-@Getter
-@Builder
-@AllArgsConstructor
-@EntityListeners(AuditingEntityListener.class)
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @Table(name = "notice_post")
-public class NoticePost extends BaseTime {
+class NoticePost(
+    @Id
+    @Column(updatable = false, nullable = false)
+    var _id: String = "npost-" + UUID.randomUUID(),
+    @ManyToOne
+    var _admin: User,
+    var _title: String,
+    var _content: String,
+) : BaseTime() {
+    val id:String
+        get()=_id
+    val admin:User
+        get()=_admin
+    val title:String
+        get()=_title
+    val content:String
+        get()=_content
 
-	@Id
-	@EqualsAndHashCode.Include
-	@Column(updatable = false, nullable = false)
-	private String id = "npost-" + UUID.randomUUID();
+    constructor(title: String, content: String, admin: User):this(
+        _title=title,
+        _content=content,
+        _admin=admin
+    )
 
-	@ManyToOne
-	private User admin;
+    fun update(title: String, content: String): NoticePost {
+        this._title = title
+        this._content = content
+        return this
+    }
 
-	private String title;
-	private String content;
 
-	public NoticePost( String title, String content, User admin) {
-		this.title = title;
-		this.content = content;
-		this.admin = admin;
-	}
+    override fun equals(o: Any?): Boolean {
+        if (o !is NoticePost) return false
+        return id == o.id
+    }
 
-	public NoticePost update(String title, String content) {
-		this.title = title;
-		this.content = content;
-		return this;
-	}
+    override fun hashCode(): Int {
+        return Objects.hashCode(id)
+    }
+
 }
 
