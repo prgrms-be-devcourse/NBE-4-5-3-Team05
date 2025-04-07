@@ -10,6 +10,7 @@ import com.NBE_4_5_2.Team5.domain.user.admin.entity.NoticePost
 import com.NBE_4_5_2.Team5.domain.user.admin.repository.NoticePostRepository
 import com.NBE_4_5_2.Team5.domain.user.admin.service.AdminService
 import com.NBE_4_5_2.Team5.domain.user.user.entity.Role
+import com.NBE_4_5_2.Team5.domain.user.user.entity.User
 import com.NBE_4_5_2.Team5.domain.user.user.repository.UserRepository
 import com.NBE_4_5_2.Team5.domain.user.user.service.UserService
 import com.NBE_4_5_2.Team5.domain.user.user.service.email.EmailService
@@ -152,17 +153,22 @@ class BaseInitData(
 
     @Transactional
     fun noticeInit() {
+        // 이미 공지가 하나라도 있으면 스킵
         if (noticePostRepository.count() > 0) return
 
-        var admin = userRepository.findAll().firstOrNull { it.role == Role.ADMIN }
-        if (admin == null && userRepository.findAll().isNotEmpty()) {
-            admin = userRepository.findAll()[0]
-        }
-        for (i in 1..10) {
+        // 관리자 계정 우선, 없으면 첫 번째 유저
+        val users = userRepository.findAll()
+        val adminUser: User = users
+            .firstOrNull { it.role == Role.ADMIN }
+            ?: users.firstOrNull()
+            ?: return  // 유저 자체가 하나도 없으면 초기화 스킵
+
+        // 샘플 공지 10개 저장
+        (1..10).forEach { i ->
             val notice = NoticePost(
-                "공지사항 제목 $i",
-                "공지사항 내용 $i - 중요한 공지사항 내용입니다.",
-                admin
+                title = "공지사항 제목 $i",
+                content = "공지사항 내용 $i - 중요한 공지사항 내용입니다.",
+                adminUser
             )
             noticePostRepository.save(notice)
         }
