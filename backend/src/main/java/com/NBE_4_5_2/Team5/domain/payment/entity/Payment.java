@@ -1,6 +1,8 @@
 package com.NBE_4_5_2.Team5.domain.payment.entity;
 
+import com.NBE_4_5_2.Team5.domain.base.entity.BaseTime;
 import com.NBE_4_5_2.Team5.domain.payment.enums.PaymentStatus;
+import com.NBE_4_5_2.Team5.domain.user.user.entity.User;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;

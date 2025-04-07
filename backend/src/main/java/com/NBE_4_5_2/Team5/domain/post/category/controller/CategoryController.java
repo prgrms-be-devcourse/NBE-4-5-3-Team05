@@ -2,6 +2,7 @@ package com.NBE_4_5_2.Team5.domain.post.category.controller;
 
 import java.util.List;
 
+import com.NBE_4_5_2.Team5.global.dto.RsData;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;

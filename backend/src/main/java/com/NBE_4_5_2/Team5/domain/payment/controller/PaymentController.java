@@ -1,5 +1,6 @@
 package com.NBE_4_5_2.Team5.domain.payment.controller;
 
+import com.NBE_4_5_2.Team5.global.dto.RsData;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;

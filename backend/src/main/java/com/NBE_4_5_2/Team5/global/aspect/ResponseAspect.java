@@ -1,5 +1,6 @@
 package com.NBE_4_5_2.Team5.global.aspect;
 
+import com.NBE_4_5_2.Team5.global.dto.RsData;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;

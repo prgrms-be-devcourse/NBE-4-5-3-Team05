@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 
 import com.NBE_4_5_2.Team5.domain.user.admin.entity.BanList;
 
+import com.NBE_4_5_2.Team5.domain.user.user.dto.UserDto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

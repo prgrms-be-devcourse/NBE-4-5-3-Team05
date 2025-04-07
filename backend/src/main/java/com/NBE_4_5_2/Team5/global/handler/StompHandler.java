@@ -3,6 +3,7 @@ package com.NBE_4_5_2.Team5.global.handler;
 import java.security.Principal;
 import java.util.Optional;
 
+import com.NBE_4_5_2.Team5.domain.user.user.service.AuthTokenService;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.stomp.StompCommand;

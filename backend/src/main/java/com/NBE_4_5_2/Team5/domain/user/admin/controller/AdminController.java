@@ -5,7 +5,7 @@ import com.NBE_4_5_2.Team5.domain.user.admin.dto.BanResBody;
 import com.NBE_4_5_2.Team5.domain.user.admin.dto.NoticeResBody;
 import com.NBE_4_5_2.Team5.domain.user.admin.entity.NoticePost;
 import com.NBE_4_5_2.Team5.domain.user.admin.service.AdminService;
-import com.NBE_4_5_2.Team5.global.response.RsData;
+import com.NBE_4_5_2.Team5.domain.user.user.dto.UserDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;

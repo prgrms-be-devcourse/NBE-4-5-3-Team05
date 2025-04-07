@@ -2,6 +2,7 @@ package com.NBE_4_5_2.Team5.global.exception;
 
 import java.util.stream.Collectors;
 
+import com.NBE_4_5_2.Team5.global.dto.RsData;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;

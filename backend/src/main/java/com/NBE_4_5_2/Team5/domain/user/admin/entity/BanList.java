@@ -3,6 +3,7 @@ package com.NBE_4_5_2.Team5.domain.user.admin.entity;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import com.NBE_4_5_2.Team5.domain.user.user.entity.User;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 

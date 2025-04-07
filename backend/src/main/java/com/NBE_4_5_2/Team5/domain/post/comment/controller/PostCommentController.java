@@ -1,5 +1,7 @@
 package com.NBE_4_5_2.Team5.domain.post.comment.controller;
 
+import com.NBE_4_5_2.Team5.domain.user.user.dto.UserDto;
+import com.NBE_4_5_2.Team5.global.dto.RsData;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.security.access.prepost.PreAuthorize;

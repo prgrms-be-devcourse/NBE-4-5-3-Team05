@@ -2,6 +2,7 @@ package com.NBE_4_5_2.Team5.global;
 
 import java.util.Optional;
 
+import com.NBE_4_5_2.Team5.domain.user.user.service.UserService;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.annotation.RequestScope;
