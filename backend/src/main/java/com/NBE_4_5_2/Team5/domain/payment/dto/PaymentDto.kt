@@ -1,15 +1,24 @@
-package com.NBE_4_5_2.Team5.domain.payment.dto;
+package com.NBE_4_5_2.Team5.domain.payment.dto
 
-import java.time.LocalDateTime;
+import com.NBE_4_5_2.Team5.domain.payment.entity.Payment
+import com.NBE_4_5_2.Team5.domain.payment.enums.PaymentStatus
+import java.time.LocalDateTime
 
-import com.NBE_4_5_2.Team5.domain.payment.entity.Payment;
-import com.NBE_4_5_2.Team5.domain.payment.enums.PaymentStatus;
-
-public record PaymentDto(
-	String id, String buyerId, int totalPrice, LocalDateTime createdAt, LocalDateTime modifiedAt,
-	PaymentStatus status) {
-	public static PaymentDto of(Payment payment) {
-		return new PaymentDto(payment.getId(), payment.getBuyer().getId(), payment.getTotalPrice(),
-			payment.getCreatedAt(), payment.getModifiedAt(), payment.getStatus());
-	}
+@JvmRecord
+data class PaymentDto(
+    val id: String,
+    val buyerId: String,
+    val totalPrice: Int,
+    val createdAt: LocalDateTime,
+    val modifiedAt: LocalDateTime,
+    val status: PaymentStatus?
+) {
+    companion object {
+        fun of(payment: Payment): PaymentDto {
+            return PaymentDto(
+                payment.id, payment.buyer.id, payment.totalPrice,
+                payment.createdAt, payment.modifiedAt, payment.status
+            )
+        }
+    }
 }
