@@ -71,8 +71,8 @@ class AdminService(
             content,
             loggedInUser
         )
-            .apply {
-                noticePostRepository.save(this)
+            .let {
+                noticePostRepository.save(it)
             }.let {
                 NoticeResBody.of(it)
             }
@@ -175,7 +175,7 @@ class AdminService(
     fun getLatestNotices(limit: Int): List<NoticePost> {
         val notices = noticePostRepository.findAll()
         return notices.stream()
-            .sorted(Comparator.comparing(NoticePost::createdAt).reversed())
+            .sorted(Comparator.comparing(NoticePost::createdDate).reversed())
             .limit(limit.toLong())
             .collect(Collectors.toList())
     }

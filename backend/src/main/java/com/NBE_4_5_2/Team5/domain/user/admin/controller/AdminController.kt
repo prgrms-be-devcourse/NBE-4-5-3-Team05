@@ -2,7 +2,6 @@ package com.NBE_4_5_2.Team5.domain.user.admin.controller
 
 import com.NBE_4_5_2.Team5.domain.user.admin.dto.BanResBody
 import com.NBE_4_5_2.Team5.domain.user.admin.dto.NoticeResBody
-import com.NBE_4_5_2.Team5.domain.user.admin.dto.NoticeResBody.Companion.of
 import com.NBE_4_5_2.Team5.domain.user.admin.entity.NoticePost
 import com.NBE_4_5_2.Team5.domain.user.admin.service.AdminService
 import com.NBE_4_5_2.Team5.domain.user.user.dto.UserDto
@@ -29,21 +28,21 @@ import java.util.stream.Collectors
 @Tag(name = "Admin API", description = "관리자 전용 API")
 class AdminController(
     private val adminService: AdminService
-
 ) {
+
     @JvmRecord
     data class NoticeReqBody(
-        @field:Parameter(
+        @Parameter(
             description = "공지사항 제목",
             example = "서비스 점검 안내"
-        ) @param:Parameter(
+        ) @Parameter(
             description = "공지사항 제목",
             example = "서비스 점검 안내"
         ) val title: @NotEmpty String,
-        @field:Parameter(
+        @Parameter(
             description = "공지사항 내용",
             example = "서비스 점검으로 인해 3월 15일 02시부터 04시까지 이용이 제한됩니다."
-        ) @param:Parameter(
+        ) @Parameter(
             description = "공지사항 내용",
             example = "서비스 점검으로 인해 3월 15일 02시부터 04시까지 이용이 제한됩니다."
         ) val content: @NotEmpty String
@@ -85,6 +84,7 @@ class AdminController(
         )
     }
 
+
     @Operation(summary = "계정 정지 해제", description = "특정 유저의 정지를 해제합니다.")
     @ApiResponses(value = [ApiResponse(responseCode = "204", description = "계정 정지 해제 성공.")])
     @SecurityRequirement(name = "cookieAuth")
@@ -120,7 +120,7 @@ class AdminController(
         // 최신 공지사항 5개 조회 엔드포인트 추가 get() {
         val latestNotices: List<NoticePost> = adminService.getLatestNotices(5)
         val res: List<NoticeResBody> = latestNotices.stream()
-            .map { noticePost: NoticePost -> of(noticePost) }
+            .map { obj: NoticePost -> NoticeResBody.of(obj) }
             .collect(Collectors.toList())
         return RsData<List<NoticeResBody>>(
             "200",

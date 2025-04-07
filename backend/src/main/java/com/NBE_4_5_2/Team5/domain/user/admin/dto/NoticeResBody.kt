@@ -15,7 +15,7 @@ data class NoticeResBody(
 		fun of(saved: NoticePost): NoticeResBody {
             return NoticeResBody(
                 saved.id, saved.title, saved.content,
-                AdminResBody(saved.admin), saved.createdAt
+                AdminResBody(saved.admin), saved.createdDate
             )
         }
 
