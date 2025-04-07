@@ -33,11 +33,11 @@ public class CommentService {
 			.orElseThrow(
 				() -> new ProductPostNotFoundException("400-1", "id가 %s인 product post는 없습니다.".formatted(postId)));
 
-		Comment comment = Comment.builder()
-			.content(content)
-			.target(productPost)
-			.author(loggedInUser)
-			.build();
+		Comment comment = new Comment(
+				content,
+				productPost,
+				loggedInUser
+		);
 
 		Comment saved = commentRepository.save(comment);
 

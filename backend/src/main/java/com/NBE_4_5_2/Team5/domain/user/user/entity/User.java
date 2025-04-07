@@ -18,7 +18,6 @@ import java.util.UUID;
 
 @Entity
 @Getter
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
@@ -27,18 +26,9 @@ import java.util.UUID;
 public class User extends BaseTime {
 
 	@Id
-	@Builder.Default
 	@EqualsAndHashCode.Include
 	@Column(updatable = false, nullable = false)
 	private String id = "user-" + UUID.randomUUID();
-
-	public String getId() {
-		return id;
-	}
-
-	public String getNickname() {
-		return nickname;
-	}
 
 	@Column(length = 20, nullable = false, unique = true)
 	@Setter
@@ -67,16 +57,13 @@ public class User extends BaseTime {
 	private int cash;
 
 	@Column(nullable = false)
-	@Builder.Default
 	@Enumerated(EnumType.ORDINAL)
 	private Role role = Role.USER;
 
 	@Column(nullable = false)
-	@Builder.Default
 	private Boolean blocked = false;
 
 	@Column(name = "blocked_count", nullable = false)
-	@Builder.Default
 	private Integer blockedCount = 0;
 
 	@OneToMany(mappedBy = "buyer", cascade = CascadeType.REMOVE)
@@ -216,9 +203,4 @@ public class User extends BaseTime {
 		this.nickname = nickname;
 		this.role = role;
 	}
-
-	public void setAdmin() {
-		this.role = Role.ADMIN;
-	}
-
 }

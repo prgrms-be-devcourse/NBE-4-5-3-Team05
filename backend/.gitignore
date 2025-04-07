@@ -57,7 +57,6 @@ error.log
 
 
 ### custom ###
-gradlew
 db_dev.mv.db
 db_dev.trace.db
 
@@ -82,26 +81,9 @@ src/main/resources/application*.yml
 /src/main/resources/application-prod.yml
 /src/main/resources/application-local.yml
 
-### 🚀 데이터베이스 관련 ###
-*.db
-*.sqlite
-*.s3db
-*.h2.db
-*.mv.db  # H2 데이터베이스 무시
-*.trace.db
-
-### 📝 로그 파일 ###
-logs/
-*.log
-*.log.*
-log/
-debug.log
-error.log
-
 # Generated OpenAPI Files
 apiV1.json
 frontend/src/lib/backend/api/schema.d.ts
-apiV1.json
 /application.pid
 src/main/resources/application-mysql.yml
 generated/

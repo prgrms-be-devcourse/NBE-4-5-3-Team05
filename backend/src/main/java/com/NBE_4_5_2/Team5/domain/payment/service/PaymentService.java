@@ -35,12 +35,13 @@ public class PaymentService {
 
     public PaymentMetaData saveMetaData(String paymentId, Integer amount) {
         User user = getLoggedInUser();
-        Payment saved = paymentRepository.save(Payment.builder()
-                .id(paymentId)
-                .buyer(user)
-                .totalPrice(amount)
-                .status(PaymentStatus.IN_PROGRESS)
-                .build());
+        Payment saved = paymentRepository.save(
+                new Payment(
+                        paymentId,
+                        user,
+                        amount,
+                        PaymentStatus.IN_PROGRESS
+                ));
         return new PaymentMetaData(saved);
     }
 
@@ -60,11 +61,11 @@ public class PaymentService {
         loggedInUserEntity.canBuy(product, product.getProductPrice());
         loggedInUserEntity.buy(product, product.getProductPrice());
 
-        Payment purchasedPayment = Payment.builder()
-                .buyer(loggedInUser)
-                .totalPrice(-1 * product.getProductPrice())
-                .status(PaymentStatus.DONE)
-                .build();
+        Payment purchasedPayment = new Payment(
+                loggedInUser,
+                -1 * product.getProductPrice(),
+                PaymentStatus.DONE
+        );
 
         purchasedPayment.updatePaymentKey(productId);
 

@@ -5,14 +5,16 @@ import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductPost;
 import com.NBE_4_5_2.Team5.domain.user.user.entity.User;
 import com.NBE_4_5_2.Team5.global.exception.security.ForbiddenAccessException;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.util.UUID;
 
 @Entity
 @Getter
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
@@ -20,7 +22,6 @@ import java.util.UUID;
 public class Comment extends BaseTime {
 
 	@Id
-	@Builder.Default
 	@EqualsAndHashCode.Include
 	@Column(updatable = false, nullable = false)
 	private String id = "comment-" + UUID.randomUUID();
