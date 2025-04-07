@@ -18,9 +18,10 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import static org.hamcrest.Matchers.hasItem;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -57,13 +58,6 @@ public class ProductPostControllerTest {
     private String sellerToken;
     private String buyerToken;
 
-    // @BeforeAll
-    // void setup2() {
-    // 	baseInitData.userInit();
-    // 	baseInitData.categoryInit();
-    // 	baseInitData.postInit();
-    // 	baseInitData.noticeInit();
-    // }
 
     @BeforeEach
     void beforeEach() {
@@ -77,6 +71,150 @@ public class ProductPostControllerTest {
         sellerToken = userService.generateAuthTokenAsString(seller);
         buyerToken = userService.generateAuthTokenAsString(buyer);
     }
+
+    @Test
+    @DisplayName("상품 게시글 작성")
+    void write1() throws Exception {
+        String json = """
+                    {
+                      "productName": "아이폰이요 최신꺼1233",
+                      "productPrice": 1200000,
+                      "title": "거의 새 것 팝니다",
+                      "content": "사용한 지 3개월 됨, 상태 최상",
+                      "imageUrlList": [
+                        "https://example.com/image1.jpg",
+                        "https://example.com/image2.jpg",
+                        "https://example.com/image3.jpg"
+                      ],
+                      "latitude": 37.5665,
+                      "longitude": 126.9780,
+                      "categoryIds": [1, 3, 5]
+                    }
+                """;
+
+        mvc.perform(
+                        post("/api/posts")
+                                .header("Authorization", "Bearer " + sellerToken)
+                                .contentType("application/json")
+                                .content(json)
+                )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.message").value("글 작성 성공"))
+                .andExpect(jsonPath("$.data.title").value("거의 새 것 팝니다"));
+    }
+
+    @Test
+    @DisplayName("전체 글 목록 조회")
+    void list1() throws Exception {
+        createPost(seller, "전체글");
+
+        mvc.perform(get("/api/posts"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.message").value("글 목록 조회가 완료되었습니다."))
+                .andExpect(jsonPath("$.data.items[0].title").value("전체글"));
+    }
+
+    @Test
+    @DisplayName("글 상세 조회")
+    void getPost1() throws Exception {
+        ProductPost post = createPost(seller, "상세조회 상품");
+
+        mvc.perform(get("/api/posts/" + post.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.message").value("게시물 조회가 완료되었습니다."))
+                .andExpect(jsonPath("$.data.id").value(post.getId()));
+    }
+
+    @Test
+    @DisplayName("내 글 목록 조회")
+    void myPosts1() throws Exception {
+        createPost(seller, "내글1");
+
+        mvc.perform(get("/api/posts/my")
+                        .header("Authorization", "Bearer " + sellerToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.message").value("내 글 목록 조회가 완료되었습니다."))
+                .andExpect(jsonPath("$.data.items.size()").value(10));
+    }
+
+    @Test
+    @DisplayName("최근 조회한 게시글 조회")
+    void getRecentlyViewedPosts() throws Exception {
+        ProductPost post = createPost(seller, "최근 본 글");
+
+        // 상세 조회 → 최근 본 글 기록됨
+        mvc.perform(
+                get("/api/posts/" + post.getId())
+                        .header("Authorization", "Bearer " + buyerToken)
+        );
+
+        mvc.perform(
+                        get("/api/posts/recently-viewed")
+                                .header("Authorization", "Bearer " + buyerToken)
+                )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[*].id").value(hasItem(post.getId())));
+    }
+
+
+    @Test
+    @DisplayName("게시글 수정")
+    void modify1() throws Exception {
+        ProductPost post = createPost(seller, "수정 전 제목");
+
+        String json = """
+                {
+                  "productName": "수정된 상품",
+                  "productPrice": 20000,
+                  "title": "수정 제목",
+                  "content": "수정된 내용",
+                  "imageUrlList": ["http://img.com/edited.jpg"],
+                  "latitude": 37.6,
+                  "longitude": 127.1,
+                  "categoryIds": [1]
+                }
+                """;
+
+        mvc.perform(
+                        put("/api/posts/" + post.getId())
+                                .header("Authorization", "Bearer " + sellerToken)
+                                .contentType("application/json")
+                                .content(json)
+                )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("글 수정 완료."));
+    }
+
+    @Test
+    @DisplayName("게시글 삭제")
+    void delete() throws Exception {
+        ProductPost post = createPost(seller, "삭제 대상");
+
+        mvc.perform(
+                        MockMvcRequestBuilders.delete("/api/posts/" + post.getId())
+                                .header("Authorization", "Bearer " + sellerToken)
+                )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("글 삭제 완료."));
+    }
+
+    @Test
+    @DisplayName("게시글 찜")
+    void likePost() throws Exception {
+        ProductPost post = createPost(seller, "찜 대상");
+
+        mvc.perform(
+                        post("/api/posts/" + post.getId() + "/like")
+                                .header("Authorization", "Bearer " + buyerToken)
+                )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("찜 완료"));
+    }
+
 
     @Test
     @DisplayName("내 판매 내역 조회 - 배열 어디엔가 내 글이 있는지 확인")
