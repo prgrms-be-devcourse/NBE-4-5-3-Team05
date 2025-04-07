@@ -5,9 +5,6 @@ import java.time.LocalDateTime;
 import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductPost;
 
 import com.NBE_4_5_2.Team5.domain.post.post.enums.ProductStatus;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
 
 data class PreviewPostResponse(
     val id: String,
