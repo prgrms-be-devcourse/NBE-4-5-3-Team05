@@ -14,35 +14,35 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class UserDto {
 
-	private String id;
-	private String username;
-	private String email;
-	private String nickname;
-	private String address;
-	private String profileUrl;
-	private Role role;
-	private int cash;
-	private LocalDateTime createdAt;
-	private LocalDateTime modifiedAt;
-	private boolean blocked;
-	private int blockedCount;
+    private String id;
+    private String username;
+    private String email;
+    private String nickname;
+    private String address;
+    private String profileUrl;
+    private Role role;
+    private int cash;
+    private LocalDateTime createdAt;
+    private LocalDateTime modifiedAt;
+    private boolean blocked;
+    private int blockedCount;
 
-	public UserDto(User admin) {
-		this.id = admin.getId();
-		this.role = admin.getRole();
-		this.username = admin.getUsername();
-		this.email = admin.getEmail();
-		this.nickname = admin.getNickname();
-		this.address = admin.getAddress();
-		this.profileUrl = admin.getProfileUrl();
-		this.blocked = admin.getBlocked();
-		this.cash = admin.getCash();
-		this.blockedCount = admin.getBlockedCount();
-		this.createdAt = admin.getCreatedAt();
-		this.modifiedAt = admin.getModifiedAt();
-	}
+    public UserDto(User admin) {
+        this.id = admin.getId();
+        this.role = admin.getRole();
+        this.username = admin.getUsername();
+        this.email = admin.getEmail();
+        this.nickname = admin.getNickname();
+        this.address = admin.getAddress();
+        this.profileUrl = admin.getProfileUrl();
+        this.blocked = admin.getBlocked();
+        this.cash = admin.getCash();
+        this.blockedCount = admin.getBlockedCount();
+        this.createdAt = admin.createdDate;
+        this.modifiedAt = admin.modifiedDate;
+    }
 
-	public static UserDto fromEntity(User user) {
-		return new UserDto(user);
-	}
+    public static UserDto fromEntity(User user) {
+        return new UserDto(user);
+    }
 }
