@@ -1,10 +1,9 @@
-package com.NBE_4_5_2.Team5.domain.user.admin.dto;
+package com.NBE_4_5_2.Team5.domain.user.admin.dto
 
-import com.NBE_4_5_2.Team5.domain.user.user.entity.Role;
-import com.NBE_4_5_2.Team5.domain.user.user.entity.User;
+import com.NBE_4_5_2.Team5.domain.user.user.entity.Role
+import com.NBE_4_5_2.Team5.domain.user.user.entity.User
 
-public record AdminResBody(String id, String nickname, Role role) {
-	public AdminResBody(User admin) {
-		this(admin.getId(), admin.getNickname(), admin.getRole());
-	}
+@JvmRecord
+data class AdminResBody(val id: String, val nickname: String, val role: Role) {
+    constructor(admin: User) : this(admin.id, admin.nickname, admin.role)
 }

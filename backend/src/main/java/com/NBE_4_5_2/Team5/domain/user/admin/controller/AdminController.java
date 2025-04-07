@@ -104,7 +104,7 @@ public class AdminController {
     public RsData<List<NoticeResBody>> getLatestNotices() {
         List<NoticePost> latestNotices = adminService.getLatestNotices(5);
         List<NoticeResBody> res = latestNotices.stream()
-                .map(NoticeResBody::of)
+                .map(noticePost -> NoticeResBody.of(noticePost))
                 .collect(Collectors.toList());
         return new RsData<>("200", "최신 공지사항 조회 성공.", res);
     }

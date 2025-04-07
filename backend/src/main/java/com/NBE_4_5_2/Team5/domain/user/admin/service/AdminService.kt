@@ -150,7 +150,7 @@ class AdminService(
         isAdmin(loggedInUser)
 
         val all = noticePostRepository.findAll(pageable)
-        return all.map { notice: NoticePost? -> NoticeResBody.of(notice) }
+        return all.map { notice: NoticePost -> NoticeResBody.of(notice) }
     }
 
     fun updateNotice(noticeId: String, body: UpdateNoticeReq): NoticeResBody {
