@@ -14,18 +14,18 @@ import lombok.RequiredArgsConstructor;
 @Component
 @RequiredArgsConstructor
 public class ResponseAspect {
-	private final HttpServletResponse response;
+    private final HttpServletResponse response;
 
-	@Around("execution(* com.NBE_4_5_2.Team5..*Controller.*(..))")
-	public Object responseAspect(ProceedingJoinPoint joinPoint) throws Throwable {
-		Object result = joinPoint.proceed();
+    @Around("execution(* com.NBE_4_5_2.Team5..*Controller.*(..))")
+    public Object responseAspect(ProceedingJoinPoint joinPoint) throws Throwable {
+        Object result = joinPoint.proceed();
 
-		// 응답코드를 설정해준다
-		if (result instanceof RsData<?> rsData) {
-			int statusCode = rsData.getStatusCode();
-			response.setStatus(statusCode);
-		}
+        // 응답코드를 설정해준다
+        if (result instanceof RsData<?> rsData) {
+            int statusCode = rsData.getStatusCode();
+            response.setStatus(statusCode);
+        }
 
-		return result;
-	}
+        return result;
+    }
 }
