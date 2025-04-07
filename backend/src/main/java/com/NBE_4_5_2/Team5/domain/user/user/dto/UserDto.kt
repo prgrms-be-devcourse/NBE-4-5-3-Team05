@@ -27,8 +27,8 @@ class UserDto(
         profileUrl = admin.profileUrl,
         role = admin.role,
         cash = admin.cash,
-        createdAt = admin.createdAt,
-        modifiedAt = admin.modifiedAt,
+        createdAt = admin.createdDate,
+        modifiedAt = admin.modifiedDate,
         blocked = admin.blocked,
         blockedCount = admin.blockedCount
     )

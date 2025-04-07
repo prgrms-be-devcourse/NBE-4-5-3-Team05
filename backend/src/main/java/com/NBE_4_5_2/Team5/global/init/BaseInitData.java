@@ -1,9 +1,21 @@
 package com.NBE_4_5_2.Team5.global.init;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.NBE_4_5_2.Team5.domain.post.category.entity.Category;
-import com.NBE_4_5_2.Team5.domain.post.category.repository.CategoryRepository;
 import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductCategory;
 import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductPost;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.ApplicationRunner;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Profile;
+import org.springframework.core.annotation.Order;
+
+import com.NBE_4_5_2.Team5.domain.post.category.repository.CategoryRepository;
 import com.NBE_4_5_2.Team5.domain.post.post.repository.ProductCategoryRepository;
 import com.NBE_4_5_2.Team5.domain.post.post.repository.ProductPostRepository;
 import com.NBE_4_5_2.Team5.domain.user.admin.entity.NoticePost;
@@ -14,19 +26,9 @@ import com.NBE_4_5_2.Team5.domain.user.user.entity.User;
 import com.NBE_4_5_2.Team5.domain.user.user.repository.UserRepository;
 import com.NBE_4_5_2.Team5.domain.user.user.service.UserService;
 import com.NBE_4_5_2.Team5.domain.user.user.service.email.EmailService;
+
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.ApplicationRunner;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.context.annotation.Profile;
-import org.springframework.core.annotation.Order;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Configuration
 @Profile("!monitor")
@@ -69,13 +71,13 @@ public class BaseInitData {
         };
     }
 
-    @Bean
-    @Order(4)
-    public ApplicationRunner applicationRunner4() {
-        return args -> {
-            self.noticeInit();
-        };
-    }
+//    @Bean
+//    @Order(4)
+//    public ApplicationRunner applicationRunner4() {
+//        return args -> {
+//            self.noticeInit();
+//        };
+//    }
 
     @Value("${custom.server.host}")
     private String serverHost;
@@ -116,26 +118,30 @@ public class BaseInitData {
         }
 
         List<Category> categories = List.of(
-
-                new Category("전자제품"),
-                new Category("가구"),
-                new Category("의류"),
-                new Category("스포츠 용품"),
-                new Category("도서"),
-                new Category("생활용품"),
-                new Category("자동차 용품"),
-                new Category("식품"),
-                new Category("악기"),
-                new Category("반려동물 용품"),
-                new Category("뷰티/미용"),
-                new Category("티켓/쿠폰"),
-                new Category("수집/예술"),
-                new Category("게임"),
-                new Category("기타")
-
+                createCategory("전자제품"),
+                createCategory("가구"),
+                createCategory("의류"),
+                createCategory("스포츠 용품"),
+                createCategory("도서"),
+                createCategory("생활용품"),
+                createCategory("자동차 용품"),
+                createCategory("식품"),
+                createCategory("악기"),
+                createCategory("반려동물 용품"),
+                createCategory("뷰티/미용"),
+                createCategory("티켓/쿠폰"),
+                createCategory("수집/예술"),
+                createCategory("게임"),
+                createCategory("기타")
         );
 
         categoryRepository.saveAll(categories);
+    }
+
+    private static Category createCategory(String name) {
+        Category category = new Category();  // 기본 생성자
+        category.setName(name);             // Kotlin lateinit 프로퍼티 → setName 사용 가능
+        return category;
     }
 
     @Transactional
@@ -159,7 +165,7 @@ public class BaseInitData {
             // ✅ 단순한 이미지 파일명 지정 (productX.jpg)
             String imageUrl = baseUrl + "default" + ".jpg"; // ✅ 하나의 이미지만 저장
 
-            posts.add(ProductPost.create(
+            posts.add(new ProductPost(
                     writer,
                     "상품 " + i,
                     (i * 10000) % 200000 + 10000, // 가격 랜덤화
@@ -178,39 +184,34 @@ public class BaseInitData {
 
         for (int i = 0; i < posts.size(); i++) {
             Category randomCategory = categories.get(i % categories.size()); // ✅ 순환하면서 랜덤 카테고리 적용
-            productCategories.add(
-                    new ProductCategory(
-                            posts.get(i),
-                            randomCategory
-                    ));
+            productCategories.add(ProductCategory.of(posts.get(i), randomCategory));
         }
 
         productCategoryRepository.saveAll(productCategories);
     }
 
-    @Transactional
-    public void noticeInit() {
-        if (noticePostRepository.count() > 0) {
-            return;
-        }
-
-        // 공지사항 생성: 총 10개의 공지사항 생성
-        User admin = userRepository.findAll().stream()
-                .filter(u -> u.getRole().equals(Role.ADMIN))
-                .findFirst()
-                .orElse(null);
-        if (admin == null && !userRepository.findAll().isEmpty()) {
-            admin = userRepository.findAll().get(0);
-        }
-
-        for (int i = 1; i <= 10; i++) {
-            NoticePost notice = new NoticePost(
-                    "공지사항 제목 " + i,
-                    "공지사항 내용 " + i + " - 중요한 공지사항 내용입니다.",
-                    admin
-            );
-
-            noticePostRepository.save(notice);
-        }
-    }
+//    @Transactional
+//    public void noticeInit() {
+//        if (noticePostRepository.count() > 0) {
+//            return;
+//        }
+//
+//        // 공지사항 생성: 총 10개의 공지사항 생성
+//        User admin = userRepository.findAll().stream()
+//                .filter(u -> u.getRole().equals(Role.ADMIN))
+//                .findFirst()
+//                .orElse(null);
+//        if (admin == null && !userRepository.findAll().isEmpty()) {
+//            admin = userRepository.findAll().get(0);
+//        }
+//
+//        for (int i = 1; i <= 10; i++) {
+//            NoticePost notice = NoticePost.builder()
+//                    .admin(admin)
+//                    .title("공지사항 제목 " + i)
+//                    .content("공지사항 내용 " + i + " - 중요한 공지사항 내용입니다.")
+//                    .build();
+//            noticePostRepository.save(notice);
+//        }
+//    }
 }

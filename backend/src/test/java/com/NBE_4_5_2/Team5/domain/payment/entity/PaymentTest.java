@@ -20,7 +20,7 @@ class PaymentTest {
 	void checkValid() {
 		Payment payment = new Payment();
 		Integer metadataValue = 50000;
-		ReflectionTestUtils.setField(payment, "totalPrice", metadataValue);
+		ReflectionTestUtils.setField(payment, "_totalPrice", metadataValue);
 
 		Integer clientValue = 50000;
 

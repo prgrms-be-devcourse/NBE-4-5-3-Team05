@@ -100,12 +100,12 @@ class User() : BaseTime() {
 		this.cash += totalAmount
 	}
 
-	fun buy(product: ProductPost, amount: Int) {
-		pay(amount)
-		addToPurchasedProductList(product)
-		product.updateStatus(ProductStatus.PURCHASED)
-		product.setBuyer(this)
-	}
+    fun buy(product: ProductPost, amount: Int) {
+        pay(amount)
+        addToPurchasedProductList(product)
+        product.updateStatus(ProductStatus.PURCHASED)
+        product.purchaseBy(this)
+    }
 
 	//TODO : Member 객체의 구현에 따라 구매 상품을 담을 list에 업데이트 필요
 
