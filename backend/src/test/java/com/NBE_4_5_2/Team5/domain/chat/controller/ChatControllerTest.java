@@ -1,5 +1,6 @@
 package com.NBE_4_5_2.Team5.domain.chat.controller;
 
+import com.NBE_4_5_2.Team5.domain.chat.entity.ChatMessage;
 import com.NBE_4_5_2.Team5.domain.chat.repository.ChatMessageRepository;
 import com.NBE_4_5_2.Team5.domain.chat.service.ChatRoomService;
 import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductPost;

@@ -55,4 +55,8 @@ public class ChatMessage {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
         return timestamp.format(formatter);
     }
+
+    public String getRoomId() {
+        return this.roomId;
+    }
 }
