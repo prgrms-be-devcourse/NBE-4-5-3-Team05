@@ -1,11 +1,16 @@
 package com.NBE_4_5_2.Team5.domain.payment.controller;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.util.Map;
 import java.util.UUID;
 
+import com.NBE_4_5_2.Team5.domain.post.post.dto.response.PreviewPostResponse;
+import com.NBE_4_5_2.Team5.domain.post.post.service.ProductPostService;
+import com.NBE_4_5_2.Team5.domain.user.user.entity.User;
+import com.NBE_4_5_2.Team5.domain.user.user.service.UserService;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
