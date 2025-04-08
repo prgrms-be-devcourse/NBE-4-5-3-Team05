@@ -179,9 +179,25 @@ export default function ClientPage({
                   <TableCell>{post.likedCount}</TableCell>
 
                   {/* 판매 상태 */}
-                  <TableCell>
-                    {/* 향후에 상품 글 상태 변경하게  */}
-                    <Select
+                  <TableCell
+                    className={`px-4 py-2 text-center font-semibold ${
+                      post.status === "AVAILABLE"
+                        ? "text-blue-500" // 판매중: 파란색
+                        : post.status === "RESERVED"
+                          ? "text-yellow-500" // 예약중: 노란색
+                          : post.status === "PURCHASED"
+                            ? "text-red-500" // 판매 완료: 빨간색
+                            : "text-gray-500" // 알 수 없음: 회색
+                    }`}
+                  >
+                    {post.status === "AVAILABLE"
+                      ? "판매중"
+                      : post.status === "RESERVED"
+                        ? "예약중"
+                        : post.status === "PURCHASED"
+                          ? "판매 완료"
+                          : "알 수 없음"}
+                    {/* <Select
                       onValueChange={(value) =>
                         handleStatusChange(post.id, value)
                       }
@@ -192,8 +208,8 @@ export default function ClientPage({
                           {post.status === "AVAILABLE"
                             ? "판매중"
                             : post.status === "RESERVED"
-                            ? "예약중"
-                            : "판매 완료"}
+                              ? "예약중"
+                              : "판매 완료"}
                         </SelectValue>
                       </SelectTrigger>
                       <SelectContent>
@@ -201,7 +217,7 @@ export default function ClientPage({
                         <SelectItem value="RESERVED">예약중</SelectItem>
                         <SelectItem value="PURCHASED">판매완료</SelectItem>
                       </SelectContent>
-                    </Select>
+                    </Select> */}
                   </TableCell>
 
                   {/* 최근 수정일 */}
