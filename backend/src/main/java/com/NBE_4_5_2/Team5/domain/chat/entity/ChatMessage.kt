@@ -11,7 +11,7 @@ import java.util.*
 @Entity
 class ChatMessage (
     private var _type: MessageType = MessageType.TALK,
-    private var _roomId: String="",     // todo: JPA가 _roomId를 찾지 못하여, roomId로 수정
+    private var _roomId: String="",
     private var _sender: String="",
     private val _receiver: String="",
     private var _message: String="",

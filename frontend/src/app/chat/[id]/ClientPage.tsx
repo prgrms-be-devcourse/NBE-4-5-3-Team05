@@ -233,14 +233,15 @@ export default function ClientPage({
       latitude: latitude, // 위도
       longitude: longitude, // 경도
       messageId: null, // 필요 시 비워둡니다
-      image: null, // 필요 시 비워둡니다
+      image: "", // 필요 시 비워둡니다
       timestamp: new Date().toISOString(), // 현재 시간 설정
     };
 
     stompClient.send(
       "/pub/chat/message",
       { token: accessToken },
-      JSON.stringify(message)
+      JSON.stringify(message),
+      console.log("json직렬화 확인: ",JSON.stringify(message))
     );
     alert("위치가 전송되었습니다!");
     return;
