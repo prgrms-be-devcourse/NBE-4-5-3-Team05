@@ -57,6 +57,7 @@ error.log
 
 
 ### custom ###
+gradlew
 db_dev.mv.db
 db_dev.trace.db
 
@@ -74,16 +75,11 @@ Dockerfile
 data/
 db_dev.mv.db  # H2 데이터베이스 파일도 무시
 gradle
-src/main/resources/application*.yml
-
-/src/main/resources/application.yml
-/src/main/resources/application-dev.yml
-/src/main/resources/application-prod.yml
-/src/main/resources/application-local.yml
 
 # Generated OpenAPI Files
 apiV1.json
 frontend/src/lib/backend/api/schema.d.ts
+apiV1.json
 /application.pid
 src/main/resources/application-mysql.yml
 generated/
