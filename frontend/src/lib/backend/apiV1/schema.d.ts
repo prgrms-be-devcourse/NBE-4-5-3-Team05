@@ -890,18 +890,18 @@ export interface components {
             content?: string;
         };
         AdminResBody: {
-            id?: string;
-            nickname?: string;
+            id: string;
+            nickname: string;
             /** @enum {string} */
-            role?: "ADMIN" | "USER";
+            role: "ADMIN" | "USER";
         };
         NoticeResBody: {
-            id?: string;
-            title?: string;
-            content?: string;
-            admin?: components["schemas"]["AdminResBody"];
+            id: string;
+            title: string;
+            content: string;
+            admin: components["schemas"]["AdminResBody"];
             /** Format: date-time */
-            createdAt?: string;
+            createdAt: string;
         };
         RsDataNoticeResBody: {
             code: string;
@@ -978,17 +978,17 @@ export interface components {
             author?: components["schemas"]["UserDto"];
         };
         PurchaseItemReqDto: {
-            productId?: string;
+            productId: string;
         };
         PaymentDto: {
-            id?: string;
-            buyerId?: string;
+            id: string;
+            buyerId: string;
             /** Format: int32 */
-            totalPrice?: number;
+            totalPrice: number;
             /** Format: date-time */
-            createdAt?: string;
+            createdAt: string;
             /** Format: date-time */
-            modifiedAt?: string;
+            modifiedAt: string;
             /** @enum {string} */
             status?: "IN_PROGRESS" | "DONE" | "ABORTED";
         };
@@ -1019,15 +1019,15 @@ export interface components {
             reason: string;
         };
         BanResBody: {
-            banListId?: string;
-            userId?: string;
-            reason?: string;
+            banListId: string;
+            userId: string;
+            reason: string;
             /** Format: int32 */
-            banCount?: number;
+            banCount: number;
             /** Format: date-time */
-            startDate?: string;
+            startDate: string;
             /** Format: date-time */
-            endDate?: string;
+            endDate: string;
         };
         RsDataBanResBody: {
             code: string;
@@ -1096,10 +1096,10 @@ export interface components {
             offset?: number;
             sort?: components["schemas"]["SortObject"];
             /** Format: int32 */
-            pageNumber?: number;
+            pageSize?: number;
             paged?: boolean;
             /** Format: int32 */
-            pageSize?: number;
+            pageNumber?: number;
             unpaged?: boolean;
         };
         RsDataSliceCommentDto: {
@@ -1158,9 +1158,9 @@ export interface components {
             data: boolean;
         };
         PaymentMetaData: {
-            paymentId?: string;
+            paymentId: string;
             /** Format: int32 */
-            amount?: number;
+            amount: number;
         };
         RsDataPaymentMetaData: {
             code: string;
@@ -1225,10 +1225,10 @@ export interface components {
             data: components["schemas"]["Category"][];
         };
         PageUserDto: {
-            /** Format: int64 */
-            totalElements?: number;
             /** Format: int32 */
             totalPages?: number;
+            /** Format: int64 */
+            totalElements?: number;
             /** Format: int32 */
             size?: number;
             content?: components["schemas"]["UserDto"][];
@@ -1248,10 +1248,10 @@ export interface components {
             data: components["schemas"]["PageUserDto"];
         };
         PageNoticeResBody: {
-            /** Format: int64 */
-            totalElements?: number;
             /** Format: int32 */
             totalPages?: number;
+            /** Format: int64 */
+            totalElements?: number;
             /** Format: int32 */
             size?: number;
             content?: components["schemas"]["NoticeResBody"][];
