@@ -95,6 +95,9 @@ dependencies {
     annotationProcessor("jakarta.annotation:jakarta.annotation-api")
     annotationProcessor("jakarta.persistence:jakarta.persistence-api")
 
+    // kafka
+    implementation ("org.springframework.kafka:spring-kafka")
+
     // AWS S3
     implementation("org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE")
 
