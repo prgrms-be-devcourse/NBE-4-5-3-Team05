@@ -53,7 +53,7 @@ internal class AdminControllerTest(
 
         // when
         // API 호출
-        val perform = mockMvc!!.perform(
+        val perform = mockMvc.perform(
             MockMvcRequestBuilders.post("/api/admin/notices")
                 .content(
                     """
@@ -68,11 +68,11 @@ internal class AdminControllerTest(
                 .cookie(cookieMap["accessToken"], cookieMap["refreshToken"])
         )
 
-        val id = objectMapper!!.readTree(perform.andReturn().response.contentAsString)["data"]["id"].asText()
+        val id = objectMapper.readTree(perform.andReturn().response.contentAsString)["data"]["id"].asText()
 
-        val notice = adminService!!.getNotice(id)
+        val notice = adminService.getNotice(id)
 
-        val admin = userService!!.getUserByUsername("user4")
+        val admin = userService.getUserByUsername("user4")
             .orElseThrow { RuntimeException() }
 
         // then
@@ -90,16 +90,16 @@ internal class AdminControllerTest(
 
     @Throws(Exception::class)
     private fun login(username: String, password: String): Map<String, Cookie> {
-        val cookies = mockMvc!!.perform(
+        val cookies = mockMvc.perform(
             MockMvcRequestBuilders.post("/api/users/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(
                     """
 					{
-						"username": "%s",
-						"password": "%s"
+						"username": "$username",
+						"password": "$password"
 					}
-					""".trimIndent().formatted(username, password)
+					""".trimIndent()
                 )
         )
             .andExpect(MockMvcResultMatchers.status().isOk())
@@ -122,11 +122,11 @@ internal class AdminControllerTest(
 
         // when
         // user1을 밴함
-        val user = userService!!.getUserByUsername("user1")
+        val user = userService.getUserByUsername("user1")
             .orElseThrow { RuntimeException() }
 
-        val perform = mockMvc!!.perform(
-            MockMvcRequestBuilders.post("/api/admin/users/%s/ban".formatted(user.id))
+        val perform = mockMvc.perform(
+            MockMvcRequestBuilders.post("/api/admin/users/${user.id}/ban")
                 .content(
                     """
 				{
@@ -139,9 +139,9 @@ internal class AdminControllerTest(
                 .cookie(cookieMap["accessToken"], cookieMap["refreshToken"])
         )
 
-        val id = objectMapper!!.readTree(perform.andReturn().response.contentAsString)["data"]["banListId"].asText()
+        val id = objectMapper.readTree(perform.andReturn().response.contentAsString)["data"]["banListId"].asText()
 
-        val banList = banListRepository!!.findById(id).get()
+        val banList = banListRepository.findById(id).get()
 
         // then
         val foundedUser = userService.getUserByUsername("user1")
@@ -169,11 +169,11 @@ internal class AdminControllerTest(
 
         //when
         // id를 가진 post를 삭제
-        val id = productPostService!!.getPosts(1, 1, "", "asc")
+        val id = productPostService.getPosts(1, 1, "", "asc")
             .items[0].id
 
-        val result = mockMvc!!.perform(
-            MockMvcRequestBuilders.delete("/api/admin/posts/%s".formatted(id))
+        val result = mockMvc.perform(
+            MockMvcRequestBuilders.delete("/api/admin/posts/$id")
                 .cookie(cookieMap["accessToken"], cookieMap["refreshToken"])
         )
 
