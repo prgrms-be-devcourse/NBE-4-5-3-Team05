@@ -189,7 +189,7 @@ export default function ClientPage({
     );
     setInputMessage("");
 
-    setChatMessages((prevMessages) => [...prevMessages, message]);
+    // setChatMessages((prevMessages) => [...prevMessages, message]);
     scrollToBottomWithOffset(50); // 스크롤 이동
   };
   const handleKeyPress = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -267,7 +267,6 @@ export default function ClientPage({
     formData.append("file", file); // 파일 추가
 
     try {
-      // fetch를 사용하여 파일 업로드
       const protocol = `${process.env.NEXT_PUBLIC_PROTOCOL}`;
       let url = `${protocol}://${process.env.NEXT_PUBLIC_BACKEND_HOST}`;
       if (protocol === "http") {
@@ -295,12 +294,13 @@ export default function ClientPage({
         longitude: 0,
       };
 
-      setChatMessages((prevMessages) => [...prevMessages, message]); // 메시지를 상태에 추가
+      // setChatMessages((prevMessages) => [...prevMessages, message]); // 메시지를 상태에 추가
       stompClient.send(
         "/pub/chat/message",
         { token: accessToken },
-        JSON.stringify(message)
-      ); // 메시지 전송
+        JSON.stringify(message),
+        console.log("json직렬화 확인: ",JSON.stringify(message))
+      );
     } catch (error) {
       console.error("이미지 업로드에 실패했습니다:", error);
       alert("이미지 업로드에 실패했습니다.");
