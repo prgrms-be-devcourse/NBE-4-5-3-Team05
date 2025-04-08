@@ -188,10 +188,10 @@ class ProductPostService(
 
     //내가 구매한 내역
     @Transactional(readOnly = true)
-    fun getMyPurchases(actor: User, page: Int, pageSize: Int): PageDto<ProductPostResponse> {
+    fun getMyPurchases(actor: User, page: Int, pageSize: Int): PageDto<PreviewPostResponse> {
         val pageable = PageRequest.of(page - 1, pageSize)
         val purchasedPosts = productPostRepository.findByBuyer(actor, pageable)
-        val mappedPosts = purchasedPosts.map { ProductPostResponse.fromEntity(it) }
+        val mappedPosts = purchasedPosts.map { PreviewPostResponse.fromEntity(it) }
         return PageDto(mappedPosts)
     }
 
@@ -200,11 +200,11 @@ class ProductPostService(
         return salesPosts.map { ProductPostResponse.fromEntity(it) }
     }
 
-    fun getMyFavorites(actor: User, page: Int, pageSize: Int): PageDto<ProductPostResponse> {
+    fun getMyFavorites(actor: User, page: Int, pageSize: Int): PageDto<PreviewPostResponse> {
         val pageable = PageRequest.of(page - 1, pageSize)
         val postIds = likedPostRepository.findAllProductPostIdsByUserId(actor.id)
         val favoritePosts = productPostRepository.findByIdIn(postIds, pageable)
-        val mappedPosts = favoritePosts.map { ProductPostResponse.fromEntity(it) }
+        val mappedPosts = favoritePosts.map { PreviewPostResponse.fromEntity(it) }
         return PageDto(mappedPosts)
     }
 
