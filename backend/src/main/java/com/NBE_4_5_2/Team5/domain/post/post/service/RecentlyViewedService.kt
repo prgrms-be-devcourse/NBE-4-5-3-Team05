@@ -1,12 +1,9 @@
 package com.NBE_4_5_2.Team5.domain.post.post.service
 
 import com.NBE_4_5_2.Team5.domain.post.post.dto.response.PreviewPostResponse
-import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductPost
 import com.NBE_4_5_2.Team5.domain.post.post.repository.ProductPostRepository
-import lombok.RequiredArgsConstructor
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Service
-import java.util.*
 
 @Service
 class RecentlyViewedService(
