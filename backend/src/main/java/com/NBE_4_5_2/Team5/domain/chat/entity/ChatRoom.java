@@ -5,7 +5,11 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 @Getter
@@ -26,6 +30,7 @@ public class ChatRoom implements Serializable {
     private long userCount; // 채팅방 인원수
     private String lastMessage;
     private String lastTimestamp;
+    private Map<String,Boolean> isDelete = new HashMap<>();   // 논리적 삭제(userNickname,True/False)
 
     public ChatRoom(String sender, String receiver) {
         this.id = UUID.randomUUID().toString();
@@ -33,5 +38,15 @@ public class ChatRoom implements Serializable {
         this.receiver = receiver;
         this.name = receiver;
         this.userCount = 2;
+        isDelete.put(sender,false);
+        isDelete.put(receiver,false);
+    }
+
+    public void setDeleteStatus(String username, boolean status) {
+        this.isDelete.put(username,status);
+    }
+
+    public boolean getDeleteStatus(String username) {
+        return isDelete.get(username);
     }
 }
