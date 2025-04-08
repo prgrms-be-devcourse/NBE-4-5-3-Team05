@@ -15,10 +15,13 @@ class ChatMessage (
     private var _sender: String="",
     private val _receiver: String="",
     private var _message: String="",
+    @JsonProperty("image")
     private var _image: String="",
     private var _userCount: Long=0,
-    private val _latitude: Float=0.0f,
-    private val _longitude: Float=0.0f
+    @JsonProperty("latitude")
+    private var _latitude: Float=0.0f,
+    @JsonProperty("longitude")
+    private var _longitude: Float=0.0f
 ) {
     @Id
     private val _messageId = UUID.randomUUID().toString()
@@ -99,5 +102,8 @@ class ChatMessage (
 
     fun getDeleteStatus(username: String?): Boolean? {
         return deleteStatus[username]
+    }
+    override fun toString(): String {
+        return "ChatMessage(messageId='$_messageId', type='$_type', roomId='$roomId', sender='$_sender', receiver='$_receiver', message='$_message', image='$_image', userCount=$_userCount, latitude=$_latitude, longitude=$_longitude, timestamp='$_timestamp')"
     }
 }
