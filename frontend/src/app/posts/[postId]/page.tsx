@@ -51,8 +51,8 @@ export default function PostDetailPage() {
     if (!postId) return;
     try {
       const response = await client.GET("/api/posts/{id}", {
-        withCredentials: true,
         params: { path: { id: postId } },
+        credentials: "include",
       });
       if (response.error) {
         console.error("게시글 상세 조회 실패", response.error);
@@ -281,8 +281,6 @@ export default function PostDetailPage() {
     }
   };
 
-
-
   // 이미지 URL들을 소문자와 trim을 적용해 유효한 값만 필터링
   const images = post.imageUrls
     ? post.imageUrls
@@ -302,7 +300,7 @@ export default function PostDetailPage() {
           {images.length > 0 ? (
             <div className="relative w-full h-64">
               <Image
-              loader={()=>images[0]}
+                loader={() => images[0]}
                 src={images[0]}
                 alt={post.title || "이미지"}
                 fill
@@ -322,14 +320,14 @@ export default function PostDetailPage() {
             <li>작성자 닉네임: {post.writerName}</li>
           </ul>
           <div className="mt-4">
-          <Button
-            variant="outline"
-            onClick={handleCreateChatRoom}
-            className="rounded-full bg-yellow-400 text-black py-2 px-4 border border-black-700 hover:bg-yellow-300"              
-          >
-            <FontAwesomeIcon icon={faComment} className="mr-2" />
-            채팅
-          </Button>
+            <Button
+              variant="outline"
+              onClick={handleCreateChatRoom}
+              className="rounded-full bg-yellow-400 text-black py-2 px-4 border border-black-700 hover:bg-yellow-300"
+            >
+              <FontAwesomeIcon icon={faComment} className="mr-2" />
+              채팅
+            </Button>
           </div>
         </div>
       </div>
@@ -374,7 +372,7 @@ export default function PostDetailPage() {
               {images.slice(1).map((imgUrl, idx) => (
                 <div key={idx} className="relative w-40 h-40">
                   <Image
-                  loader={()=>imgUrl}
+                    loader={() => imgUrl}
                     src={imgUrl}
                     alt={`${post.title} - ${idx + 1}`}
                     fill
