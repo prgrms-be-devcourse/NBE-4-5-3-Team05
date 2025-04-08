@@ -832,7 +832,7 @@ export interface components {
             blockedCount: number;
         };
         UpdateCommentReqBody: {
-            content?: string;
+            content: string;
         };
         RsDataUpdateCommentResBody: {
             code: string;
@@ -840,8 +840,8 @@ export interface components {
             data: components["schemas"]["UpdateCommentResBody"];
         };
         UpdateCommentResBody: {
-            content?: string;
-            author?: components["schemas"]["UserDto"];
+            content: string;
+            author: components["schemas"]["UserDto"];
         };
         ProductPostModifyForm: {
             productName: string;
@@ -965,7 +965,7 @@ export interface components {
             longitude: number;
         };
         WriteCommentReqBody: {
-            content?: string;
+            content: string;
         };
         RsDataWriteCommentResBody: {
             code: string;
@@ -973,9 +973,9 @@ export interface components {
             data: components["schemas"]["WriteCommentResBody"];
         };
         WriteCommentResBody: {
-            id?: string;
-            content?: string;
-            author?: components["schemas"]["UserDto"];
+            id: string;
+            content: string;
+            author: components["schemas"]["UserDto"];
         };
         PurchaseItemReqDto: {
             productId: string;
@@ -1046,7 +1046,7 @@ export interface components {
             /** Format: int32 */
             totalItems: number;
             /** Format: int32 */
-            curPageNo: number;
+            currentPageNo: number;
             /** Format: int32 */
             pageSize: number;
         };
@@ -1086,10 +1086,10 @@ export interface components {
             sort?: string[];
         };
         CommentDto: {
-            id?: string;
-            author?: components["schemas"]["UserDto"];
-            content?: string;
-            postId?: string;
+            id: string;
+            author: components["schemas"]["UserDto"];
+            content: string;
+            postId: string;
         };
         PageableObject: {
             /** Format: int64 */
@@ -1114,17 +1114,17 @@ export interface components {
             /** Format: int32 */
             number?: number;
             sort?: components["schemas"]["SortObject"];
+            pageable?: components["schemas"]["PageableObject"];
             first?: boolean;
             last?: boolean;
             /** Format: int32 */
             numberOfElements?: number;
-            pageable?: components["schemas"]["PageableObject"];
             empty?: boolean;
         };
         SortObject: {
             empty?: boolean;
-            sorted?: boolean;
             unsorted?: boolean;
+            sorted?: boolean;
         };
         RsDataListPreviewPostResponse: {
             code: string;
@@ -1143,7 +1143,7 @@ export interface components {
             /** Format: int32 */
             totalItems: number;
             /** Format: int32 */
-            curPageNo: number;
+            currentPageNo: number;
             /** Format: int32 */
             pageSize: number;
         };
@@ -1225,21 +1225,21 @@ export interface components {
             data: components["schemas"]["Category"][];
         };
         PageUserDto: {
-            /** Format: int32 */
-            totalPages?: number;
             /** Format: int64 */
             totalElements?: number;
+            /** Format: int32 */
+            totalPages?: number;
             /** Format: int32 */
             size?: number;
             content?: components["schemas"]["UserDto"][];
             /** Format: int32 */
             number?: number;
             sort?: components["schemas"]["SortObject"];
+            pageable?: components["schemas"]["PageableObject"];
             first?: boolean;
             last?: boolean;
             /** Format: int32 */
             numberOfElements?: number;
-            pageable?: components["schemas"]["PageableObject"];
             empty?: boolean;
         };
         RsDataPageUserDto: {
@@ -1248,21 +1248,21 @@ export interface components {
             data: components["schemas"]["PageUserDto"];
         };
         PageNoticeResBody: {
-            /** Format: int32 */
-            totalPages?: number;
             /** Format: int64 */
             totalElements?: number;
+            /** Format: int32 */
+            totalPages?: number;
             /** Format: int32 */
             size?: number;
             content?: components["schemas"]["NoticeResBody"][];
             /** Format: int32 */
             number?: number;
             sort?: components["schemas"]["SortObject"];
+            pageable?: components["schemas"]["PageableObject"];
             first?: boolean;
             last?: boolean;
             /** Format: int32 */
             numberOfElements?: number;
-            pageable?: components["schemas"]["PageableObject"];
             empty?: boolean;
         };
         RsDataPageNoticeResBody: {
