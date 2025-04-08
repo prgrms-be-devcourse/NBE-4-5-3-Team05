@@ -1,7 +1,6 @@
 package com.NBE_4_5_2.Team5.domain.user.logging
 
-import com.NBE_4_5_2.Team5.domain.user.user.controller.UserController.LoginUserDto
-import com.NBE_4_5_2.Team5.domain.user.user.controller.UserController.LoginUserForm
+import com.NBE_4_5_2.Team5.domain.user.user.controller.UserController.*
 import com.NBE_4_5_2.Team5.global.dto.RsData
 import jakarta.servlet.http.HttpServletRequest
 import lombok.RequiredArgsConstructor
@@ -30,7 +29,7 @@ class LoginLogAspect(
     fun userLoginAspect(joinPoint: ProceedingJoinPoint): Any {
         val now = LocalDateTime.now()
 
-        val userForm = joinPoint.args[0] as LoginUserForm
+        val userForm = joinPoint.args[0] as LoginUserResBody
         val ip = request!!.remoteAddr
         var accessToken = ""
         var refreshToken = ""
@@ -38,7 +37,7 @@ class LoginLogAspect(
 
         try {
             val result = joinPoint.proceed()
-            val loginUserDto = result as RsData<LoginUserDto>
+            val loginUserDto = result as RsData<LoginUserResBody>
             accessToken = loginUserDto.data.accessToken
             refreshToken = loginUserDto.data.refreshToken
             return result
