@@ -130,21 +130,21 @@ class ProductPostService(
 
         post.canModify(actor)
 
-        post.apply {
-            productName = body.productName
-            productPrice = body.productPrice
-            title = body.title
-            content = body.content
-            imageUrls = body.imageUrlList.joinToString(",")
-            latitude = body.latitude
-            longitude = body.longitude
+        body.productName?.let { post.productName = it }
+        body.productPrice?.let { post.productPrice = it }
+        body.title?.let { post.title = it }
+        body.content?.let { post.content = it }
+        body.imageUrlList?.takeIf { it.isNotEmpty() }?.let { post.imageUrls = it.joinToString(",") }
+        body.latitude?.let { post.latitude = it }
+        body.longitude?.let { post.longitude = it }
+        body.status?.let { post.status = it }
+
+        body.categoryIds?.let {
+            val categories = categoryRepository.findAllById(it)
+            post.productCategories.clear()
+            val newCategories = categories.map { category -> ProductCategory.of(post, category) }
+            post.productCategories.addAll(newCategories)
         }
-
-        val categories = categoryRepository.findAllById(body.categoryIds)
-
-        post.productCategories.clear()
-        val newProductCategories = categories.map { ProductCategory.of(post, it) }
-        post.productCategories.addAll(newProductCategories)
 
         return ProductPostResponse.fromEntity(post)
     }
