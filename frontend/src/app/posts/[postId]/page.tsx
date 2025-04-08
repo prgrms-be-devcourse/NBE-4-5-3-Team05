@@ -12,6 +12,7 @@ import { faComment } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 type ProductPostResponse = components["schemas"]["ProductPostResponse"];
+type PreviewPostResponse = components["schemas"]["PreviewPostResponse"];
 type StatusType = "AVAILABLE" | "RESERVED" | "PURCHASED";
 
 export default function PostDetailPage() {
@@ -89,7 +90,7 @@ export default function PostDetailPage() {
         return;
       }
       const favoritesResponse = response.data.data;
-      const favorites: ProductPostResponse[] = favoritesResponse.items;
+      const favorites: PreviewPostResponse[] = favoritesResponse.items;
       if (post?.id && favorites.some((fav) => fav.id === post.id)) {
         setLiked(true);
       }
