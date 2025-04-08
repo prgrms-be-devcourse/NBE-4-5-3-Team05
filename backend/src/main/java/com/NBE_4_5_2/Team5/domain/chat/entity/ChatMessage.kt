@@ -96,7 +96,7 @@ class ChatMessage (
         deleteStatus[username] = status
     }
 
-    fun getDeleteStatus(username: String): Boolean? {
+    fun getDeleteStatus(username: String?): Boolean? {
         return deleteStatus[username]
     }
 }
