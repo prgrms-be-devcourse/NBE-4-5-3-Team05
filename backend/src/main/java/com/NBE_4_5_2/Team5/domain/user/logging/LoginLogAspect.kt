@@ -29,7 +29,7 @@ class LoginLogAspect(
     fun userLoginAspect(joinPoint: ProceedingJoinPoint): Any {
         val now = LocalDateTime.now()
 
-        val userForm = joinPoint.args[0] as LoginUserResBody
+        val userForm = joinPoint.args[0] as LoginUserReqBody
         val ip = request!!.remoteAddr
         var accessToken = ""
         var refreshToken = ""
@@ -51,7 +51,7 @@ class LoginLogAspect(
 					refreshToken : {}
 					
 					""".trimIndent(), now, "Anonymous", "Anonymous",
-                userForm.item.username,
+                userForm.username,
                 ip,
                 accessToken,
                 refreshToken
