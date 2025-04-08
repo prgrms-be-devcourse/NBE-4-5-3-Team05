@@ -38,15 +38,12 @@ class ChatRoomService {
 
     // 모든 채팅방 조회
     fun findAllRoom(): List<ChatRoom> {
-        return hashOpsChatRoom!!.values(CHAT_ROOMS)
+        return hashOpsChatRoom.values(CHAT_ROOMS)
     }
 
     // roomId로 조회
     fun findByRoomId(roomId: String): ChatRoom {
-        if (roomId == null) {
-            throw ServiceException("404", "roomId가 null")
-        }
-        val chatRoom = hashOpsChatRoom!![CHAT_ROOMS, roomId]
+        val chatRoom = hashOpsChatRoom[CHAT_ROOMS, roomId]
             ?: throw ServiceException("404", "존재하지 않는 채팅방")
         return chatRoom
     }
@@ -131,7 +128,7 @@ class ChatRoomService {
             throw ForbiddenAccessException("405", "접근 권한 없는 채팅방")
         }
 
-        val messages = chatMessageRepository!!.findByRoomId(roomId)
+        val messages = chatMessageRepository.findByRoomId(roomId)
             .stream() // 삭제되지 않은 메세지만
             .filter { message: ChatMessage -> !message.getDeleteStatus(username)!! }
             .collect(Collectors.toList())
@@ -139,8 +136,8 @@ class ChatRoomService {
         return messages
     }
 
-    fun deleteMessage(roomId: String?, username: String) {
-        val messages = chatMessageRepository!!.findByRoomId(roomId)
+    fun deleteMessage(roomId: String, username: String) {
+        val messages = chatMessageRepository.findByRoomId(roomId)
         // 삭제
         messages.forEach(Consumer { message: ChatMessage ->
             message.setDeleteStatus(username, true)
@@ -155,7 +152,7 @@ class ChatRoomService {
 
         val chatRoom = findByRoomId(roomId)
         chatRoom.setDeleteStatus(username, true) // 논리적 삭제
-        hashOpsChatRoom!!.put(CHAT_ROOMS, roomId, chatRoom) // redis에 업데이트
+        hashOpsChatRoom.put(CHAT_ROOMS, roomId, chatRoom) // redis에 업데이트
         deleteMessage(roomId, username) // 메세지 삭제
         // 양측에서 모두 삭제했을 경우
         if (isAllDelete(roomId)) {
@@ -175,32 +172,32 @@ class ChatRoomService {
 
     // 유저가 입장한 채팅방ID와 유저 세션ID 맵핑 정보 저장
     fun setUserEnterInfo(sessionId: String, roomId: String) {
-        hashOpsEnterInfo!!.put(ENTER_INFO, sessionId, roomId)
+        hashOpsEnterInfo.put(ENTER_INFO, sessionId, roomId)
     }
 
     // 유저 세션으로 입장해 있는 채팅방 ID 조회
     fun getUserEnterRoomId(sessionId: String): String? {
-        return hashOpsEnterInfo!![ENTER_INFO, sessionId]
+        return hashOpsEnterInfo[ENTER_INFO, sessionId]
     }
 
     // 유저 세션정보와 맵핑된 채팅방ID 삭제
     fun removeUserEnterInfo(sessionId: String) {
-        hashOpsEnterInfo!!.delete(ENTER_INFO, sessionId)
+        hashOpsEnterInfo.delete(ENTER_INFO, sessionId)
     }
 
     // 채팅방 유저수 조회
     fun getUserCount(roomId: String): Long {
-        return Optional.ofNullable(valueOps!![USER_COUNT + "_" + roomId]).orElse("0").toLong()
+        return Optional.ofNullable(valueOps[USER_COUNT + "_" + roomId]).orElse("0").toLong()
     }
 
     // 채팅방에 입장한 유저수 +1
     fun plusUserCount(roomId: String): Long {
-        return Optional.ofNullable(valueOps!!.increment(USER_COUNT + "_" + roomId)).orElse(0L)
+        return Optional.ofNullable(valueOps.increment(USER_COUNT + "_" + roomId)).orElse(0L)
     }
 
     // 채팅방에 입장한 유저수 -1
     fun minusUserCount(roomId: String?): Long {
-        return Optional.ofNullable(valueOps!!.decrement(USER_COUNT + "_" + roomId)).filter { count: Long -> count > 0 }
+        return Optional.ofNullable(valueOps.decrement(USER_COUNT + "_" + roomId)).filter { count: Long -> count > 0 }
             .orElse(0L)
     }
 
@@ -217,8 +214,8 @@ class ChatRoomService {
 
     // 현재 두 사용자가 사용중인 roomId
     fun findByRoomIdByUsers(sender: String, receiver: String): String? {
-        for (key in hashOpsEnterInfo!!.keys(CHAT_ROOMS)) {
-            val chatRoom = hashOpsChatRoom!![CHAT_ROOMS, key] ?: continue
+        for (key in hashOpsEnterInfo.keys(CHAT_ROOMS)) {
+            val chatRoom = hashOpsChatRoom[CHAT_ROOMS, key] ?: continue
 
             if (chatRoom.getSender() == sender && chatRoom.getReceiver() == receiver
                 || chatRoom.getSender() == receiver && chatRoom.getReceiver() == sender
