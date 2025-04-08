@@ -59,7 +59,7 @@ class ProductPost() : BaseTime() {
     @OneToMany(mappedBy = "productPost", cascade = [CascadeType.ALL], orphanRemoval = true)
     val productCategories: MutableList<ProductCategory> = mutableListOf()
 
-    @OneToMany(mappedBy = "target", cascade = [CascadeType.REMOVE], orphanRemoval = true)
+    @OneToMany(mappedBy = "_target", cascade = [CascadeType.REMOVE], orphanRemoval = true)
     val commentList: MutableList<Comment> = mutableListOf()
 
     constructor(
@@ -81,6 +81,22 @@ class ProductPost() : BaseTime() {
         this.latitude = latitude
         this.longitude = longitude
         setCreateDateNow();
+    }
+
+    companion object {
+        @JvmStatic
+        fun create(
+            writer: User,
+            productName: String,
+            productPrice: Int,
+            title: String,
+            content: String,
+            imageUrls: String,
+            latitude: Float,
+            longitude: Float
+        ): ProductPost {
+            return ProductPost(writer, productName, productPrice, title, content, imageUrls, latitude, longitude)
+        }
     }
 
     fun addCategories(categories: List<Category>) {

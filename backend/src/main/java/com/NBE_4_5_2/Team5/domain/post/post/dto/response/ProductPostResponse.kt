@@ -1,9 +1,7 @@
 package com.NBE_4_5_2.Team5.domain.post.post.dto.response
 
-import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductCategory
 import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductPost
 import java.time.LocalDateTime
-import java.util.stream.Collectors
 
 class ProductPostResponse(
     val id: String,

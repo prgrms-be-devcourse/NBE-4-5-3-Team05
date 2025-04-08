@@ -9,7 +9,6 @@ import com.NBE_4_5_2.Team5.global.exception.post.product.ProductPostNotFoundExce
 import com.fasterxml.jackson.databind.ObjectMapper
 import jakarta.servlet.http.Cookie
 import org.assertj.core.api.Assertions
-import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
@@ -24,7 +23,6 @@ import java.util.*
 @SpringBootTest
 @AutoConfigureMockMvc
 @BaseTestConfig
-@Order(100)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class AdminControllerTest(
     @Autowired
@@ -45,7 +43,6 @@ internal class AdminControllerTest(
     @Autowired
     private val adminService: AdminService,
 ) {
-
 
     @Test
     @Throws(Exception::class)
