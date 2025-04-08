@@ -143,7 +143,7 @@ class ChatRoomController(
 
     @GetMapping("/room/{roomId}")
     @ResponseBody
-    fun getRoomByRoomId(@PathVariable roomId: String?): RsData<ChatRoom> {
+    fun getRoomByRoomId(@PathVariable roomId: String): RsData<ChatRoom> {
         val userIdentity = userAuthService.userIdentity
         val user = userAuthService.getRealActor(userIdentity)
 
@@ -158,7 +158,7 @@ class ChatRoomController(
     @GetMapping("/message")
     @ResponseBody
     fun getMessages(
-        @Parameter(description = "채팅방 id", example = "123") @RequestParam roomId: String?
+        @Parameter(description = "채팅방 id", example = "123") @RequestParam roomId: String
     ): RsData<List<MessageDto>> {
         val userIdentity = userAuthService.userIdentity
         val user = userAuthService.getRealActor(userIdentity)
@@ -191,7 +191,7 @@ class ChatRoomController(
     @DeleteMapping("/message")
     @ResponseBody
     fun deleteRoom(
-        @Parameter(description = "채팅방 id", example = "123") @RequestParam roomId: String?
+        @Parameter(description = "채팅방 id", example = "123") @RequestParam roomId: String
     ): RsData<*> {
         val userIdentity = userAuthService.userIdentity
         val user = userAuthService.getRealActor(userIdentity)
