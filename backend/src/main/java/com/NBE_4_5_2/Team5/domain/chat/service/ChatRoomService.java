@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import com.NBE_4_5_2.Team5.global.exception.security.ForbiddenAccessException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.ValueOperations;
@@ -14,10 +13,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.NBE_4_5_2.Team5.domain.chat.entity.ChatMessage;
 import com.NBE_4_5_2.Team5.domain.chat.entity.ChatRoom;
-import com.NBE_4_5_2.Team5.domain.chat.repository.MessageRepository;
+import com.NBE_4_5_2.Team5.domain.chat.repository.ChatMessageRepository;
 import com.NBE_4_5_2.Team5.domain.post.post.service.ProductPostService;
 import com.NBE_4_5_2.Team5.domain.user.user.service.UserService;
 import com.NBE_4_5_2.Team5.global.Rq;
+import com.NBE_4_5_2.Team5.global.exception.security.ForbiddenAccessException;
 
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
@@ -39,13 +39,13 @@ public class ChatRoomService {
 	@Resource(name = "objectRedisTemplate")
 	private ValueOperations<String, String> valueOps;
 	@Autowired
-	private MessageRepository messageRepository;
-	@Autowired
 	private ProductPostService productPostService;
 	@Autowired
 	private Rq rq;
 	@Autowired
 	private UserService userService;
+	@Autowired
+	private ChatMessageRepository chatMessageRepository;
 
 	// 모든 채팅방 조회
 	public List<ChatRoom> findAllRoom() {
@@ -148,11 +148,11 @@ public class ChatRoomService {
 	public List<ChatMessage> getMessagesByUser(String roomId, String username) {
 
 		if (!canAccess(roomId, username)) {
-			throw new ForbiddenAccessException("404","접근 권한 없는 채팅방");
+			throw new ForbiddenAccessException("404", "접근 권한 없는 채팅방");
 		}
 		ChatRoom chatRoom = findChatRoomByClient(roomId, username);
-
-		return messageRepository.findAllByClientAndRoomId(chatRoom.getId(), roomId);
+		List<ChatMessage> byRoomId = chatMessageRepository.findByClientAndRoomId(chatRoom.getId(), roomId);
+		return byRoomId;
 	}
 
 	// 채팅방 삭제
@@ -160,7 +160,6 @@ public class ChatRoomService {
 		ChatRoom chatRoom = findChatRoomByClient(roomId, username);
 		String client = chatRoom.getId();
 		hashOpsChatRoom.delete(CHAT_ROOMS, roomId + "_" + username);     // redis에서 삭제
-		messageRepository.deleteAllByClient(client);
 	}
 
 	// 유저가 입장한 채팅방ID와 유저 세션ID 맵핑 정보 저장
@@ -224,7 +223,7 @@ public class ChatRoomService {
 	}
 
 	// 현재 두 사용자가 사용중인 roodId(개별저장소)
-	public String findByRoomIdByClients(String sender, String receiver) {
+	public ChatRoom findByRoomIdByClients(String sender, String receiver) {
 		for (String key : hashOpsEnterInfo.keys(CHAT_ROOMS)) {
 			ChatRoom chatRoom = hashOpsChatRoom.get(CHAT_ROOMS, key);
 
@@ -235,7 +234,7 @@ public class ChatRoomService {
 			if (chatRoom.getSender().equals(sender) && chatRoom.getReceiver().equals(receiver)
 				|| chatRoom.getSender().equals(receiver) && chatRoom.getReceiver().equals(sender)) {
 				if (chatRoom.getClient().equals(sender)) {
-					return chatRoom.getRoomId();
+					return chatRoom;
 				}
 			}
 		}

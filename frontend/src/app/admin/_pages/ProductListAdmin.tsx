@@ -39,7 +39,6 @@ export default function ProductListAdmin() {
   return (
     <div className="w-full flex flex-col flex-1 min-h-0">
       <div className="flex-1 flex flex-col min-h-0 ">
-        <h1>ProductList</h1>
         <div className="flex justify-end items-end min-h-0">
           <PageSizeSelector
             selectedPageSize={pageSize}

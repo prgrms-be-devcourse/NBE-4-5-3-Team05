@@ -8,8 +8,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MessageDto {
+    private String messageId;
     private String sender;
     private String message;
     private String image;
+    private double latitude;
+    private double longitude;
     private String timestamp;
+    private String lastMessage;
+    private String lastTimestamp;
 }

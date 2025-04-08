@@ -1,9 +1,10 @@
 package com.NBE_4_5_2.Team5.domain.user.user.service;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 
+import com.NBE_4_5_2.Team5.global.exception.user.UserNotFoundException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -46,7 +47,6 @@ public class UserService {
 		userValidator.emailVerified(email);
 
 		User user = User.builder()
-			.id("user-" + UUID.randomUUID())
 			.username(username)
 			.password(passwordEncoder.encode(password))
 			.email(email)
@@ -106,12 +106,14 @@ public class UserService {
 
 		String id = (String)payload.get("id");
 		String username = (String)payload.get("username");
+		String nickname = (String)payload.get("nickname");
 		Role role = (Role)payload.get("role");
 
 		return Optional.of(
 			User.builder()
 				.id(id)
 				.username(username)
+				.nickname(nickname)
 				.role(role)
 				.build()
 		);
@@ -226,6 +228,7 @@ public class UserService {
 		return User.builder()
 			.id(user.getId())
 			.username(user.getUsername())
+			.nickname(user.getNickname())
 			.role(user.getRole())
 			.build();
 	}
@@ -297,5 +300,13 @@ public class UserService {
 		}
 
 		emailService.saveVerificationCode(email, "verified");
+	}
+
+	// 관리자 유저 한명 반환
+	public User getAdminUsers() {
+		Optional<User> adminUser=userRepository.findAllByRole(Role.ADMIN).stream().findFirst();
+		if(adminUser.isPresent()) {
+			return adminUser.get();
+		}else throw new UserNotFoundException("404","관리자 유저가 없습니다.");
 	}
 }

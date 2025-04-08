@@ -7,7 +7,7 @@ interface FilterSidebarProps {
     keyword: string;
     minPrice: number | null;
     maxPrice: number | null;
-    category: string;
+    categories: string[];
     sort: string;
   }) => void;
   categories: { id: number; name: string }[];
@@ -20,8 +20,17 @@ export default function FilterSidebar({
   const [keyword, setKeyword] = useState("");
   const [minPrice, setMinPrice] = useState<string>("");
   const [maxPrice, setMaxPrice] = useState<string>("");
-  const [category, setCategory] = useState("");
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [sort, setSort] = useState("desc");
+
+  const handleCategoryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (e.target.checked) {
+      setSelectedCategories((prev) => [...prev, value]);
+    } else {
+      setSelectedCategories((prev) => prev.filter((cat) => cat !== value));
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,7 +38,7 @@ export default function FilterSidebar({
       keyword,
       minPrice: minPrice.trim() === "" ? null : Number(minPrice),
       maxPrice: maxPrice.trim() === "" ? null : Number(maxPrice),
-      category,
+      categories: selectedCategories,
       sort,
     });
   };
@@ -69,18 +78,21 @@ export default function FilterSidebar({
         </div>
         <div>
           <label className="block mb-1">카테고리</label>
-          <select
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            className="w-full border rounded p-1"
-          >
-            <option value="">전체</option>
+          <div className="flex flex-wrap gap-2">
             {categories.map((cat) => (
-              <option key={cat.id} value={cat.name}>
-                {cat.name}
-              </option>
+              <label
+                key={cat.id}
+                className="flex items-center space-x-2 border p-2 rounded-md cursor-pointer"
+              >
+                <input
+                  type="checkbox"
+                  value={cat.name}
+                  onChange={handleCategoryChange}
+                />
+                <span>{cat.name}</span>
+              </label>
             ))}
-          </select>
+          </div>
         </div>
         <div>
           <label className="block mb-1">정렬</label>

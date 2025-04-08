@@ -2,9 +2,9 @@
 
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import type { components } from "@/lib/backend/apiV1/schema";
 
-// PreviewPostResponse 타입을 사용하는 경우
 export type Post = components["schemas"]["PreviewPostResponse"];
 
 interface PostListProps {
@@ -19,16 +19,23 @@ export default function PostList({ posts }: PostListProps) {
   return (
     <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {posts.map((post) => {
-        const thumbNail = post.thumbNail?.trim() || "";
+        const thumbNailRaw = post.thumbNail?.trim();
+        const thumbNail =
+          thumbNailRaw && thumbNailRaw !== "null" ? thumbNailRaw : "";
+
         return (
           <li key={post.id} className="border rounded p-4 shadow">
             <Link href={`/posts/${post.id}`} className="block hover:opacity-90">
               {thumbNail ? (
-                <img
-                  src={thumbNail}
-                  alt={post.title || "이미지"}
-                  className="w-full h-40 object-cover mb-2 rounded"
-                />
+                <div className="relative w-full h-40 mb-2 rounded">
+                  <Image
+                    loader={() => thumbNail}
+                    src={thumbNail}
+                    alt={post.title || "이미지"}
+                    fill
+                    className="object-cover rounded"
+                  />
+                </div>
               ) : (
                 <div className="w-full h-40 bg-gray-200 flex items-center justify-center mb-2 rounded">
                   이미지 없음

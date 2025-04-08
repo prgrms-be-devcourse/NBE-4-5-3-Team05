@@ -12,6 +12,13 @@ export default function ClientPage() {
   const router = useRouter();
   const { setLoginMember } = use(LoginMemberContext);
 
+  let baseUrl = `${process.env.NEXT_PUBLIC_PROTOCOL}://${process.env.NEXT_PUBLIC_BACKEND_HOST}`;
+  if (`${process.env.NEXT_PUBLIC_PROTOCOL}` === "https") {
+    baseUrl += `/oauth2/authorization/kakao?redirectUrl=${process.env.NEXT_PUBLIC_PROTOCOL}://${process.env.NEXT_PUBLIC_FRONTEND_HOST}`;
+  } else {
+    baseUrl += `:${process.env.NEXT_PUBLIC_BACKEND_PORT}/oauth2/authorization/kakao?redirectUrl=${process.env.NEXT_PUBLIC_PROTOCOL}://${process.env.NEXT_PUBLIC_FRONTEND_HOST}:${process.env.NEXT_PUBLIC_FRONTEND_PORT}`;
+  }
+
   async function login(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const form = e.target as HTMLFormElement;
@@ -47,6 +54,7 @@ export default function ClientPage() {
     alert("로그인 성공하셨습니다.");
     if (response.data.data.item) {
       setLoginMember(response.data.data.item);
+      console.log("업데이트된 loginMember:", response.data.data.item);
     }
     router.replace("/");
   }
@@ -76,10 +84,7 @@ export default function ClientPage() {
             <Button className="w-full cursor-pointer">회원가입</Button>
           </Link>
           <Button variant="ghost" className="w-full mt-4 p-0">
-            <Link
-              href={`http://${process.env.NEXT_PUBLIC_BACKEND_HOST}:${process.env.NEXT_PUBLIC_BACKEND_PORT}/oauth2/authorization/kakao?redirectUrl=http://${process.env.NEXT_PUBLIC_FRONTEND_HOST}:${process.env.NEXT_PUBLIC_FRONTEND_PORT}`}
-              className="w-full"
-            >
+            <Link href={baseUrl} className="w-full">
               <img src="/kakao_login.png" className="w-full" />
             </Link>
           </Button>

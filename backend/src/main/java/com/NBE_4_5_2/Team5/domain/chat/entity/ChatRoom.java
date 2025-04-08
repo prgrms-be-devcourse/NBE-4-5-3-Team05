@@ -24,12 +24,14 @@ public class ChatRoom implements Serializable {
     private String receiver;    // 상대
     private String client;    // 개별 저장소
     private long userCount; // 채팅방 인원수
+    private String lastMessage;
+    private String lastTimestamp;
 
     public ChatRoom(String sender, String receiver) {
         this.id = UUID.randomUUID().toString();
         this.sender = sender;
         this.receiver = receiver;
-        this.name = sender+"와 "+receiver+"의 채팅방";
+        this.name = receiver;
         this.userCount = 2;
     }
 }

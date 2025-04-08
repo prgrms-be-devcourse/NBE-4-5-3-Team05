@@ -1,5 +1,7 @@
 package com.NBE_4_5_2.Team5.global.springDocs;
 
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.info.Info;
 import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,5 +34,4 @@ public class SpringDocConfig {
 				.addSecurityItem(new SecurityRequirement().addList("cookieAuth")))
 			.build();
 	}
-
 }

@@ -70,6 +70,10 @@ spring:
           timeout: 5000                                # 클라이언트 <- SMTP 서버 응답 대기 시간
           write-timeout: 5000                          # 클라이언트 작업 완료 대기 시간
 
+  web:
+    resources:
+      static-locations: classpath:/static/
+
 logging:
   level:
     org.hibernate.SQL: DEBUG

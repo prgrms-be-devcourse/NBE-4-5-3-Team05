@@ -23,7 +23,9 @@ export default async function Page({
     headers: {
       cookie: (await cookies()).toString(),
     },
+    credentials: "include",
   });
+  console.log(response);
 
   if (response.error) {
     console.log("서버 오류 : " + response.error.message);

@@ -3,7 +3,6 @@ package com.NBE_4_5_2.Team5.domain.user.admin.service;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
@@ -51,7 +50,6 @@ public class AdminService {
 	public User signUpAdmin(String username, String password, String nickname, String email) {
 		User admin =
 			User.builder()
-				.id("user-" + UUID.randomUUID())
 				.role(Role.ADMIN)
 				.username(username)
 				.password(passwordEncoder.encode(password))
@@ -79,8 +77,11 @@ public class AdminService {
 
 		isAdmin(admin);
 
-		NoticePost noticePost = NoticePost.builder().title(title).content(content)
-			.admin(admin).build();
+		NoticePost noticePost = NoticePost.builder()
+			.title(title)
+			.content(content)
+			.admin(admin)
+			.build();
 
 		NoticePost saved = noticePostRepository.save(noticePost);
 
@@ -103,8 +104,12 @@ public class AdminService {
 	}
 
 	private BanList addNewBanList(String reason, User bannedUser) {
-		BanList banList = new BanList(reason, bannedUser, LocalDateTime.now()
-			.plusDays((long)(bannedUser.getBlockedCount() + 1) * BAN_DURATION_WEIGHT));
+
+		BanList banList = BanList.builder()
+			.reason(reason)
+			.bannedUser(bannedUser)
+			.endDate(LocalDateTime.now().plusDays((long)(bannedUser.getBlockedCount() + 1) * BAN_DURATION_WEIGHT))
+			.build();
 
 		return banListRepository.save(banList);
 	}
@@ -151,6 +156,7 @@ public class AdminService {
 
 	/**
 	 * {@code userId}를 가진 유저의 밴 이력을 삭제한다.
+	 *
 	 * @param userId
 	 */
 	private void removeBanInfo(String userId) {
@@ -192,4 +198,10 @@ public class AdminService {
 			.collect(Collectors.toList());
 	}
 
+	public NoticeResBody getNotice(String noticeId) {
+		NoticePost noticePost = noticePostRepository.findById(noticeId)
+			.orElseThrow(() -> new NoticeNotFoundException());
+
+		return NoticeResBody.of(noticePost);
+	}
 }

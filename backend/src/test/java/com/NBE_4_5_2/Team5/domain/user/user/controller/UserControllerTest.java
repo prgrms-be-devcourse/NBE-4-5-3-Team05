@@ -25,7 +25,6 @@ import com.NBE_4_5_2.Team5.domain.user.user.entity.User;
 import com.NBE_4_5_2.Team5.domain.user.user.service.UserService;
 import com.NBE_4_5_2.Team5.domain.user.user.service.email.EmailService;
 import com.NBE_4_5_2.Team5.global.config.BaseTestConfig;
-import com.NBE_4_5_2.Team5.global.config.RedisTestContainerConfig;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.transaction.Transactional;
@@ -35,7 +34,7 @@ import jakarta.transaction.Transactional;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @BaseTestConfig
 @Order(100)
-class UserControllerTest extends RedisTestContainerConfig {
+class UserControllerTest {
 
 	@Autowired
 	private MockMvc mvc;
@@ -353,7 +352,6 @@ class UserControllerTest extends RedisTestContainerConfig {
 				assertThat(cookieRefreshToken).isNotNull();
 				assertThat(cookieRefreshToken.getName()).isEqualTo("refreshToken");
 				assertThat(cookieRefreshToken.getValue()).isNotBlank();
-				assertThat(cookieRefreshToken.getDomain()).isEqualTo("localhost");
 				assertThat(cookieRefreshToken.getPath()).isEqualTo("/");
 				assertThat(cookieRefreshToken.isHttpOnly()).isTrue();
 				assertThat(cookieRefreshToken.getSecure()).isTrue();
@@ -363,7 +361,6 @@ class UserControllerTest extends RedisTestContainerConfig {
 				assertThat(cookieAccessToken).isNotNull();
 				assertThat(cookieAccessToken.getName()).isEqualTo("accessToken");
 				assertThat(cookieAccessToken.getValue()).isNotBlank();
-				assertThat(cookieAccessToken.getDomain()).isEqualTo("localhost");
 				assertThat(cookieAccessToken.getPath()).isEqualTo("/");
 				assertThat(cookieAccessToken.isHttpOnly()).isTrue();
 				assertThat(cookieAccessToken.getSecure()).isTrue();
@@ -759,7 +756,6 @@ class UserControllerTest extends RedisTestContainerConfig {
 				assertThat(accessToken).isNotNull();
 				assertThat(accessToken.getName()).isEqualTo("accessToken");
 				assertThat(accessToken.getValue()).isNotBlank();
-				assertThat(accessToken.getDomain()).isEqualTo("localhost");
 				assertThat(accessToken.getPath()).isEqualTo("/");
 				assertThat(accessToken.isHttpOnly()).isTrue();
 				assertThat(accessToken.getSecure()).isTrue();

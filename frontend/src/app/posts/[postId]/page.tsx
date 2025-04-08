@@ -1,168 +1,245 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import Image from "next/image";
 import type { components } from "@/lib/backend/apiV1/schema";
 import client from "@/lib/client";
+import { LoginMemberContext } from "@/app/stores/auth/loginMemberStore";
+import Comments from "./_pages/comments";
+import { Button } from "@/components/ui/button";
+import { faComment } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 type ProductPostResponse = components["schemas"]["ProductPostResponse"];
 
 export default function PostDetailPage() {
   const { postId } = useParams<{ postId: string }>();
   const router = useRouter();
+  // LoginMemberContext를 useContext로 직접 읽어옵니다.
+  const { loginMember } = useContext(LoginMemberContext);
+
   const [post, setPost] = useState<ProductPostResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
   const [likeLoading, setLikeLoading] = useState<boolean>(false);
   const [liked, setLiked] = useState<boolean>(false);
-
   const [purchased, setPurchased] = useState<boolean>(false);
   const [purchaseLoading, setPurchasedLoading] = useState<boolean>(false);
 
-  // 로그인 상태 체크 함수
+  const [comments, setComments] = useState<
+    components["schemas"]["CommentDto"][]
+  >([]);
+
   const checkLoginStatus = async (): Promise<boolean> => {
-    // 로그인 여부를 확인하는 API 호출 (/api/users/me)
-    const result = await client.GET("/api/users/me", {
-      credentials: "include",
-    });
-    if (result.error) {
-      console.log(result.error);
+    try {
+      const result = await client.GET("/api/users/me", {
+        credentials: "include",
+      });
+      if (result.error) {
+        console.log("로그인 상태 확인 실패:", result.error);
+        return false;
+      }
+      return true;
+    } catch (err) {
+      console.log("로그인 상태 확인 중 예외 발생:", err);
       return false;
     }
-    return true;
   };
-
-  // 게시글 상세 조회 (백엔드에서 조회수 증가 처리)
+  // 게시글 상세 조회 API 호출
   const fetchPost = async () => {
     if (!postId) return;
-    const response = await client.GET("/api/posts/{id}", {
-      withCredentials: true,
-      params: {
-        path: {
-          id: postId,
-        },
-      },
-    });
-    if (response.error) {
-      console.error("게시글 상세 조회 실패", response.error);
+    try {
+      const response = await client.GET("/api/posts/{id}", {
+        withCredentials: true,
+        params: { path: { id: postId } },
+      });
+      if (response.error) {
+        console.error("게시글 상세 조회 실패", response.error);
+        setError("게시글 정보를 불러올 수 없습니다.");
+      } else {
+        setPost(response.data.data);
+      }
+    } catch (err) {
+      console.error("게시글 상세 조회 중 예외 발생:", err);
       setError("게시글 정보를 불러올 수 없습니다.");
-
-      return;
+    } finally {
+      setLoading(false);
     }
-    setPost(response.data.data);
-    setLoading(false);
   };
 
-  // 사용자의 찜한 내역을 불러와 현재 게시글이 찜되었는지 확인
+  // 찜한 내역 조회
   const fetchUserFavorites = async () => {
-    // 먼저 로그인 상태 체크
-    const isLoggedIn = await checkLoginStatus();
-    console.log(isLoggedIn);
-    if (!isLoggedIn) {
-      // 로그인 안되어 있으면 찜한 내역을 불러오지 않음
-      return;
-    }
-    const response = await client.GET("/api/posts/my/favorites", {
-      credentials: "include",
-    });
-    if (response.error) {
-      console.error("찜한 내역 조회 실패", response.error);
-      return;
-    }
-    const favorites = response.data!.data; // ProductPostResponse[]
-    if (post?.id && favorites.items.some((fav) => fav.id === post.id)) {
-      setLiked(true);
+    try {
+      const response = await client.GET("/api/posts/my/favorites", {
+        credentials: "include",
+      });
+      if (response.error) {
+        console.error("찜한 내역 조회 실패", response.error);
+        return;
+      }
+      const favoritesResponse = response.data.data;
+      const favorites: ProductPostResponse[] = favoritesResponse.items;
+      if (post?.id && favorites.some((fav) => fav.id === post.id)) {
+        setLiked(true);
+      }
+    } catch (err) {
+      console.error("찜한 내역 조회 중 예외 발생:", err);
     }
   };
 
+  // 구매 여부 확인 (로그인 정보가 있을 때만 확인)
   const checkPurchased = async () => {
-    const isLoggedIn = await checkLoginStatus();
-
-    if (!isLoggedIn) return;
-
-    const result = await client.GET("/api/payments", {
-      params: {
-        query: {
-          "post-id": post!.id!,
-        },
-      },
-      credentials: "include",
-    });
-    if (result.error) {
-      console.log(result);
-      setPurchased(false);
-      return;
+    // 로그인 정보가 없으면 바로 return
+    if (!loginMember.id) return;
+    try {
+      const result = await client.GET("/api/payments", {
+        params: { query: { "post-id": post?.id! } },
+        credentials: "include",
+      });
+      if (result.error) {
+        console.log("구매 여부 확인 실패:", result.error);
+        setPurchased(false);
+        return;
+      }
+      setPurchased(true);
+    } catch (err) {
+      console.error(err);
     }
-    setPurchased(true);
   };
 
   useEffect(() => {
     fetchPost();
-  }, []);
+  }, [postId]);
 
   useEffect(() => {
     if (post) {
       fetchUserFavorites();
       checkPurchased();
+      fetchComments();
     }
   }, [post]);
 
-  const handleLike = async () => {
-    if (!post) return;
-    // 로그인 상태 체크
-    const isLoggedIn = await checkLoginStatus();
-    if (!isLoggedIn) {
-      alert("먼저 로그인을 해주세요.");
-      router.push("/user/login");
-      return;
-    }
-    setLikeLoading(true);
-
-    const response = await client.POST("/api/posts/{id}/like", {
+  const fetchComments = async () => {
+    const result = await client.GET("/api/posts/{id}/comments", {
       params: {
         path: {
-          id: post.id!,
+          id: post!.id!,
+        },
+        query: {
+          pageable: {},
+          page: 0,
+          size: 10,
         },
       },
       credentials: "include",
     });
-    if (response.error) {
-      console.error("찜 처리 실패", response.error);
+    if (result.error) {
+      console.log(result.error);
       return;
     }
-    setPost(response.data.data);
-    setLiked(true);
-    setLikeLoading(false);
+    setComments(result.data.data!.content!);
   };
 
+  const loadComments = async (page: number) => {
+    const response = await client.GET("/api/posts/{id}/comments", {
+      params: {
+        path: {
+          id: post!.id!,
+        },
+        query: {
+          pageable: {},
+          page: page,
+        },
+      },
+    });
+    return response.data!.data.content!;
+  };
+
+  // 구매 처리 핸들러
   const handlePurchase = async () => {
-    console.log("hi");
-    const isLoggedIn = await checkLoginStatus();
-    if (!isLoggedIn) {
-      alert("먼저 로그인을 해주세요.");
-      router.push("/user/login");
-      return;
-    }
-
+    if (!post) return;
     const isConfirmed = confirm("정말 구매하시겠습니까?");
-
     if (isConfirmed) {
       setPurchasedLoading(true);
-      const response = await client.POST("/api/payments", {
-        body: {
-          productId: post!.id,
-        },
+      try {
+        const response = await client.POST("/api/payments", {
+          body: { productId: post.id },
+          credentials: "include",
+        });
+        if (response.error) {
+          alert("구매에 실패했습니다.");
+          console.error("구매 처리 실패", response.error);
+          setPurchasedLoading(false);
+          return;
+        }
+        setPurchased(true);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setPurchasedLoading(false);
+      }
+    }
+  };
+
+  // 찜 처리 핸들러
+  const handleLike = async () => {
+    if (!post || !post.id) return;
+    setLikeLoading(true);
+    try {
+      const response = await client.POST("/api/posts/{id}/like", {
+        params: { path: { id: post.id } },
         credentials: "include",
       });
       if (response.error) {
-        alert("구매에 실패했습니다.");
-        console.error("구매 처리 실패", response.error);
-        setPurchasedLoading(false);
+        console.error("찜 처리 실패", response.error);
         return;
       }
-      setPurchased(true);
-      setPurchasedLoading(false);
-    } else {
+      setPost(response.data.data);
+      setLiked(true);
+    } catch (err) {
+      console.error("찜 처리 중 예외 발생", err);
+    } finally {
+      setLikeLoading(false);
+    }
+  };
+
+  // 수정하기 버튼 핸들러 (작성자와 로그인된 회원의 id 비교)
+  const handleEdit = () => {
+    if (!post) return;
+    console.log("로그인된 회원:", loginMember);
+    console.log("게시글 작성자:", post.writerId);
+    if (post.writerId !== loginMember.id) {
+      alert("작성자만 수정할 수 있습니다.");
+      return;
+    }
+    router.push(`/posts/modify/${post.id}`);
+  };
+
+  // 게시글 삭제 핸들러
+  const handleDelete = async () => {
+    if (!post) return;
+    // 작성자 확인
+    if (post.writerId !== loginMember.id) {
+      alert("작성자만 삭제할 수 있습니다.");
+      return;
+    }
+    const isConfirmed = confirm("정말 게시글을 삭제하시겠습니까?");
+    if (!isConfirmed) return;
+    try {
+      const response = await client.DELETE("/api/posts/{id}", {
+        credentials: "include",
+        params: { path: { id: post.id! } },
+      });
+      if (response.error) {
+        alert("게시글 삭제에 실패했습니다: " + response.error.message);
+        return;
+      }
+      alert("게시글이 삭제되었습니다.");
+      router.push("/posts");
+    } catch (err) {
+      alert("삭제 중 오류가 발생했습니다.");
+      console.error(err);
     }
   };
 
@@ -170,10 +247,52 @@ export default function PostDetailPage() {
   if (error) return <div className="p-4 text-red-500">{error}</div>;
   if (!post) return <div className="p-4">게시글 정보를 찾을 수 없습니다.</div>;
 
-  const images = post.imageUrls ? post.imageUrls.split(",") : [];
+  const handleCreateChatRoom = async () => {
+    const isLoggedIn = await checkLoginStatus();
+    if (!isLoggedIn) {
+      alert("먼저 로그인을 해주세요.");
+      router.push("/user/login");
+      return;
+    }
+
+    try {
+      const createResponse = await client.POST("/api/chat/room", {
+        params: {
+          query: {
+            postId: postId, // 현재 게시글 ID 전송
+          },
+        },
+        credentials: "include",
+      });
+
+      if (createResponse.error) {
+        console.error("채팅방 생성 오류:", createResponse.error.message);
+        alert("채팅방 생성에 실패했습니다.");
+        return;
+      }
+
+      // 채팅방 생성 성공
+      const chatRoomId = createResponse.data.data.roomId; // 생성된 채팅방 ID
+      console.log("채팅방 생성 성공, ID:", chatRoomId);
+      router.push(`/chat/${chatRoomId}`); // 생성된 채팅방으로 이동
+    } catch (error) {
+      console.error("채팅방 생성 중 오류 발생:", error);
+      alert("채팅방 생성 중 오류가 발생했습니다.");
+    }
+  };
+
+
+
+  // 이미지 URL들을 소문자와 trim을 적용해 유효한 값만 필터링
+  const images = post.imageUrls
+    ? post.imageUrls
+        .split(",")
+        .map((url) => url.trim())
+        .filter((url) => url && url.toLowerCase() !== "null")
+    : [];
 
   return (
-    <div className="p-4 w-full flex-1">
+    <div className="p-4  w-full">
       <div className="bg-gray-800 text-white p-4 rounded mb-4">
         <h1 className="text-2xl font-bold">길게 볼 장터</h1>
       </div>
@@ -181,11 +300,15 @@ export default function PostDetailPage() {
         <div className="flex-1 bg-gray-100 rounded p-4">
           <h2 className="text-xl font-semibold mb-2">사진</h2>
           {images.length > 0 ? (
-            <img
-              src={images[0]}
-              alt={post.title || "이미지"}
-              className="w-full h-auto object-cover rounded"
-            />
+            <div className="relative w-full h-64">
+              <Image
+              loader={()=>images[0]}
+                src={images[0]}
+                alt={post.title || "이미지"}
+                fill
+                className="object-cover rounded"
+              />
+            </div>
           ) : (
             <div className="h-64 flex items-center justify-center text-gray-500">
               이미지가 없습니다.
@@ -199,12 +322,14 @@ export default function PostDetailPage() {
             <li>작성자 닉네임: {post.writerName}</li>
           </ul>
           <div className="mt-4">
-            <button
-              onClick={() => router.push(`/chat/${post.id}`)}
-              className="px-4 py-2 bg-blue-500 text-white rounded"
-            >
-              채팅 걸기
-            </button>
+          <Button
+            variant="outline"
+            onClick={handleCreateChatRoom}
+            className="rounded-full bg-yellow-400 text-black py-2 px-4 border border-black-700 hover:bg-yellow-300"              
+          >
+            <FontAwesomeIcon icon={faComment} className="mr-2" />
+            채팅
+          </Button>
           </div>
         </div>
       </div>
@@ -247,18 +372,21 @@ export default function PostDetailPage() {
             <h3 className="text-lg font-semibold mb-2">추가 사진</h3>
             <div className="flex gap-2 overflow-x-auto">
               {images.slice(1).map((imgUrl, idx) => (
-                <img
-                  key={idx}
-                  src={imgUrl}
-                  alt={`${post.title} - ${idx + 1}`}
-                  className="w-40 h-auto object-cover rounded"
-                />
+                <div key={idx} className="relative w-40 h-40">
+                  <Image
+                  loader={()=>imgUrl}
+                    src={imgUrl}
+                    alt={`${post.title} - ${idx + 1}`}
+                    fill
+                    className="object-cover rounded"
+                  />
+                </div>
               ))}
             </div>
           </div>
         )}
       </div>
-      <div className="mt-4">
+      <div className="mt-4 flex gap-4">
         <button
           disabled={likeLoading || liked}
           onClick={handleLike}
@@ -277,6 +405,25 @@ export default function PostDetailPage() {
             ? "처리 중..."
             : "구매하기"}
         </button>
+        <button
+          onClick={handleEdit}
+          className="px-4 py-2 bg-blue-500 text-white rounded"
+        >
+          수정하기
+        </button>
+        <button
+          onClick={handleDelete}
+          className="px-4 py-2 bg-gray-500 text-white rounded"
+        >
+          삭제하기
+        </button>
+      </div>
+      <div className="w-full">
+        <Comments
+          postId={post.id!}
+          initialComments={comments}
+          loadMoreComments={loadComments}
+        ></Comments>
       </div>
     </div>
   );

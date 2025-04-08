@@ -15,14 +15,13 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import com.NBE_4_5_2.Team5.domain.user.user.service.email.EmailService;
 import com.NBE_4_5_2.Team5.global.config.BaseTestConfig;
-import com.NBE_4_5_2.Team5.global.config.RedisTestContainerConfig;
 import com.NBE_4_5_2.Team5.global.exception.ServiceException;
 
 import jakarta.mail.internet.MimeMessage;
 
 @SpringBootTest
 @BaseTestConfig
-class EmailServiceTest extends RedisTestContainerConfig {
+class EmailServiceTest  {
 
 	@MockitoBean
 	private JavaMailSender mailSender;

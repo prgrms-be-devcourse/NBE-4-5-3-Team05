@@ -79,6 +79,7 @@ export default function SidebarLayout({
     if (!tab) {
       router.replace("?tab=ProductList"); // ✅ 초기 상태 설정
     }
+    setCurrentPage(tab as PageType);
   }, [tab, router]);
 
   // URL에서 현재 탭 상태 가져오기
@@ -88,7 +89,7 @@ export default function SidebarLayout({
     router.push(`?tab=${page}`, { scroll: false });
   };
   return (
-    <div className="flex flex-1 overflow-y-scroll ">
+    <div className="flex flex-1 w-full ">
       <Sidebar setPage={setPage} />
       <Content page={currentPage} />
     </div>
