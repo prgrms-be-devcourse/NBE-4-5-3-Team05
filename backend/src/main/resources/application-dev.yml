@@ -12,6 +12,11 @@ spring:
   jackson:
     serialization:
       fail-on-empty-beans: false
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: sse-demo-group
+      auto-offset-reset: earliest
 
   output:
     ansi:
