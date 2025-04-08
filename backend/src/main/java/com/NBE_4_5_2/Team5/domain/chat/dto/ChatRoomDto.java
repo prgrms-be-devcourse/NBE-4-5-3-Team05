@@ -1,5 +1,6 @@
 package com.NBE_4_5_2.Team5.domain.chat.dto;
 
+import com.NBE_4_5_2.Team5.domain.chat.entity.ChatMessage;
 import com.NBE_4_5_2.Team5.domain.chat.entity.ChatRoom;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -14,6 +15,7 @@ public class ChatRoomDto {
     private String name;
     private long userCount;
     private String lastMessage;
+    private ChatMessage.MessageType messageType;
     private String lastTimestamp;
     private String other;
 

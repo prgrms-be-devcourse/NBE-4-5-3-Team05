@@ -23,4 +23,3 @@ abstract class BaseTime {
         this.modifiedDate = createdDate
     }
 }
-

@@ -39,48 +39,44 @@ class AdminService(
     private val noticePostRepository: NoticePostRepository,
     private val userService: UserService,
     private val passwordEncoder: PasswordEncoder,
-    private val productPostRepository: ProductPostRepository
+    private val productPostRepository: ProductPostRepository,
 ) {
+
+    companion object {
+        private const val BAN_DURATION_WEIGHT = 7
+    }
 
 
     fun signUpAdmin(username: String, password: String, nickname: String, email: String): User {
         return User(
-            username,
-            passwordEncoder.encode(password),
-            email,
-            nickname,
-            "addr",
-            "url",
-            Role.ADMIN
-        ).let {
-            userService.generateAuthtoken(it)
-            userRepository.save(it)
-        }
-
-        /**
-         * 기존 코드
-         * admin.setRefreshToken(UUID.randomUUID().toString());
-         *
-         * refreshToken을 login 할 때 발급하여 redis에 저장하는 방식으로 변경했습니다.
-         * 이에 따라 기존에 setRefreshToken 하던 방식에서 generateAuthtoken 하여 redis에 저장하는 방식으로
-         * 변경했습니다.
-         */
-
+                username,
+                passwordEncoder.encode(password),
+                email,
+                nickname,
+                "addr",
+                "url",
+                Role.ADMIN
+            )
+                .let {
+                    userService.generateAuthtoken(it)
+                    userRepository.save(it)
+                }
     }
 
     fun writeNotice(title: @NotEmpty String, content: @NotEmpty String): NoticeResBody {
-
         isAdmin(loggedInUser)
 
-        val noticePost = NoticePost(
+        return NoticePost(
             title,
             content,
             loggedInUser
         )
+            .let {
+                noticePostRepository.save(it)
+            }.let {
+                NoticeResBody.of(it)
+            }
 
-        val saved = noticePostRepository.save(noticePost)
-
-        return NoticeResBody.of(saved)
     }
 
     fun banUser(userId: String, reason: @NotEmpty String): BanListDto {
@@ -119,7 +115,6 @@ class AdminService(
     }
 
     fun deletePost(postId: String) {
-
         isAdmin(loggedInUser)
 
         productPostRepository.deleteById(postId)
@@ -163,13 +158,15 @@ class AdminService(
     }
 
     fun updateNotice(noticeId: String, body: UpdateNoticeReq): NoticeResBody {
-
         isAdmin(loggedInUser)
 
         val noticePost = noticePostRepository.findById(noticeId)
             .orElseThrow { NoticeNotFoundException("404-1", "Notice post를 찾을 수 없습니다.") }
 
-        return NoticeResBody.of(noticePost.update(body.title, body.content))
+        return noticePost.update(body.title, body.content)
+            .let {
+                NoticeResBody.of(noticePost)
+            }
     }
 
     fun deleteNotice(noticeId: String) {
@@ -188,13 +185,12 @@ class AdminService(
     }
 
     fun getNotice(noticeId: String): NoticeResBody {
-        val noticePost = noticePostRepository.findById(noticeId)
+        return noticePostRepository.findById(noticeId)
             .orElseThrow { NoticeNotFoundException() }
-
-        return NoticeResBody.of(noticePost)
+            .let {
+                NoticeResBody.of(it)
+            }
     }
 
-    companion object {
-        private const val BAN_DURATION_WEIGHT = 7
-    }
+
 }
