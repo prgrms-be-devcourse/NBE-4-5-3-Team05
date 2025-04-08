@@ -87,7 +87,7 @@ public class ChatRoomControllerTest {
         return roomId;
     }
 
-    @AfterEach
+//    @AfterEach
     @DisplayName("초기화_ 채팅방 전체 비우기")
     void deleteAll() throws Exception {
         List<ChatRoom> chatRoomList = chatRoomService.findRoomByUser(sender);
@@ -174,9 +174,9 @@ public class ChatRoomControllerTest {
                 .andDo(print());
 
         // Then
-        action.andExpect(status().isOk())
-                .andExpect(jsonPath("$.code").value("200"))
-                .andExpect(jsonPath("$.message").value("채팅방 목록"))
+        action.andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("404"))
+                .andExpect(jsonPath("$.message").value("존재하지 않는 채팅방"))
                 .andExpect(jsonPath("$.data").isEmpty());
     }
 
@@ -208,9 +208,9 @@ public class ChatRoomControllerTest {
                 .andExpect(jsonPath("$.data").isEmpty());
 
         // 조회 검증
-        getAction.andExpect(status().isOk())
-                .andExpect(jsonPath("$.code").value("200"))
-                .andExpect(jsonPath("$.message").value("채팅방 목록"))
+        getAction.andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("404"))
+                .andExpect(jsonPath("$.message").value("존재하지 않는 채팅방"))
                 .andExpect(jsonPath("$.data").isEmpty()); // 데이터가 비어 있음을 검증
 
         // roomId가 존재하지 않음을 검증
@@ -268,7 +268,7 @@ public class ChatRoomControllerTest {
         // Then: 검색 요청 결과 검증
         action.andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code").value("404"))
-                .andExpect(jsonPath("$.message").value("존재하지 않는 대화방입니다."))
+                .andExpect(jsonPath("$.message").value("존재하지 않는 채팅방"))
                 .andExpect(jsonPath("$.data").isEmpty());
     }
 
@@ -297,7 +297,6 @@ public class ChatRoomControllerTest {
     void getNotExistRoomByRoomId() throws Exception {
         // Given
         roomId = setUpChatRoom();
-        System.out.println("검색전, roomId: " + roomId);
         deleteAll();
         // When
         ResultActions action = mvc.perform(get("/api/chat/room/"+roomId)
@@ -354,8 +353,8 @@ public class ChatRoomControllerTest {
                 .andDo(print());
 
         // Then
-        action.andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.code").value("404"))
+        action.andExpect(status().isMethodNotAllowed())
+                .andExpect(jsonPath("$.code").value("405"))
                 .andExpect(jsonPath("$.message").value("접근 권한 없는 채팅방"))
                 .andExpect(jsonPath("$.data").isEmpty());
     }

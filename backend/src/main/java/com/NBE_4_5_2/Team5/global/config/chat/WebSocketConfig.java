@@ -1,4 +1,4 @@
-package com.NBE_4_5_2.Team5.global.config;
+package com.NBE_4_5_2.Team5.global.config.chat;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;

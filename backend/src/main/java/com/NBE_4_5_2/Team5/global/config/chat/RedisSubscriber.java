@@ -1,4 +1,4 @@
-package com.NBE_4_5_2.Team5.global.redis;
+package com.NBE_4_5_2.Team5.global.config.chat;
 
 
 import com.NBE_4_5_2.Team5.domain.chat.entity.ChatMessage;

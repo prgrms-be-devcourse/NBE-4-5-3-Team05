@@ -348,7 +348,7 @@ class ChatControllerTest {
 
         // Then
         Thread.sleep(50); // 비동기 처리
-        List<ChatMessage> messages = chatMessageRepository.findByRoomId(roomId);
+        List<ChatMessage> messages = chatRoomService.getMessagesByUser(roomId,sender);
         assertFalse(messages.isEmpty(),"메세지가 전송되지 않았습니다.");
         ChatMessage lastMessage = messages.get(messages.size()-1);
         assertEquals(content, lastMessage.getMessage(),"메세지 내용이 일치하지 않습니다.");

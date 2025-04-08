@@ -16,6 +16,8 @@ import com.NBE_4_5_2.Team5.domain.user.user.service.UserService;
 import com.NBE_4_5_2.Team5.global.Rq;
 import com.NBE_4_5_2.Team5.global.dto.Empty;
 import com.NBE_4_5_2.Team5.global.dto.RsData;
+import com.NBE_4_5_2.Team5.global.exception.ServiceException;
+import com.NBE_4_5_2.Team5.global.exception.security.ForbiddenAccessException;
 import com.NBE_4_5_2.Team5.global.exception.security.WrongRoleException;
 import com.NBE_4_5_2.Team5.global.exception.user.UserNotFoundException;
 import io.swagger.v3.oas.annotations.Operation;
@@ -43,32 +45,6 @@ public class ChatRoomController {
 	private final UserService userService;
 	private final UserRepository userRepository;
 	private final UserAuthService userAuthService;
-
-	/*
-	테스트용 HTML(임시)
-	 */
-	// 모든 방 조회
-	@Operation(summary = "채팅방 목록 페이지 조회", description = "채팅방 목록을 HTML 페이지로 반환합니다.")
-	@GetMapping("/room")
-	public String rooms() {
-		String token = rq.getValueFromCookie("accessToken");
-		if (token == null || authTokenService.getUsernameFromToken(token) == null) {
-			return "redirect:/api/users/login"; // 로그인 페이지로 리다이렉트
-		}
-		return "/chat/room";
-	}
-
-	// 채팅방 상세 페이지로 이동 (HTML 반환)
-	@Operation(summary = "채팅방 상세 페이지 조회", description = "채팅방 상세 페이지를 HTML로 반환합니다.")
-	@GetMapping("/room/{roomId}/show")
-	public String showRoomDetailPage(@PathVariable String roomId) {
-		String token = rq.getValueFromCookie("accessToken");
-		if (token == null || authTokenService.getUsernameFromToken(token) == null) {
-			return "redirect:/api/users/login"; // 로그인 페이지로 리다이렉트
-		}
-		// roomId를 이용해 추가적인 방 정보 검증이나 처리 로직 추가 가능
-		return "/chat/roomdetail"; // 채팅방 상세 페이지 반환
-	}
 
 	// 사용자 토큰 조회
 	@Operation(summary = "사용자 토큰 조회", description = "사용자를 판단하기 위한 토큰을 생성해 반환합니다.")
@@ -144,9 +120,11 @@ public class ChatRoomController {
 					String other=chatRoomService.findOther(chatRoom.getRoomId(),user.getNickname());
 					List<ChatMessage> messages= chatRoomService.getMessagesByUser(chatRoom.getRoomId(),user.getNickname());
 					String lastMessage="";
+					ChatMessage.MessageType messageType = ChatMessage.MessageType.TALK;	// 초기값
 					String lastTimestamp="";
-					if(messages.size()>0) {
+					if(!messages.isEmpty()) {
 						lastMessage = messages.get(messages.size() - 1).getMessage();
+						messageType = messages.get(messages.size() - 1).getType();
 						lastTimestamp = messages.get(messages.size() - 1).getTimestamp();
 					}
 					return new ChatRoomDto(
@@ -155,6 +133,7 @@ public class ChatRoomController {
 							chatRoom.getName(),
 							chatRoom.getUserCount(),
 							lastMessage,
+							messageType,
 							lastTimestamp,
 							other
 					);
@@ -168,13 +147,10 @@ public class ChatRoomController {
 	public RsData<ChatRoom> getRoomByRoomId(@PathVariable String roomId) {
 		User userIdentity = userAuthService.getUserIdentity();
 		User user = userAuthService.getRealActor(userIdentity);
-//        List<ChatMessage> messages=chatRoomService.getMessagesByUser(roomId,user.getNickname());
-		ChatRoom chatRoom=chatRoomService.findChatRoomByClient(roomId,user.getNickname());
-		if(chatRoom==null) {
-			return new RsData<>("404","존재하지 않는 채팅방");
-		}
+
+		ChatRoom chatRoom=chatRoomService.getRoomByRoomId(roomId,user.getNickname());
 		return new RsData<>("200","채팅방 반환",chatRoom);
-	}
+    }
 
 	// 채팅방 메세지 조회
 	@Operation(summary = "채팅방 메세지 조회", description = "채팅방의 모든 메시지를 조회합니다.")
@@ -187,6 +163,7 @@ public class ChatRoomController {
 			@RequestParam String roomId) {
 		User userIdentity = userAuthService.getUserIdentity();
 		User user = userAuthService.getRealActor(userIdentity);
+
 		List<ChatMessage> messages= chatRoomService.getMessagesByUser(roomId,user.getNickname());
 		String other=chatRoomService.findOther(roomId,user.getNickname());
 
@@ -216,6 +193,7 @@ public class ChatRoomController {
 			@RequestParam String roomId) {
 		User userIdentity = userAuthService.getUserIdentity();
 		User user = userAuthService.getRealActor(userIdentity);
+
 		chatRoomService.deleteChatRoom(roomId, user.getNickname());
 		return new RsData<>("200", "삭제 완료",new Empty());
 	}
@@ -231,16 +209,15 @@ public class ChatRoomController {
 			@RequestParam String receiver) {
 		User userIdentity = userAuthService.getUserIdentity();
 		User user = userAuthService.getRealActor(userIdentity);
-		ChatRoom chatRoom=chatRoomService.findByRoomIdByClients(user.getNickname(),receiver);
-//        ChatRoom chatRoom=chatRoomService.findChatRoomByClient(roomId,user.getNickname());
-		if (chatRoom == null) {
-			return new RsData<>("404", "존재하지 않는 대화방입니다.");
-		}
+
+		ChatRoom chatRoom=chatRoomService.findRoomByClients(user.getNickname(),receiver);
 		List<ChatMessage> messages= chatRoomService.getMessagesByUser(chatRoom.getRoomId(),user.getNickname());
 		String lastMessage="";
+		ChatMessage.MessageType messageType = ChatMessage.MessageType.TALK;	// 초기값
 		String lastTimestamp="";
-		if(messages.size()>0) {
+		if(!messages.isEmpty()) {
 			lastMessage = messages.get(messages.size() - 1).getMessage();
+			messageType = messages.get(messages.size() - 1).getType();
 			lastTimestamp = messages.get(messages.size() - 1).getTimestamp();
 		}
 		ChatRoomDto chatRoomDto = new ChatRoomDto(
@@ -249,6 +226,7 @@ public class ChatRoomController {
 				chatRoom.getName(),
 				chatRoom.getUserCount(),
 				lastMessage, // 마지막 메시지 내용
+				messageType, // 마지막 메세지의 타입
 				lastTimestamp,
 				receiver
 		);

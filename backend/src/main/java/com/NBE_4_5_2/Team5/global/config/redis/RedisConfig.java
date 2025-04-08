@@ -16,7 +16,7 @@ import org.springframework.data.redis.repository.configuration.EnableRedisReposi
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
-import com.NBE_4_5_2.Team5.global.redis.RedisSubscriber;
+import com.NBE_4_5_2.Team5.global.config.chat.RedisSubscriber;
 
 import lombok.RequiredArgsConstructor;
 
