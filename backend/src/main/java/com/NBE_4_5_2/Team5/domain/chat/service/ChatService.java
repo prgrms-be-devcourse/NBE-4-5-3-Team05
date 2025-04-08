@@ -59,38 +59,39 @@ public class ChatService {
 		if (ChatMessage.MessageType.TALK.equals(chatMessage.getType())) {
 			// redis로 메세지 발송
 			objectRedisTemplate.convertAndSend(channelTopic.getTopic(), chatMessage);
-			ChatMessage message = ChatMessage.builder()
-				.type(ChatMessage.MessageType.TALK)
-				.roomId(chatRoom.getRoomId()) // 동일한 roomId 사용
-				.sender(chatMessage.getSender()) // 원 메시지의 발신자
-				.receiver(receiver)
-				.message(chatMessage.getMessage()) // 원 메시지 내용
-				.userCount(chatMessage.getUserCount())
-				.image(chatMessage.getImage())
-				.latitude(0.0f)
-				.longitude(0.0f)
-				.build();
-
+			ChatMessage message =new ChatMessage(
+					ChatMessage.MessageType.TALK,
+					chatRoom.getRoomId(),
+					chatMessage.getSender(),
+					receiver,
+					chatMessage.getMessage(),
+					chatMessage.getImage(),
+					chatMessage.getUserCount(),
+					0.0f,
+					0.0f
+			);
 			chatRoom.setLastMessage(message.getMessage()); // 마지막 메시지 업데이트
 			chatRoom.setLastTimestamp(message.getTimestamp()); // 마지막 타임스탬프 업데이트
 
 			hashOpsChatRoom.put(CHAT_ROOMS, chatRoom.getRoomId(), chatRoom); // 레디스에 업데이트
 			// DB에 저장
 			chatMessageRepository.save(message);
+
 		} else if (ChatMessage.MessageType.IMAGE.equals(chatMessage.getType())) {
 			chatMessage.setMessage("");
 
-			ChatMessage message = ChatMessage.builder()
-				.type(ChatMessage.MessageType.IMAGE)
-				.roomId(chatRoom.getRoomId()) // 동일한 roomId 사용
-				.sender(chatMessage.getSender()) // 원 메시지의 발신자
-				.receiver(receiver)
-				.message("") // 원 메시지 내용
-				.userCount(chatMessage.getUserCount())
-				.image(chatMessage.getImage())
-				.latitude(0.0f)
-				.longitude(0.0f)
-				.build();
+			ChatMessage message =new ChatMessage(
+					ChatMessage.MessageType.IMAGE,
+					chatRoom.getRoomId(),
+					chatMessage.getSender(),
+					receiver,
+					"",
+//					chatMessage.getMessage(),
+					chatMessage.getImage(),
+					chatMessage.getUserCount(),
+					0.0f,
+					0.0f
+			);
 
 			// redis로 메세지 발송
 			objectRedisTemplate.convertAndSend(channelTopic.getTopic(), message);
@@ -98,17 +99,18 @@ public class ChatService {
 			chatMessageRepository.save(message);
 		} else if (ChatMessage.MessageType.LOCATION.equals(chatMessage.getType())) {
 			// LOCATION 타입 처리를 위한 코드 추가
-			ChatMessage message = ChatMessage.builder()
-				.type(ChatMessage.MessageType.LOCATION)
-				.roomId(chatRoom.getRoomId()) // 동일한 roomId 사용
-				.sender(chatMessage.getSender()) // 원 메시지의 발신자
-				.receiver(receiver)
-				.message("") // 메시지 내용
-				.userCount(chatMessage.getUserCount())
-				.latitude(chatMessage.getLatitude()) // 위도 설정
-				.longitude(chatMessage.getLongitude()) // 경도 설정
-				.build();
-
+			ChatMessage message =new ChatMessage(
+					ChatMessage.MessageType.LOCATION,
+					chatRoom.getRoomId(),
+					chatMessage.getSender(),
+					receiver,
+					"",
+//					chatMessage.getMessage(),
+					chatMessage.getImage(),
+					chatMessage.getUserCount(),
+					chatMessage.getLatitude(),
+					chatMessage.getLongitude()
+			);
 			// Redis로 메시지 발송
 			objectRedisTemplate.convertAndSend(channelTopic.getTopic(), message);
 			hashOpsChatRoom.put(CHAT_ROOMS, chatRoom.getRoomId(), chatRoom); // 레디스에 업데이트

@@ -1,0 +1,102 @@
+package com.NBE_4_5_2.Team5.domain.chat.entity
+
+import jakarta.persistence.ElementCollection
+import jakarta.persistence.Entity
+import jakarta.persistence.Id
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.util.*
+
+@Entity
+class ChatMessage (
+    private var _type: MessageType = MessageType.TALK,
+    private var roomId: String="",     // todo: JPA가 _roomId를 찾지 못하여, roomId로 수정
+    private var _sender: String="",
+    private val _receiver: String="",
+    private var _message: String="",
+    private val _image: String="",
+    private var _userCount: Long=0,
+    private val _latitude: Float=0.0f,
+    private val _longitude: Float=0.0f
+) {
+    @Id
+    private val _messageId = UUID.randomUUID().toString()
+    private var _timestamp: String = formatTimestamp(LocalDateTime.now())
+
+    @ElementCollection
+    private val deleteStatus: MutableMap<String, Boolean> = HashMap()
+
+    fun getMessageId(): String {
+        return _messageId
+    }
+    fun getType(): MessageType {
+        return _type
+    }
+    fun setType(type: MessageType) {
+        _type=type
+    }
+    fun getRoomId(): String {
+        return roomId
+    }
+    fun setRoomId(value: String) {
+        roomId=value
+    }
+    fun getSender(): String {
+        return _sender
+    }
+    fun setSender(sender: String) {
+        _sender=sender
+    }
+    fun getReceiver(): String {
+        return _receiver
+    }
+    fun getMessage(): String {
+        return _message
+    }
+    fun setMessage(message: String) {
+        _message = message
+    }
+    fun getTimestamp(): String {
+        return _timestamp
+    }
+    fun getImage(): String {
+        return _image
+    }
+    fun getUserCount(): Long {
+        return _userCount
+    }
+    fun setUserCount(userCount: Long) {
+        _userCount=userCount
+    }
+    fun getLatitude(): Float {
+        return _latitude
+    }
+    fun getLongitude(): Float {
+        return _longitude
+    }
+
+    init {
+        deleteStatus[_sender] = false
+        deleteStatus[_receiver] = false
+    }
+
+    // 메시지 타입 : 입장, 퇴장, 채팅, 이미지 추가
+    enum class MessageType {
+        ENTER, QUIT, TALK, IMAGE, LOCATION
+    }
+
+    companion object{
+        fun formatTimestamp(timestamp: LocalDateTime): String {
+            val formatter = DateTimeFormatter.ofPattern("HH:mm")
+            return timestamp.format(formatter)
+        }
+    }
+
+    fun setDeleteStatus(username: String, status: Boolean) {
+        deleteStatus[username] = status
+    }
+
+    fun getDeleteStatus(username: String): Boolean? {
+        return deleteStatus[username]
+    }
+}

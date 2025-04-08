@@ -6,7 +6,6 @@ import com.NBE_4_5_2.Team5.domain.chat.entity.ChatRoom;
 import com.NBE_4_5_2.Team5.domain.chat.service.ChatRoomService;
 import com.NBE_4_5_2.Team5.domain.chat.service.ChatService;
 import com.NBE_4_5_2.Team5.domain.user.user.service.AuthTokenService;
-import com.NBE_4_5_2.Team5.global.Rq;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -54,29 +53,29 @@ public class ChatController {
 		List<ChatRoom> updatedRooms = chatRoomService.findRoomByUser(nickname); // 업데이트된 채팅방 목록 조회
 
 		List<ChatRoomDto> dtos = updatedRooms.stream()
-						.map(chatRoom -> {
-							List<ChatMessage> messages = chatRoomService.getMessagesByUser(chatRoom.getRoomId(), nickname);
-							// 초기값
-							ChatMessage.MessageType messageType = ChatMessage.MessageType.TALK;
-							// 상대방
-							String other = chatRoomService.findOther(chatRoom.getRoomId(),nickname);
+				.map(chatRoom -> {
+					List<ChatMessage> messages = chatRoomService.getMessagesByUser(chatRoom.getRoomId(), nickname);
+					// 초기값
+					ChatMessage.MessageType messageType = ChatMessage.MessageType.TALK;
+					// 상대방
+					String other = chatRoomService.findOther(chatRoom.getRoomId(),nickname);
 
-							if(!messages.isEmpty()) {
-								messageType = messages.get(messages.size() - 1).getType();
-							}
-							System.out.println("lastMessage!!!!!: " + chatRoom.getLastMessage());
-							System.out.println("lastTimestamp!!!!!: " + chatRoom.getLastTimestamp());
-							return new ChatRoomDto(
-									chatRoom.getId(),
-									chatRoom.getRoomId(),
-									chatRoom.getName(),
-									chatRoom.getUserCount(),
-									chatRoom.getLastMessage(),
-									messageType,
-									chatRoom.getLastTimestamp(),
-									other
-							);
-						})
+					if(!messages.isEmpty()) {
+						messageType = messages.get(messages.size() - 1).getType();
+					}
+					System.out.println("lastMessage!!!!!: " + chatRoom.getLastMessage());
+					System.out.println("lastTimestamp!!!!!: " + chatRoom.getLastTimestamp());
+					return new ChatRoomDto(
+							chatRoom.getId(),
+							chatRoom.getRoomId(),
+							chatRoom.getName(),
+							chatRoom.getUserCount(),
+							chatRoom.getLastMessage(),
+							messageType,
+							chatRoom.getLastTimestamp(),
+							other
+					);
+				})
 				.toList();
 		System.out.println("===DTO===");
 		System.out.println(dtos.get(dtos.size()-1).getLastMessage());

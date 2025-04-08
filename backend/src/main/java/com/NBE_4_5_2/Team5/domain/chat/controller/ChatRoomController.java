@@ -57,11 +57,10 @@ public class ChatRoomController {
 		User userIdentity = userAuthService.getUserIdentity();
 		User user = userAuthService.getRealActor(userIdentity);
 
-		AccessProvider access = AccessProvider.builder()
-				.name(user.getNickname())  // 사용자 이름
-				.token(token)
-				.build();
-
+		AccessProvider access = new AccessProvider(
+				user.getNickname(),  // 사용자 이름
+				token
+		);
 		return new RsData<>("200", "success", access);
 	}
 
