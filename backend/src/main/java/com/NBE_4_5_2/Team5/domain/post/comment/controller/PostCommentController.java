@@ -1,27 +1,18 @@
 package com.NBE_4_5_2.Team5.domain.post.comment.controller;
 
-import com.NBE_4_5_2.Team5.domain.user.user.dto.UserDto;
-import com.NBE_4_5_2.Team5.global.dto.RsData;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.NBE_4_5_2.Team5.domain.post.comment.dto.CommentDto;
 import com.NBE_4_5_2.Team5.domain.post.comment.service.CommentService;
-
+import com.NBE_4_5_2.Team5.domain.user.user.dto.UserDto;
+import com.NBE_4_5_2.Team5.global.dto.RsData;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
