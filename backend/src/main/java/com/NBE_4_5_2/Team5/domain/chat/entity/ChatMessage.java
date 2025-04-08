@@ -32,6 +32,54 @@ public class ChatMessage {
 	@ElementCollection
 	private Map<String, Boolean> deleteStatus = new HashMap<>();
 
+	public String getMessageId() {
+		return messageId;
+	}
+
+	public MessageType getType() {
+		return type;
+	}
+
+	public String getRoomId() {
+		return roomId;
+	}
+
+	public String getSender() {
+		return sender;
+	}
+
+	public String getReceiver() {
+		return receiver;
+	}
+
+	public String getMessage() {
+		return message;
+	}
+
+	public String getImage() {
+		return image;
+	}
+
+	public long getUserCount() {
+		return userCount;
+	}
+
+	public String getTimestamp() {
+		return timestamp;
+	}
+
+	public Float getLatitude() {
+		return latitude;
+	}
+
+	public Float getLongitude() {
+		return longitude;
+	}
+
+	public Map<String, Boolean> getDeleteStatus() {
+		return deleteStatus;
+	}
+
 	@Builder
 	public ChatMessage(MessageType type, String roomId, String sender, String receiver, String message, String image,
 		long userCount, Float latitude, Float longitude) {

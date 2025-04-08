@@ -536,8 +536,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * 내가 판매한 상품 게시글 리스트 조회
-         * @description 내가 판매한 상품 게시글의 목록을 조회합니다.
+         * 내가 찜한 상품 게시글 리스트 조회
+         * @description 내가 찜한 상품 게시글의 목록을 조회합니다.
          */
         get: operations["getMyFavorites"];
         put?: never;
@@ -789,26 +789,26 @@ export interface components {
             data: components["schemas"]["UserDto"];
         };
         UserDto: {
-            id?: string;
-            username?: string;
-            email?: string;
-            nickname?: string;
-            address?: string;
-            profileUrl?: string;
+            id: string;
+            username: string;
+            email: string;
+            nickname: string;
+            address: string;
+            profileUrl: string;
             /** @enum {string} */
-            role?: "ADMIN" | "USER";
+            role: "ADMIN" | "USER";
             /** Format: int32 */
-            cash?: number;
+            cash: number;
             /** Format: date-time */
-            createdAt?: string;
+            createdAt: string;
             /** Format: date-time */
-            modifiedAt?: string;
-            blocked?: boolean;
+            modifiedAt: string;
+            blocked: boolean;
             /** Format: int32 */
-            blockedCount?: number;
+            blockedCount: number;
         };
         UpdateCommentReqBody: {
-            content?: string;
+            content: string;
         };
         RsDataUpdateCommentResBody: {
             code: string;
@@ -816,45 +816,45 @@ export interface components {
             data: components["schemas"]["UpdateCommentResBody"];
         };
         UpdateCommentResBody: {
-            content?: string;
-            author?: components["schemas"]["UserDto"];
+            content: string;
+            author: components["schemas"]["UserDto"];
         };
         ProductPostModifyForm: {
-            productName?: string;
+            productName: string;
             /** Format: int32 */
-            productPrice?: number;
-            title?: string;
-            content?: string;
-            categoryIds?: number[];
-            imageUrlList?: string[];
+            productPrice: number;
+            title: string;
+            content: string;
+            categoryIds: number[];
+            imageUrlList: string[];
             /** Format: float */
-            latitude?: number;
+            latitude: number;
             /** Format: float */
-            longitude?: number;
+            longitude: number;
         };
         ProductPostResponse: {
-            id?: string;
-            writerId?: string;
-            writerName?: string;
-            productName?: string;
+            id: string;
+            writerId: string;
+            writerName: string;
+            productName: string;
             /** Format: int32 */
-            productPrice?: number;
-            title?: string;
-            content?: string;
-            imageUrls?: string;
+            productPrice: number;
+            title: string;
+            content: string;
+            imageUrls: string;
             /** Format: float */
-            latitude?: number;
+            latitude: number;
             /** Format: float */
-            longitude?: number;
-            categories?: string[];
+            longitude: number;
+            categories: string[];
             /** Format: date-time */
-            createdAt?: string;
+            createdAt: string;
             /** Format: date-time */
-            modifiedAt?: string;
+            modifiedAt: string;
             /** Format: int32 */
-            viewCount?: number;
+            viewCount: number;
             /** Format: int32 */
-            likedCount?: number;
+            likedCount: number;
         };
         RsDataProductPostResponse: {
             code: string;
@@ -862,37 +862,37 @@ export interface components {
             data: components["schemas"]["ProductPostResponse"];
         };
         UpdateNoticeReq: {
-            title?: string;
-            content?: string;
+            title: string;
+            content: string;
         };
         AdminResBody: {
-            id?: string;
-            nickname?: string;
+            id: string;
+            nickname: string;
             /** @enum {string} */
-            role?: "ADMIN" | "USER";
+            role: "ADMIN" | "USER";
         };
         NoticeResBody: {
-            id?: string;
-            title?: string;
-            content?: string;
-            admin?: components["schemas"]["AdminResBody"];
+            id: string;
+            title: string;
+            content: string;
+            admin: components["schemas"]["AdminResBody"];
             /** Format: date-time */
-            createdAt?: string;
+            createdAt: string;
         };
         RsDataNoticeResBody: {
             code: string;
             message: string;
             data: components["schemas"]["NoticeResBody"];
         };
-        SignUpUserForm: {
-            username?: string;
-            password?: string;
+        SignUpUserReqBody: {
+            username: string;
+            password: string;
             email: string;
-            nickname?: string;
-            address?: string;
-            profileUrl?: string;
+            nickname: string;
+            address: string;
+            profileUrl: string;
         };
-        RefreshUserForm: {
+        RefreshUserReqBody: {
             refreshToken: string;
         };
         RsDataString: {
@@ -900,26 +900,32 @@ export interface components {
             message: string;
             data: string;
         };
-        LoginUserForm: {
+        Empty: Record<string, never>;
+        RsDataEmpty: {
+            code: string;
+            message: string;
+            data: components["schemas"]["Empty"];
+        };
+        LoginUserReqBody: {
             username: string;
             password: string;
         };
-        LoginUserDto: {
-            accessToken?: string;
-            refreshToken?: string;
-            item?: components["schemas"]["UserDto"];
+        LoginUserResBody: {
+            accessToken: string;
+            refreshToken: string;
+            item: components["schemas"]["UserDto"];
         };
-        RsDataLoginUserDto: {
+        RsDataLoginUserResBody: {
             code: string;
             message: string;
-            data: components["schemas"]["LoginUserDto"];
+            data: components["schemas"]["LoginUserResBody"];
         };
-        EmailCodeRequest: {
-            email?: string;
+        EmailUserReqBody: {
+            email: string;
         };
-        VerifyCodeRequest: {
-            email?: string;
-            code?: string;
+        VerifyCodeUserReqBody: {
+            email: string;
+            code: string;
         };
         ProductPostWriteForm: {
             productName: string;
@@ -935,7 +941,7 @@ export interface components {
             longitude: number;
         };
         WriteCommentReqBody: {
-            content?: string;
+            content: string;
         };
         RsDataWriteCommentResBody: {
             code: string;
@@ -943,22 +949,22 @@ export interface components {
             data: components["schemas"]["WriteCommentResBody"];
         };
         WriteCommentResBody: {
-            id?: string;
-            content?: string;
-            author?: components["schemas"]["UserDto"];
+            id: string;
+            content: string;
+            author: components["schemas"]["UserDto"];
         };
         PurchaseItemReqDto: {
-            productId?: string;
+            productId: string;
         };
         PaymentDto: {
-            id?: string;
-            buyerId?: string;
+            id: string;
+            buyerId: string;
             /** Format: int32 */
-            totalPrice?: number;
+            totalPrice: number;
             /** Format: date-time */
-            createdAt?: string;
+            createdAt: string;
             /** Format: date-time */
-            modifiedAt?: string;
+            modifiedAt: string;
             /** @enum {string} */
             status?: "IN_PROGRESS" | "DONE" | "ABORTED";
         };
@@ -992,15 +998,15 @@ export interface components {
             reason: string;
         };
         BanResBody: {
-            banListId?: string;
-            userId?: string;
-            reason?: string;
+            banListId: string;
+            userId: string;
+            reason: string;
             /** Format: int32 */
-            banCount?: number;
+            banCount: number;
             /** Format: date-time */
-            startDate?: string;
+            startDate: string;
             /** Format: date-time */
-            endDate?: string;
+            endDate: string;
         };
         RsDataBanResBody: {
             code: string;
@@ -1019,32 +1025,32 @@ export interface components {
             /** Format: int32 */
             totalItems: number;
             /** Format: int32 */
-            curPageNo: number;
+            currentPageNo: number;
             /** Format: int32 */
             pageSize: number;
         };
         PreviewPostResponse: {
-            id?: string;
-            productName?: string;
+            id: string;
+            productName: string;
             /** Format: int32 */
-            productPrice?: number;
-            title?: string;
-            writerId?: string;
-            writerName?: string;
+            productPrice: number;
+            title: string;
+            writerId: string;
+            writerName: string;
             /** Format: float */
-            latitude?: number;
+            latitude: number;
             /** Format: float */
-            longitude?: number;
-            thumbNail?: string;
+            longitude: number;
+            thumbNail: string;
             /** Format: date-time */
-            createdAt?: string;
-            imageUrls?: string;
+            createdAt: string;
+            imageUrls: string;
             /** Format: int32 */
-            viewCount?: number;
+            viewCount: number;
             /** Format: int32 */
-            likedCount?: number;
+            likedCount: number;
             /** @enum {string} */
-            status?: "RESERVED" | "AVAILABLE" | "PURCHASED";
+            status: "RESERVED" | "AVAILABLE" | "PURCHASED";
         };
         RsDataPageDtoPreviewPostResponse: {
             code: string;
@@ -1059,21 +1065,21 @@ export interface components {
             sort?: string[];
         };
         CommentDto: {
-            id?: string;
-            author?: components["schemas"]["UserDto"];
-            content?: string;
-            postId?: string;
+            id: string;
+            author: components["schemas"]["UserDto"];
+            content: string;
+            postId: string;
         };
         PageableObject: {
             /** Format: int64 */
             offset?: number;
             sort?: components["schemas"]["SortObject"];
-            unpaged?: boolean;
             paged?: boolean;
             /** Format: int32 */
             pageSize?: number;
             /** Format: int32 */
             pageNumber?: number;
+            unpaged?: boolean;
         };
         RsDataSliceCommentDto: {
             code: string;
@@ -1081,17 +1087,17 @@ export interface components {
             data: components["schemas"]["SliceCommentDto"];
         };
         SliceCommentDto: {
-            first?: boolean;
-            last?: boolean;
             /** Format: int32 */
             size?: number;
             content?: components["schemas"]["CommentDto"][];
             /** Format: int32 */
             number?: number;
             sort?: components["schemas"]["SortObject"];
-            pageable?: components["schemas"]["PageableObject"];
+            first?: boolean;
+            last?: boolean;
             /** Format: int32 */
             numberOfElements?: number;
+            pageable?: components["schemas"]["PageableObject"];
             empty?: boolean;
         };
         SortObject: {
@@ -1116,7 +1122,7 @@ export interface components {
             /** Format: int32 */
             totalItems: number;
             /** Format: int32 */
-            curPageNo: number;
+            currentPageNo: number;
             /** Format: int32 */
             pageSize: number;
         };
@@ -1131,9 +1137,9 @@ export interface components {
             data: boolean;
         };
         PaymentMetaData: {
-            paymentId?: string;
+            paymentId: string;
             /** Format: int32 */
-            amount?: number;
+            amount: number;
         };
         RsDataPaymentMetaData: {
             code: string;
@@ -1190,9 +1196,9 @@ export interface components {
             data: components["schemas"]["MessageDto"][];
         };
         Category: {
+            name: string;
             /** Format: int64 */
-            id?: number;
-            name?: string;
+            id: number;
         };
         RsDataListCategory: {
             code: string;
@@ -1200,21 +1206,21 @@ export interface components {
             data: components["schemas"]["Category"][];
         };
         PageUserDto: {
-            /** Format: int64 */
-            totalElements?: number;
             /** Format: int32 */
             totalPages?: number;
-            first?: boolean;
-            last?: boolean;
+            /** Format: int64 */
+            totalElements?: number;
             /** Format: int32 */
             size?: number;
             content?: components["schemas"]["UserDto"][];
             /** Format: int32 */
             number?: number;
             sort?: components["schemas"]["SortObject"];
-            pageable?: components["schemas"]["PageableObject"];
+            first?: boolean;
+            last?: boolean;
             /** Format: int32 */
             numberOfElements?: number;
+            pageable?: components["schemas"]["PageableObject"];
             empty?: boolean;
         };
         RsDataPageUserDto: {
@@ -1223,21 +1229,21 @@ export interface components {
             data: components["schemas"]["PageUserDto"];
         };
         PageNoticeResBody: {
-            /** Format: int64 */
-            totalElements?: number;
             /** Format: int32 */
             totalPages?: number;
-            first?: boolean;
-            last?: boolean;
+            /** Format: int64 */
+            totalElements?: number;
             /** Format: int32 */
             size?: number;
             content?: components["schemas"]["NoticeResBody"][];
             /** Format: int32 */
             number?: number;
             sort?: components["schemas"]["SortObject"];
-            pageable?: components["schemas"]["PageableObject"];
+            first?: boolean;
+            last?: boolean;
             /** Format: int32 */
             numberOfElements?: number;
+            pageable?: components["schemas"]["PageableObject"];
             empty?: boolean;
         };
         RsDataPageNoticeResBody: {
@@ -1254,12 +1260,6 @@ export interface components {
             code: string;
             message: string;
             data: Record<string, never>;
-        };
-        Empty: Record<string, never>;
-        RsDataEmpty: {
-            code: string;
-            message: string;
-            data: components["schemas"]["Empty"];
         };
     };
     responses: never;
@@ -1347,7 +1347,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json;charset=UTF-8": components["schemas"]["RsDataObject"];
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataEmpty"];
                 };
             };
             /** @description Internal Server Error */
@@ -1467,10 +1467,6 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /**
-                 * @description 상품 게시글 id
-                 * @example ppost-fsiodf-21edd-fd2c1
-                 */
                 id: string;
             };
             cookie?: never;
@@ -1506,10 +1502,6 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /**
-                 * @description 상품 게시글 id
-                 * @example ppost-2ji109-fe3sfd-3fsdf
-                 */
                 id: string;
             };
             cookie?: never;
@@ -1642,7 +1634,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["SignUpUserForm"];
+                "application/json": components["schemas"]["SignUpUserReqBody"];
             };
         };
         responses: {
@@ -1675,7 +1667,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["RefreshUserForm"];
+                "application/json": components["schemas"]["RefreshUserReqBody"];
             };
         };
         responses: {
@@ -1714,7 +1706,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json;charset=UTF-8": components["schemas"]["RsDataVoid"];
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataEmpty"];
                 };
             };
             /** @description Internal Server Error */
@@ -1737,7 +1729,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["LoginUserForm"];
+                "application/json": components["schemas"]["LoginUserReqBody"];
             };
         };
         responses: {
@@ -1747,7 +1739,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json;charset=UTF-8": components["schemas"]["RsDataLoginUserDto"];
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataLoginUserResBody"];
                 };
             };
             /** @description Internal Server Error */
@@ -1770,7 +1762,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["EmailCodeRequest"];
+                "application/json": components["schemas"]["EmailUserReqBody"];
             };
         };
         responses: {
@@ -1803,7 +1795,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["VerifyCodeRequest"];
+                "application/json": components["schemas"]["VerifyCodeUserReqBody"];
             };
         };
         responses: {
@@ -1813,7 +1805,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json;charset=UTF-8": components["schemas"]["RsDataVoid"];
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataEmpty"];
                 };
             };
             /** @description Internal Server Error */
@@ -1836,7 +1828,7 @@ export interface operations {
         };
         requestBody?: {
             content: {
-                "application/json": {
+                "multipart/form-data": {
                     /** Format: binary */
                     file: string;
                 };
@@ -1978,10 +1970,6 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /**
-                 * @description 상품 게시글 id
-                 * @example ppost-2ji109-fe3sfd-3fsdf
-                 */
                 id: string;
             };
             cookie?: never;
@@ -2332,11 +2320,8 @@ export interface operations {
     getMyPosts: {
         parameters: {
             query?: {
-                /** @description 페이지 번호 */
                 page?: number;
-                /** @description 페이지 내 아이템 개수 */
                 pageSize?: number;
-                /** @description 정렬 순서 */
                 sort?: string;
                 status?: "RESERVED" | "AVAILABLE" | "PURCHASED";
             };
