@@ -1,5 +1,6 @@
 package com.NBE_4_5_2.Team5.domain.chat.entity
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import jakarta.persistence.ElementCollection
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
@@ -14,7 +15,7 @@ class ChatMessage (
     private var _sender: String="",
     private val _receiver: String="",
     private var _message: String="",
-    private val _image: String="",
+    private var _image: String="",
     private var _userCount: Long=0,
     private val _latitude: Float=0.0f,
     private val _longitude: Float=0.0f
