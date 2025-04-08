@@ -2,11 +2,11 @@ package com.NBE_4_5_2.Team5.domain.chat.service;
 
 import java.util.List;
 
+import com.NBE_4_5_2.Team5.domain.chat.entity.ChatMessage;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.stereotype.Service;
 
-import com.NBE_4_5_2.Team5.domain.chat.entity.ChatMessage;
 import com.NBE_4_5_2.Team5.domain.chat.entity.ChatRoom;
 import com.NBE_4_5_2.Team5.domain.chat.repository.ChatMessageRepository;
 

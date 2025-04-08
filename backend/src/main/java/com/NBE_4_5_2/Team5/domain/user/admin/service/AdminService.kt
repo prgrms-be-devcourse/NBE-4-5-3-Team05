@@ -127,7 +127,7 @@ class AdminService(
 
     fun getUsers(pageable: Pageable): Page<UserDto> {
         val all = userRepository.findAll(pageable)
-        return all.map { admin: User? -> UserDto(admin) }
+        return all.map { admin: User -> UserDto(admin) }
     }
 
     fun unBanUser(userId: String) {

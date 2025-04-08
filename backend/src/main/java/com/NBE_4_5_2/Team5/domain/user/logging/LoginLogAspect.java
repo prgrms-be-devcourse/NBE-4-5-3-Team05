@@ -1,18 +1,16 @@
 package com.NBE_4_5_2.Team5.domain.user.logging;
 
-import java.time.LocalDateTime;
-
+import com.NBE_4_5_2.Team5.domain.user.user.controller.UserController;
+import com.NBE_4_5_2.Team5.global.dto.RsData;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Component;
 
-import com.NBE_4_5_2.Team5.domain.user.user.controller.UserController;
-import com.NBE_4_5_2.Team5.global.dto.RsData;
-
-import jakarta.servlet.http.HttpServletRequest;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.time.LocalDateTime;
 
 @Aspect
 @Component
@@ -27,7 +25,7 @@ public class LoginLogAspect {
 	public Object userLoginAspect(ProceedingJoinPoint joinPoint) throws Throwable {
 		LocalDateTime now = LocalDateTime.now();
 
-		UserController.LoginUserForm userForm = (UserController.LoginUserForm)joinPoint.getArgs()[0];
+		UserController.LoginUserReqBody userForm = (UserController.LoginUserReqBody)joinPoint.getArgs()[0];
 		String ip = request.getRemoteAddr();
 		String accessToken = "";
 		String refreshToken = "";
@@ -35,7 +33,7 @@ public class LoginLogAspect {
 
 		try {
 			Object result = joinPoint.proceed();
-			RsData<UserController.LoginUserDto> loginUserDto = (RsData<UserController.LoginUserDto>)result;
+			RsData<UserController.LoginUserResBody> loginUserDto = (RsData<UserController.LoginUserResBody>)result;
 			accessToken = loginUserDto.getData().accessToken();
 			refreshToken = loginUserDto.getData().refreshToken();
 			return result;

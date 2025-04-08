@@ -1,9 +1,6 @@
 package com.NBE_4_5_2.Team5.domain.base.entity
 
-import com.NBE_4_5_2.Team5.global.standard.util.Ut
 import jakarta.persistence.*
-import lombok.*
-import lombok.experimental.SuperBuilder
 import org.hibernate.Hibernate
 
 @MappedSuperclass
