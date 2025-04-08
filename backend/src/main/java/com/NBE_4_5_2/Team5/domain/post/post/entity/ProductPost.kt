@@ -83,6 +83,22 @@ class ProductPost() : BaseTime() {
         setCreateDateNow();
     }
 
+    companion object {
+        @JvmStatic
+        fun create(
+            writer: User,
+            productName: String,
+            productPrice: Int,
+            title: String,
+            content: String,
+            imageUrls: String,
+            latitude: Float,
+            longitude: Float
+        ): ProductPost {
+            return ProductPost(writer, productName, productPrice, title, content, imageUrls, latitude, longitude)
+        }
+    }
+
     fun addCategories(categories: List<Category>) {
         val newCategories = categories.map {
             ProductCategory.of(productPost = this, category = it)
