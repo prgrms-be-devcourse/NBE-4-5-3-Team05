@@ -1,8 +1,8 @@
 package com.NBE_4_5_2.Team5.domain.post.post.repository;
 
-import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductPost;
-import com.NBE_4_5_2.Team5.domain.post.post.enums.ProductStatus;
-import com.NBE_4_5_2.Team5.domain.user.user.entity.User;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -11,8 +11,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-import java.util.Optional;
+import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductPost;
+import com.NBE_4_5_2.Team5.domain.post.post.enums.ProductStatus;
+import com.NBE_4_5_2.Team5.domain.user.user.entity.User;
 
 @Repository
 public interface ProductPostRepository extends JpaRepository<ProductPost, String> {
@@ -24,9 +25,11 @@ public interface ProductPostRepository extends JpaRepository<ProductPost, String
 	@EntityGraph(attributePaths = {"productCategories.category"})
 	Page<ProductPost> findByTitleLike(String title, Pageable pageable);
 
-	@EntityGraph(attributePaths = {"productCategories.category"})
 	@Query("select p from ProductPost p")
 	Page<ProductPost> findAllWithCategories(@NonNull Pageable pageable);
+
+	@Query(value = "select p from ProductPost p", countQuery = "select p.value from ProductMetadata p where p.name='PRODUCT_TOTAL_COUNT'")
+	Page<ProductPost> findAll2(Pageable pageable);
 
 	@EntityGraph(attributePaths = {"productCategories.category"})
 	Page<ProductPost> findByWriter(User writer, Pageable pageable);
@@ -40,10 +43,10 @@ public interface ProductPostRepository extends JpaRepository<ProductPost, String
 	List<ProductPost> findAllByStatus(ProductStatus status);
 
 	@EntityGraph(attributePaths = {"productCategories.category"})
-	Page<ProductPost> findByBuyer(User buyer,Pageable pageable);
+	Page<ProductPost> findByBuyer(User buyer, Pageable pageable);
 
 	@EntityGraph(attributePaths = {"writer", "productCategories.category"})
-	Page<ProductPost> findByIdIn(List<String> postIds,Pageable pageable);
+	Page<ProductPost> findByIdIn(List<String> postIds, Pageable pageable);
 
 	@EntityGraph(attributePaths = {"writer", "productCategories.category"})
 	List<ProductPost> findByIdIn(List<String> postIds);

@@ -75,9 +75,9 @@ public class ProductPost extends BaseTime {
 	@Builder.Default
 	private Integer viewCount = 0;
 
-	@Builder.Default
 	@Column(nullable = false)
-	private Integer likeCount = 0;
+	@Builder.Default
+	private Integer likedCount = 0;
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
