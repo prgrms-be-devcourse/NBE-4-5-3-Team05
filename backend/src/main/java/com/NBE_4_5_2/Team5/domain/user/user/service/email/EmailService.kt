@@ -3,6 +3,7 @@ package com.NBE_4_5_2.Team5.domain.user.user.service.email
 import com.NBE_4_5_2.Team5.domain.user.user.service.email.service.BouncedEmailService
 import com.NBE_4_5_2.Team5.global.exception.ServiceException
 import jakarta.mail.MessagingException
+import jakarta.transaction.Transactional
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.io.ClassPathResource
 import org.springframework.data.redis.core.StringRedisTemplate
@@ -63,7 +64,7 @@ class EmailService(
                 .replace("{{CODE}}", code)
 
             sendHtmlEmail(email, subject, htmlContent) // HTML 형식의 이메일 발송
-            saveVerificationCode(email, code) // 인증 코드를 Redis에 저장
+            saveAuthenticationCode(email, code) // 인증 코드를 Redis에 저장
         } catch (e: IOException) {
             throw ServiceException("500-1", "이메일 발송 템플릿이 존재하지 않습니다.")
         } catch (e: MessagingException) {
@@ -131,7 +132,7 @@ class EmailService(
      * @param email 인증 코드가 저장된 대상 이메일 주소
      * @return 저장된 인증 코드 문자열, 없으면 null 반환
      */
-    fun getVerificationCode(email: String): String? {
+    fun getAuthenticationCode(email: String): String? {
         val key = createEmailKey(email)
         return redisTemplate.opsForValue()[key]
     }
@@ -155,9 +156,15 @@ class EmailService(
      * @param email 인증 코드를 저장할 대상 이메일 주소
      * @param code 저장할 인증 코드
      */
-    fun saveVerificationCode(email: String, code: String) {
+    fun saveAuthenticationCode(email: String, code: String) {
         val key = createEmailKey(email)
         redisTemplate.opsForValue()[key, code] = Duration.ofSeconds(expireSeconds)
+    }
+
+    @Transactional
+    fun deleteAuthenticationCode(email: String) {
+        val key = createEmailKey(email)
+        redisTemplate.delete(key)
     }
 
     /**
