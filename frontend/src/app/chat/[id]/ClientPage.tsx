@@ -49,7 +49,6 @@ export default function ClientPage({
   const [accessToken, setAccessToken] = useState<string>("");
   const [stompClient, setStompClient] = useState<any>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [visibleMessagesCount, setVisibleMessagesCount] = useState(20);
   const messagesEndRef = useRef<null | HTMLDivElement>(null);
 
   const [isOpen, setIsOpen] = useState(false);
@@ -115,9 +114,7 @@ export default function ClientPage({
 
                   if (messageResponse.data?.code === "200") {
                     setChatMessages(messageResponse.data.data); // 수신된 메시지로 상태 업데이트
-                    messagesEndRef.current?.scrollIntoView({
-                      behavior: "smooth",
-                    });
+                    scrollToBottomWithOffset(50);
                   }
                 }
               );
@@ -147,8 +144,19 @@ export default function ClientPage({
   }, [roomId, cookie]);
 
   useEffect(() => {
-    getCurrentPostion();
+    getCurrentPosition();
   }, []);
+
+  useEffect(() => {
+    scrollToBottomWithOffset(50);
+  }, [chatMessages]);
+
+  const scrollToBottomWithOffset = (offset: number) => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+      window.scrollBy(0, offset); // 지정된 offset만큼 스크롤을 더 내립니다.
+    }
+  };
 
   const handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInputMessage(event.target.value);
@@ -170,6 +178,8 @@ export default function ClientPage({
       message: inputMessage,
       sender: userNickname,
       type: "TALK",
+      latitude: 0,  
+      longitude: 0, 
     };
 
     stompClient.send(
@@ -180,7 +190,7 @@ export default function ClientPage({
     setInputMessage("");
 
     setChatMessages((prevMessages) => [...prevMessages, message]);
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); // 스크롤 이동
+    scrollToBottomWithOffset(50); // 스크롤 이동
   };
   const handleKeyPress = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (event.key === "Enter") {
@@ -214,6 +224,8 @@ export default function ClientPage({
       return;
     }
 
+    getCurrentPosition();
+
     const message = {
       roomId,
       sender: userNickname,
@@ -234,7 +246,7 @@ export default function ClientPage({
     return;
   };
 
-  const getCurrentPostion = () => {
+  const getCurrentPosition = () => {
     navigator.geolocation.getCurrentPosition((position) => {
       setLatitude(position.coords.latitude);
       setLongitude(position.coords.longitude);
@@ -259,7 +271,7 @@ export default function ClientPage({
       const protocol = `${process.env.NEXT_PUBLIC_PROTOCOL}`;
       let url = `${protocol}://${process.env.NEXT_PUBLIC_BACKEND_HOST}`;
       if (protocol === "http") {
-        url += `:${process.env.NEXT_PUBHLIC_BACKEND_PORT}`;
+        url += `:${process.env.NEXT_PUBLIC_BACKEND_PORT}`;
       }
       url += `/api/uploadFile`;
       const response = await fetch(url, {
@@ -279,6 +291,8 @@ export default function ClientPage({
         type: "IMAGE",
         sender: userNickname,
         image: imageUrl,
+        latitude: 0,  
+        longitude: 0,
       };
 
       setChatMessages((prevMessages) => [...prevMessages, message]); // 메시지를 상태에 추가
@@ -291,10 +305,6 @@ export default function ClientPage({
       console.error("이미지 업로드에 실패했습니다:", error);
       alert("이미지 업로드에 실패했습니다.");
     }
-  };
-
-  const handleLoadMoreMessages = () => {
-    setVisibleMessagesCount((prevCount) => prevCount + 20); // 20개씩 추가
   };
 
   return (
@@ -327,7 +337,8 @@ export default function ClientPage({
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-      <div className="flex-grow overflow-auto flex flex-col mb-26 w-full">
+
+      <div className="flex-grow overflow-auto flex flex-col mb-20 w-full">
         <ul className="space-y-3 w-full">
           {chatMessages.map((message) => (
             <li
@@ -410,7 +421,7 @@ export default function ClientPage({
         style={{ display: "none" }}
       />
 
-      <div className="fixed bottom-0 left-0 right-0 bg-white p-4 border-t flex items-center">
+      <footer className="fixed bottom-0 left-0 right-0 bg-white p-4 border-t flex items-center">
         <div>
           {/* 팝업이 열려 있다면 렌더링 */}
           {isOpen && (
@@ -505,7 +516,8 @@ export default function ClientPage({
         >
           <FontAwesomeIcon icon={faArrowRight} />
         </Button>
-      </div>
+      </footer>
     </div>
   );
 }
+
