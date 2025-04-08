@@ -41,6 +41,7 @@ import java.lang.reflect.Type;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -92,6 +93,19 @@ class ChatControllerTest {
         roomId = setUpChatRoom();
     }
 
+    @DisplayName("셋업_ 유저1")
+    void setUpUser() {
+        // 로그인 유저 설정
+        loginedUser = userService.getUserByUsername("user1").orElseThrow(
+                () -> new RuntimeException("User not found")
+        );
+        sender = loginedUser.getNickname();
+        token = userService.generateAuthTokenAsString(loginedUser);
+        String[] param = token.split(" ");
+        accessToken = param[1];
+        System.out.println("accessToken: " + accessToken);
+        System.out.println("토큰1: "+token);
+    }
     @DisplayName("셋업_ 게시글,유저")
     void setUpUserAndPost() {
         // 로그인 유저 설정
@@ -173,7 +187,7 @@ class ChatControllerTest {
         });
 
         // Then
-        Thread.sleep(50); // 비동기 처리 대기
+        Thread.sleep(100); // 비동기 처리 대기
         userCount = chatRoomService.getUserCount(roomId);
         assertEquals(1, userCount,"구독 실패\nDestination: "+destination + "\nuserCount: " + userCount);
         System.out.println("채팅방 구독 요청이 완료되었습니다. Destination: " + destination);
@@ -183,11 +197,10 @@ class ChatControllerTest {
     void setUp_DisConnect() throws Exception{
         stompSession.disconnect();
         System.out.println("종료");
-//        Thread.sleep(50); // 비동기 처리 대기
     }
 
     @DisplayName("셋업 - 메세지 전송")
-    void setUp_SendMessage(String content) throws Exception {
+    void setUp_SendMessage(String content,String roomId) throws Exception {
         // Given
         // 구독
         setUp_Subscribe();
@@ -273,7 +286,7 @@ class ChatControllerTest {
         // When
         stompSession.disconnect();
         System.out.println("종료");
-        Thread.sleep(50); // 비동기 처리 대기
+        Thread.sleep(100); // 비동기 처리 대기
 
         // Then
         assertFalse(stompSession.isConnected(), "WebSocket 연결이 끊기지 않았습니다.");
@@ -314,7 +327,7 @@ class ChatControllerTest {
         });
 
         // Then
-        Thread.sleep(50); // 비동기 처리 대기
+        Thread.sleep(100); // 비동기 처리 대기
         userCount = chatRoomService.getUserCount(roomId);
         assertEquals(1, userCount,"구독 실패\nDestination: "+destination + "\nuserCount: " + userCount);
         System.out.println("채팅방 구독 요청이 완료되었습니다. Destination: " + destination);
@@ -345,15 +358,16 @@ class ChatControllerTest {
         stompSession.send(headers, message);
 
         // Then
-        Thread.sleep(50); // 비동기 처리
+        Thread.sleep(500); // 비동기 처리
+
         List<ChatMessage> messages = chatRoomService.getMessagesByUser(roomId,sender);
         assertFalse(messages.isEmpty(),"메세지가 전송되지 않았습니다.");
         ChatMessage lastMessage = messages.get(messages.size()-1);
         assertEquals(content, lastMessage.getMessage(),"메세지 내용이 일치하지 않습니다.");
         System.out.println("messages: " + lastMessage.getMessage());
 
-        setUp_DisConnect(); // 연결 해제
         setUp_DeleteRoom(); // 채팅방 비우기
+        setUp_DisConnect(); // 연결 해제
     }
 
     @Test
@@ -361,8 +375,9 @@ class ChatControllerTest {
     void getMessages() throws Exception {
         // Given
         String content = "테스트 메세지1";
-        setUp_SendMessage(content);
         roomId = setUpChatRoom();
+        setUp_SendMessage(content,roomId);
+        Thread.sleep(100);
 
         // When
         ResultActions action = mvc.perform(get("/api/chat/message")
@@ -380,7 +395,74 @@ class ChatControllerTest {
 
         String responseContent = result.getResponse().getContentAsString();
         List<String> messages = JsonPath.read(responseContent, "$.data[*].message");
+        List<String> data = JsonPath.read(responseContent, "$.data[*]");
         System.out.println("메세지 리스트: "+messages);
+        System.out.println("================== data ==================\n"+data.toString());
+        setUp_DisConnect(); // 연결 해제
+        setUp_DeleteRoom(); // 채팅방 비우기
     }
 
+    @Test
+    @DisplayName("채팅방 메세지 삭제")
+    void deleteMessage() throws Exception {
+        // Given
+        String content = "삭제할 메세지";
+        roomId = setUpChatRoom();
+        setUp_SendMessage(content,roomId);
+        Thread.sleep(100);
+        ResultActions action = mvc.perform(get("/api/chat/message")
+                        .param("roomId", roomId)
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(APPLICATION_JSON))
+                .andDo(print());
+        MvcResult result = action.andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.message").value(receiver+"와의 대화방"))
+                .andExpect(jsonPath("$.data[*].message").value(hasItem(content)))
+                .andReturn();
+        String responseContent = result.getResponse().getContentAsString();
+        List<String> data = JsonPath.read(responseContent, "$.data[*]");
+        System.out.println("================== 삭제 전 ==================\n"+data.toString());
+
+        // When
+        // 삭제
+        setUp_DeleteRoom();
+        ResultActions action2 = mvc.perform(get("/api/chat/message")
+                        .param("roomId", roomId)
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(APPLICATION_JSON))
+                .andDo(print());
+        MvcResult result2 = action2.andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.message").value(receiver+"와의 대화방"))
+                .andExpect(jsonPath("$.data").isEmpty())
+                .andReturn();
+        String responseContent2 = result2.getResponse().getContentAsString();
+        List<String> data2 = JsonPath.read(responseContent2, "$.data[*]");
+        System.out.println("================== 삭제 후 원래 계정 ==================\n"+data2.toString());
+
+        // 반대쪽 계정 로그인
+        receiver = sender;
+        setUpUser();
+
+        ResultActions action3 = mvc.perform(get("/api/chat/message")
+                        .param("roomId", roomId)
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(APPLICATION_JSON))
+                .andDo(print());
+
+        // Then
+        MvcResult result3 = action3.andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.message").value(receiver+"와의 대화방"))
+                .andExpect(jsonPath("$.data[*].message").value(hasItem(content)))
+                .andReturn();
+
+        String responseContent3 = result3.getResponse().getContentAsString();
+        List<String> data3 = JsonPath.read(responseContent3, "$.data[*]");
+        System.out.println("================== 새로운 계정 ==================\n"+data3.toString());
+        setUp_DisConnect(); // 연결 해제
+        setUp_DeleteRoom(); // 채팅방 비우기
+
+    }
 }

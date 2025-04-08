@@ -15,12 +15,11 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-
+import static org.junit.jupiter.api.Assertions.*;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -88,7 +87,7 @@ public class ChatRoomControllerTest {
         return roomId;
     }
 
-//    @AfterEach
+    //    @AfterEach
     @DisplayName("초기화_ 채팅방 전체 비우기")
     void deleteAll() throws Exception {
         List<ChatRoom> chatRoomList = chatRoomService.findRoomByUser(sender);
@@ -144,8 +143,8 @@ public class ChatRoomControllerTest {
 
         // When: 채팅방 조회 요청
         ResultActions action = mvc.perform(get("/api/chat/rooms")
-                .header("Authorization", "Bearer " + token)
-                .contentType(APPLICATION_JSON))
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(APPLICATION_JSON))
                 .andDo(print());
 
         // Then
@@ -329,7 +328,7 @@ public class ChatRoomControllerTest {
         action.andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("200"))
                 .andExpect(jsonPath("$.message").value(receiver+"와의 대화방"));
-                // todo: 메세지까지 조회
+        // todo: 메세지까지 조회
     }
 
 
