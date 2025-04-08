@@ -39,7 +39,7 @@ class ChatService(
     @Transactional
     fun sendChatMessage(chatMessage: ChatMessage) {
         chatMessage.setUserCount(chatRoomService.getUserCount(chatMessage.getRoomId()))
-        val chatRoom = chatRoomService.findByRoomId(chatMessage.getRoomId())
+        val chatRoom = chatRoomService.findBy_roomId(chatMessage.getRoomId())
         val receiver = chatRoomService.findOther(chatRoom.roomId, chatMessage.getSender())
         println("전송된 메시지: $chatMessage")
         println("메시지 타입: ${chatMessage.getType()}")
