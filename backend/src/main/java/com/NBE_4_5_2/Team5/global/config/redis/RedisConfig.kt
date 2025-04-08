@@ -1,6 +1,6 @@
 package com.NBE_4_5_2.Team5.global.config.redis
 
-import com.NBE_4_5_2.Team5.global.redis.RedisSubscriber
+import com.NBE_4_5_2.Team5.global.config.chat.RedisSubscriber
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile

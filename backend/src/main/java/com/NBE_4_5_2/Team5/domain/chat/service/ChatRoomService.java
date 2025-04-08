@@ -105,7 +105,7 @@ public class ChatRoomService {
 	public boolean canAccess(String roomId, String username) {
 		ChatRoom chatRoom = findByRoomId(roomId);
 		if (chatRoom.getRoomId().equals(roomId)) {
-            return chatRoom.getSender().equals(username) || chatRoom.getReceiver().equals(username); // 접근 허용
+			return chatRoom.getSender().equals(username) || chatRoom.getReceiver().equals(username); // 접근 허용
 		}
 		return false; // 접근 불가
 	}
@@ -113,7 +113,7 @@ public class ChatRoomService {
 	// 논리적 삭제 여부 검증
 	public boolean getDeleteStatus(String roomId, String username) {
 		ChatRoom chatRoom = findByRoomId(roomId);
-        return chatRoom.getDeleteStatus(username);
+		return chatRoom.getDeleteStatus(username);
 	}
 
 	// 참가한 채팅방 목록 조회
@@ -163,6 +163,7 @@ public class ChatRoomService {
 		if(!canAccess(roomId, username)){
 			throw new ForbiddenAccessException("405","접근 권한 없는 채팅방");
 		}
+
 		ChatRoom chatRoom = findByRoomId(roomId);
 		chatRoom.setDeleteStatus(username,true);	// 논리적 삭제
 		hashOpsChatRoom.put(CHAT_ROOMS, roomId, chatRoom);	// redis에 업데이트
@@ -180,8 +181,8 @@ public class ChatRoomService {
 		String user1 = chatRoom.getSender();
 		String user2 = chatRoom.getReceiver();
 
-        return getDeleteStatus(roomId, user1) && getDeleteStatus(roomId, user2);
-    }
+		return getDeleteStatus(roomId, user1) && getDeleteStatus(roomId, user2);
+	}
 
 	// 유저가 입장한 채팅방ID와 유저 세션ID 맵핑 정보 저장
 	public void setUserEnterInfo(String sessionId, String roomId) {
@@ -234,7 +235,7 @@ public class ChatRoomService {
 			}
 
 			if (chatRoom.getSender().equals(sender) && chatRoom.getReceiver().equals(receiver)
-				|| chatRoom.getSender().equals(receiver) && chatRoom.getReceiver().equals(sender)) {
+					|| chatRoom.getSender().equals(receiver) && chatRoom.getReceiver().equals(sender)) {
 				return chatRoom.getRoomId();
 			}
 		}
