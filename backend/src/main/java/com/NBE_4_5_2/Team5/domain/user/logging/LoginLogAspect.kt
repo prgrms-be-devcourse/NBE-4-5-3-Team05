@@ -51,7 +51,7 @@ class LoginLogAspect(
 					refreshToken : {}
 					
 					""".trimIndent(), now, "Anonymous", "Anonymous",
-                userForm.username,
+                userForm.item.username,
                 ip,
                 accessToken,
                 refreshToken
