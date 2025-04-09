@@ -67,7 +67,6 @@ Thumbs.db
 ehthumbs.db
 
 ### 🐳 Docker 관련 ###
-docker-compose.yml
 Dockerfile
 .dockerignore
 
