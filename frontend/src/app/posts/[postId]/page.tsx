@@ -12,6 +12,8 @@ import { faComment } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 type ProductPostResponse = components["schemas"]["ProductPostResponse"];
+type PreviewPostResponse = components["schemas"]["PreviewPostResponse"];
+type StatusType = "AVAILABLE" | "RESERVED" | "PURCHASED";
 
 export default function PostDetailPage() {
   const { postId } = useParams<{ postId: string }>();
@@ -27,9 +29,17 @@ export default function PostDetailPage() {
   const [purchased, setPurchased] = useState<boolean>(false);
   const [purchaseLoading, setPurchasedLoading] = useState<boolean>(false);
 
+  // 상태 변경 로딩 여부
+  const [statusLoading, setStatusLoading] = useState<boolean>(false);
   const [comments, setComments] = useState<
     components["schemas"]["CommentDto"][]
   >([]);
+
+  const statusLabels: Record<StatusType, string> = {
+    AVAILABLE: "판매중",
+    RESERVED: "예약중",
+    PURCHASED: "판매완료",
+  };
 
   const checkLoginStatus = async (): Promise<boolean> => {
     try {
@@ -46,6 +56,7 @@ export default function PostDetailPage() {
       return false;
     }
   };
+
   // 게시글 상세 조회 API 호출
   const fetchPost = async () => {
     if (!postId) return;
@@ -79,12 +90,49 @@ export default function PostDetailPage() {
         return;
       }
       const favoritesResponse = response.data.data;
-      const favorites: ProductPostResponse[] = favoritesResponse.items;
+      const favorites: PreviewPostResponse[] = favoritesResponse.items;
       if (post?.id && favorites.some((fav) => fav.id === post.id)) {
         setLiked(true);
       }
     } catch (err) {
       console.error("찜한 내역 조회 중 예외 발생:", err);
+    }
+  };
+
+  // 상품 상태 변경 핸들러
+  const handleStatusChange = async (newStatus: StatusType) => {
+    if (!post) return;
+    if (post.writerId !== loginMember.id) {
+      alert("작성자만 상태를 변경할 수 있습니다.");
+      return;
+    }
+
+    const confirmChange = confirm(
+      `상품 상태를 "${statusLabels[newStatus]}"로 변경하시겠습니까?`
+    );
+    if (!confirmChange) return;
+
+    setStatusLoading(true);
+    try {
+      const response = await client.PUT("/api/posts/{id}", {
+        params: { path: { id: post.id! } },
+        body: { status: newStatus },
+        credentials: "include",
+      });
+
+      if (response.error) {
+        alert("상품 상태 변경 실패: " + response.error.message);
+        return;
+      }
+
+      // 상태 변경 성공 시 즉시 UI 업데이트
+      setPost((prev) => (prev ? { ...prev, status: newStatus } : prev));
+      alert(`상품 상태가 "${statusLabels[newStatus]}"로 변경되었습니다.`);
+    } catch (err) {
+      console.error("상품 상태 변경 중 오류 발생:", err);
+      alert("상품 상태 변경 중 오류가 발생했습니다.");
+    } finally {
+      setStatusLoading(false);
     }
   };
 
@@ -281,8 +329,6 @@ export default function PostDetailPage() {
     }
   };
 
-
-
   // 이미지 URL들을 소문자와 trim을 적용해 유효한 값만 필터링
   const images = post.imageUrls
     ? post.imageUrls
@@ -302,7 +348,7 @@ export default function PostDetailPage() {
           {images.length > 0 ? (
             <div className="relative w-full h-64">
               <Image
-              loader={()=>images[0]}
+                loader={() => images[0]}
                 src={images[0]}
                 alt={post.title || "이미지"}
                 fill
@@ -322,14 +368,14 @@ export default function PostDetailPage() {
             <li>작성자 닉네임: {post.writerName}</li>
           </ul>
           <div className="mt-4">
-          <Button
-            variant="outline"
-            onClick={handleCreateChatRoom}
-            className="rounded-full bg-yellow-400 text-black py-2 px-4 border border-black-700 hover:bg-yellow-300"              
-          >
-            <FontAwesomeIcon icon={faComment} className="mr-2" />
-            채팅
-          </Button>
+            <Button
+              variant="outline"
+              onClick={handleCreateChatRoom}
+              className="rounded-full bg-yellow-400 text-black py-2 px-4 border border-black-700 hover:bg-yellow-300"
+            >
+              <FontAwesomeIcon icon={faComment} className="mr-2" />
+              채팅
+            </Button>
           </div>
         </div>
       </div>
@@ -374,7 +420,7 @@ export default function PostDetailPage() {
               {images.slice(1).map((imgUrl, idx) => (
                 <div key={idx} className="relative w-40 h-40">
                   <Image
-                  loader={()=>imgUrl}
+                    loader={() => imgUrl}
                     src={imgUrl}
                     alt={`${post.title} - ${idx + 1}`}
                     fill
@@ -386,44 +432,102 @@ export default function PostDetailPage() {
           </div>
         )}
       </div>
-      <div className="mt-4 flex gap-4">
-        <button
-          disabled={likeLoading || liked}
-          onClick={handleLike}
-          className="px-4 py-2 bg-red-500 text-white rounded"
-        >
-          {liked ? "찜 완료" : likeLoading ? "처리 중..." : "찜하기"}
-        </button>
-        <button
-          disabled={purchaseLoading || purchased}
-          onClick={handlePurchase}
-          className="px-4 py-2 bg-red-500 text-white rounded"
-        >
-          {purchased
-            ? "구매 완료"
-            : purchaseLoading
-            ? "처리 중..."
-            : "구매하기"}
-        </button>
-        <button
-          onClick={handleEdit}
-          className="px-4 py-2 bg-blue-500 text-white rounded"
-        >
-          수정하기
-        </button>
-        <button
-          onClick={handleDelete}
-          className="px-4 py-2 bg-gray-500 text-white rounded"
-        >
-          삭제하기
-        </button>
+
+      {/* 상태 변경 & 액션 버튼 영역 */}
+      <div className="bg-gray-50 p-6 rounded-lg shadow mb-10">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+          {/* 왼쪽: 상품 상태 변경 */}
+          {post.writerId === loginMember.id && (
+            <div className="w-full md:w-auto">
+              <h3 className="text-lg font-semibold mb-2">상품 상태 변경</h3>
+              <div className="flex gap-2 flex-wrap">
+                <Button
+                  className={`px-4 py-2 rounded font-bold transition-colors shadow ${
+                    post.status === "AVAILABLE"
+                      ? "bg-green-700 text-white ring-2 ring-green-900"
+                      : "bg-green-200 text-green-900 hover:bg-green-300"
+                  }`}
+                  onClick={() => handleStatusChange("AVAILABLE")}
+                  disabled={statusLoading || post.status === "AVAILABLE"}
+                >
+                  판매중
+                </Button>
+
+                <Button
+                  className={`px-4 py-2 rounded font-bold transition-colors shadow ${
+                    post.status === "RESERVED"
+                      ? "bg-yellow-500 text-white ring-2 ring-yellow-700"
+                      : "bg-yellow-200 text-yellow-900 hover:bg-yellow-300"
+                  }`}
+                  onClick={() => handleStatusChange("RESERVED")}
+                  disabled={statusLoading || post.status === "RESERVED"}
+                >
+                  예약중
+                </Button>
+
+                <Button
+                  className={`px-4 py-2 rounded font-bold transition-colors shadow ${
+                    post.status === "PURCHASED"
+                      ? "bg-red-700 text-white ring-2 ring-red-900"
+                      : "bg-red-200 text-red-900 hover:bg-red-300"
+                  }`}
+                  onClick={() => handleStatusChange("PURCHASED")}
+                  disabled={statusLoading || post.status === "PURCHASED"}
+                >
+                  판매 완료
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* 오른쪽: 액션 버튼들 */}
+          <div className="flex flex-wrap gap-3 justify-end w-full md:w-auto">
+            <Button
+              disabled={likeLoading || liked}
+              onClick={handleLike}
+              className="px-4 py-2 bg-gray-700 text-white rounded"
+            >
+              {liked ? "찜 완료" : likeLoading ? "처리 중..." : "찜하기"}
+            </Button>
+            <Button
+              disabled={purchaseLoading || purchased}
+              onClick={handlePurchase}
+              className="px-4 py-2  bg-gray-700 text-white rounded"
+            >
+              {purchased
+                ? "구매 완료"
+                : purchaseLoading
+                  ? "처리 중..."
+                  : "구매하기"}
+            </Button>
+            {loginMember.id === post.writerId && (
+              <>
+                <Button
+                  onClick={handleEdit}
+                  className="px-4 py-2 bg-gray-700 text-white rounded"
+                >
+                  수정하기
+                </Button>
+                <Button
+                  onClick={handleDelete}
+                  className="px-4 py-2 bg-gray-700 text-white rounded"
+                >
+                  삭제하기
+                </Button>
+              </>
+            )}
+          </div>
+        </div>
       </div>
-      <div className="w-full">
+
+      {/* 댓글 섹션 (명확하게 구분) */}
+      <div className="w-full border-t pt-6 mt-10">
+        <h3 className="text-xl font-bold mb-4">댓글</h3>
         <Comments
           postId={post.id!}
           initialComments={comments}
           loadMoreComments={loadComments}
-        ></Comments>
+        />
       </div>
     </div>
   );

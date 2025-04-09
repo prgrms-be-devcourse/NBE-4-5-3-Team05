@@ -73,7 +73,7 @@ export default function ClientPage({
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {posts.map((post) => (
           <div key={post.id} className="border p-4 rounded-md shadow-lg">
-            <Link href={`/post/${post.id}`}>
+            <Link href={`/posts/${post.id}`}>
               <img
                 src={post.thumbNail}
                 alt="썸네일 없음"

@@ -147,7 +147,7 @@ class ProductPostController(
     fun getMyPurchases(
         @RequestParam(defaultValue = "1") page: Int,
         @RequestParam(defaultValue = "10") pageSize: Int
-    ): RsData<PageDto<ProductPostResponse>> {
+    ): RsData<PageDto<PreviewPostResponse>> {
         val actor = userAuthService.userIdentity
         val myPurchases = productPostService.getMyPurchases(actor, page, pageSize)
         return RsData("200", "내 구매 내역 조회 성공", myPurchases)
@@ -170,7 +170,7 @@ class ProductPostController(
     fun getMyFavorites(
         @RequestParam(defaultValue = "1") page: Int,
         @RequestParam(defaultValue = "10") pageSize: Int
-    ): RsData<PageDto<ProductPostResponse>> {
+    ): RsData<PageDto<PreviewPostResponse>> {
         val actor = userAuthService.userIdentity
         val favorites = productPostService.getMyFavorites(actor, page, pageSize)
         return RsData("200", "내가 찜한 내역 조회 성공", favorites)
