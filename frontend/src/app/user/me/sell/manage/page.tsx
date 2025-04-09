@@ -26,7 +26,7 @@ export default async function Page({
     headers: {
       cookie: (await cookies()).toString(),
     },
-    credentials:"include"
+    credentials: "include",
   });
 
   if (response.error) {
@@ -40,7 +40,7 @@ export default async function Page({
   const pageInfo = {
     totalPages: rsData.data.totalPages,
     totalItems: rsData.data.totalItems,
-    currentPage: rsData.data.curPageNo,
+    currentPage: rsData.data.currentPageNo,
     pageSize,
   };
 
