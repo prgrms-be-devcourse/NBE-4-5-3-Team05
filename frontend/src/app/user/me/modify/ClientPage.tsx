@@ -24,12 +24,12 @@ export default function ClientPage() {
   const [codeStatusColor, setCodeStatusColor] = useState("text-red-500");
 
   // 위치 관리
-  const [latitude, setLatitude] = useState(0);
-  const [longitude, setLongitude] = useState(0);
-  const [zoom, setZoom] = useState(18);
-  const [locationStatus, setLocationStatus] = useState("");
-  const [mapVisible, setMapVisible] = useState(false);
-  const [address, setAddress] = useState("");
+    const [latitude, setLatitude] = useState(0);
+    const [longitude, setLongitude] = useState(0);
+    const [zoom, setZoom] = useState(18);
+    const [locationStatus, setLocationStatus] = useState("");
+    const [mapVisible, setMapVisible] = useState(false);
+    const [address, setAddress] = useState("");
 
   useEffect(() => {
     // 초기 사용자 위치 설정 (0,0)
@@ -189,14 +189,14 @@ export default function ClientPage() {
     console.log(formData);
     const email = formData.email.value;
     const nickname = formData.nickname.value;
-    const _address = address || loginMember.address;
+    const address = formData.address.value;
     const profileUrl = formData.profileUrl.value;
 
     const response = await client.PUT("/api/users/me", {
       body: {
         email,
         nickname,
-        address:_address,
+        address,
         profileUrl,
       },
       credentials: "include",
