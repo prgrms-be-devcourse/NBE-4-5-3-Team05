@@ -93,7 +93,7 @@ class CommentService(
     }
 
     fun getComments(postId: String, pageable: Pageable): Slice<CommentDto> {
-        return commentRepository.findBy_target_Id(postId, pageable)
+        return commentRepository.findByTarget_Id(postId, pageable)
             .map { comment: Comment ->
                 CommentDto.of(
                     comment

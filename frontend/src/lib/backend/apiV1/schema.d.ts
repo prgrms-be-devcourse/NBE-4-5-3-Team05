@@ -836,17 +836,19 @@ export interface components {
             author: components["schemas"]["UserDto"];
         };
         ProductPostModifyForm: {
-            productName: string;
+            productName?: string;
             /** Format: int32 */
-            productPrice: number;
-            title: string;
-            content: string;
-            categoryIds: number[];
-            imageUrlList: string[];
+            productPrice?: number;
+            title?: string;
+            content?: string;
+            categoryIds?: number[];
+            imageUrlList?: string[];
             /** Format: float */
-            latitude: number;
+            latitude?: number;
             /** Format: float */
-            longitude: number;
+            longitude?: number;
+            /** @enum {string} */
+            status?: "RESERVED" | "AVAILABLE" | "PURCHASED";
         };
         ProductPostResponse: {
             id: string;
@@ -871,6 +873,8 @@ export interface components {
             viewCount: number;
             /** Format: int32 */
             likedCount: number;
+            /** @enum {string} */
+            status: "RESERVED" | "AVAILABLE" | "PURCHASED";
         };
         RsDataProductPostResponse: {
             code: string;
@@ -1090,9 +1094,9 @@ export interface components {
             /** Format: int64 */
             offset?: number;
             sort?: components["schemas"]["SortObject"];
+            paged?: boolean;
             /** Format: int32 */
             pageSize?: number;
-            paged?: boolean;
             /** Format: int32 */
             pageNumber?: number;
             unpaged?: boolean;
@@ -1130,22 +1134,6 @@ export interface components {
             code: string;
             message: string;
             data: components["schemas"]["ProductPostResponse"][];
-        };
-        PageDtoProductPostResponse: {
-            items: components["schemas"]["ProductPostResponse"][];
-            /** Format: int32 */
-            totalPages: number;
-            /** Format: int32 */
-            totalItems: number;
-            /** Format: int32 */
-            currentPageNo: number;
-            /** Format: int32 */
-            pageSize: number;
-        };
-        RsDataPageDtoProductPostResponse: {
-            code: string;
-            message: string;
-            data: components["schemas"]["PageDtoProductPostResponse"];
         };
         RsDataBoolean: {
             code: string;
@@ -2418,7 +2406,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json;charset=UTF-8": components["schemas"]["RsDataPageDtoProductPostResponse"];
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataPageDtoPreviewPostResponse"];
                 };
             };
             /** @description Internal Server Error */
@@ -2450,7 +2438,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json;charset=UTF-8": components["schemas"]["RsDataPageDtoProductPostResponse"];
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataPageDtoPreviewPostResponse"];
                 };
             };
             /** @description Internal Server Error */

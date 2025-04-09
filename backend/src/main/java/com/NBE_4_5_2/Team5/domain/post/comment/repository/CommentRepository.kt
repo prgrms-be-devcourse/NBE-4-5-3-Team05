@@ -6,7 +6,7 @@ import org.springframework.data.domain.Slice
 import org.springframework.data.jpa.repository.JpaRepository
 
 interface CommentRepository : JpaRepository<Comment, String> {
-    fun findBy_target_Id(postId: String, pageable: Pageable): Slice<Comment>
+    fun findByTarget_Id(postId: String, pageable: Pageable): Slice<Comment>
 
 
 }
