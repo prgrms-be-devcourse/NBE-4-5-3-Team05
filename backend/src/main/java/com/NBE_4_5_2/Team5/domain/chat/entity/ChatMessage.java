@@ -32,54 +32,6 @@ public class ChatMessage {
 	@ElementCollection
 	private Map<String, Boolean> deleteStatus = new HashMap<>();
 
-	public String getMessageId() {
-		return messageId;
-	}
-
-	public MessageType getType() {
-		return type;
-	}
-
-	public String getRoomId() {
-		return roomId;
-	}
-
-	public String getSender() {
-		return sender;
-	}
-
-	public String getReceiver() {
-		return receiver;
-	}
-
-	public String getMessage() {
-		return message;
-	}
-
-	public String getImage() {
-		return image;
-	}
-
-	public long getUserCount() {
-		return userCount;
-	}
-
-	public String getTimestamp() {
-		return timestamp;
-	}
-
-	public Float getLatitude() {
-		return latitude;
-	}
-
-	public Float getLongitude() {
-		return longitude;
-	}
-
-	public Map<String, Boolean> getDeleteStatus() {
-		return deleteStatus;
-	}
-
 	@Builder
 	public ChatMessage(MessageType type, String roomId, String sender, String receiver, String message, String image,
 		long userCount, Float latitude, Float longitude) {
@@ -99,10 +51,10 @@ public class ChatMessage {
 		deleteStatus.put(receiver, false);
 	}
 
-	// 메시지 타입 : 입장, 퇴장, 채팅, 이미지 추가
-	public enum MessageType {
-		ENTER, QUIT, TALK, IMAGE, LOCATION
-	}
+    // 메시지 타입 : 입장, 퇴장, 채팅, 이미지 추가
+    public enum MessageType {
+        ENTER, QUIT, TALK, IMAGE, LOCATION
+    }
 
 	public String formatTimestamp(LocalDateTime timestamp) {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
@@ -116,5 +68,7 @@ public class ChatMessage {
 	public Boolean getDeleteStatus(String username) {
 		return this.deleteStatus.get(username);
 	}
-
+	public String getRoomId() {
+		return this.roomId;
+	}
 }

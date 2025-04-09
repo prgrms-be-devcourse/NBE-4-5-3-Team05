@@ -23,6 +23,6 @@ public class ProductMetadata {
 		this.value = value;
 	}
 
-	public ProductMetadata() {
+	protected ProductMetadata() {
 	}
 }

@@ -6,7 +6,6 @@ import com.NBE_4_5_2.Team5.domain.chat.entity.AccessProvider;
 import com.NBE_4_5_2.Team5.domain.chat.entity.ChatMessage;
 import com.NBE_4_5_2.Team5.domain.chat.entity.ChatRoom;
 import com.NBE_4_5_2.Team5.domain.chat.service.ChatRoomService;
-import com.NBE_4_5_2.Team5.domain.notification.entity.Notification;
 import com.NBE_4_5_2.Team5.domain.post.post.dto.response.ProductPostResponse;
 import com.NBE_4_5_2.Team5.domain.post.post.service.ProductPostService;
 import com.NBE_4_5_2.Team5.domain.user.user.entity.User;
@@ -21,8 +20,6 @@ import com.NBE_4_5_2.Team5.global.exception.ServiceException;
 import com.NBE_4_5_2.Team5.global.exception.security.ForbiddenAccessException;
 import com.NBE_4_5_2.Team5.global.exception.security.WrongRoleException;
 import com.NBE_4_5_2.Team5.global.exception.user.UserNotFoundException;
-import com.NBE_4_5_2.Team5.infrastructure.kafka.KafkaNotificationProducerService;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -48,7 +45,6 @@ public class ChatRoomController {
 	private final UserService userService;
 	private final UserRepository userRepository;
 	private final UserAuthService userAuthService;
-	private final KafkaNotificationProducerService kafkaNotificationProducerService;
 
 	// 사용자 토큰 조회
 	@Operation(summary = "사용자 토큰 조회", description = "사용자를 판단하기 위한 토큰을 생성해 반환합니다.")
@@ -85,8 +81,6 @@ public class ChatRoomController {
 		ProductPostResponse postResponse = productPostService.getPost(postId);
 		String receiver = postResponse.getWriterName();
 		ChatRoom chatRoom = chatRoomService.createChatRoom(sender.getNickname(), receiver);
-		kafkaNotificationProducerService.sendMessage(
-			new Notification(postResponse.getWriterId(), false, sender.getNickname() + "님 과의 채팅방이 생성되었습니다."));
 
 		return new RsData<>("200", receiver + "와의 채팅방", chatRoom);
 	}
