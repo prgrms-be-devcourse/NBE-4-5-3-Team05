@@ -61,8 +61,6 @@ class ChatController(
                 if (!messages.isEmpty()) {
                     messageType = messages[messages.size - 1].getType()
                 }
-                println("lastMessage!!!!!: " + chatRoom.lastMessage)
-                println("lastTimestamp!!!!!: " + chatRoom.lastTimestamp)
                 ChatRoomDto(
                     chatRoom.id,
                     chatRoom.roomId,
@@ -75,10 +73,6 @@ class ChatController(
                 )
             }
             .toList()
-        println("===DTO===")
-        println(dtos[dtos.size - 1].lastMessage)
-        println(dtos[dtos.size - 1].lastTimestamp)
-        println(dtos[dtos.size - 1].messageType)
         simpMessagingTemplate.convertAndSend("/sub/chat/rooms", dtos) // 클라이언트에게 전송
     }
 }
