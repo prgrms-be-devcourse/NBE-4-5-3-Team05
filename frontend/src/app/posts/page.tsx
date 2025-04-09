@@ -28,7 +28,7 @@ export default function PostsPage() {
     keyword: initialKeyword,
     minPrice: null as number | null,
     maxPrice: null as number | null,
-    categories: [] as string[],
+    categories: [] as number[],
     sort: "desc",
   });
 
@@ -73,12 +73,13 @@ export default function PostsPage() {
           pageSize: 10,
           keyword: filters.keyword || undefined,
           sort: filters.sort,
-          minPrice: filters.minPrice || undefined,
+          minPrice: filters.minPrice ?? undefined,
           maxPrice: filters.maxPrice || undefined,
           // 다중 카테고리인 경우 콤마로 구분하여 전달
-          categories: filters.categories.length
-            ? filters.categories.join(",")
-            : undefined,
+          categoryIds:
+            filters.categories.length > 0
+              ? filters.categories.map((id) => Number(id))
+              : undefined,
         },
       },
       credentials: "include",
@@ -106,9 +107,15 @@ export default function PostsPage() {
         <div className="flex-grow">
           {noticeList.length > 0 && (
             <div className="mb-4 space-y-4">
-              {noticeList.map((notice) => (
-                <Link key={notice.id} href={`/notices/${notice.id!}`}>
-                  <Notice title={notice.title!} content={notice.content!} />
+              {noticeList.map((notice, index) => (
+                <Link
+                  href={`/notices/${notice.id!}`}
+                  legacyBehavior
+                  key={index}
+                >
+                  <a>
+                    <Notice title={notice.title!} content={notice.content!} />
+                  </a>
                 </Link>
               ))}
             </div>

@@ -169,7 +169,7 @@ internal class AdminControllerTest(
 
         //when
         // id를 가진 post를 삭제
-        val id = productPostService.getPosts(1, 1, "", "asc")
+        val id = productPostService.getPosts(1, 1, "", "asc", 0, 1000000, emptyList())
             .items[0].id
 
         val result = mockMvc.perform(

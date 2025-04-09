@@ -170,7 +170,7 @@ internal class PaymentControllerTest(
     fun payProduct() {
         // given
         // 구매할 상품 찾기
-        val product = productPostService.getPosts(1, 1, "", "asc")
+        val product = productPostService.getPosts(1, 1, "", "asc", 0, 1000000, emptyList())
             .items[0]
 
         // 유저의 캐시가 차감되었는지 확인하기 위해 유저 엔티티 가져옴
@@ -221,7 +221,7 @@ internal class PaymentControllerTest(
 
         // 구매할 상품 찾기
 
-        val product = productPostService.getPosts(1, 1, "", "asc")
+        val product = productPostService.getPosts(1, 1, "", "asc", 0, 1000000, emptyList())
             .items[0]
 
         // 유저의 캐시가 차감되었는지 확인하기 위해 유저 엔티티 가져옴
