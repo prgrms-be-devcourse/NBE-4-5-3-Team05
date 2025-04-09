@@ -24,7 +24,7 @@ class ProductCategory(
 ) : BaseLongIdEntity() {
 
     companion object {
-        @JvmStatic
+        
         fun of(productPost: ProductPost, category: Category): ProductCategory {
             return ProductCategory(productPost, category)
         }
