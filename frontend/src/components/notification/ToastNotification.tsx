@@ -1,7 +1,6 @@
 "use client";
 
 import { useEventSource } from "@/app/stores/notification/notificationSessionStore";
-import { escape } from "querystring";
 import { useEffect } from "react";
 import { toast, ToastContainer } from "react-toastify";
 
