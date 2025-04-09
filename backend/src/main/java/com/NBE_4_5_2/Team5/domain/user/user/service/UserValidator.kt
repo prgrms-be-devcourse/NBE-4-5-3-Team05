@@ -40,8 +40,9 @@ class UserValidator(
         when {
             userRepository.existsByEmail(email) ->
                 throw ServiceException("409-2", "이미 사용중인 이메일입니다.")
-            emailService.getVerificationCode(email) != "verified" ->
+            emailService.getAuthenticationCode(email) != "verified" ->
                 throw ServiceException("409", "이메일 인증이 완료되지 않았습니다. 인증 후 다시 시도해주세요.")
         }
+        emailService.deleteAuthenticationCode(email)
     }
 }

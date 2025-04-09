@@ -102,9 +102,7 @@ export default function ClientPage() {
           <Link href="/user/me/sell/manage">
             <Button variant="default">내 상점</Button>
           </Link>
-          <Button 
-            variant="outline"
-            asChild>              
+          <Button variant="outline" asChild>
             <Link href="/chat">
               <FontAwesomeIcon icon={faComment} className="mr-2" />
               채팅방

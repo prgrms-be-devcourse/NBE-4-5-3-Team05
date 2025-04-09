@@ -49,18 +49,18 @@ class AdminService(
 
     fun signUpAdmin(username: String, password: String, nickname: String, email: String): User {
         return User(
-                username,
-                passwordEncoder.encode(password),
-                email,
-                nickname,
-                "addr",
-                "url",
-                Role.ADMIN
-            )
-                .let {
-                    userService.generateAuthtoken(it)
-                    userRepository.save(it)
-                }
+            username,
+            passwordEncoder.encode(password),
+            email,
+            nickname,
+            "addr",
+            "url",
+            Role.ADMIN
+        )
+            .let {
+                userService.deleteAuthenticationCode(it.email)
+                userRepository.save(it)
+            }
     }
 
     fun writeNotice(title: @NotEmpty String, content: @NotEmpty String): NoticeResBody {
@@ -131,7 +131,7 @@ class AdminService(
 
         userRepository.findById(userId)
             .orElseThrow { UsernameNotFoundException("유저를 찾을 수 없습니다.") }
-            .let{
+            .let {
 
                 check(it.blocked) { "계정 정지 상태가 아닙니다." }
 

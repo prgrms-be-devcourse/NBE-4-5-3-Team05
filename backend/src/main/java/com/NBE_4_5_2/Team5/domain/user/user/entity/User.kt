@@ -55,7 +55,7 @@ class User() : BaseTime() {
     @OneToMany(mappedBy = "writer", cascade = [CascadeType.REMOVE])
     val writtenProducts: MutableList<ProductPost> = mutableListOf()
 
-    @OneToMany(mappedBy = "_author", fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE], orphanRemoval = true)
+    @OneToMany(mappedBy = "author", fetch = FetchType.LAZY, cascade = [CascadeType.REMOVE], orphanRemoval = true)
     val wroteComments: MutableList<Comment> = mutableListOf()
 
     val isAdmin: Boolean

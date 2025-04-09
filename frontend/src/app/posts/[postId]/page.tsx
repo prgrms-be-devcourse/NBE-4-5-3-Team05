@@ -62,8 +62,8 @@ export default function PostDetailPage() {
     if (!postId) return;
     try {
       const response = await client.GET("/api/posts/{id}", {
-        withCredentials: true,
         params: { path: { id: postId } },
+        credentials: "include",
       });
       if (response.error) {
         console.error("게시글 상세 조회 실패", response.error);

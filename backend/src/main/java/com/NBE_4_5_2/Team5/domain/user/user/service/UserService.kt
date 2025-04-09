@@ -33,6 +33,7 @@ class UserService(
     private val rq: Rq
 ) {
 
+    @Transactional
     fun createUser(
         username: String, password: String, email: String,
         nickname: String, address: String, profileUrl: String
@@ -259,6 +260,10 @@ class UserService(
         emailService.checkBouncedEmail(email)
     }
 
+    fun deleteAuthenticationCode(email: String) {
+        emailService.deleteAuthenticationCode(email)
+    }
+
     /**
      * 사용자가 입력한 인증코드를 검증하여 일치할 경우 해당 이메일을 verified로 저장
      *
@@ -267,9 +272,9 @@ class UserService(
      * @throws ServiceException 인증코드가 일치하지 않는 경우
      */
     fun verifyAuthenticationCode(email: String, code: String) {
-        emailService.getVerificationCode(email)
+        emailService.getAuthenticationCode(email)
             ?.takeIf { emailService.verifyAuthenticationCode(code, it) }
-            ?.also { emailService.saveVerificationCode(email, "verified") }
+            ?.also { emailService.saveAuthenticationCode(email, "verified") }
             ?: throw ServiceException("400-1", "인증코드가 틀렸습니다.")
     }
 

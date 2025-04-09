@@ -8,11 +8,15 @@ import PostList from "@/components/posts/PostList";
 import Pagination from "@/components/posts/Pagination";
 import { components } from "@/lib/backend/apiV1/schema";
 import client from "@/lib/client";
+import { useSearchParams } from "next/navigation";
 
 type NoticeListItem = components["schemas"]["NoticeResBody"];
 type ProductPostListItem = components["schemas"]["PreviewPostResponse"];
 
 export default function PostsPage() {
+  const searchParams = useSearchParams();
+  const initialKeyword = searchParams.get("keyword") || "";
+
   const [noticeList, setNoticeList] = useState<NoticeListItem[]>([]);
   const [posts, setPosts] = useState<ProductPostListItem[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -21,7 +25,7 @@ export default function PostsPage() {
     []
   );
   const [filters, setFilters] = useState({
-    keyword: "",
+    keyword: initialKeyword,
     minPrice: null as number | null,
     maxPrice: null as number | null,
     categories: [] as number[],
