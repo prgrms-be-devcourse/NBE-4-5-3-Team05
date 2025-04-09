@@ -20,8 +20,8 @@ class LogAspect {
             "execution(* com.NBE_4_5_2.Team5..*Service.*(..)) || within(@jakarta.persistence.Entity *)"
         const val CONTROLLER_POINTCUT =
             "execution(* com.NBE_4_5_2.Team5..*Controller.*(..)) && " +
-                    "!execution(* com.NBE_4_5_2.Team5.domain.user.controller.UserController.me(..)) && " +
-                    "!execution(* com.NBE_4_5_2.Team5.domain.user.controller.UserController.loginUser(..))"
+                    "!execution(* com.NBE_4_5_2.Team5.domain.user.user.controller.UserController.me(..)) && " +
+                    "!execution(* com.NBE_4_5_2.Team5.domain.user.user.controller.UserController.loginUser(..))"
     }
 
     @Around(SERVICE_POINTCUT)
