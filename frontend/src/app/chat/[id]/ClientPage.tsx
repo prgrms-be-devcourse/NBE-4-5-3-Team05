@@ -50,6 +50,7 @@ export default function ClientPage({
   const [stompClient, setStompClient] = useState<any>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<null | HTMLDivElement>(null);
+  const [selectedStatus, setSelectedStatus] = useState<string>("");
 
   const [isOpen, setIsOpen] = useState(false);
 
@@ -146,6 +147,40 @@ export default function ClientPage({
   useEffect(() => {
     getCurrentPosition();
   }, []);
+
+  // 게시글 상태 변경
+  const handleStatusChange = (status: string) => {
+    setSelectedStatus(status);
+  };
+
+  const handleSendStatus = () => {
+    if (!selectedStatus) {
+      alert("상태를 선택하세요.");
+      return;
+    }
+
+    if (!stompClient) {
+      alert("WebSocket 연결이 되어 있지 않습니다.");
+      return;
+    }
+
+    const message = {
+      roomId,
+      sender: userNickname,
+      type: "STATUS",
+      productStatus: selectedStatus,
+    };
+
+    stompClient.send(
+      "/pub/chat/message",
+      { token: accessToken },
+      JSON.stringify(message)
+    );
+    console.log("전송할 메시지 (JSON 직렬화):", JSON.stringify(message));
+    alert("상태가 변경되었습니다!");
+  };
+
+
 
   useEffect(() => {
     scrollToBottomWithOffset(50);
@@ -307,6 +342,7 @@ export default function ClientPage({
       alert("이미지 업로드에 실패했습니다.");
     }
   };
+  
 
   return (
     <div className="flex flex-col h-screen w-full">
@@ -503,6 +539,8 @@ export default function ClientPage({
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+            
+
         <Textarea
           value={inputMessage}
           onChange={handleInputChange}
@@ -518,6 +556,37 @@ export default function ClientPage({
           <FontAwesomeIcon icon={faArrowRight} />
         </Button>
       </footer>
+
+      <div className="fixed bottom-20 left-0 right-0 bg-white p-4 border-t flex items-center justify-center">
+        <Button
+          variant="outline"
+          onClick={() => handleStatusChange("PURCHASED")}
+          className="rounded-md flex items-center h-15 px-3 mx-2"
+        >
+          판매완료
+        </Button>
+        <Button
+          variant="outline"
+          onClick={() => handleStatusChange("AVAILABLE")}
+          className="rounded-md flex items-center h-15 px-3 mx-2"
+        >
+          판매중
+        </Button>
+        <Button
+          variant="outline"
+          onClick={() => handleStatusChange("RESERVED")}
+          className="rounded-md flex items-center h-15 px-3 mx-2"
+        >
+          예약중
+        </Button>
+        <Button
+          variant="outline"
+          onClick={handleSendStatus}
+          className="rounded-md flex items-center h-15 px-3 mx-2"
+        >
+          상태 변경
+        </Button>
+      </div>
     </div>
   );
 }
