@@ -11,6 +11,7 @@ import client from "@/lib/client";
 import { components } from "@/lib/backend/apiV1/schema";
 import { faComment } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import ScrollToTopButton from "@/components/posts/ScrollToTopButton";
 
 type Notice = components["schemas"]["NoticeResBody"];
 type Category = {
@@ -165,6 +166,7 @@ export default function ClientPage() {
       {/* 최근 올라온 상품 섹션 */}
       <section className="border p-4">
         <RecentlyUploadedSection />
+        <ScrollToTopButton />
       </section>
     </div>
   );
