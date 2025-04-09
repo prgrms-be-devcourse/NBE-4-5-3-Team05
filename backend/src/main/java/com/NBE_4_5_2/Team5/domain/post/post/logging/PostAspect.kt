@@ -5,7 +5,7 @@ import com.NBE_4_5_2.Team5.domain.post.post.dto.request.ProductPostWriteForm
 import com.NBE_4_5_2.Team5.domain.post.post.dto.response.ProductPostResponse
 import com.NBE_4_5_2.Team5.domain.post.post.service.ProductPostService
 import com.NBE_4_5_2.Team5.domain.user.user.entity.User
-import com.NBE_4_5_2.Team5.global.dto.RsData
+import com.NBE_4_5_2.Team5.global.response.RsData
 import jakarta.servlet.http.HttpServletRequest
 import org.aspectj.lang.ProceedingJoinPoint
 import org.aspectj.lang.annotation.Around
