@@ -947,15 +947,16 @@ export interface components {
         WriteCommentReqBody: {
             content: string;
         };
-        RsDataWriteCommentResBody: {
+        CommentDto: {
+            id: string;
+            author: components["schemas"]["UserDto"];
+            content: string;
+            postId: string;
+        };
+        RsDataCommentDto: {
             code: string;
             message: string;
-            data: components["schemas"]["WriteCommentResBody"];
-        };
-        WriteCommentResBody: {
-            id: string;
-            content: string;
-            author: components["schemas"]["UserDto"];
+            data: components["schemas"]["CommentDto"];
         };
         PurchaseItemReqDto: {
             productId: string;
@@ -1068,21 +1069,15 @@ export interface components {
             size?: number;
             sort?: string[];
         };
-        CommentDto: {
-            id: string;
-            author: components["schemas"]["UserDto"];
-            content: string;
-            postId: string;
-        };
         PageableObject: {
             /** Format: int64 */
             offset?: number;
             sort?: components["schemas"]["SortObject"];
             paged?: boolean;
             /** Format: int32 */
-            pageNumber?: number;
-            /** Format: int32 */
             pageSize?: number;
+            /** Format: int32 */
+            pageNumber?: number;
             unpaged?: boolean;
         };
         RsDataSliceCommentDto: {
@@ -1099,9 +1094,9 @@ export interface components {
             /** Format: int32 */
             number?: number;
             sort?: components["schemas"]["SortObject"];
+            pageable?: components["schemas"]["PageableObject"];
             /** Format: int32 */
             numberOfElements?: number;
-            pageable?: components["schemas"]["PageableObject"];
             empty?: boolean;
         };
         SortObject: {
@@ -1206,9 +1201,9 @@ export interface components {
             /** Format: int32 */
             number?: number;
             sort?: components["schemas"]["SortObject"];
+            pageable?: components["schemas"]["PageableObject"];
             /** Format: int32 */
             numberOfElements?: number;
-            pageable?: components["schemas"]["PageableObject"];
             empty?: boolean;
         };
         RsDataPageUserDto: {
@@ -1229,9 +1224,9 @@ export interface components {
             /** Format: int32 */
             number?: number;
             sort?: components["schemas"]["SortObject"];
+            pageable?: components["schemas"]["PageableObject"];
             /** Format: int32 */
             numberOfElements?: number;
-            pageable?: components["schemas"]["PageableObject"];
             empty?: boolean;
         };
         RsDataPageNoticeResBody: {
@@ -1942,7 +1937,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json;charset=UTF-8": components["schemas"]["RsDataWriteCommentResBody"];
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataCommentDto"];
                 };
             };
             /** @description Internal Server Error */
