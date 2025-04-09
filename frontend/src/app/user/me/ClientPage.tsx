@@ -1,6 +1,7 @@
 "use client";
 
 import { LoginMemberContext } from "@/app/stores/auth/loginMemberStore";
+import MapComponent from "@/components/MapComponent";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { use } from "react";
@@ -25,6 +26,13 @@ export default function ClientPage() {
         <div className="mb-2">
           <strong>주소:</strong> {loginMember.address || "주소 없음"}
         </div>
+        <div className="mb-2">
+          <strong>위치:</strong> { 
+            loginMember.latitude === 0 && loginMember.longitude === 0 
+              ? "정보 없음" 
+              : `위도: ${loginMember.latitude} / 경도: ${loginMember.longitude}`
+          }
+        </div>
         <div className="mb-4">
           <strong>프로필 사진:</strong> <br />
           {loginMember.profileUrl ? (
@@ -44,6 +52,19 @@ export default function ClientPage() {
           내 정보 수정
         </Button>
       </div>
+
+      {/* 위도, 경도가 0이 아닐 경우 지도 표시 */}
+      {(loginMember.latitude !== 0 || loginMember.longitude !== 0) && (
+        <div className="mt-4 w-1/2" style={{ height: "350px" }}> {/* 지도의 높이 설정 */}
+          <h1 className="text-lg mb-2">Map</h1>
+          <MapComponent
+            currentPos={{ lat: loginMember.latitude, lng: loginMember.longitude, zoom: 18 }}
+            onLocationSelect={() => {}} // 사용자가 클릭해도 상태 변경 없도록 빈 함수
+          />
+        </div>
+      )}
+
+      
     </div>
   );
 }
