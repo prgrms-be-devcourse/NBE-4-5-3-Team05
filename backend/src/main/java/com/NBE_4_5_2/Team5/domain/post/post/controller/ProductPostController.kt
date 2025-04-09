@@ -10,7 +10,7 @@ import com.NBE_4_5_2.Team5.domain.post.post.service.RecentlyViewedService
 import com.NBE_4_5_2.Team5.domain.user.user.service.UserAuthService
 import com.NBE_4_5_2.Team5.global.dto.Empty
 import com.NBE_4_5_2.Team5.global.dto.PageDto
-import com.NBE_4_5_2.Team5.global.dto.RsData
+import com.NBE_4_5_2.Team5.global.response.RsData
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
@@ -51,9 +51,14 @@ class ProductPostController(
         @Parameter(description = "검색 키워드")
         @RequestParam(defaultValue = "") keyword: String,
         @Parameter(description = "정렬 순서. desc:내림차순, asc:오름차순", example = "desc")
-        @RequestParam(defaultValue = "desc") sort: String
+        @RequestParam(defaultValue = "desc") sort: String,
+        @RequestParam(defaultValue = "0") minPrice: Int,
+        @RequestParam(defaultValue = "${Int.MAX_VALUE}") maxPrice: Int,
+        @RequestParam(name = "categoryIds", required = false) categoryIds: List<Long> = emptyList()
     ): RsData<PageDto<PreviewPostResponse>> {
-        val postPage = productPostService.getPosts(page, pageSize, keyword, sort)
+        val postPage = productPostService.getPosts(
+            page, pageSize, keyword, sort, minPrice, maxPrice, categoryIds
+        )
         return RsData("200", "글 목록 조회가 완료되었습니다.", postPage)
     }
 

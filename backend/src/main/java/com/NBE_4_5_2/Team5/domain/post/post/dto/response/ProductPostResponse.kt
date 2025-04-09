@@ -24,7 +24,7 @@ class ProductPostResponse(
 ) {
 
     companion object {
-        @JvmStatic
+        
         fun fromEntity(post: ProductPost): ProductPostResponse {
             return ProductPostResponse(
                 post.id,
@@ -47,7 +47,7 @@ class ProductPostResponse(
         }
 
         // 찜 개수를 외부에서 전달받는 메서드
-        @JvmStatic
+        
         fun fromEntityWithLikeCount(post: ProductPost, likedCount: Int): ProductPostResponse {
             return ProductPostResponse(
                 post.id,

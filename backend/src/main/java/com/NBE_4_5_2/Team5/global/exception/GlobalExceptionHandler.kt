@@ -1,6 +1,6 @@
 package com.NBE_4_5_2.Team5.global.exception
 
-import com.NBE_4_5_2.Team5.global.dto.RsData
+import com.NBE_4_5_2.Team5.global.response.RsData
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageNotReadableException

@@ -10,6 +10,12 @@ import {
   LoginMemberContext,
   useLoginMember,
 } from "./stores/auth/loginMemberStore";
+import { ToastContainer, toast } from "react-toastify";
+import {
+  EventSourceProvider,
+  useEventSource,
+} from "./stores/notification/notificationSessionStore";
+import ToastNotification from "@/components/notification/ToastNotification";
 
 export default function ClientLayout({
   children,
@@ -79,6 +85,9 @@ export default function ClientLayout({
 
   return (
     <LoginMemberContext.Provider value={loginMemberContextValue}>
+      <EventSourceProvider>
+        <ToastNotification />
+      </EventSourceProvider>
       <header className="flex justify-between">
         <Link href="/" className="flex items-center gap-2">
           <Button>
@@ -121,7 +130,9 @@ export default function ClientLayout({
         </div>
       </header>
       <div className="flex flex-1 flex-col items-center w-full">{children}</div>
-      <footer>푸터</footer>
+      <footer className="w-full py-4 mt-8 bg-gray-100 border-t text-center text-sm text-gray-600">
+        © {new Date().getFullYear()} 길게 볼 장터. All rights reserved.
+      </footer>
     </LoginMemberContext.Provider>
   );
 }

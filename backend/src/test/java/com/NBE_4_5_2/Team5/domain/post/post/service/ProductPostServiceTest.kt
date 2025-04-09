@@ -64,7 +64,7 @@ class ProductPostServiceTest {
 
     @Test
     fun getPosts() {
-        val posts = productPostService.getPosts(1, 10, "", "desc")
+        val posts = productPostService.getPosts(1, 10, "", "desc",0,10000000, emptyList())
         val items = posts.items
 
         assertThat(items.size).isEqualTo(10)
@@ -72,7 +72,7 @@ class ProductPostServiceTest {
 
     @Test
     fun getPost() {
-        val res = productPostService.getPosts(1, 1, "", "desc").items[0]
+        val res = productPostService.getPosts(1, 1, "", "desc",0,10000000, emptyList()).items[0]
         val post = productPostService.getPost(res.id)
 
         assertThat(res.id).isEqualTo(post.id)

@@ -19,7 +19,7 @@ export default function PostDetailPage() {
   const { postId } = useParams<{ postId: string }>();
   const router = useRouter();
   // LoginMemberContext를 useContext로 직접 읽어옵니다.
-  const { loginMember } = useContext(LoginMemberContext);
+  const { isLogin, loginMember } = useContext(LoginMemberContext);
 
   const [post, setPost] = useState<ProductPostResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -162,8 +162,10 @@ export default function PostDetailPage() {
 
   useEffect(() => {
     if (post) {
-      fetchUserFavorites();
-      checkPurchased();
+      if (isLogin) {
+        fetchUserFavorites();
+        checkPurchased();
+      }
       fetchComments();
     }
   }, [post]);
@@ -364,18 +366,19 @@ export default function PostDetailPage() {
         <div className="w-full md:w-1/3 bg-blue-50 rounded p-4">
           <h2 className="text-xl font-semibold mb-2">유저 정보</h2>
           <ul className="space-y-1">
-            <li>작성자 ID: {post.writerId}</li>
             <li>작성자 닉네임: {post.writerName}</li>
           </ul>
           <div className="mt-4">
-            <Button
-              variant="outline"
-              onClick={handleCreateChatRoom}
-              className="rounded-full bg-yellow-400 text-black py-2 px-4 border border-black-700 hover:bg-yellow-300"
-            >
-              <FontAwesomeIcon icon={faComment} className="mr-2" />
-              채팅
-            </Button>
+            {isLogin && (
+              <Button
+                variant="outline"
+                onClick={handleCreateChatRoom}
+                className="rounded-full bg-yellow-400 text-black py-2 px-4 border border-black-700 hover:bg-yellow-300"
+              >
+                <FontAwesomeIcon icon={faComment} className="mr-2" />
+                채팅
+              </Button>
+            )}
           </div>
         </div>
       </div>
@@ -481,54 +484,59 @@ export default function PostDetailPage() {
           )}
 
           {/* 오른쪽: 액션 버튼들 */}
-          <div className="flex flex-wrap gap-3 justify-end w-full md:w-auto">
-            <Button
-              disabled={likeLoading || liked}
-              onClick={handleLike}
-              className="px-4 py-2 bg-gray-700 text-white rounded"
-            >
-              {liked ? "찜 완료" : likeLoading ? "처리 중..." : "찜하기"}
-            </Button>
-            <Button
-              disabled={purchaseLoading || purchased}
-              onClick={handlePurchase}
-              className="px-4 py-2  bg-gray-700 text-white rounded"
-            >
-              {purchased
-                ? "구매 완료"
-                : purchaseLoading
-                  ? "처리 중..."
-                  : "구매하기"}
-            </Button>
-            {loginMember.id === post.writerId && (
-              <>
-                <Button
-                  onClick={handleEdit}
-                  className="px-4 py-2 bg-gray-700 text-white rounded"
-                >
-                  수정하기
-                </Button>
-                <Button
-                  onClick={handleDelete}
-                  className="px-4 py-2 bg-gray-700 text-white rounded"
-                >
-                  삭제하기
-                </Button>
-              </>
-            )}
-          </div>
+          {isLogin && (
+            <div className="flex flex-wrap gap-3 justify-end w-full md:w-auto">
+              <Button
+                disabled={likeLoading || liked}
+                onClick={handleLike}
+                className="px-4 py-2 bg-gray-700 text-white rounded"
+              >
+                {liked ? "찜 완료" : likeLoading ? "처리 중..." : "찜하기"}
+              </Button>
+              <Button
+                disabled={purchaseLoading || purchased}
+                onClick={handlePurchase}
+                className="px-4 py-2  bg-gray-700 text-white rounded"
+              >
+                {purchased
+                  ? "구매 완료"
+                  : purchaseLoading
+                    ? "처리 중..."
+                    : "구매하기"}
+              </Button>
+              {loginMember.id === post.writerId && (
+                <>
+                  <Button
+                    onClick={handleEdit}
+                    className="px-4 py-2 bg-gray-700 text-white rounded"
+                  >
+                    수정하기
+                  </Button>
+                  <Button
+                    onClick={handleDelete}
+                    className="px-4 py-2 bg-gray-700 text-white rounded"
+                  >
+                    삭제하기
+                  </Button>
+                </>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
       {/* 댓글 섹션 (명확하게 구분) */}
-      <div className="w-full border-t pt-6 mt-10">
-        <h3 className="text-xl font-bold mb-4">댓글</h3>
-        <Comments
-          postId={post.id!}
-          initialComments={comments}
-          loadMoreComments={loadComments}
-        />
-      </div>
+      {isLogin && (
+        <div className="w-full border-t pt-6 mt-10">
+          <h3 className="text-xl font-bold mb-4">댓글</h3>
+          <Comments
+            postId={post.id!}
+            initialComments={comments}
+            loadMoreComments={loadComments}
+            loginMember={loginMember}
+          />
+        </div>
+      )}
     </div>
   );
 }

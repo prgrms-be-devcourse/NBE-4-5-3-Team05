@@ -1,4 +1,4 @@
-package com.NBE_4_5_2.Team5.global
+package com.NBE_4_5_2.Team5.global.rq
 
 import com.NBE_4_5_2.Team5.domain.user.user.service.UserService
 import jakarta.servlet.http.Cookie

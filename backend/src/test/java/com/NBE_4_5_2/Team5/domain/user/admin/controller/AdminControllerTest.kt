@@ -169,7 +169,7 @@ internal class AdminControllerTest(
 
         //when
         // id를 가진 post를 삭제
-        val id = productPostService.getPosts(1, 1, "", "asc")
+        val id = productPostService.getPosts(1, 1, "", "asc", 0, 1000000, emptyList())
             .items[0].id
 
         val result = mockMvc.perform(
@@ -184,7 +184,7 @@ internal class AdminControllerTest(
             .isInstanceOf(ProductPostNotFoundException::class.java)
 
         result
-            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(MockMvcResultMatchers.status().isNoContent)
             .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("204-1"))
             .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("게시글 삭제 성공."))
     }
