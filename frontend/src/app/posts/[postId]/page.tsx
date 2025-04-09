@@ -533,7 +533,6 @@ export default function PostDetailPage() {
             postId={post.id!}
             initialComments={comments}
             loadMoreComments={loadComments}
-            loginMember={loginMember}
           />
         </div>
       )}
