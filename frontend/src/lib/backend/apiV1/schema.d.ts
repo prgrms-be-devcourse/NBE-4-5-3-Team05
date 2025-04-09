@@ -588,6 +588,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/notification/subscribe": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["subscribe"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/chat/user": {
         parameters: {
             query?: never;
@@ -820,17 +836,19 @@ export interface components {
             author: components["schemas"]["UserDto"];
         };
         ProductPostModifyForm: {
-            productName: string;
+            productName?: string;
             /** Format: int32 */
-            productPrice: number;
-            title: string;
-            content: string;
-            categoryIds: number[];
-            imageUrlList: string[];
+            productPrice?: number;
+            title?: string;
+            content?: string;
+            categoryIds?: number[];
+            imageUrlList?: string[];
             /** Format: float */
-            latitude: number;
+            latitude?: number;
             /** Format: float */
-            longitude: number;
+            longitude?: number;
+            /** @enum {string} */
+            status?: "RESERVED" | "AVAILABLE" | "PURCHASED";
         };
         ProductPostResponse: {
             id: string;
@@ -855,6 +873,8 @@ export interface components {
             viewCount: number;
             /** Format: int32 */
             likedCount: number;
+            /** @enum {string} */
+            status: "RESERVED" | "AVAILABLE" | "PURCHASED";
         };
         RsDataProductPostResponse: {
             code: string;
@@ -943,15 +963,16 @@ export interface components {
         WriteCommentReqBody: {
             content: string;
         };
-        RsDataWriteCommentResBody: {
+        CommentDto: {
+            id: string;
+            author: components["schemas"]["UserDto"];
+            content: string;
+            postId: string;
+        };
+        RsDataCommentDto: {
             code: string;
             message: string;
-            data: components["schemas"]["WriteCommentResBody"];
-        };
-        WriteCommentResBody: {
-            id: string;
-            content: string;
-            author: components["schemas"]["UserDto"];
+            data: components["schemas"]["CommentDto"];
         };
         PurchaseItemReqDto: {
             productId: string;
@@ -974,17 +995,20 @@ export interface components {
             data: components["schemas"]["PaymentDto"];
         };
         ChatRoom: {
-            id?: string;
-            roomId?: string;
-            name?: string;
-            sender?: string;
-            receiver?: string;
-            client?: string;
+            sender: string;
+            receiver: string;
+            id: string;
+            roomId: string;
+            name: string;
+            client: string;
             /** Format: int64 */
-            userCount?: number;
-            lastMessage?: string;
-            lastTimestamp?: string;
-            isDelete?: {
+            userCount: number;
+            lastMessage: string;
+            lastTimestamp: string;
+            isDelete: {
+                [key: string]: boolean;
+            };
+            delete?: {
                 [key: string]: boolean;
             };
         };
@@ -1064,12 +1088,6 @@ export interface components {
             size?: number;
             sort?: string[];
         };
-        CommentDto: {
-            id: string;
-            author: components["schemas"]["UserDto"];
-            content: string;
-            postId: string;
-        };
         PageableObject: {
             /** Format: int64 */
             offset?: number;
@@ -1093,11 +1111,11 @@ export interface components {
             /** Format: int32 */
             number?: number;
             sort?: components["schemas"]["SortObject"];
-            pageable?: components["schemas"]["PageableObject"];
             first?: boolean;
             last?: boolean;
             /** Format: int32 */
             numberOfElements?: number;
+            pageable?: components["schemas"]["PageableObject"];
             empty?: boolean;
         };
         SortObject: {
@@ -1115,22 +1133,6 @@ export interface components {
             message: string;
             data: components["schemas"]["ProductPostResponse"][];
         };
-        PageDtoProductPostResponse: {
-            items: components["schemas"]["ProductPostResponse"][];
-            /** Format: int32 */
-            totalPages: number;
-            /** Format: int32 */
-            totalItems: number;
-            /** Format: int32 */
-            currentPageNo: number;
-            /** Format: int32 */
-            pageSize: number;
-        };
-        RsDataPageDtoProductPostResponse: {
-            code: string;
-            message: string;
-            data: components["schemas"]["PageDtoProductPostResponse"];
-        };
         RsDataBoolean: {
             code: string;
             message: string;
@@ -1146,9 +1148,13 @@ export interface components {
             message: string;
             data: components["schemas"]["PaymentMetaData"];
         };
+        SseEmitter: {
+            /** Format: int64 */
+            timeout?: number;
+        };
         AccessProvider: {
-            name?: string;
-            token?: string;
+            name: string;
+            token: string;
         };
         RsDataAccessProvider: {
             code: string;
@@ -1156,16 +1162,16 @@ export interface components {
             data: components["schemas"]["AccessProvider"];
         };
         ChatRoomDto: {
-            postId?: string;
-            roomId?: string;
-            name?: string;
+            id: string;
+            roomId: string;
+            name: string;
             /** Format: int64 */
-            userCount?: number;
-            lastMessage?: string;
+            userCount: number;
+            lastMessage: string;
             /** @enum {string} */
-            messageType?: "ENTER" | "QUIT" | "TALK" | "IMAGE" | "LOCATION";
-            lastTimestamp?: string;
-            other?: string;
+            messageType: "ENTER" | "QUIT" | "TALK" | "IMAGE" | "LOCATION";
+            lastTimestamp: string;
+            other: string;
         };
         RsDataChatRoomDto: {
             code: string;
@@ -1178,17 +1184,17 @@ export interface components {
             data: components["schemas"]["ChatRoomDto"][];
         };
         MessageDto: {
-            messageId?: string;
-            sender?: string;
-            message?: string;
-            image?: string;
-            /** Format: double */
-            latitude?: number;
-            /** Format: double */
-            longitude?: number;
-            timestamp?: string;
-            lastMessage?: string;
-            lastTimestamp?: string;
+            messageId: string;
+            sender: string;
+            message: string;
+            image: string;
+            /** Format: float */
+            latitude: number;
+            /** Format: float */
+            longitude: number;
+            timestamp: string;
+            lastMessage: string;
+            lastTimestamp: string;
         };
         RsDataListMessageDto: {
             code: string;
@@ -1216,11 +1222,11 @@ export interface components {
             /** Format: int32 */
             number?: number;
             sort?: components["schemas"]["SortObject"];
-            pageable?: components["schemas"]["PageableObject"];
             first?: boolean;
             last?: boolean;
             /** Format: int32 */
             numberOfElements?: number;
+            pageable?: components["schemas"]["PageableObject"];
             empty?: boolean;
         };
         RsDataPageUserDto: {
@@ -1239,11 +1245,11 @@ export interface components {
             /** Format: int32 */
             number?: number;
             sort?: components["schemas"]["SortObject"];
-            pageable?: components["schemas"]["PageableObject"];
             first?: boolean;
             last?: boolean;
             /** Format: int32 */
             numberOfElements?: number;
+            pageable?: components["schemas"]["PageableObject"];
             empty?: boolean;
         };
         RsDataPageNoticeResBody: {
@@ -1869,6 +1875,9 @@ export interface operations {
                  * @example desc
                  */
                 sort?: string;
+                minPrice?: number;
+                maxPrice?: number;
+                categoryIds?: number[];
             };
             header?: never;
             path?: never;
@@ -1951,7 +1960,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json;charset=UTF-8": components["schemas"]["RsDataWriteCommentResBody"];
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataCommentDto"];
                 };
             };
             /** @description Internal Server Error */
@@ -2398,7 +2407,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json;charset=UTF-8": components["schemas"]["RsDataPageDtoProductPostResponse"];
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataPageDtoPreviewPostResponse"];
                 };
             };
             /** @description Internal Server Error */
@@ -2430,7 +2439,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json;charset=UTF-8": components["schemas"]["RsDataPageDtoProductPostResponse"];
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataPageDtoPreviewPostResponse"];
                 };
             };
             /** @description Internal Server Error */
@@ -2501,6 +2510,37 @@ export interface operations {
                 };
                 content: {
                     "application/json;charset=UTF-8": components["schemas"]["RsDataPaymentMetaData"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataVoid"];
+                };
+            };
+        };
+    };
+    subscribe: {
+        parameters: {
+            query?: never;
+            header?: {
+                "Last-Event-ID"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/event-stream": components["schemas"]["SseEmitter"];
                 };
             };
             /** @description Internal Server Error */
