@@ -19,6 +19,7 @@ class Comment(
     @Column(updatable = false, nullable = false)
     private var _id: String = "comment-" + UUID.randomUUID(),
     @ManyToOne
+    @JoinColumn(name = "target_id")
     private var _target: ProductPost,
     @ManyToOne
     private var _author: User,

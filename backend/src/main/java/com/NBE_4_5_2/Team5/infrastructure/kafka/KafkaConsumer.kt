@@ -7,6 +7,7 @@ import com.NBE_4_5_2.Team5.domain.user.user.service.UserService
 import com.NBE_4_5_2.Team5.global.standard.util.Ut
 import com.NBE_4_5_2.Team5.global.standard.util.Ut.Notification.parse
 import org.apache.kafka.clients.consumer.ConsumerRecord
+import org.slf4j.LoggerFactory
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.stereotype.Component
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter
@@ -19,6 +20,7 @@ class KafkaConsumer(
 ) {
     // SseEmitter를 저장할 스레드 안전 컬렉션
     private val emitters: MutableMap<String, SseEmitter> = ConcurrentHashMap()
+    private val logger = LoggerFactory.getLogger(KafkaConsumer::class.java)
 
 
     private val loggedInUser:User
@@ -38,6 +40,26 @@ class KafkaConsumer(
         return emitter
     }
 
+    fun ping(){
+        synchronized(emitters){
+            val iterator = emitters.entries
+                .stream().map { entry: Map.Entry<String, SseEmitter> -> entry.value }.iterator()
+            while(iterator.hasNext()){
+                val emitter = iterator.next()
+                logger.info("ping 전송중")
+                emitter.send(
+                    SseEmitter.event()
+                        .data("ping")
+                )
+                emitter.send(
+                    SseEmitter.event()
+                        .name("kafka-event")
+                        .data("ping")
+                )
+            }
+        }
+    }
+
     @KafkaListener(topics = ["sse-topic"], groupId = "sse-demo-group")
     fun consume(record: ConsumerRecord<Long, Notification>) {
         val id = record.key()
@@ -47,7 +69,7 @@ class KafkaConsumer(
         synchronized(emitters) {
             val iterator = emitters.entries
                 .stream().map { entry: Map.Entry<String, SseEmitter> -> entry.value }.iterator()
-
+            notificationRepository.save(notification);
             if (notification.isGlobal) {
                 while (iterator.hasNext()) {
                     val emitter = iterator.next()
@@ -65,7 +87,7 @@ class KafkaConsumer(
             } else {
                 try {
                     val sseEmitter = emitters[notification.userId]
-                    sseEmitter!!.send(
+                    sseEmitter?.send(
                         SseEmitter.event()
                             .name("kafka-event") // 커스텀 이벤트명
                             .data(notification.content)

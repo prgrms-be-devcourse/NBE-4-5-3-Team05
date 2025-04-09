@@ -1090,9 +1090,9 @@ export interface components {
             /** Format: int64 */
             offset?: number;
             sort?: components["schemas"]["SortObject"];
+            paged?: boolean;
             /** Format: int32 */
             pageSize?: number;
-            paged?: boolean;
             /** Format: int32 */
             pageNumber?: number;
             unpaged?: boolean;
@@ -1161,6 +1161,10 @@ export interface components {
             code: string;
             message: string;
             data: components["schemas"]["PaymentMetaData"];
+        };
+        SseEmitter: {
+            /** Format: int64 */
+            timeout?: number;
         };
         AccessProvider: {
             name?: string;
@@ -2547,7 +2551,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json;charset=UTF-8": components["schemas"]["RsDataVoid"];
+                    "text/event-stream": components["schemas"]["SseEmitter"];
                 };
             };
             /** @description Internal Server Error */

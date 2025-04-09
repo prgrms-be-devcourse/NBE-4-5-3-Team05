@@ -42,4 +42,8 @@ public class Notification {
 		this.global = global;
 		this.content = content;
 	}
+	public Notification( boolean global, String content) {
+		this.global = global;
+		this.content = content;
+	}
 }

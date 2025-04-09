@@ -1,5 +1,6 @@
 package com.NBE_4_5_2.Team5.global.init
 
+import com.NBE_4_5_2.Team5.domain.notification.entity.Notification
 import com.NBE_4_5_2.Team5.domain.post.category.entity.Category
 import com.NBE_4_5_2.Team5.domain.post.category.repository.CategoryRepository
 import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductCategory
@@ -14,6 +15,8 @@ import com.NBE_4_5_2.Team5.domain.user.user.entity.User
 import com.NBE_4_5_2.Team5.domain.user.user.repository.UserRepository
 import com.NBE_4_5_2.Team5.domain.user.user.service.UserService
 import com.NBE_4_5_2.Team5.domain.user.user.service.email.EmailService
+import com.NBE_4_5_2.Team5.infrastructure.kafka.KafkaConsumer
+import com.NBE_4_5_2.Team5.infrastructure.kafka.KafkaNotificationProducerService
 import jakarta.transaction.Transactional
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -23,6 +26,10 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Lazy
 import org.springframework.context.annotation.Profile
 import org.springframework.core.annotation.Order
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter
+import java.io.IOException
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 
 @Configuration
@@ -36,6 +43,7 @@ class BaseInitData(
     private val adminService: AdminService,
     private val noticePostRepository: NoticePostRepository,
     private val emailService: EmailService,
+    private val kafkaConsumer: KafkaConsumer,
     @Value("\${custom.server.host}")
     private val serverHost: String
 ) {
@@ -62,6 +70,20 @@ class BaseInitData(
     @Order(4)
     fun applicationRunner4(): ApplicationRunner =
         ApplicationRunner { _ -> self.noticeInit() }
+
+    @Bean
+    @Order(5)
+    fun applicationRunner5(): ApplicationRunner =
+        ApplicationRunner { _ -> self.noticePing() }
+
+    fun noticePing() {
+        val executor = Executors.newSingleThreadScheduledExecutor()
+
+        executor.scheduleAtFixedRate({
+            kafkaConsumer.ping()
+
+        }, 0, 15, TimeUnit.SECONDS)
+    }
 
     @Transactional
     fun userInit() {

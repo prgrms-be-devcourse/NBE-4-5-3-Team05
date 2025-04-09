@@ -10,6 +10,7 @@ import {
   LoginMemberContext,
   useLoginMember,
 } from "./stores/auth/loginMemberStore";
+import { ToastContainer, toast } from "react-toastify";
 
 export default function ClientLayout({
   children,
@@ -77,8 +78,50 @@ export default function ClientLayout({
     fetchLoginMember();
   }, []);
 
+  useEffect(() => {
+    // 브라우저 환경 체크 (Next.js에서는 SSR 시 window가 없음)
+    if (typeof window !== "undefined") {
+      console.log("SSE 연결 시작");
+      const eventSource = new EventSource(
+        "http://localhost:8080/api/notification/subscribe",
+        {
+          withCredentials: true,
+        }
+      );
+      // 서버의 SSE 엔드포인트 (예시)
+
+      eventSource.addEventListener("kafka-event", (event) => {
+        console.log("event:", event.data);
+      });
+      eventSource.onmessage = (event) => {
+        // event.data 는 서버에서 보내준 메시지 (문자열)
+        console.log("SSE message received:", event.data);
+
+        // 토스트로 표시
+        toast.info(`새 메시지: ${event.data}`);
+      };
+
+      eventSource.onerror = (err) => {
+        console.error("SSE error:", err);
+        // 문제가 발생하면 연결 닫기
+        eventSource.close();
+      };
+
+      // 컴포넌트 unmount 시에는 반드시 연결 종료
+      return () => {
+        eventSource.close();
+      };
+    }
+  }, []);
+
   return (
     <LoginMemberContext.Provider value={loginMemberContextValue}>
+      <div>
+        <h1>Next.js SSE Demo</h1>
+        <p>SSE로 들어오는 메시지를 토스트로 표시</p>
+        {/* 토스트 표시 컨테이너 */}
+        <ToastContainer />
+      </div>
       <header className="flex justify-between">
         <Link href="/" className="flex items-center gap-2">
           <Button>
