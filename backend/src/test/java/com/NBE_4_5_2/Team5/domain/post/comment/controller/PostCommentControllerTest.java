@@ -55,7 +55,7 @@ class PostCommentControllerTest {
 
     @BeforeEach
     void setUp() {
-        emailService.saveVerificationCode("emasdfasdail", "verified"); // 이메일 인증이 통과되었다고 가정
+        emailService.saveAuthenticationCode("emasdfasdail", "verified"); // 이메일 인증이 통과되었다고 가정
     }
 
     @Test

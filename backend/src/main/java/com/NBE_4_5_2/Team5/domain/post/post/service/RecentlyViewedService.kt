@@ -1,12 +1,9 @@
 package com.NBE_4_5_2.Team5.domain.post.post.service
 
 import com.NBE_4_5_2.Team5.domain.post.post.dto.response.PreviewPostResponse
-import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductPost
 import com.NBE_4_5_2.Team5.domain.post.post.repository.ProductPostRepository
-import lombok.RequiredArgsConstructor
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Service
-import java.util.*
 
 @Service
 class RecentlyViewedService(
@@ -33,10 +30,13 @@ class RecentlyViewedService(
 
     fun getRecentlyViewedPosts(userId: String): List<PreviewPostResponse> {
         val key = RECENTLY_VIEW_KEY + userId
-        val postIds = redisTemplate.opsForList().range(key, 0, -1).orEmpty()
 
+        val postIds = redisTemplate.opsForList().range(key, 0, -1).orEmpty()
         val posts = productPostRepository.findByIdIn(postIds)
 
-        return posts.map { PreviewPostResponse.fromEntity(it) }
+        val postMap = posts.associateBy { it.id }
+        val sortedPosts = postIds.mapNotNull { postMap[it] }
+
+        return sortedPosts.map { PreviewPostResponse.fromEntity(it) }
     }
 }
