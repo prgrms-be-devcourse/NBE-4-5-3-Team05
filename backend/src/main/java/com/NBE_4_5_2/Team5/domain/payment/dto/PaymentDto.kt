@@ -4,7 +4,7 @@ import com.NBE_4_5_2.Team5.domain.payment.entity.Payment
 import com.NBE_4_5_2.Team5.domain.payment.enums.PaymentStatus
 import java.time.LocalDateTime
 
-@JvmRecord
+
 data class PaymentDto(
     val id: String,
     val buyerId: String,

@@ -46,7 +46,7 @@ class PaymentController(
         return RsData("200-1", "페이 충전 결제 요청 성공.")
     }
 
-    @JvmRecord
+    
     data class PurchaseItemReqDto(
         @field:Parameter(description = "구매할 상품 게시글 id") @param:Parameter(
             description = "구매할 상품 게시글 id"

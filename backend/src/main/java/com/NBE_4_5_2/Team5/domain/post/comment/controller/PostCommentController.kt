@@ -20,10 +20,10 @@ class PostCommentController(
     private val commentService: CommentService
 
 ) {
-    @JvmRecord
+    
     data class WriteCommentResBody(val id: String, val content: String, val author: UserDto)
 
-    @JvmRecord
+    
     data class WriteCommentReqBody(
         @Parameter(description = "댓글 내용") @Parameter(
             description = "댓글 내용"
@@ -46,10 +46,10 @@ class PostCommentController(
         )
     }
 
-    @JvmRecord
+    
     data class UpdateCommentResBody(val content: String, val author: UserDto)
 
-    @JvmRecord
+    
     data class UpdateCommentReqBody(val content: String)
 
     @Operation(summary = "댓글 수정", description = "댓글 내용을 수정합니다.")

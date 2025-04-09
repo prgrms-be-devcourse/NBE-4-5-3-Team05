@@ -37,13 +37,13 @@ class UserController(
     }
 
 
-    @JvmRecord
+    
     data class LoginUserReqBody(
         @field:NotBlank(message = "아이디는 필수 입력값입니다.") val username: String,
         @field:NotBlank(message = "비밀번호는 필수 입력값입니다.") val password: String
     )
 
-    @JvmRecord
+    
     data class LoginUserResBody(val accessToken: String, val refreshToken: String, val item: UserDto)
 
     @Operation(summary = "로그인", description = "사용자가 로그인합니다.")
@@ -88,7 +88,7 @@ class UserController(
     }
 
 
-    @JvmRecord
+    
     data class RefreshUserReqBody(
         @field:NotBlank(message = "refreshToken을 입력해주세요.") val refreshToken: String
     )
@@ -132,7 +132,7 @@ class UserController(
     }
 
 
-    @JvmRecord
+    
     data class EmailUserReqBody(
         @field:Email(message = "올바른 이메일 형식이 아닙니다.") val email: String
     )
@@ -146,7 +146,7 @@ class UserController(
         return RsData("200-1", "이메일이 발송되었습니다.")
     }
 
-    @JvmRecord
+    
     data class VerifyCodeUserReqBody(val email: String, val code: String)
 
     @Operation(summary = "이메일 인증 코드 검증", description = "사용자가 입력한 인증 코드를 검증합니다.")
