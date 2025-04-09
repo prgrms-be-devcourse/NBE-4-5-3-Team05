@@ -13,6 +13,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper
 import org.testcontainers.utility.DockerImageName
+import util.Util
 
 @TestConfiguration
 class TestConfig {

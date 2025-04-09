@@ -5,8 +5,6 @@ import com.NBE_4_5_2.Team5.domain.payment.service.PaymentProviderAdapter
 import com.NBE_4_5_2.Team5.domain.post.post.service.ProductPostService
 import com.NBE_4_5_2.Team5.domain.user.user.service.UserService
 import com.NBE_4_5_2.Team5.global.config.BaseTestConfig
-import com.NBE_4_5_2.Team5.global.config.Util
-import com.fasterxml.jackson.databind.ObjectMapper
 import jakarta.servlet.http.Cookie
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeAll
@@ -24,6 +22,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
+import util.Util
 import java.util.*
 
 @BaseTestConfig
