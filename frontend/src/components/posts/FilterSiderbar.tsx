@@ -7,7 +7,7 @@ interface FilterSidebarProps {
     keyword: string;
     minPrice: number | null;
     maxPrice: number | null;
-    categories: string[];
+    categories: number[]; // ✅ number[]
     sort: string;
   }) => void;
   categories: { id: number; name: string }[];
@@ -20,15 +20,15 @@ export default function FilterSidebar({
   const [keyword, setKeyword] = useState("");
   const [minPrice, setMinPrice] = useState<string>("");
   const [maxPrice, setMaxPrice] = useState<string>("");
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<number[]>([]); // ✅ number[]
   const [sort, setSort] = useState("desc");
 
   const handleCategoryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
+    const value = parseInt(e.target.value, 10);
     if (e.target.checked) {
       setSelectedCategories((prev) => [...prev, value]);
     } else {
-      setSelectedCategories((prev) => prev.filter((cat) => cat !== value));
+      setSelectedCategories((prev) => prev.filter((catId) => catId !== value));
     }
   };
 
@@ -38,7 +38,7 @@ export default function FilterSidebar({
       keyword,
       minPrice: minPrice.trim() === "" ? null : Number(minPrice),
       maxPrice: maxPrice.trim() === "" ? null : Number(maxPrice),
-      categories: selectedCategories,
+      categories: selectedCategories, // ✅ 숫자 배열로 전달
       sort,
     });
   };
@@ -86,8 +86,9 @@ export default function FilterSidebar({
               >
                 <input
                   type="checkbox"
-                  value={cat.name}
+                  value={cat.id} // ✅ 여기 변경
                   onChange={handleCategoryChange}
+                  checked={selectedCategories.includes(cat.id)}
                 />
                 <span>{cat.name}</span>
               </label>
