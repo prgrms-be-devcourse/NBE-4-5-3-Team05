@@ -41,10 +41,6 @@ class ChatService(
         chatMessage.setUserCount(chatRoomService.getUserCount(chatMessage.getRoomId()))
         val chatRoom = chatRoomService.findBy_roomId(chatMessage.getRoomId())
         val receiver = chatRoomService.findOther(chatRoom.roomId, chatMessage.getSender())
-        println("전송된 메시지: $chatMessage")
-        println("메시지 타입: ${chatMessage.getType()}")
-        println("위도: ${chatMessage.getLatitude()}")
-        println("경도: ${chatMessage.getLongitude()}")
 
         // 수신자가 채팅방 삭제한 상태
         if (chatRoom.getDeleteStatus(receiver)) {
@@ -110,10 +106,6 @@ class ChatService(
             objectRedisTemplate.convertAndSend(channelTopic.topic, message)
             hashOpsChatRoom.put(CHAT_ROOMS, chatRoom.roomId, chatRoom) // 레디스에 업데이트
             chatMessageRepository.save(message)
-            println("==== 위치 ====")
-            println("위도: ${chatMessage.getLatitude()}")
-            println("경도: ${chatMessage.getLongitude()}")
-            println("")
 
         }
     }
