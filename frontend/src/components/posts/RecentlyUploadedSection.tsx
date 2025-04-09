@@ -38,7 +38,6 @@ function getRelativeTime(dateString: string): string {
 
 export default function RecentlyUploadedSection() {
   const router = useRouter();
-  // 초기 상태에서 로딩을 true로 설정합니다.
   const [loading, setLoading] = useState<boolean>(true);
   const [products, setProducts] = useState<PreviewPostResponse[]>([]);
   const [page, setPage] = useState<number>(1);
@@ -95,8 +94,8 @@ export default function RecentlyUploadedSection() {
     <div>
       <h2 className="font-bold text-lg mb-2">🔥 최근 올라온 상품</h2>
       {error && <p className="text-red-500">{error}</p>}
-      {/* 로딩 중이면 로딩 메시지를 보여줍니다. */}
-      {loading && (
+      {/* 초기 로딩 상태일 때만 로딩 메시지를 보여줍니다. */}
+      {loading && products.length === 0 && (
         <div className="mt-4 text-center">
           <p className="animate-pulse">로딩 중...</p>
         </div>

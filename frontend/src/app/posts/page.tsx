@@ -17,6 +17,12 @@ export default function PostsPage() {
   const searchParams = useSearchParams();
   const initialKeyword = searchParams.get("keyword") || "";
 
+  // URL에서 categoryIds 쿼리 파라미터 읽기 및 초기값 설정
+  const categoryIdsParam = searchParams.get("categoryIds");
+  const initialCategories = categoryIdsParam
+    ? categoryIdsParam.split(",").map((id) => Number(id))
+    : [];
+
   const [noticeList, setNoticeList] = useState<NoticeListItem[]>([]);
   const [posts, setPosts] = useState<ProductPostListItem[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -28,7 +34,7 @@ export default function PostsPage() {
     keyword: initialKeyword,
     minPrice: null as number | null,
     maxPrice: null as number | null,
-    categories: [] as number[],
+    categories: initialCategories,
     sort: "desc",
   });
 
