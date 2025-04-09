@@ -10,7 +10,7 @@ import com.NBE_4_5_2.Team5.domain.post.post.service.RecentlyViewedService
 import com.NBE_4_5_2.Team5.domain.user.user.service.UserAuthService
 import com.NBE_4_5_2.Team5.global.dto.Empty
 import com.NBE_4_5_2.Team5.global.dto.PageDto
-import com.NBE_4_5_2.Team5.global.dto.RsData
+import com.NBE_4_5_2.Team5.global.response.RsData
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
