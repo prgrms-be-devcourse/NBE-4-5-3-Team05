@@ -10,7 +10,10 @@ import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.data.redis.listener.ChannelTopic
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer
 import org.springframework.data.redis.serializer.StringRedisSerializer
+import org.springframework.test.context.DynamicPropertyRegistry
+import org.springframework.test.context.DynamicPropertySource
 import org.testcontainers.containers.GenericContainer
+import org.testcontainers.containers.KafkaContainer
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper
 import org.testcontainers.utility.DockerImageName
 
@@ -32,6 +35,13 @@ class TestConfig {
             redisTestContainer.start()
             System.setProperty("spring.data.redis.host", redisTestContainer.host)
             System.setProperty("spring.data.redis.port", redisTestContainer.getMappedPort(6379).toString())
+        }
+        private val kafkaTestContainer = KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:latest"))
+            .withExposedPorts(9093)
+            .withReuse(true)
+        init {
+            kafkaTestContainer.start()
+            System.setProperty("spring.kafka.bootstrap-servers", "localhost:${kafkaTestContainer.getMappedPort(9093)}")
         }
     }
 

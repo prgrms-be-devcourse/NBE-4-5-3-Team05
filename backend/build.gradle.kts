@@ -97,6 +97,7 @@ dependencies {
 
     // kafka
     implementation ("org.springframework.kafka:spring-kafka")
+    testImplementation("org.testcontainers:kafka:1.19.1")
 
     // AWS S3
     implementation("org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE")

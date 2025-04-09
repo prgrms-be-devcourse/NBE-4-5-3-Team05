@@ -4,8 +4,10 @@ import com.NBE_4_5_2.Team5.domain.notification.entity.Notification
 import com.NBE_4_5_2.Team5.domain.post.category.entity.Category
 import com.NBE_4_5_2.Team5.domain.post.category.repository.CategoryRepository
 import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductCategory
+import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductMetadata
 import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductPost
 import com.NBE_4_5_2.Team5.domain.post.post.repository.ProductCategoryRepository
+import com.NBE_4_5_2.Team5.domain.post.post.repository.ProductMetadataRepository
 import com.NBE_4_5_2.Team5.domain.post.post.repository.ProductPostRepository
 import com.NBE_4_5_2.Team5.domain.user.admin.entity.NoticePost
 import com.NBE_4_5_2.Team5.domain.user.admin.repository.NoticePostRepository
@@ -15,6 +17,7 @@ import com.NBE_4_5_2.Team5.domain.user.user.entity.User
 import com.NBE_4_5_2.Team5.domain.user.user.repository.UserRepository
 import com.NBE_4_5_2.Team5.domain.user.user.service.UserService
 import com.NBE_4_5_2.Team5.domain.user.user.service.email.EmailService
+import com.NBE_4_5_2.Team5.global.aspect.product.ProductMetaDataNames
 import com.NBE_4_5_2.Team5.infrastructure.kafka.KafkaConsumer
 import com.NBE_4_5_2.Team5.infrastructure.kafka.KafkaNotificationProducerService
 import jakarta.transaction.Transactional
@@ -48,6 +51,9 @@ class BaseInitData(
     private val serverHost: String
 ) {
     @Autowired
+    private lateinit var productMetadataRepository: ProductMetadataRepository
+
+    @Autowired
     @Lazy
     private lateinit var self: BaseInitData
 
@@ -75,6 +81,15 @@ class BaseInitData(
     @Order(5)
     fun applicationRunner5(): ApplicationRunner =
         ApplicationRunner { _ -> self.noticePing() }
+
+    @Bean
+    @Order(6)
+    fun applicationRunner6(): ApplicationRunner =
+        ApplicationRunner { _ -> self.metadata() }
+    fun metadata(){
+        if(productMetadataRepository.findByName(ProductMetaDataNames.PRODUCT_TOTAL_COUNT)!=null)
+        productMetadataRepository.save(ProductMetadata(ProductMetaDataNames.PRODUCT_TOTAL_COUNT, "0"))
+    }
 
     fun noticePing() {
         val executor = Executors.newSingleThreadScheduledExecutor()

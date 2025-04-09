@@ -64,7 +64,7 @@ class KafkaConsumer(
     }
 
     @KafkaListener(topics = ["sse-topic"], groupId = "sse-demo-group")
-    fun consume(record: ConsumerRecord<Long, Notification>) {
+    fun consume(record: ConsumerRecord<String, Notification>) {
         val id = record.key()
         val notification = record.value()
 
@@ -73,14 +73,14 @@ class KafkaConsumer(
             val iterator = emitters.entries
                 .stream().map { entry: Map.Entry<String, SseEmitter> -> entry.value }.iterator()
             notificationRepository.save(notification);
-            if (notification.isGlobal) {
+            if (notification.global) {
                 while (iterator.hasNext()) {
                     val emitter = iterator.next()
                     try {
                         emitter.send(
                             SseEmitter.event()
                                 .name("kafka-event") // 커스텀 이벤트명
-                                .data(notification.content)
+                                .data(notification.content?:"")
                         )
                     } catch (e: Exception) {
                         // 전송 실패 시 emitter 제거
@@ -93,7 +93,7 @@ class KafkaConsumer(
                     sseEmitter?.send(
                         SseEmitter.event()
                             .name("kafka-event") // 커스텀 이벤트명
-                            .data(notification.content)
+                            .data(notification.content?:"")
                     )
                 } catch (e: Exception) {
                     // 전송 실패 시 emitter 제거
