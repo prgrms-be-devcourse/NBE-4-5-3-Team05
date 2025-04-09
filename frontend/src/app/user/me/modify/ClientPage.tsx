@@ -189,14 +189,14 @@ export default function ClientPage() {
     console.log(formData);
     const email = formData.email.value;
     const nickname = formData.nickname.value;
-    const address = formData.address.value;
+    const _address = address || loginMember.address;
     const profileUrl = formData.profileUrl.value;
 
     const response = await client.PUT("/api/users/me", {
       body: {
         email,
         nickname,
-        address,
+        address:_address,
         profileUrl,
       },
       credentials: "include",
