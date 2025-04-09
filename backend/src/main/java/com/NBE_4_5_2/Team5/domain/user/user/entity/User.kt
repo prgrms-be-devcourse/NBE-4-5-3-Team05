@@ -61,6 +61,9 @@ class User() : BaseTime() {
     val isAdmin: Boolean
         get() = role == Role.ADMIN
 
+    var latitude: Float = 0.0F
+    var longitude: Float = 0.0F
+
     constructor(id: String, username: String, nickname: String, role: Role): this() {
         this.id = id
         this.username = username
@@ -79,6 +82,21 @@ class User() : BaseTime() {
         this.address = address
         this.profileUrl = profileUrl
         this.role = role
+    }
+
+    constructor(username: String, password: String, email: String, nickname: String,
+                address: String, profileUrl: String, role: Role, latitude: Float, longitude: Float): this() {
+        this.username = username
+        this.password = password
+        this.email = email
+        this.blocked = false
+        this.blockedCount = 0
+        this.nickname = nickname
+        this.address = address
+        this.profileUrl = profileUrl
+        this.role = role
+        this.latitude = latitude
+        this.longitude = longitude
     }
 
     fun ban() {
