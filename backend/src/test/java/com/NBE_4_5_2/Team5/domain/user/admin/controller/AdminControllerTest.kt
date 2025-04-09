@@ -184,7 +184,7 @@ internal class AdminControllerTest(
             .isInstanceOf(ProductPostNotFoundException::class.java)
 
         result
-            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(MockMvcResultMatchers.status().isNoContent)
             .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("204-1"))
             .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("게시글 삭제 성공."))
     }
