@@ -23,10 +23,11 @@ class KafkaConsumer(
     private val logger = LoggerFactory.getLogger(KafkaConsumer::class.java)
 
 
-    private val loggedInUser:User
+    private val loggedInUser: User
         get() = userService.userIdentity
+
     // 클라이언트가 SSE 연결 시에 emitter를 등록
-    fun addEmitter( emitter: SseEmitter): SseEmitter {
+    fun addEmitter(emitter: SseEmitter): SseEmitter {
         val userId = loggedInUser.id
 
         if (!emitters.containsKey(userId)) {
@@ -40,24 +41,26 @@ class KafkaConsumer(
         return emitter
     }
 
-    fun ping(){
-        synchronized(emitters){
-            val iterator = emitters.entries
-                .stream().map { entry: Map.Entry<String, SseEmitter> -> entry.value }.iterator()
-            while(iterator.hasNext()){
-                val emitter = iterator.next()
-                logger.info("ping 전송중")
-                emitter.send(
-                    SseEmitter.event()
-                        .data("ping")
-                )
-                emitter.send(
-                    SseEmitter.event()
-                        .name("kafka-event")
-                        .data("ping")
-                )
+    fun ping() {
+            synchronized(emitters) {
+                val iterator = emitters.entries
+                    .stream().map { entry: Map.Entry<String, SseEmitter> -> entry }.iterator()
+                while (iterator.hasNext()) {
+                    val next = iterator.next()
+                    val emitter = next.value
+                    val key = next.key
+
+                        logger.info("ping 전송중")
+                        emitter.send(
+                            SseEmitter.event()
+                                .comment("ping")
+                        )
+
+
+                }
+
             }
-        }
+
     }
 
     @KafkaListener(topics = ["sse-topic"], groupId = "sse-demo-group")
@@ -100,7 +103,7 @@ class KafkaConsumer(
         }
     }
 
-    fun removeEmitter(userId:String){
+    fun removeEmitter(userId: String) {
         emitters.remove(userId);
     }
 }

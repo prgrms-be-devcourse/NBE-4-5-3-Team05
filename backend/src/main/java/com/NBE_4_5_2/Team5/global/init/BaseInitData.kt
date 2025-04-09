@@ -80,7 +80,12 @@ class BaseInitData(
         val executor = Executors.newSingleThreadScheduledExecutor()
 
         executor.scheduleAtFixedRate({
-            kafkaConsumer.ping()
+            try{
+                kafkaConsumer.ping()
+
+            }catch (e:Throwable){
+
+            }
 
         }, 0, 15, TimeUnit.SECONDS)
     }
