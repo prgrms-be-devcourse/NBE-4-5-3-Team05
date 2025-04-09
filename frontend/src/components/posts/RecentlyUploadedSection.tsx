@@ -7,6 +7,7 @@ import client from "@/lib/client";
 
 type PreviewPostResponse = components["schemas"]["PreviewPostResponse"];
 
+/** 숫자형 가격을 '8,100원' 형식으로 포맷 */
 function formatPrice(price: number): string {
   return (
     new Intl.NumberFormat("ko-KR", { maximumFractionDigits: 0 }).format(price) +
@@ -22,7 +23,6 @@ function getRelativeTime(dateString: string): string {
   const minute = 1000 * 60;
   const hour = minute * 60;
   const day = hour * 24;
-
   if (diff < minute) return "방금 전";
   if (diff < hour) {
     const minutes = Math.floor(diff / minute);
@@ -38,10 +38,11 @@ function getRelativeTime(dateString: string): string {
 
 export default function RecentlyUploadedSection() {
   const router = useRouter();
+  // 초기 상태에서 로딩을 true로 설정합니다.
+  const [loading, setLoading] = useState<boolean>(true);
   const [products, setProducts] = useState<PreviewPostResponse[]>([]);
   const [page, setPage] = useState<number>(1);
   const [hasMore, setHasMore] = useState<boolean>(true);
-  const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
 
   const observer = useRef<IntersectionObserver | null>(null);
@@ -60,16 +61,16 @@ export default function RecentlyUploadedSection() {
     [loading, hasMore]
   );
 
+  // 페이지 번호 변경 시 데이터를 불러옴
   useEffect(() => {
     async function fetchRecentlyUploaded() {
       try {
         setLoading(true);
-        // 최신순(desc)으로 페이지(page) 단위, 10개씩 데이터를 가져옵니다.
         const res = await client.GET("/api/posts", {
           params: {
             query: {
               page: page,
-              pageSize: 10,
+              pageSize: 10, // 한 페이지 당 가져올 항목 수
               sort: "desc",
             },
           },
@@ -93,14 +94,21 @@ export default function RecentlyUploadedSection() {
   return (
     <div>
       <h2 className="font-bold text-lg mb-2">🔥 최근 올라온 상품</h2>
-      {products.length === 0 && !loading && !error && (
-        <p>최근 업로드된 상품이 없습니다.</p>
-      )}
       {error && <p className="text-red-500">{error}</p>}
-      {/* grid-cols-5로 한 줄에 5개의 상품을 표시 */}
+      {/* 로딩 중이면 로딩 메시지를 보여줍니다. */}
+      {loading && (
+        <div className="mt-4 text-center">
+          <p className="animate-pulse">로딩 중...</p>
+        </div>
+      )}
+      {/* 로딩이 끝났고, 상품이 없을 경우에만 "없음" 메시지를 출력 */}
+      {!loading && products.length === 0 && !error && (
+        <p className="mt-4 text-center text-gray-500">
+          최근 업로드된 상품이 없습니다.
+        </p>
+      )}
       <div className="grid grid-cols-5 gap-4">
         {products.map((product, index) => {
-          // 마지막 요소에 observer ref 연결
           if (products.length === index + 1) {
             return (
               <div
@@ -113,7 +121,6 @@ export default function RecentlyUploadedSection() {
                   <img
                     src={product.thumbNail}
                     alt={product.title || "상품 이미지"}
-                    // 이미지 크기를 2배 (h-48)로 설정
                     className="w-full h-48 object-cover mb-2 rounded"
                   />
                 ) : (
@@ -156,7 +163,11 @@ export default function RecentlyUploadedSection() {
           }
         })}
       </div>
-      {loading && <p>로딩 중...</p>}
+      {!hasMore && !loading && (
+        <p className="mt-4 text-center text-gray-500">
+          더 이상 불러올 게시글이 없습니다.
+        </p>
+      )}
     </div>
   );
 }

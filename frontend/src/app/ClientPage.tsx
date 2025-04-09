@@ -14,10 +14,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import ScrollToTopButton from "@/components/posts/ScrollToTopButton";
 
 type Notice = components["schemas"]["NoticeResBody"];
-type Category = {
-  id: number;
-  name: string;
-};
 
 export default function ClientPage() {
   const [searchKeyword, setSearchKeyword] = useState("");
@@ -64,17 +60,18 @@ export default function ClientPage() {
   };
 
   return (
-    <div className="flex flex-col gap-4 p-4 w-full">
+    // 전체 페이지를 중앙 정렬하고, 좌우 여백과 부드러운 배경을 적용
+    <div className="max-w-7xl mx-auto px-6 py-6 w-full bg-gray-100 min-h-screen">
       {/* 상단 섹션 */}
-      <section className="flex items-start gap-4 border p-4">
-        <div className="flex-grow">
-          <div className="flex gap-2">
+      <section className="flex flex-col md:flex-row items-center gap-4 rounded-xl shadow-md p-6 bg-white mb-6">
+        <div className="flex-grow w-full">
+          <div className="flex items-center gap-2">
             <input
               type="text"
               placeholder="상품명 검색"
               value={searchKeyword}
               onChange={(e) => setSearchKeyword(e.target.value)}
-              className="w-full p-2 border rounded-md"
+              className="w-full p-3 h-12 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
                   e.preventDefault();
@@ -82,30 +79,25 @@ export default function ClientPage() {
                 }
               }}
             />
-            <Button onClick={handleSearch}>검색</Button>
+            <Button onClick={handleSearch} className="px-6 h-12">
+              검색
+            </Button>
           </div>
-          {/* 카테고리 필터 UI (추후 동적 구현 가능) */}
-          {/* {
-            <div className="mt-4">
-              <h3 className="font-bold mb-2">📌 카테고리 필터</h3>
-              
-              <label className="flex items-center space-x-2 border p-2 rounded-md cursor-pointer">
-                <input type="checkbox" />
-                <span>카테고리</span>
-              </label>
-            </div>
-          } */}
         </div>
         <div className="flex gap-2">
           <Link href="/posts">
-            <Button variant="default">판매하기</Button>
+            <Button variant="default" className="px-6 h-12">
+              판매하기
+            </Button>
           </Link>
           <Link href="/user/me/sell/manage">
-            <Button variant="default">내 상점</Button>
+            <Button variant="default" className="px-6 h-12">
+              내 상점
+            </Button>
           </Link>
-          <Button variant="outline" asChild>
-            <Link href="/chat">
-              <FontAwesomeIcon icon={faComment} className="mr-2" />
+          <Button variant="outline" asChild className="px-6 h-12">
+            <Link href="/chat" className="flex items-center gap-2">
+              <FontAwesomeIcon icon={faComment} />
               채팅방
             </Link>
           </Button>
@@ -113,18 +105,15 @@ export default function ClientPage() {
       </section>
 
       {/* 공지사항 섹션 */}
-      <section className="border p-4">
-        {/* 공지사항 버튼 */}
+      <section className="rounded-xl shadow-md p-6 bg-white mb-6">
         <Button
-          className="flex justify-start text-lg font-bold"
+          className="flex justify-start text-lg font-bold mb-4"
           onClick={handleToggleNotices}
         >
           📢 공지사항
         </Button>
-
-        {/* 공지사항 목록 (토글 상태일 때만 표시) */}
         {isOpen && (
-          <div className="mt-2">
+          <div>
             {isLoading ? (
               <p className="text-gray-500">📡 공지사항을 불러오는 중...</p>
             ) : error ? (
@@ -145,7 +134,7 @@ export default function ClientPage() {
                     </Link>
                     <span className="ml-2 text-xs text-gray-500">
                       - {notice.admin?.nickname} (
-                      {new Date(notice.createdAt ?? "").toLocaleDateString()})
+                      {new Date(notice.createdAt ?? "").toLocaleDateString()} )
                     </span>
                   </li>
                 ))}
@@ -156,18 +145,20 @@ export default function ClientPage() {
       </section>
 
       {/* 최근 본 상품 섹션 */}
-      <section className="border p-4">
-        <Button className="flex justify-start text-lg font-bold">
+      <section className="rounded-xl shadow-md p-6 bg-white mb-6">
+        <Button className="flex justify-start text-lg font-bold mb-4">
           최근 본 상품
         </Button>
         <RecentlyViewedSection isLogin={isLogin} />
       </section>
 
       {/* 최근 올라온 상품 섹션 */}
-      <section className="border p-4">
+      <section className="rounded-xl shadow-md p-6 bg-white mb-6">
         <RecentlyUploadedSection />
-        <ScrollToTopButton />
       </section>
+
+      {/* 우측 하단에 Top 버튼 */}
+      <ScrollToTopButton />
     </div>
   );
 }
