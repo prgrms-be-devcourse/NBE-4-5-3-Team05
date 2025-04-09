@@ -1,28 +1,19 @@
-package com.NBE_4_5_2.Team5.domain.post.post.entity;
+package com.NBE_4_5_2.Team5.domain.post.post.entity
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import lombok.Getter;
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.Id
 
 @Entity
-@Getter
-public class ProductMetadata {
+class ProductMetadata() {
+    @Id
+    lateinit var name: String
 
-	@Id
-	private String name;
-	@Column(name = "metadata_value")
-	private String value;
+    @Column(name = "metadata_value")
+    lateinit var value: String
 
-	public void setValue(String value) {
-		this.value = value;
-	}
-
-	public ProductMetadata(String name, String value) {
-		this.name = name;
-		this.value = value;
-	}
-
-	protected ProductMetadata() {
-	}
+    constructor(name: String, value: String): this() {
+        this.name = name
+        this.value = value
+    }
 }
