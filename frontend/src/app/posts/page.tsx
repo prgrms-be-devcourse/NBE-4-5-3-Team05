@@ -106,13 +106,9 @@ export default function PostsPage() {
         <div className="flex-grow">
           {noticeList.length > 0 && (
             <div className="mb-4 space-y-4">
-              {noticeList.map((notice, index) => (
-                <Link href={`/notices/${notice.id!}`}>
-                  <Notice
-                    key={index}
-                    title={notice.title!}
-                    content={notice.content!}
-                  />
+              {noticeList.map((notice) => (
+                <Link key={notice.id} href={`/notices/${notice.id!}`}>
+                  <Notice title={notice.title!} content={notice.content!} />
                 </Link>
               ))}
             </div>
