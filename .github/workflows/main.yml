@@ -21,6 +21,10 @@ jobs:
         image: redis:7.0.8-alpine
         ports:
           - 6379:6379
+      kafka:
+        image: confluentinc/cp-kafka:latest
+        ports:
+          - 9093:9093
 
     steps:
       - uses: actions/checkout@v4

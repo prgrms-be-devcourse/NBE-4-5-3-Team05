@@ -5,15 +5,12 @@ import jakarta.persistence.Entity
 import jakarta.persistence.Id
 
 @Entity
-class ProductMetadata() {
+class ProductMetadata(
     @Id
-    lateinit var name: String
+    var name: String,
 
     @Column(name = "metadata_value")
-    lateinit var value: String
+    var value: String
+) {
 
-    constructor(name: String, value: String): this() {
-        this.name = name
-        this.value = value
-    }
 }
