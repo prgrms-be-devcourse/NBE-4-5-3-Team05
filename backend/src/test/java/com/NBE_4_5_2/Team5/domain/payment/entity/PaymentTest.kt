@@ -1,31 +1,34 @@
-package com.NBE_4_5_2.Team5.domain.payment.entity;
+package com.NBE_4_5_2.Team5.domain.payment.entity
 
-import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.springframework.test.util.ReflectionTestUtils;
-
-import com.NBE_4_5_2.Team5.domain.payment.enums.PaymentStatus;
+import com.NBE_4_5_2.Team5.domain.payment.enums.PaymentStatus
+import com.NBE_4_5_2.Team5.domain.user.user.entity.User
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Test
+import org.mockito.Mockito
+import org.springframework.test.util.ReflectionTestUtils
 
 class PaymentTest {
 
-	@Test
-	void updateStateTest() {
-		Payment payment = new Payment();
-		payment.updateState(PaymentStatus.DONE);
+    @Test
+    fun updateStateTest() {
+        val dummyBuyer = Mockito.mock(User::class.java)
+        val payment = Payment(dummyBuyer, 0, PaymentStatus.IN_PROGRESS)
 
-		Assertions.assertThat(payment.getStatus()).isEqualByComparingTo(PaymentStatus.DONE);
-	}
+        payment.updateState(PaymentStatus.DONE)
 
-	@Test
-	void checkValid() {
-		Payment payment = new Payment();
-		Integer metadataValue = 50000;
-		ReflectionTestUtils.setField(payment, "_totalPrice", metadataValue);
+        assertThat(payment.status).isEqualTo(PaymentStatus.DONE)
+    }
 
-		Integer clientValue = 50000;
+    @Test
+    fun checkValid() {
+        val dummyBuyer = Mockito.mock(User::class.java)
+        val payment = Payment(dummyBuyer, 0, PaymentStatus.IN_PROGRESS)
+        val metadataValue = 50000
+        ReflectionTestUtils.setField(payment, "_totalPrice", metadataValue)
 
-		boolean res = payment.checkValid(clientValue);
+        val clientValue = 50000
+        val res = payment.checkValid(clientValue)
 
-		Assertions.assertThat(res).isTrue();
-	}
+        assertThat(res).isTrue()
+    }
 }
