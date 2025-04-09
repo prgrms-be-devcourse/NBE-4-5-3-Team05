@@ -1118,8 +1118,8 @@ export interface components {
         };
         SortObject: {
             empty?: boolean;
-            unsorted?: boolean;
             sorted?: boolean;
+            unsorted?: boolean;
         };
         RsDataListPreviewPostResponse: {
             code: string;
@@ -1226,10 +1226,10 @@ export interface components {
             data: components["schemas"]["Category"][];
         };
         PageUserDto: {
-            /** Format: int64 */
-            totalElements?: number;
             /** Format: int32 */
             totalPages?: number;
+            /** Format: int64 */
+            totalElements?: number;
             /** Format: int32 */
             size?: number;
             content?: components["schemas"]["UserDto"][];
@@ -1249,10 +1249,10 @@ export interface components {
             data: components["schemas"]["PageUserDto"];
         };
         PageNoticeResBody: {
-            /** Format: int64 */
-            totalElements?: number;
             /** Format: int32 */
             totalPages?: number;
+            /** Format: int64 */
+            totalElements?: number;
             /** Format: int32 */
             size?: number;
             content?: components["schemas"]["NoticeResBody"][];
