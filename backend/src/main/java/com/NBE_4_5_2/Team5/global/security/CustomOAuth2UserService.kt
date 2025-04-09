@@ -41,7 +41,7 @@ class CustomOAuth2UserService(
             .orElseGet {
                 // 랜덤 이메일 생성 후 검증 코드 저장
                 val randomEmail = "${UUID.randomUUID()}@kakao.com"
-                emailService.saveVerificationCode(randomEmail, "verified")
+                emailService.saveAuthenticationCode(randomEmail, "verified")
                 // 유저 생성
                 userService.createUser(
                     username     = username,

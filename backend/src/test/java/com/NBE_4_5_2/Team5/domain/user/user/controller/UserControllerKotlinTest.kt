@@ -113,7 +113,7 @@ internal open class UserControllerKotlinTest {
         val nickname = "무명"
         val address = "서울시 강남구"
         val profileUrl = "default_profile.png"
-        emailService.saveVerificationCode(email, "verified")
+        emailService.saveAuthenticationCode(email, "verified")
 
         // WHEN: 회원 가입 API 호출
         val resultActions = createUserRequest(username, password, email, nickname, address, profileUrl)
@@ -791,7 +791,7 @@ internal open class UserControllerKotlinTest {
         val newNickname = "새로운닉네임"
         val newAddress = "서울시 서초구"
         val newEmail = "newemail@example.com"
-        emailService.saveVerificationCode(newEmail, "verified")
+        emailService.saveAuthenticationCode(newEmail, "verified")
 
         // WHEN: 내 정보 수정 API 호출
         val resultActions = mvc.perform(
