@@ -67,11 +67,11 @@ class BaseInitData(
     fun userInit() {
         if (userRepository.count() > 0) return
 
-        emailService.saveVerificationCode("user1@gmail.com", "verified")
-        emailService.saveVerificationCode("user2@gmail.com", "verified")
-        emailService.saveVerificationCode("user3@gmail.com", "verified")
-        emailService.saveVerificationCode("user4@gmail.com", "verified")
-        emailService.saveVerificationCode("admin2@gmail.com", "verified")
+        emailService.saveAuthenticationCode("user1@gmail.com", "verified")
+        emailService.saveAuthenticationCode("user2@gmail.com", "verified")
+        emailService.saveAuthenticationCode("user3@gmail.com", "verified")
+        emailService.saveAuthenticationCode("user4@gmail.com", "verified")
+        emailService.saveAuthenticationCode("admin2@gmail.com", "verified")
 
         val baseUrl =
             if (serverHost.startsWith("backend.nbe-4-5-5-team5.shop"))
