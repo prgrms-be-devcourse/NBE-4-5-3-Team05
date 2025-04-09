@@ -1,13 +1,12 @@
 "use client";
 
-import React, { useState, useEffect, use } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import type { components } from "@/lib/backend/apiV1/schema";
 import client from "@/lib/client";
-import fileUploadClient from "@/lib/fileUploadClient"; // 파일 업로드 전용 클라이언트
-import { LoginMemberContext } from "@/app/stores/auth/loginMemberStore";
+import fileUploadClient from "@/lib/fileUploadClient";
+import MapPopup from "@/components/MapPopup"; // MapPopup 임포트
 
-// OpenAPI 스키마의 Category 타입 사용
 type Category = components["schemas"]["Category"];
 
 export default function PostCreatePage() {
@@ -19,22 +18,51 @@ export default function PostCreatePage() {
   const [content, setContent] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [price, setPrice] = useState<number | "">("");
+  // 거래 위치(주소)는 검색 후 업데이트되며, 수동 수정도 가능
   const [location, setLocation] = useState("");
+  // 지도 선택 시 업데이트되는 위도, 경도
   const [latitude, setLatitude] = useState<number | "">("");
   const [longitude, setLongitude] = useState<number | "">("");
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
+  // 지도 팝업 열림 상태 관리
+  const [isMapOpen, setIsMapOpen] = useState(false);
+  // MapPopup에 전달할 현재 지도 위치 (초기값은 서울 대신 사용자의 위치로 업데이트)
+  const [mapCurrentPos, setMapCurrentPos] = useState({
+    lat: 37.5665,
+    lng: 126.978,
+    zoom: 12,
+  });
 
-  // AWS S3 업로드 API 호출 함수 (FormData 그대로 전송)
+  // 컴포넌트가 마운트될 때 사용자의 위치를 가져와 디폴트 위치로 설정
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setMapCurrentPos({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+            zoom: 12,
+          });
+        },
+        (error) => {
+          console.error("위치 정보를 가져오는데 실패했습니다.", error);
+        }
+      );
+    } else {
+      console.error("Geolocation API를 사용할 수 없습니다.");
+    }
+  }, []);
+
+  // AWS S3 업로드 API 호출 함수
   const uploadFile = async (file: File): Promise<string> => {
     const formData = new FormData();
     formData.append("file", file);
-    // fileUploadClient를 사용하여 multipart/form-data로 전송합니다.
     const response = await fileUploadClient.POST("/api/uploadFile", {
       body: formData as any,
-      rawBody: true, // JSON 자동 변환 방지
+      rawBody: true,
       credentials: "include",
-      headers: {}, // Content-Type 헤더 제거 (브라우저가 자동 설정)
+      headers: {},
     });
     if (response.error) {
       console.error("파일 업로드 실패", response.error);
@@ -42,7 +70,6 @@ export default function PostCreatePage() {
     return response.data as string;
   };
 
-  // 카테고리 목록 불러오기
   useEffect(() => {
     async function fetchCategories() {
       const res = await client.GET("/api/categories", {
@@ -57,13 +84,11 @@ export default function PostCreatePage() {
     fetchCategories();
   }, []);
 
-  // 게시글 생성 처리 (폼 검증 추가)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // 폼 검증: 필수 입력값이 비어있는지 확인
     if (!productName) {
-      alert("물픔 이름을 입력해주세요.");
+      alert("물품 이름을 입력해주세요.");
       return;
     }
     if (!selectedCategory) {
@@ -87,11 +112,11 @@ export default function PostCreatePage() {
       return;
     }
     if (latitude === "" || isNaN(Number(latitude))) {
-      alert("유효한 위도를 입력해주세요.");
+      alert("유효한 위도를 선택해주세요.");
       return;
     }
     if (longitude === "" || isNaN(Number(longitude))) {
-      alert("유효한 경도를 입력해주세요.");
+      alert("유효한 경도를 선택해주세요.");
       return;
     }
 
@@ -131,9 +156,33 @@ export default function PostCreatePage() {
     router.push("/posts");
   };
 
+  const openMap = () => {
+    setIsMapOpen(true);
+  };
+
+  const closeMap = () => {
+    setIsMapOpen(false);
+  };
+
+  // MapPopup에서 위치 선택 시 좌표와 주소 업데이트
+  const handleLocationSelect = (
+    lat: number,
+    lng: number,
+    zoom: number,
+    address: string
+  ) => {
+    setLatitude(lat);
+    setLongitude(lng);
+    setLocation(address);
+    setMapCurrentPos({ lat, lng, zoom });
+  };
+
   return (
-    <form onSubmit={handleSubmit} className="flex space-x-4 p-4 w-full flex-1">
-      {/* 왼쪽 영역: 물품 이름, 게시글 제목, 본문 */}
+    <form
+      onSubmit={handleSubmit}
+      className="flex space-x-4 p-4 w-full flex-1 relative"
+    >
+      {/* 왼쪽 영역 */}
       <div className="w-2/3">
         <h1 className="text-2xl font-bold mb-4">판매 게시글 작성</h1>
         <div className="mb-4">
@@ -167,7 +216,7 @@ export default function PostCreatePage() {
         </div>
       </div>
 
-      {/* 오른쪽 영역: 카테고리, 가격, 거래 위치, 좌표, 사진 추가, 게시하기 버튼 */}
+      {/* 오른쪽 영역 */}
       <div className="w-1/3">
         <div className="mb-4">
           <label className="block mb-1 font-semibold">카테고리</label>
@@ -202,7 +251,15 @@ export default function PostCreatePage() {
             className="border w-full p-2"
             value={location}
             onChange={(e) => setLocation(e.target.value)}
+            placeholder="주소를 선택하세요"
           />
+          <button
+            type="button"
+            onClick={openMap}
+            className="mt-2 w-full bg-gray-200 p-2 rounded"
+          >
+            지도에서 위치 선택
+          </button>
         </div>
         <div className="mb-4">
           <label className="block mb-1 font-semibold">위도</label>
@@ -210,9 +267,7 @@ export default function PostCreatePage() {
             type="number"
             className="border w-full p-2"
             value={latitude}
-            onChange={(e) =>
-              setLatitude(e.target.value === "" ? "" : Number(e.target.value))
-            }
+            readOnly
           />
         </div>
         <div className="mb-4">
@@ -221,13 +276,9 @@ export default function PostCreatePage() {
             type="number"
             className="border w-full p-2"
             value={longitude}
-            onChange={(e) =>
-              setLongitude(e.target.value === "" ? "" : Number(e.target.value))
-            }
+            readOnly
           />
         </div>
-
-        {/* 파일 입력 부분 */}
         <div className="mb-4">
           <label className="block mb-1 font-semibold">사진 추가</label>
           <input
@@ -254,7 +305,6 @@ export default function PostCreatePage() {
             </div>
           )}
         </div>
-
         <button
           type="submit"
           className="mt-4 w-full bg-blue-500 text-white p-2 rounded"
@@ -262,6 +312,15 @@ export default function PostCreatePage() {
           게시하기
         </button>
       </div>
+
+      {/* 지도 팝업 모달 */}
+      {isMapOpen && (
+        <MapPopup
+          currentPos={mapCurrentPos}
+          onLocationSelect={handleLocationSelect}
+          onClose={closeMap}
+        />
+      )}
     </form>
   );
 }
