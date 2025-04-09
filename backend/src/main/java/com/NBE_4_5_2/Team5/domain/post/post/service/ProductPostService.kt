@@ -224,4 +224,11 @@ class ProductPostService(
         return PageDto(mappedPosts)
     }
 
+    @Transactional
+    fun updateStatus(status: ProductStatus, postId: String) {
+        val productPost = productPostRepository.findById(postId)
+            .orElseThrow { ProductPostNotFoundException("404", "해당 글은 존재하지 않습니다.") }
+        productPost.updateStatus(status)
+    }
+
 }

@@ -71,7 +71,7 @@ class ChatRoomController(
         val sender = userAuthService.getRealActor(userIdentity)
 
         val postResponse = productPostService.getPost(postId)
-        val writer = postResponse.writerId
+        val writer = postResponse.writerName
         val receiver = postResponse.writerName
         val chatRoom = chatRoomService.createChatRoom(sender.nickname, receiver,postId,writer)
 
