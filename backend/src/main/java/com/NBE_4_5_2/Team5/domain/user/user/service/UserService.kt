@@ -260,6 +260,7 @@ class UserService(
             user.email = updateRequest.email
         }
 
+        userRepository.save(user)   // 저장
         return fromEntity(user)
     }
 
