@@ -6,7 +6,7 @@ import type { components } from "@/lib/backend/apiV1/schema";
 import client from "@/lib/client";
 import fileUploadClient from "@/lib/fileUploadClient";
 import { LoginMemberContext } from "@/app/stores/auth/loginMemberStore";
-import MapComponent from "@/components/MapComponent";
+import MapPopup from "@/components/MapPopup"; // PostCreatePage와 동일한 MapPopup 사용
 
 type Category = components["schemas"]["Category"];
 type ProductPostResponse = components["schemas"]["ProductPostResponse"];
@@ -15,7 +15,6 @@ type StatusType = "AVAILABLE" | "RESERVED" | "PURCHASED";
 export default function PostModifyPage() {
   const { postId } = useParams<{ postId: string }>();
   const router = useRouter();
-  // LoginMemberContext에서 로그인 정보를 직접 가져옵니다.
   const { loginMember } = useContext(LoginMemberContext);
 
   // 수정할 필드 상태들
@@ -32,13 +31,16 @@ export default function PostModifyPage() {
   const [initialImageUrls, setInitialImageUrls] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
-
   const [status, setStatus] = useState<StatusType>("AVAILABLE");
 
-  // 로그인 정보 디버깅
-  useEffect(() => {
-    console.log("수정 페이지의 loginMember:", loginMember);
-  }, [loginMember]);
+  // 지도 팝업 열림 상태
+  const [isMapOpen, setIsMapOpen] = useState(false);
+  // MapPopup에 전달할 현재 지도 위치 (초기값은 기본값)
+  const [mapCurrentPos, setMapCurrentPos] = useState({
+    lat: 37.5665,
+    lng: 126.978,
+    zoom: 12,
+  });
 
   // AWS S3 파일 업로드 함수
   const uploadFile = async (file: File): Promise<string> => {
@@ -77,8 +79,8 @@ export default function PostModifyPage() {
     if (!postId) return;
     try {
       const response = await client.GET("/api/posts/{id}", {
-        withCredentials: true,
         params: { path: { id: postId } },
+        credentials: "include",
       });
       if (response.error) {
         setError("게시글 정보를 불러올 수 없습니다.");
@@ -94,15 +96,23 @@ export default function PostModifyPage() {
         setPrice(postData.productPrice ?? "");
         setLatitude(postData.latitude ?? "");
         setLongitude(postData.longitude ?? "");
-        setLocation("");
+        // 거래 위치는 수정 시 사용자가 다시 입력하거나 선택하게 할 수도 있음.
+        // 기존 데이터가 있다면 넣어둡니다.
+        setLocation((postData as any).location ?? "");
         if (postData.imageUrls) {
           const imgs = postData.imageUrls
             .split(",")
-            .map((url) => url.trim())
-            .filter((url) => url && url.toLowerCase() !== "null");
+            .map((url: string) => url.trim())
+            .filter((url: string) => url && url.toLowerCase() !== "null");
           setInitialImageUrls(imgs);
         }
         setStatus(postData.status ?? "AVAILABLE");
+        // 지도 초기 위치로 기존 좌표 사용
+        setMapCurrentPos({
+          lat: postData.latitude,
+          lng: postData.longitude,
+          zoom: 16,
+        });
       }
     } catch (err) {
       console.error("게시글 데이터를 불러오는 중 오류 발생", err);
@@ -116,7 +126,6 @@ export default function PostModifyPage() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // 파일 업로드 처리
     let uploadedUrls: string[] = [];
     if (selectedFiles && selectedFiles.length > 0) {
       uploadedUrls = await Promise.all(
@@ -140,7 +149,6 @@ export default function PostModifyPage() {
       status,
     };
 
-    // 수정 요청 전, 로그인 정보가 있는지 확인
     if (!loginMember.id) {
       alert("로그인이 필요합니다.");
       router.push("/user/login");
@@ -165,6 +173,23 @@ export default function PostModifyPage() {
     }
   };
 
+  // MapPopup에서 위치 선택 시 상태 업데이트 함수
+  const handleLocationSelect = (
+    lat: number,
+    lng: number,
+    zoom: number,
+    address: string
+  ) => {
+    setLatitude(lat);
+    setLongitude(lng);
+    setLocation(address);
+    setMapCurrentPos({ lat, lng, zoom });
+  };
+
+  // 모달 열기/닫기 함수
+  const openMap = () => setIsMapOpen(true);
+  const closeMap = () => setIsMapOpen(false);
+
   useEffect(() => {
     fetchPost();
     fetchCategories();
@@ -180,7 +205,7 @@ export default function PostModifyPage() {
         onSubmit={handleSubmit}
         className="flex space-x-4 p-4 w-full flex-1"
       >
-        {/* 왼쪽 영역: 물품 이름, 게시글 제목, 본문, 판매 상태 */}
+        {/* 왼쪽 영역: 물품 이름, 제목, 본문 */}
         <div className="w-2/3 space-y-4">
           <div>
             <label className="block mb-1 font-semibold">물품 이름</label>
@@ -211,24 +236,22 @@ export default function PostModifyPage() {
               placeholder="상품 설명, 상태 등을 자세히 적어주세요."
             />
           </div>
-        </div>
-
-        {/* 🔥 판매 상태 선택 드롭다운 추가 */}
-        <div>
-          <label className="block mb-1 font-semibold">판매 상태</label>
-          <select
-            className="border p-2 w-full"
-            value={status}
-            onChange={(e) =>
-              setStatus(
-                e.target.value as "AVAILABLE" | "RESERVED" | "PURCHASED"
-              )
-            }
-          >
-            <option value="AVAILABLE">판매중</option>
-            <option value="RESERVED">예약중</option>
-            <option value="PURCHASED">판매완료</option>
-          </select>
+          <div>
+            <label className="block mb-1 font-semibold">판매 상태</label>
+            <select
+              className="border p-2 w-full"
+              value={status}
+              onChange={(e) =>
+                setStatus(
+                  e.target.value as "AVAILABLE" | "RESERVED" | "PURCHASED"
+                )
+              }
+            >
+              <option value="AVAILABLE">판매중</option>
+              <option value="RESERVED">예약중</option>
+              <option value="PURCHASED">판매완료</option>
+            </select>
+          </div>
         </div>
 
         {/* 오른쪽 영역: 카테고리, 가격, 거래 위치, 좌표, 파일 업로드 */}
@@ -266,11 +289,18 @@ export default function PostModifyPage() {
               className="border w-full p-2"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
+              placeholder="주소를 선택하세요"
             />
+            <button
+              type="button"
+              onClick={openMap}
+              className="mt-2 w-full bg-gray-200 p-2 rounded"
+            >
+              지도에서 위치 선택
+            </button>
           </div>
           <div>
             <label className="block mb-1 font-semibold">위도</label>
-
             <input
               type="number"
               className="border w-full p-2"
@@ -327,6 +357,15 @@ export default function PostModifyPage() {
           </button>
         </div>
       </form>
+
+      {/* 지도 팝업 모달 */}
+      {isMapOpen && (
+        <MapPopup
+          currentPos={mapCurrentPos}
+          onLocationSelect={handleLocationSelect}
+          onClose={closeMap}
+        />
+      )}
     </div>
   );
 }
