@@ -588,22 +588,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/notification/subscribe": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["subscribe"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/chat/user": {
         parameters: {
             query?: never;
@@ -995,20 +979,17 @@ export interface components {
             data: components["schemas"]["PaymentDto"];
         };
         ChatRoom: {
-            sender: string;
-            receiver: string;
-            id: string;
-            roomId: string;
-            name: string;
-            client: string;
+            id?: string;
+            roomId?: string;
+            name?: string;
+            sender?: string;
+            receiver?: string;
+            client?: string;
             /** Format: int64 */
-            userCount: number;
-            lastMessage: string;
-            lastTimestamp: string;
-            isDelete: {
-                [key: string]: boolean;
-            };
-            delete?: {
+            userCount?: number;
+            lastMessage?: string;
+            lastTimestamp?: string;
+            isDelete?: {
                 [key: string]: boolean;
             };
         };
@@ -1092,7 +1073,6 @@ export interface components {
             /** Format: int64 */
             offset?: number;
             sort?: components["schemas"]["SortObject"];
-            paged?: boolean;
             /** Format: int32 */
             pageSize?: number;
             /** Format: int32 */
@@ -1149,13 +1129,9 @@ export interface components {
             message: string;
             data: components["schemas"]["PaymentMetaData"];
         };
-        SseEmitter: {
-            /** Format: int64 */
-            timeout?: number;
-        };
         AccessProvider: {
-            name: string;
-            token: string;
+            name?: string;
+            token?: string;
         };
         RsDataAccessProvider: {
             code: string;
@@ -1163,16 +1139,16 @@ export interface components {
             data: components["schemas"]["AccessProvider"];
         };
         ChatRoomDto: {
-            id: string;
-            roomId: string;
-            name: string;
+            postId?: string;
+            roomId?: string;
+            name?: string;
             /** Format: int64 */
-            userCount: number;
-            lastMessage: string;
+            userCount?: number;
+            lastMessage?: string;
             /** @enum {string} */
-            messageType: "ENTER" | "QUIT" | "TALK" | "IMAGE" | "LOCATION";
-            lastTimestamp: string;
-            other: string;
+            messageType?: "ENTER" | "QUIT" | "TALK" | "IMAGE" | "LOCATION";
+            lastTimestamp?: string;
+            other?: string;
         };
         RsDataChatRoomDto: {
             code: string;
@@ -1185,17 +1161,17 @@ export interface components {
             data: components["schemas"]["ChatRoomDto"][];
         };
         MessageDto: {
-            messageId: string;
-            sender: string;
-            message: string;
-            image: string;
-            /** Format: float */
-            latitude: number;
-            /** Format: float */
-            longitude: number;
-            timestamp: string;
-            lastMessage: string;
-            lastTimestamp: string;
+            messageId?: string;
+            sender?: string;
+            message?: string;
+            image?: string;
+            /** Format: double */
+            latitude?: number;
+            /** Format: double */
+            longitude?: number;
+            timestamp?: string;
+            lastMessage?: string;
+            lastTimestamp?: string;
         };
         RsDataListMessageDto: {
             code: string;
@@ -2511,37 +2487,6 @@ export interface operations {
                 };
                 content: {
                     "application/json;charset=UTF-8": components["schemas"]["RsDataPaymentMetaData"];
-                };
-            };
-            /** @description Internal Server Error */
-            500: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json;charset=UTF-8": components["schemas"]["RsDataVoid"];
-                };
-            };
-        };
-    };
-    subscribe: {
-        parameters: {
-            query?: never;
-            header?: {
-                "Last-Event-ID"?: string;
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "text/event-stream": components["schemas"]["SseEmitter"];
                 };
             };
             /** @description Internal Server Error */
