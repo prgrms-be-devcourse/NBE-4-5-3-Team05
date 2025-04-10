@@ -37,7 +37,9 @@ class NotificationController(
                         )
                     }
                 } catch (e: IOException) {
-                    kafkaConsumer.removeEmitter(n!!.userId)
+                    n!!.userId?.let {
+                        kafkaConsumer.removeEmitter(it)
+                    }
                     break
                 }
             }
