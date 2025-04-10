@@ -424,6 +424,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/admin/signup": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 관리자 회원가입
+         * @description superadmin 권한으로 새로운 admin 계정을 생성합니다.
+         */
+        post: operations["signUpAdmin"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/admin/notices": {
         parameters: {
             query?: never;
@@ -832,7 +852,7 @@ export interface components {
             address: string;
             profileUrl: string;
             /** @enum {string} */
-            role: "ADMIN" | "USER";
+            role: "SUPER_ADMIN" | "ADMIN" | "USER";
             /** Format: int32 */
             cash: number;
             /** Format: date-time */
@@ -921,7 +941,7 @@ export interface components {
             id: string;
             nickname: string;
             /** @enum {string} */
-            role: "ADMIN" | "USER";
+            role: "SUPER_ADMIN" | "ADMIN" | "USER";
         };
         NoticeResBody: {
             id: string;
@@ -1072,6 +1092,12 @@ export interface components {
             message: string;
             data: components["schemas"]["BanResBody"];
         };
+        SignUpAdminReqBody: {
+            username: string;
+            password: string;
+            nickname: string;
+            email: string;
+        };
         /** @description 공지사항 등록 body */
         NoticeReqBody: {
             title: string;
@@ -1155,8 +1181,8 @@ export interface components {
         };
         SortObject: {
             empty?: boolean;
-            sorted?: boolean;
             unsorted?: boolean;
+            sorted?: boolean;
         };
         RsDataListPreviewPostResponse: {
             code: string;
@@ -1251,10 +1277,10 @@ export interface components {
             data: components["schemas"]["Category"][];
         };
         PageUserDto: {
-            /** Format: int32 */
-            totalPages?: number;
             /** Format: int64 */
             totalElements?: number;
+            /** Format: int32 */
+            totalPages?: number;
             /** Format: int32 */
             size?: number;
             content?: components["schemas"]["UserDto"][];
@@ -1274,10 +1300,10 @@ export interface components {
             data: components["schemas"]["PageUserDto"];
         };
         PageNoticeResBody: {
-            /** Format: int32 */
-            totalPages?: number;
             /** Format: int64 */
             totalElements?: number;
+            /** Format: int32 */
+            totalPages?: number;
             /** Format: int32 */
             size?: number;
             content?: components["schemas"]["NoticeResBody"][];
@@ -2259,6 +2285,39 @@ export interface operations {
                 };
                 content: {
                     "application/json;charset=UTF-8": components["schemas"]["RsDataVoid"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataVoid"];
+                };
+            };
+        };
+    };
+    signUpAdmin: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SignUpAdminReqBody"];
+            };
+        };
+        responses: {
+            /** @description 관리자 회원가입 성공 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataUserDto"];
                 };
             };
             /** @description Internal Server Error */

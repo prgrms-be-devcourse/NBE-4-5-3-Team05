@@ -61,7 +61,8 @@ export function useLoginMember() {
   };
 
   const isLogin = loginMember.id !== "";
-  const isAdmin = loginMember.role === "ADMIN";
+  const isAdmin = loginMember.role.toUpperCase() === "ADMIN" 
+  || loginMember.role.toUpperCase() === "SUPER_ADMIN";
 
   return {
     loginMember,
