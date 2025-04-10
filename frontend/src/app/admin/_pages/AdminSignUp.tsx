@@ -117,7 +117,9 @@ export default function AdminSignUp() {
   return (
     <div className="flex items-center justify-center min-h-screen">
       <form onSubmit={join} className="flex flex-col gap-8 w-full max-w-4xl">
-        <h2 className="text-3xl font-bold text-center">관리자 회원가입</h2>
+        <h2 className="text-3xl font-bold text-center">
+          신규 관리자 계정 등록
+        </h2>
         <Input
           type="text"
           name="username"
@@ -220,7 +222,7 @@ export default function AdminSignUp() {
             !isEmailVerified
           }
         >
-          관리자 회원가입
+          신규 관리자 등록
         </Button>
       </form>
     </div>

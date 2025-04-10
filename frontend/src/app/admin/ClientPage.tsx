@@ -1,8 +1,9 @@
 "use client";
 
-import { lazy, useEffect, useState } from "react";
+import { lazy, useEffect, useState, useContext } from "react";
 import { Home, User, Settings, Shield } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { LoginMemberContext } from "@/app/stores/auth/loginMemberStore";
 
 // 기존 관리자 페이지들
 const ProductListAdmin = lazy(() => import("./_pages/ProductListAdmin"));
@@ -25,6 +26,9 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ setPage }) => {
+  // 로그인 정보 가져오기
+  const { isSuperAdmin } = useContext(LoginMemberContext);
+
   return (
     <div className="w-64 bg-gray-900 text-white p-5 flex flex-col gap-4">
       <button
@@ -51,18 +55,22 @@ const Sidebar: React.FC<SidebarProps> = ({ setPage }) => {
       >
         <Settings size={20} /> 로그
       </button>
-      <button
-        onClick={() => setPage("AdminListSuperAdmin")}
-        className="flex items-center gap-2 p-3 hover:bg-gray-700 rounded"
-      >
-        <Shield size={20} /> 관리자 리스트
-      </button>
-      <button
-        onClick={() => setPage("AdminSignUp")}
-        className="flex items-center gap-2 p-3 hover:bg-gray-700 rounded"
-      >
-        <Shield size={20} /> 관리자 등록
-      </button>
+      {isSuperAdmin && (
+        <>
+          <button
+            onClick={() => setPage("AdminListSuperAdmin")}
+            className="flex items-center gap-2 p-3 hover:bg-gray-700 rounded"
+          >
+            <Shield size={20} /> 관리자 리스트
+          </button>
+          <button
+            onClick={() => setPage("AdminSignUp")}
+            className="flex items-center gap-2 p-3 hover:bg-gray-700 rounded"
+          >
+            <Shield size={20} /> 관리자 등록
+          </button>
+        </>
+      )}
     </div>
   );
 };

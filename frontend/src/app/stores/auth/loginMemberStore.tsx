@@ -12,6 +12,7 @@ export const LoginMemberContext = createContext<{
   isLogin: boolean;
   isLoginMemberPending: boolean;
   isAdmin: boolean;
+  isSuperAdmin: boolean;
   setNoLoginMember: () => void;
 }>({
   loginMember: createEmptyMember(),
@@ -20,6 +21,7 @@ export const LoginMemberContext = createContext<{
   isLogin: false,
   isLoginMemberPending: true,
   isAdmin: false,
+  isSuperAdmin: false,
   setNoLoginMember: () => {},
 });
 
@@ -61,8 +63,10 @@ export function useLoginMember() {
   };
 
   const isLogin = loginMember.id !== "";
-  const isAdmin = loginMember.role.toUpperCase() === "ADMIN" 
-  || loginMember.role.toUpperCase() === "SUPER_ADMIN";
+  const isAdmin =
+    loginMember.role.toUpperCase() === "ADMIN" ||
+    loginMember.role.toUpperCase() === "SUPER_ADMIN";
+  const isSuperAdmin = loginMember.role.toUpperCase() === "SUPER_ADMIN";
 
   return {
     loginMember,
@@ -71,6 +75,7 @@ export function useLoginMember() {
     isLoginMemberPending,
     setLoginMember,
     isAdmin,
+    isSuperAdmin,
     setNoLoginMember,
   };
 }
