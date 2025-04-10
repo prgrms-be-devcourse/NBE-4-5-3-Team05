@@ -71,8 +71,9 @@ class ChatRoomController(
         val sender = userAuthService.getRealActor(userIdentity)
 
         val postResponse = productPostService.getPost(postId)
+        val writer = postResponse.writerName
         val receiver = postResponse.writerName
-        val chatRoom = chatRoomService.createChatRoom(sender.nickname, receiver)
+        val chatRoom = chatRoomService.createChatRoom(sender.nickname, receiver,postId,writer)
 
         return RsData("200", receiver + "와의 채팅방", chatRoom)
     }
@@ -91,7 +92,7 @@ class ChatRoomController(
         val admin = userService.adminUsers
         val receiver = admin.nickname
 
-        val chatRoom = chatRoomService.createChatRoom(sender.nickname, receiver)
+        val chatRoom = chatRoomService.createChatRoom(sender.nickname, receiver,null,null)
 
         return RsData("200", "고객센터", chatRoom)
     }
@@ -125,6 +126,8 @@ class ChatRoomController(
                     ChatRoomDto(
                         chatRoom.id,
                         chatRoom.roomId,
+                        chatRoom.getPostId(),
+                        chatRoom.writer,
                         chatRoom.name,
                         chatRoom.userCount,
                         lastMessage,
@@ -229,6 +232,8 @@ class ChatRoomController(
         val chatRoomDto = ChatRoomDto(
             chatRoom.id,
             chatRoom.roomId,
+            chatRoom.getPostId(),
+            chatRoom.writer,
             chatRoom.name,
             chatRoom.userCount,
             lastMessage,  // 마지막 메시지 내용

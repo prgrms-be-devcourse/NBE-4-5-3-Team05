@@ -6,13 +6,14 @@ import java.util.*
 
 class ChatRoom(// 나
     private val sender: String, // 상대
-    private val receiver: String
+    private val receiver: String,
+    private val postId: String? = null
 ) : Serializable {
     @Id
     val id : String = UUID.randomUUID().toString()
 
     var roomId: String = ""
-
+    var writer: String? = null
     var name = receiver
     var client: String = "" // 개별 저장소
     var userCount: Long = 0 // 채팅방 인원수
@@ -31,6 +32,9 @@ class ChatRoom(// 나
     fun getReceiver() : String {
         return receiver;
     }
+    fun getPostId() : String? {
+        return postId;
+    }
 
     fun setDeleteStatus(username: String, status: Boolean) {
         isDelete[username] = status
@@ -43,4 +47,6 @@ class ChatRoom(// 나
     companion object {
         private const val serialVersionUID = 6494678977089006639L
     }
+
+    constructor(sender: String, receiver: String) : this(sender, receiver, null)
 }

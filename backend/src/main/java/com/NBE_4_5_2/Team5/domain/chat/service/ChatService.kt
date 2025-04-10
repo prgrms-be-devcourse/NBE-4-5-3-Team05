@@ -3,6 +3,8 @@ package com.NBE_4_5_2.Team5.domain.chat.service
 import com.NBE_4_5_2.Team5.domain.chat.entity.ChatMessage
 import com.NBE_4_5_2.Team5.domain.chat.entity.ChatRoom
 import com.NBE_4_5_2.Team5.domain.chat.repository.ChatMessageRepository
+import com.NBE_4_5_2.Team5.domain.post.post.service.ProductPostService
+import com.NBE_4_5_2.Team5.global.exception.ServiceException
 import jakarta.annotation.Resource
 import jakarta.transaction.Transactional
 import org.springframework.data.redis.core.HashOperations
@@ -15,7 +17,8 @@ class ChatService(
     private val channelTopic: ChannelTopic,
     private val objectRedisTemplate: RedisTemplate<String, Any>,
     private val chatRoomService: ChatRoomService,
-    private val chatMessageRepository: ChatMessageRepository
+    private val chatMessageRepository: ChatMessageRepository,
+    private val productPostService: ProductPostService,
 ) {
 
     @Resource(name = "objectRedisTemplate")
@@ -106,6 +109,36 @@ class ChatService(
             hashOpsChatRoom.put(CHAT_ROOMS, chatRoom.roomId, chatRoom) // 레디스에 업데이트
             chatMessageRepository.save(message)
 
+        } else if (ChatMessage.MessageType.STATUS == chatMessage.getType()) {
+            val writer = chatRoom.writer
+            val sender = chatMessage.getSender()
+            val postId = chatRoom.getPostId()
+            val prev_status = productPostService.getPost(postId!!).status
+
+            // 메세지 전송자와 게시글 작성자가 다르면 권한x
+            if(writer != sender){
+                throw ServiceException("405", "권한이 없습니다.")
+            }
+
+            val message = ChatMessage(
+                ChatMessage.MessageType.STATUS,
+                chatRoom.roomId,
+                chatMessage.getSender(),
+                receiver,
+                "게시글 상태가 변경 되었습니다.\n${prev_status} -> ${chatMessage.getProductStatus()}",
+                "",
+                chatMessage.getUserCount(),
+                0.0f,
+                0.0f,
+                chatMessage.getProductStatus()
+            )
+
+            // Redis로 메시지 발송
+            objectRedisTemplate.convertAndSend(channelTopic.topic, message)
+            hashOpsChatRoom.put(CHAT_ROOMS, chatRoom.roomId, chatRoom) // 레디스에 업데이트
+            chatMessageRepository.save(message)
+            // 게시글 상태 변경
+            productPostService.updateStatus(chatMessage.getProductStatus(), postId!!)
         }
     }
 }
