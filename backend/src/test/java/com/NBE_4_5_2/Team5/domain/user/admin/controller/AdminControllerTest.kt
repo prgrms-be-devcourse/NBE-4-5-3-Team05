@@ -334,7 +334,6 @@ internal class AdminControllerTest(
         )
 
         // then
-
         result
             .andExpect(MockMvcResultMatchers.status().isOk())
             .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("200-1"))
@@ -342,6 +341,82 @@ internal class AdminControllerTest(
             .andExpect(MockMvcResultMatchers.jsonPath("$.data.username").value("admin3"))
             .andExpect(MockMvcResultMatchers.jsonPath("$.data.nickname").value("관리자3"))
             .andExpect(MockMvcResultMatchers.jsonPath("$.data.email").value("admin3@gmail.com"))
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun signUpAdminWithoutEmailAuthentication() {
+        // given
+
+        val cookieMap = login("admin1", "password1") // 메인 관리자로 로그인
+        // 이메일 인증을 하지 않은 상태
+
+        // when: 인증이 완료되지 않은 이메일로 관리자 회원가입 시도
+        val result = mockMvc.perform(
+            MockMvcRequestBuilders.post("/api/admin/signup")
+                .content(
+                    """
+                {
+                    "username": "admin3",
+                    "password": "admin3@",
+                    "nickname": "관리자3",
+                    "email": "admin3@gmail.com"
+                }
+                """.trimIndent()
+                )
+                .contentType("application/json")
+                .characterEncoding("utf-8")
+                .cookie(cookieMap["accessToken"], cookieMap["refreshToken"])
+        )
+
+        // then: 이메일 인증 미완료 오류
+        result.andExpect(MockMvcResultMatchers.status().isConflict)
+            .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("409"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("이메일 인증이 완료되지 않았습니다. 인증 후 다시 시도해주세요."))
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun signUpAdminWithInvalidInput() {
+        // given
+        // 메인 관리자로 로그인 (SUPER_ADMIN 권한)
+        val cookieMap = login("admin1", "password1")
+        val username: String = "admin!@#" // 특수문자 포함되어 유효성 검증에 실패
+        val password: String = "admin3@"
+        val nickname: String = "1" // 닉네임이 2글자 미만
+        val email: String = "invalid-email" // 올바른 이메일 형식 아님
+
+        val invalidContent = """
+        {
+            "username": "${username}",  
+            "password": "${password}",
+            "nickname": "${nickname}",         
+            "email": "${email}" 
+        }
+    """.trimIndent()
+
+        // when: 잘못된 입력값으로 관리자 회원가입 시도
+        val result = mockMvc.perform(
+            MockMvcRequestBuilders.post("/api/admin/signup")
+                .content(invalidContent)
+                .contentType("application/json")
+                .characterEncoding("utf-8")
+                .cookie(cookieMap["accessToken"], cookieMap["refreshToken"])
+        )
+
+        // then: 유효성 검증 실패로 400 Bad Request 발생
+        result
+            .andExpect(MockMvcResultMatchers.status().isBadRequest())
+            .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("400-1"))
+            .andExpect(
+                MockMvcResultMatchers.jsonPath("$.message").value(
+                    """
+                        email : 올바른 이메일 형식이 아닙니다.
+                        nickname : 닉네임은 2~20자 사이여야 합니다.
+                        username : 아이디는 영문과 숫자만 사용할 수 있습니다.
+                    """.trimIndent().trimEnd()
+                )
+            )
     }
 
 
