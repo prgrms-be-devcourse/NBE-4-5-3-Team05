@@ -177,7 +177,8 @@ class ChatRoomController(
                     chatMessage.getLongitude(),
                     chatMessage.getTimestamp(),
                     messages[messages.size - 1].getMessage(),
-                    messages[messages.size - 1].getTimestamp()
+                    messages[messages.size - 1].getTimestamp(),
+                    messages[messages.size - 1].getType()
                 )
             }
             .toList()

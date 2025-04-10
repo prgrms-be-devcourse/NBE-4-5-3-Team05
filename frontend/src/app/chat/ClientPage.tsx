@@ -62,9 +62,11 @@ export default function ClientPage({
                 console.log('업데이트된 채팅방:', updatedRooms);
 
                 // 기존 채팅방 목록과 병합하여 업데이트
-                setChatRooms(prevRooms => {
-                  const updatedRoomMap = new Map(updatedRooms.map((room: components["schemas"]["ChatRoomDto"]) => [room.roomId, room]));
-                  return prevRooms.map(room => updatedRoomMap.get(room.roomId) || room);
+                setChatRooms((prevRooms: components["schemas"]["ChatRoomDto"][]) => {
+                  const updatedRoomMap = new Map<string, components["schemas"]["ChatRoomDto"]>(
+                    updatedRooms.map((room: components["schemas"]["ChatRoomDto"]) => [room.roomId, room])
+                  );
+                  return prevRooms.map((room: components["schemas"]["ChatRoomDto"]) => updatedRoomMap.get(room.roomId) || room);
                 });
               });
             },
