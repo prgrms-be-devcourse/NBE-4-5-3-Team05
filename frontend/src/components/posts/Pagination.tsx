@@ -18,7 +18,8 @@ export default function Pagination({
   if (totalPages <= 1) return null;
 
   const pageNumbers = Array.from({ length: totalPages }, (_, i) => i + 1);
-
+  const startPage = currentPage - 3 < 1 ? 0 : currentPage - 3;
+  const endPage = currentPage + 3 > totalPages ? totalPages : currentPage + 3;
   return (
     <div className="flex items-center justify-center space-x-2 mt-6">
       <button
@@ -28,7 +29,7 @@ export default function Pagination({
       >
         이전
       </button>
-      {pageNumbers.map((num) => (
+      {pageNumbers.slice(startPage, endPage).map((num) => (
         <button
           key={num}
           onClick={() => onPageChange(num)}
