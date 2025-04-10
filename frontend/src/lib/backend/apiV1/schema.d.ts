@@ -1076,14 +1076,14 @@ export interface components {
             sort?: string[];
         };
         PageableObject: {
+            /** Format: int32 */
+            pageNumber?: number;
             /** Format: int64 */
             offset?: number;
             sort?: components["schemas"]["SortObject"];
             /** Format: int32 */
             pageSize?: number;
             paged?: boolean;
-            /** Format: int32 */
-            pageNumber?: number;
             unpaged?: boolean;
         };
         RsDataSliceCommentDto: {
@@ -1107,8 +1107,8 @@ export interface components {
         };
         SortObject: {
             empty?: boolean;
-            sorted?: boolean;
             unsorted?: boolean;
+            sorted?: boolean;
         };
         RsDataListPreviewPostResponse: {
             code: string;
