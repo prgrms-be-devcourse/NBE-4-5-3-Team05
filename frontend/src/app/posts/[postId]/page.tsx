@@ -150,7 +150,7 @@ export default function PostDetailPage() {
         setPurchased(false);
         return;
       }
-      setPurchased(true);
+      setPurchased(result.data.data);
     } catch (err) {
       console.error(err);
     }
