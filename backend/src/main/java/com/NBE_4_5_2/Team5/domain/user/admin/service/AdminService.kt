@@ -68,6 +68,7 @@ class AdminService(
     @Transactional
     fun signUpAdmin(username: String, password: String, nickname: String, email: String): User {
 
+        isSuperAdmin(loggedInUser)
         userService.checkDuplicateAndEmail(username, nickname, email)
 
         return User(
@@ -134,6 +135,12 @@ class AdminService(
 
         if (admin.role != Role.ADMIN) {
             throw WrongRoleException(HttpStatus.BAD_REQUEST.toString(), "관리자만 작성할 수 있는 글입니다.")
+        }
+    }
+
+    private fun isSuperAdmin(admin: User) {
+        if (admin.role != Role.SUPER_ADMIN) {
+            throw WrongRoleException(HttpStatus.BAD_REQUEST.toString(), "메인 관리자만 작성할 수 있는 글입니다.")
         }
     }
 

@@ -199,9 +199,9 @@ class AdminController(
     @Operation(summary = "관리자 회원가입", description = "superadmin 권한으로 새로운 admin 계정을 생성합니다.")
     @ApiResponses(value = [ApiResponse(responseCode = "200", description = "관리자 회원가입 성공")])
     @SecurityRequirement(name = "cookieAuth")
-    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    @PreAuthorize("isAuthenticated()")
     @PostMapping("/signup")
-    fun signUpAdmin(@Valid body: SignUpAdminReqBody): RsData<UserDto> {
+    fun signUpAdmin(@RequestBody @Valid body: SignUpAdminReqBody): RsData<UserDto> {
 
         val newAdmin = adminService.signUpAdmin(
             body.username,

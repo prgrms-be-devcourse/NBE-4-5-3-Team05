@@ -14,6 +14,7 @@ import com.NBE_4_5_2.Team5.domain.user.admin.service.AdminService
 import com.NBE_4_5_2.Team5.domain.user.user.entity.Role
 import com.NBE_4_5_2.Team5.domain.user.user.entity.User
 import com.NBE_4_5_2.Team5.domain.user.user.repository.UserRepository
+import com.NBE_4_5_2.Team5.domain.user.user.service.UserAuthService
 import com.NBE_4_5_2.Team5.domain.user.user.service.UserService
 import com.NBE_4_5_2.Team5.domain.user.user.service.email.EmailService
 import com.NBE_4_5_2.Team5.global.aspect.product.ProductMetaDataNames
@@ -46,6 +47,9 @@ class BaseInitData(
     @Value("\${custom.server.host}")
     private val serverHost: String
 ) {
+    @Autowired
+    private lateinit var userAuthService: UserAuthService
+
     @Autowired
     private lateinit var productMetadataRepository: ProductMetadataRepository
 
@@ -124,9 +128,12 @@ class BaseInitData(
         userService.createUser("user2", "user21234@", "user2@gmail.com", "user2", "서울시 강서구", imageUrl)
         userService.createUser("user3", "user31234@", "user3@gmail.com", "user3", "서울시 광진구", imageUrl)
 
-        adminService.signUpSuperAdmin("admin1", "password1", "admin1", "admin1@gmail.com")
+        val superAdmin = adminService.signUpSuperAdmin("admin1", "password1", "admin1", "admin1@gmail.com")
+
+        userAuthService.setLogin(superAdmin)
         adminService.signUpAdmin("admin2", "password2", "admin2", "admin2@gmail.com")
         adminService.signUpAdmin("user4", "user41234@", "admin4", "user4@gmail.com")
+        userAuthService.setLogout()
     }
 
     @Transactional

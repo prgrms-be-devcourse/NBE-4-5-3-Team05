@@ -313,11 +313,11 @@ internal class AdminControllerTest(
         //given
         // 메인 관리자로 로그인
         val cookieMap = login("admin1", "password1")
-        userService.saveAuthenticationCode("admin3@gmail.com", "verify") // 이메일 인증이 완료되었다 가정
+        userService.saveAuthenticationCode("admin3@gmail.com", "verified") // 이메일 인증이 완료되었다 가정
 
         //when
         val result = mockMvc.perform(
-            MockMvcRequestBuilders.delete("/api/admin/signup")
+            MockMvcRequestBuilders.post("/api/admin/signup")
                 .content(
                     """
 				{
@@ -330,7 +330,6 @@ internal class AdminControllerTest(
                 )
                 .contentType("application/json")
                 .characterEncoding("utf-8")
-                .cookie(cookieMap["accessToken"], cookieMap["refreshToken"])
                 .cookie(cookieMap["accessToken"], cookieMap["refreshToken"])
         )
 
