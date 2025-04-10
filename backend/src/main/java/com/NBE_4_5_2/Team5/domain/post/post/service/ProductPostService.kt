@@ -64,21 +64,37 @@ class ProductPostService(
     }
 
     @Transactional
-    fun getPosts(page: Int, pageSize: Int, keyword: String, sort: String): PageDto<PreviewPostResponse> {
+    fun getPosts(
+        page: Int,
+        pageSize: Int,
+        keyword: String,
+        sort: String,
+        minPrice: Int,
+        maxPrice: Int,
+        categoryIds: List<Long>
+    ): PageDto<PreviewPostResponse> {
         val sortDirection = if (sort.equals("asc", ignoreCase = true)) Sort.Direction.ASC else Sort.Direction.DESC
-
         val pageable = PageRequest.of(
             page - 1, pageSize,
             Sort.by(sortDirection, "createdDate")
         )
 
-        val postPage = if (keyword.isBlank()) {
-            productPostRepository.findAllWithCategories(pageable)
+        val resultPage = if (keyword.isBlank()) {
+            if (categoryIds.isEmpty()) {
+                productPostRepository.findAllWithPrice(minPrice, maxPrice, pageable)
+            } else {
+                productPostRepository.findAllWithFilters(minPrice, maxPrice, categoryIds, categoryIds.size.toLong(), pageable)
+            }
         } else {
-            productPostRepository.findByTitleLike("%$keyword%", pageable)
+            if (categoryIds.isEmpty()) {
+                productPostRepository.findByKeywordWithPrice("%$keyword%", minPrice, maxPrice, pageable)
+            } else {
+                productPostRepository.findByKeywordWithFilters("%$keyword%", minPrice, maxPrice, categoryIds, categoryIds.size.toLong(), pageable)
+            }
         }
 
-        val mappedPosts = postPage.map { post ->
+
+        val mappedPosts = resultPage.map { post ->
             val likedCount = likedPostRepository.countByProductPostId(post.id)
             PreviewPostResponse.fromEntityWithLikeCount(post, likedCount)
         }
@@ -130,21 +146,21 @@ class ProductPostService(
 
         post.canModify(actor)
 
-        post.apply {
-            productName = body.productName
-            productPrice = body.productPrice
-            title = body.title
-            content = body.content
-            imageUrls = body.imageUrlList.joinToString(",")
-            latitude = body.latitude
-            longitude = body.longitude
+        body.productName?.let { post.productName = it }
+        body.productPrice?.let { post.productPrice = it }
+        body.title?.let { post.title = it }
+        body.content?.let { post.content = it }
+        body.imageUrlList?.takeIf { it.isNotEmpty() }?.let { post.imageUrls = it.joinToString(",") }
+        body.latitude?.let { post.latitude = it }
+        body.longitude?.let { post.longitude = it }
+        body.status?.let { post.status = it }
+
+        body.categoryIds?.let {
+            val categories = categoryRepository.findAllById(it)
+            post.productCategories.clear()
+            val newCategories = categories.map { category -> ProductCategory.of(post, category) }
+            post.productCategories.addAll(newCategories)
         }
-
-        val categories = categoryRepository.findAllById(body.categoryIds)
-
-        post.productCategories.clear()
-        val newProductCategories = categories.map { ProductCategory.of(post, it) }
-        post.productCategories.addAll(newProductCategories)
 
         return ProductPostResponse.fromEntity(post)
     }
@@ -188,10 +204,10 @@ class ProductPostService(
 
     //내가 구매한 내역
     @Transactional(readOnly = true)
-    fun getMyPurchases(actor: User, page: Int, pageSize: Int): PageDto<ProductPostResponse> {
+    fun getMyPurchases(actor: User, page: Int, pageSize: Int): PageDto<PreviewPostResponse> {
         val pageable = PageRequest.of(page - 1, pageSize)
         val purchasedPosts = productPostRepository.findByBuyer(actor, pageable)
-        val mappedPosts = purchasedPosts.map { ProductPostResponse.fromEntity(it) }
+        val mappedPosts = purchasedPosts.map { PreviewPostResponse.fromEntity(it) }
         return PageDto(mappedPosts)
     }
 
@@ -200,11 +216,11 @@ class ProductPostService(
         return salesPosts.map { ProductPostResponse.fromEntity(it) }
     }
 
-    fun getMyFavorites(actor: User, page: Int, pageSize: Int): PageDto<ProductPostResponse> {
+    fun getMyFavorites(actor: User, page: Int, pageSize: Int): PageDto<PreviewPostResponse> {
         val pageable = PageRequest.of(page - 1, pageSize)
         val postIds = likedPostRepository.findAllProductPostIdsByUserId(actor.id)
         val favoritePosts = productPostRepository.findByIdIn(postIds, pageable)
-        val mappedPosts = favoritePosts.map { ProductPostResponse.fromEntity(it) }
+        val mappedPosts = favoritePosts.map { PreviewPostResponse.fromEntity(it) }
         return PageDto(mappedPosts)
     }
 

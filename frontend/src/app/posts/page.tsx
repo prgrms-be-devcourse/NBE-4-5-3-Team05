@@ -8,11 +8,15 @@ import PostList from "@/components/posts/PostList";
 import Pagination from "@/components/posts/Pagination";
 import { components } from "@/lib/backend/apiV1/schema";
 import client from "@/lib/client";
+import { useSearchParams } from "next/navigation";
 
 type NoticeListItem = components["schemas"]["NoticeResBody"];
 type ProductPostListItem = components["schemas"]["PreviewPostResponse"];
 
 export default function PostsPage() {
+  const searchParams = useSearchParams();
+  const initialKeyword = searchParams.get("keyword") || "";
+
   const [noticeList, setNoticeList] = useState<NoticeListItem[]>([]);
   const [posts, setPosts] = useState<ProductPostListItem[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -21,10 +25,10 @@ export default function PostsPage() {
     []
   );
   const [filters, setFilters] = useState({
-    keyword: "",
+    keyword: initialKeyword,
     minPrice: null as number | null,
     maxPrice: null as number | null,
-    categories: [] as string[],
+    categories: [] as number[],
     sort: "desc",
   });
 
@@ -69,12 +73,13 @@ export default function PostsPage() {
           pageSize: 10,
           keyword: filters.keyword || undefined,
           sort: filters.sort,
-          minPrice: filters.minPrice || undefined,
+          minPrice: filters.minPrice ?? undefined,
           maxPrice: filters.maxPrice || undefined,
           // 다중 카테고리인 경우 콤마로 구분하여 전달
-          categories: filters.categories.length
-            ? filters.categories.join(",")
-            : undefined,
+          categoryIds:
+            filters.categories.length > 0
+              ? filters.categories.map((id) => Number(id))
+              : undefined,
         },
       },
       credentials: "include",
@@ -103,12 +108,14 @@ export default function PostsPage() {
           {noticeList.length > 0 && (
             <div className="mb-4 space-y-4">
               {noticeList.map((notice, index) => (
-                <Link href={`/notices/${notice.id!}`}>
-                  <Notice
-                    key={index}
-                    title={notice.title!}
-                    content={notice.content!}
-                  />
+                <Link
+                  href={`/notices/${notice.id!}`}
+                  legacyBehavior
+                  key={index}
+                >
+                  <a>
+                    <Notice title={notice.title!} content={notice.content!} />
+                  </a>
                 </Link>
               ))}
             </div>

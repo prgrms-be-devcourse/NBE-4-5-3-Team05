@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size
 
-@JvmRecord
+
 data class SignUpUserForm(
     @field:Pattern(regexp = "^[a-zA-Z0-9]+$", message = "아이디는 영문과 숫자만 사용할 수 있습니다.")
     @field:Size(min = 4, max = 20, message = "아이디는 4~20자 사이여야 합니다.")

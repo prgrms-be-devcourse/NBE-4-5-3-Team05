@@ -38,7 +38,7 @@ class StompHandler(
                     ?: "InvalidRoomId"
                 val roomId = chatService.getRoomId(dest)
 
-                val sessionId = message.headers["simpSessionId"] as? String
+                val sessionId = message.headers["simpSessionId"] as? String ?: ""
                 chatRoomService.setUserEnterInfo(sessionId, roomId)
                 chatRoomService.plusUserCount(roomId)
 
@@ -50,7 +50,7 @@ class StompHandler(
 
             StompCommand.DISCONNECT -> {
                 // DISCONNECT: 세션 → roomId, 퇴장 처리
-                val sessionId = message.headers["simpSessionId"] as? String
+                val sessionId = message.headers["simpSessionId"] as? String ?: ""
                 val roomId = chatRoomService.getUserEnterRoomId(sessionId)
                 chatRoomService.minusUserCount(roomId)
                 chatRoomService.removeUserEnterInfo(sessionId)

@@ -38,7 +38,7 @@ class ProductPost() : BaseTime() {
     lateinit var imageUrls: String
 
     @ManyToOne(fetch = FetchType.LAZY)
-    lateinit var buyer: User
+    var buyer: User? = null
 
     @Column(nullable = false)
     var viewCount: Int = 0
@@ -59,7 +59,7 @@ class ProductPost() : BaseTime() {
     @OneToMany(mappedBy = "productPost", cascade = [CascadeType.ALL], orphanRemoval = true)
     val productCategories: MutableList<ProductCategory> = mutableListOf()
 
-    @OneToMany(mappedBy = "_target", cascade = [CascadeType.REMOVE], orphanRemoval = true)
+    @OneToMany(mappedBy = "target", cascade = [CascadeType.REMOVE], orphanRemoval = true)
     val commentList: MutableList<Comment> = mutableListOf()
 
     constructor(
@@ -84,7 +84,7 @@ class ProductPost() : BaseTime() {
     }
 
     companion object {
-        @JvmStatic
+        
         fun create(
             writer: User,
             productName: String,

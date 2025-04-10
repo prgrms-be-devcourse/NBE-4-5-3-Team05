@@ -1,5 +1,6 @@
 package com.NBE_4_5_2.Team5.global.response
 
+import com.NBE_4_5_2.Team5.global.dto.Empty
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonInclude
 

@@ -15,16 +15,16 @@ class ProductCategory(
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_post_id", nullable = false)
-    var productPost: ProductPost? = null,
+    var productPost: ProductPost,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
-    var category: Category? = null
+    var category: Category
 
 ) : BaseLongIdEntity() {
 
     companion object {
-        @JvmStatic
+        
         fun of(productPost: ProductPost, category: Category): ProductCategory {
             return ProductCategory(productPost, category)
         }

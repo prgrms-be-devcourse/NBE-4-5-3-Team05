@@ -1,5 +1,7 @@
 server:
   port: 8080
+  tomcat:
+    connection-timeout: -1
 
 custom:
   server:
@@ -9,9 +11,26 @@ custom:
     port: 3000
 
 spring:
+  mvc:
+    async:
+      request-timeout: 0
+
   jackson:
     serialization:
       fail-on-empty-beans: false
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: sse-demo-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "com.NBE_4_5_2.Team5.domain.notification.entity"
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
 
   output:
     ansi:
@@ -32,7 +51,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
     show-sql: false
     properties:
       hibernate:
@@ -74,6 +93,9 @@ spring:
     resources:
       static-locations: classpath:/static/
 
+
+
+
 logging:
   level:
     org.hibernate.SQL: WARN
@@ -81,6 +103,5 @@ logging:
     org.hibernate.orm.jdbc.extract: WARN
     org.springframework.transaction.interceptor: TRACE
     org.springframework.security: DEBUG
-
 springdoc:
   default-produces-media-type: application/json;charset=UTF-8

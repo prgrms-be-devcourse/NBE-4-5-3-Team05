@@ -1,6 +1,7 @@
 package com.NBE_4_5_2.Team5.domain.post.post.dto.response
 
 import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductPost
+import com.NBE_4_5_2.Team5.domain.post.post.enums.ProductStatus
 import java.time.LocalDateTime
 
 class ProductPostResponse(
@@ -18,11 +19,12 @@ class ProductPostResponse(
     val createdAt: LocalDateTime, // 생성일
     val modifiedAt: LocalDateTime, // 수정일
     val viewCount: Int, // 조회수
-    val likedCount: Int
+    val likedCount: Int,
+    val status: ProductStatus
 ) {
 
     companion object {
-        @JvmStatic
+        
         fun fromEntity(post: ProductPost): ProductPostResponse {
             return ProductPostResponse(
                 post.id,
@@ -39,13 +41,13 @@ class ProductPostResponse(
                 post.createdDate,
                 post.modifiedDate,
                 post.viewCount,
-                0
-
+                0,
+                post.status
             )
         }
 
         // 찜 개수를 외부에서 전달받는 메서드
-        @JvmStatic
+        
         fun fromEntityWithLikeCount(post: ProductPost, likedCount: Int): ProductPostResponse {
             return ProductPostResponse(
                 post.id,
@@ -62,7 +64,8 @@ class ProductPostResponse(
                 post.createdDate,
                 post.modifiedDate,
                 post.viewCount,
-                likedCount
+                likedCount,
+                post.status
             )
         }
     }
