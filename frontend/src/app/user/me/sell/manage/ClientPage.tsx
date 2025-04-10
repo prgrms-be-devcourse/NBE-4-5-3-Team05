@@ -22,6 +22,9 @@ import {
 } from "@/components/ui/table";
 import Link from "next/link";
 import { LoginMemberContext } from "@/app/stores/auth/loginMemberStore";
+import client from "@/lib/client";
+
+type ProductStatus = "AVAILABLE" | "RESERVED" | "PURCHASED";
 
 export default function ClientPage({
   postInfo,
@@ -79,8 +82,30 @@ export default function ClientPage({
     router.push(`/user/me/sell/manage?${params.toString()}`);
   };
 
-  const handleStatusChange = (postId?: string, newStatus?: string) => {
-    // TODO: 상태 변경
+  const handleStatusChange = async (
+    postId: string,
+    newStatus: ProductStatus
+  ) => {
+    const data = {
+      status: newStatus,
+    };
+
+    try {
+      const response = await client.PUT("/api/posts/{id}", {
+        credentials: "include",
+        params: { path: { id: postId } },
+        body: data,
+      });
+
+      if (response.error) {
+        alert("수정에 실패했습니다: " + response.error.message);
+        return;
+      }
+      router.refresh(); // 변경 사항 반영
+    } catch (error) {
+      console.error(error);
+      alert("상태 변경에 실패했습니다.");
+    }
   };
 
   return (
@@ -179,45 +204,33 @@ export default function ClientPage({
                   <TableCell>{post.likedCount}</TableCell>
 
                   {/* 판매 상태 */}
-                  <TableCell
-                    className={`px-4 py-2 text-center font-semibold ${
-                      post.status === "AVAILABLE"
-                        ? "text-blue-500" // 판매중: 파란색
-                        : post.status === "RESERVED"
-                          ? "text-yellow-500" // 예약중: 노란색
-                          : post.status === "PURCHASED"
-                            ? "text-red-500" // 판매 완료: 빨간색
-                            : "text-gray-500" // 알 수 없음: 회색
-                    }`}
-                  >
-                    {post.status === "AVAILABLE"
-                      ? "판매중"
-                      : post.status === "RESERVED"
-                        ? "예약중"
-                        : post.status === "PURCHASED"
-                          ? "판매 완료"
-                          : "알 수 없음"}
-                    {/* <Select
-                      onValueChange={(value) =>
+                  <TableCell>
+                    <Select
+                      onValueChange={(value: ProductStatus) =>
                         handleStatusChange(post.id, value)
                       }
                       defaultValue={post.status}
                     >
-                      <SelectTrigger className="w-[150px]">
-                        <SelectValue>
-                          {post.status === "AVAILABLE"
-                            ? "판매중"
-                            : post.status === "RESERVED"
-                              ? "예약중"
-                              : "판매 완료"}
-                        </SelectValue>
+                      <SelectTrigger
+                        className={`w-[150px] font-semibold text-center
+        ${
+          post.status === "AVAILABLE"
+            ? "text-blue-500"
+            : post.status === "RESERVED"
+              ? "text-yellow-500"
+              : post.status === "PURCHASED"
+                ? "text-red-500"
+                : "text-gray-500"
+        }`}
+                      >
+                        <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="AVALIABLE">판매중</SelectItem>
+                        <SelectItem value="AVAILABLE">판매중</SelectItem>
                         <SelectItem value="RESERVED">예약중</SelectItem>
                         <SelectItem value="PURCHASED">판매완료</SelectItem>
                       </SelectContent>
-                    </Select> */}
+                    </Select>
                   </TableCell>
 
                   {/* 최근 수정일 */}

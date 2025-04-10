@@ -61,7 +61,13 @@ class UserService(
      * @return 검증된 User 객체
      */
     fun loginUser(username: String, password: String): User {
-        return userValidator.credentials(username, password)
+        val user = userValidator.credentials(username, password)
+
+        if (user.blocked) {
+            throw ServiceException("403-1", "정지된 사용자입니다. 관리자에게 문의해주세요.")
+        }
+
+        return user
     }
 
     /**
