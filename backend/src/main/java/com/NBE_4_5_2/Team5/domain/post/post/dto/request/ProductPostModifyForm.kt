@@ -30,5 +30,8 @@ data class ProductPostModifyForm(
     val longitude: Float? = null,
 
     @Parameter(name = "상품 상태")
-    val status: ProductStatus? = null
+    val status: ProductStatus? = null,
+
+    @Parameter(name = "거래 위치(주소)")
+    val location: String? = null
 )
