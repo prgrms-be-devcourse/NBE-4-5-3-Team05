@@ -1128,6 +1128,7 @@ export interface components {
             paged?: boolean;
             /** Format: int32 */
             pageNumber?: number;
+            unpaged?: boolean;
         };
         RsDataSliceCommentDto: {
             code: string;

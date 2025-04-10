@@ -15,6 +15,7 @@ import {
   faRightFromBracket,
   faBars,
   faTrash,
+  faArrowsRotate,
 } from "@fortawesome/free-solid-svg-icons";
 import {
   DropdownMenu,
@@ -50,7 +51,6 @@ export default function ClientPage({
   const [stompClient, setStompClient] = useState<any>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<null | HTMLDivElement>(null);
-  const [selectedStatus, setSelectedStatus] = useState<string>("");
 
   const [isOpen, setIsOpen] = useState(false);
 
@@ -148,16 +148,12 @@ export default function ClientPage({
     getCurrentPosition();
   }, []);
 
-  // 게시글 상태 변경
-  const handleStatusChange = (status: string) => {
-    setSelectedStatus(status);
+  const handleStatusChangeAndSend = (status: string) => {
+    handleSendStatus(status);
   };
 
-  const handleSendStatus = () => {
-    if (!selectedStatus) {
-      alert("상태를 선택하세요.");
-      return;
-    }
+
+  const handleSendStatus = (status: string) => {
 
     if (!stompClient) {
       alert("WebSocket 연결이 되어 있지 않습니다.");
@@ -168,7 +164,7 @@ export default function ClientPage({
       roomId,
       sender: userNickname,
       type: "STATUS",
-      productStatus: selectedStatus,
+      productStatus: status,
     };
 
     stompClient.send(
@@ -177,7 +173,8 @@ export default function ClientPage({
       JSON.stringify(message)
     );
     console.log("전송할 메시지 (JSON 직렬화):", JSON.stringify(message));
-    alert("상태가 변경되었습니다!");
+    console.log("업데트 상태",message.productStatus);
+    // alert("상태가 변경되었습니다!");
   };
 
 
@@ -537,6 +534,38 @@ export default function ClientPage({
               <FontAwesomeIcon icon={faImage} className="mr-2" />
               사진
             </DropdownMenuItem>
+            {chatRoom.writer === userNickname && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <DropdownMenuItem className="flex items-center">
+                    <FontAwesomeIcon icon={faArrowsRotate} className="mr-2" />
+                    상태 변경
+                  </DropdownMenuItem>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  className="w-48 bg-white border border-gray-300 shadow-lg rounded-md"
+                >
+                  <DropdownMenuItem
+                    onClick={() => handleStatusChangeAndSend("PURCHASED")}
+                    className="flex items-center"
+                  >
+                    판매완료
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => handleStatusChangeAndSend("AVAILABLE")}
+                    className="flex items-center"
+                  >
+                    판매중
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => handleStatusChangeAndSend("RESERVED")}
+                    className="flex items-center"
+                  >
+                    예약중
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
             
@@ -557,36 +586,7 @@ export default function ClientPage({
         </Button>
       </footer>
 
-      <div className="fixed bottom-20 left-0 right-0 bg-white p-4 border-t flex items-center justify-center">
-        <Button
-          variant="outline"
-          onClick={() => handleStatusChange("PURCHASED")}
-          className="rounded-md flex items-center h-15 px-3 mx-2"
-        >
-          판매완료
-        </Button>
-        <Button
-          variant="outline"
-          onClick={() => handleStatusChange("AVAILABLE")}
-          className="rounded-md flex items-center h-15 px-3 mx-2"
-        >
-          판매중
-        </Button>
-        <Button
-          variant="outline"
-          onClick={() => handleStatusChange("RESERVED")}
-          className="rounded-md flex items-center h-15 px-3 mx-2"
-        >
-          예약중
-        </Button>
-        <Button
-          variant="outline"
-          onClick={handleSendStatus}
-          className="rounded-md flex items-center h-15 px-3 mx-2"
-        >
-          상태 변경
-        </Button>
-      </div>
+      
     </div>
   );
 }

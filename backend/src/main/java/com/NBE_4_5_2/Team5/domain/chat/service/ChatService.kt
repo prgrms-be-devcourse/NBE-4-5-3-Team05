@@ -113,6 +113,7 @@ class ChatService(
             val writer = chatRoom.writer
             val sender = chatMessage.getSender()
             val postId = chatRoom.getPostId()
+            val prev_status = productPostService.getPost(postId!!).status
 
             // 메세지 전송자와 게시글 작성자가 다르면 권한x
             if(writer != sender){
@@ -124,7 +125,7 @@ class ChatService(
                 chatRoom.roomId,
                 chatMessage.getSender(),
                 receiver,
-                "",
+                "게시글 상태가 변경 되었습니다.\n${prev_status} -> ${chatMessage.getProductStatus()}",
                 "",
                 chatMessage.getUserCount(),
                 0.0f,
