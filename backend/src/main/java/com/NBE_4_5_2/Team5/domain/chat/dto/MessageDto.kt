@@ -1,5 +1,7 @@
 package com.NBE_4_5_2.Team5.domain.chat.dto
 
+import com.NBE_4_5_2.Team5.domain.chat.entity.ChatMessage
+
 data class MessageDto(
     var messageId: String,
     var sender: String,
@@ -10,4 +12,5 @@ data class MessageDto(
     var timestamp: String,
     var lastMessage: String,
     var lastTimestamp: String,
+    var type: ChatMessage.MessageType
 )
