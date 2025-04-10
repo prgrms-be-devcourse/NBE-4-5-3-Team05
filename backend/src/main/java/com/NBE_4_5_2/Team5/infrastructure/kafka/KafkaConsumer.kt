@@ -54,7 +54,7 @@ class KafkaConsumer(
                         emitter.send(
                             SseEmitter.event()
                                 .comment("ping")
-                                .data("ping")
+//                                .data("ping")
                         )
 
 
