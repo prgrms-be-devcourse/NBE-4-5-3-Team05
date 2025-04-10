@@ -21,7 +21,7 @@ data class LocationResponse(
         val viewCount: Int,
         val likedCount: Int,
         val status: ProductStatus,
-        val distance: Double
+        val distance: String
 ) {
 
     companion object {
@@ -42,7 +42,7 @@ data class LocationResponse(
                     viewCount = post.viewCount,
                     likedCount = 0,
                     status = post.status,
-                    distance = post.distance
+                    distance = formatDistance(post.distance)
             )
         }
 
@@ -69,8 +69,11 @@ data class LocationResponse(
                     viewCount = post.viewCount,
                     likedCount = likedCount,
                     status = post.status,
-                    distance = post.distance
+                    distance = formatDistance(post.distance)
             )
+        }
+        private fun formatDistance(distance: Double): String {
+            return "약 ${String.format("%.1f", distance)}km"
         }
     }
 }
