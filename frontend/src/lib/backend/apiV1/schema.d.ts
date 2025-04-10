@@ -568,6 +568,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/posts/location": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 위치 기반 게시글 조회
+         * @description 가까운 거리에 있는 게시글을 조회합니다.
+         */
+        get: operations["getLocation"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/payments/request": {
         parameters: {
             query?: never;
@@ -1124,15 +1144,15 @@ export interface components {
             sort?: string[];
         };
         PageableObject: {
-            /** Format: int32 */
-            pageSize?: number;
-            paged?: boolean;
-            unpaged?: boolean;
-            /** Format: int32 */
-            pageNumber?: number;
             /** Format: int64 */
             offset?: number;
             sort?: components["schemas"]["SortObject"];
+            unpaged?: boolean;
+            /** Format: int32 */
+            pageNumber?: number;
+            /** Format: int32 */
+            pageSize?: number;
+            paged?: boolean;
         };
         RsDataSliceCommentDto: {
             code: string;
@@ -1142,21 +1162,21 @@ export interface components {
         SliceCommentDto: {
             first?: boolean;
             last?: boolean;
-            pageable?: components["schemas"]["PageableObject"];
-            /** Format: int32 */
-            numberOfElements?: number;
             /** Format: int32 */
             size?: number;
             content?: components["schemas"]["CommentDto"][];
             /** Format: int32 */
             number?: number;
             sort?: components["schemas"]["SortObject"];
+            /** Format: int32 */
+            numberOfElements?: number;
+            pageable?: components["schemas"]["PageableObject"];
             empty?: boolean;
         };
         SortObject: {
-            sorted?: boolean;
-            unsorted?: boolean;
             empty?: boolean;
+            unsorted?: boolean;
+            sorted?: boolean;
         };
         RsDataListPreviewPostResponse: {
             code: string;
@@ -1167,6 +1187,46 @@ export interface components {
             code: string;
             message: string;
             data: components["schemas"]["ProductPostResponse"][];
+        };
+        LocationResponse: {
+            id: string;
+            productName: string;
+            /** Format: int32 */
+            productPrice: number;
+            title: string;
+            writerId: string;
+            writerName: string;
+            /** Format: float */
+            latitude: number;
+            /** Format: float */
+            longitude: number;
+            thumbNail: string;
+            /** Format: date-time */
+            createdAt: string;
+            imageUrls: string;
+            /** Format: int32 */
+            viewCount: number;
+            /** Format: int32 */
+            likedCount: number;
+            /** @enum {string} */
+            status: "RESERVED" | "AVAILABLE" | "PURCHASED";
+            distance: string;
+        };
+        PageDtoLocationResponse: {
+            items: components["schemas"]["LocationResponse"][];
+            /** Format: int32 */
+            totalPages: number;
+            /** Format: int32 */
+            totalItems: number;
+            /** Format: int32 */
+            currentPageNo: number;
+            /** Format: int32 */
+            pageSize: number;
+        };
+        RsDataPageDtoLocationResponse: {
+            code: string;
+            message: string;
+            data: components["schemas"]["PageDtoLocationResponse"];
         };
         RsDataBoolean: {
             code: string;
@@ -1251,21 +1311,21 @@ export interface components {
             data: components["schemas"]["Category"][];
         };
         PageUserDto: {
-            /** Format: int32 */
-            totalPages?: number;
             /** Format: int64 */
             totalElements?: number;
+            /** Format: int32 */
+            totalPages?: number;
             first?: boolean;
             last?: boolean;
-            pageable?: components["schemas"]["PageableObject"];
-            /** Format: int32 */
-            numberOfElements?: number;
             /** Format: int32 */
             size?: number;
             content?: components["schemas"]["UserDto"][];
             /** Format: int32 */
             number?: number;
             sort?: components["schemas"]["SortObject"];
+            /** Format: int32 */
+            numberOfElements?: number;
+            pageable?: components["schemas"]["PageableObject"];
             empty?: boolean;
         };
         RsDataPageUserDto: {
@@ -1274,21 +1334,21 @@ export interface components {
             data: components["schemas"]["PageUserDto"];
         };
         PageNoticeResBody: {
-            /** Format: int32 */
-            totalPages?: number;
             /** Format: int64 */
             totalElements?: number;
+            /** Format: int32 */
+            totalPages?: number;
             first?: boolean;
             last?: boolean;
-            pageable?: components["schemas"]["PageableObject"];
-            /** Format: int32 */
-            numberOfElements?: number;
             /** Format: int32 */
             size?: number;
             content?: components["schemas"]["NoticeResBody"][];
             /** Format: int32 */
             number?: number;
             sort?: components["schemas"]["SortObject"];
+            /** Format: int32 */
+            numberOfElements?: number;
+            pageable?: components["schemas"]["PageableObject"];
             empty?: boolean;
         };
         RsDataPageNoticeResBody: {
@@ -2512,6 +2572,40 @@ export interface operations {
                 };
                 content: {
                     "application/json;charset=UTF-8": components["schemas"]["RsDataPageDtoPreviewPostResponse"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataVoid"];
+                };
+            };
+        };
+    };
+    getLocation: {
+        parameters: {
+            query?: {
+                page?: number;
+                pageSize?: number;
+                sort?: string;
+                radius?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataPageDtoLocationResponse"];
                 };
             };
             /** @description Internal Server Error */
