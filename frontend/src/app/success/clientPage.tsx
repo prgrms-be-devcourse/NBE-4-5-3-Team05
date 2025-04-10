@@ -15,18 +15,19 @@ export default function ClientPage({
 }) {
   const router = useRouter();
   const requestPayment = async () => {
-    let baseUrl = `${process.env.NEXT_PUBLIC_PROTOCOL}://${process.env.NEXT_PUBLIC_BACKEND_HOST}`;
-    if (`${process.env.NEXT_PUBLIC_PROTOCOL}` === "https") {
-      baseUrl += `/api/payments`;
-    } else {
-      baseUrl += `:${process.env.NEXT_PUBLIC_BACKEND_PORT}/api/payments`;
-    }
-    const response = await fetch(baseUrl, {
+    const response = await client.GET("/api/payments/request", {
+      params: {
+        query: {
+          amount,
+          orderId,
+          paymentKey,
+        },
+      },
       credentials: "include",
     });
-    const json = await response.json();
-
-    console.log(json);
+    if(response.error){
+      console.log(response.error);
+    }
   };
   useEffect(() => {
     requestPayment();

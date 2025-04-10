@@ -116,9 +116,14 @@ export default function ClientLayout({
 
               {/* 일반 유저 */}
               {!isAdmin && (
-                <Link href="/user/me">
-                  <Button>내 정보</Button>
-                </Link>
+                <>
+                  <Link href="/payments">
+                    {loginMemberContextValue.loginMember.cash}원
+                  </Link>
+                  <Link href="/user/me">
+                    <Button>내 정보</Button>
+                  </Link>
+                </>
               )}
 
               {/* 로그아웃 버튼 (공통) */}
