@@ -1,5 +1,6 @@
 package com.NBE_4_5_2.Team5.domain.chat.entity
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import jakarta.persistence.ElementCollection
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
@@ -10,14 +11,17 @@ import java.util.*
 @Entity
 class ChatMessage (
     private var _type: MessageType = MessageType.TALK,
-    private var roomId: String="",     // todo: JPA가 _roomId를 찾지 못하여, roomId로 수정
+    private var _roomId: String="",
     private var _sender: String="",
     private val _receiver: String="",
     private var _message: String="",
-    private val _image: String="",
+    @JsonProperty("image")
+    private var _image: String="",
     private var _userCount: Long=0,
-    private val _latitude: Float=0.0f,
-    private val _longitude: Float=0.0f
+    @JsonProperty("latitude")
+    private var _latitude: Float=0.0f,
+    @JsonProperty("longitude")
+    private var _longitude: Float=0.0f
 ) {
     @Id
     private val _messageId = UUID.randomUUID().toString()
@@ -36,10 +40,10 @@ class ChatMessage (
         _type=type
     }
     fun getRoomId(): String {
-        return roomId
+        return _roomId
     }
     fun setRoomId(value: String) {
-        roomId=value
+        _roomId=value
     }
     fun getSender(): String {
         return _sender
@@ -98,5 +102,8 @@ class ChatMessage (
 
     fun getDeleteStatus(username: String?): Boolean? {
         return deleteStatus[username]
+    }
+    override fun toString(): String {
+        return "ChatMessage(messageId='$_messageId', type='$_type', roomId='$_roomId', sender='$_sender', receiver='$_receiver', message='$_message', image='$_image', userCount=$_userCount, latitude=$_latitude, longitude=$_longitude, timestamp='$_timestamp')"
     }
 }

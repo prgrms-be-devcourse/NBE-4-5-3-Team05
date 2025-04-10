@@ -1,29 +1,22 @@
-package com.NBE_4_5_2.Team5.global.config;
+package util
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
+import org.springframework.beans.factory.annotation.Autowired
+import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper
+import java.io.IOException
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
+class Util {
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.transaction.Transactional;
+    @Autowired
+    lateinit var objectMapper: ObjectMapper
 
-public class Util {
-
-	@Autowired
-	private ObjectMapper objectMapper;
-
-	public Map<String, Object> paymentRequestResponse(String uuid, String paymentKey, Integer totalAmount) throws
-		IOException {
-		String bodyString = """
+    @Throws(IOException::class)
+    fun paymentRequestResponse(uuid: String?, paymentKey: String?, totalAmount: Int?): Map<String?, Any?> {
+        val bodyString = """
 			{
 			  "mId": "tosspayments",
 			  "lastTransactionKey": "9C62B18EEF0DE3EB7F4422EB6D14BC6E",
-			  "paymentKey": "%s",
-			  "orderId": "%s",
+			  "paymentKey": "$paymentKey",
+			  "orderId": "$uuid",
 			  "orderName": "토스 티셔츠 외 2건",
 			  "taxExemptionAmount": 0,
 			  "status": "DONE",
@@ -71,7 +64,7 @@ public class Util {
 			    "url": "https://api.tosspayments.com/v1/payments/5EnNZRJGvaBX7zk2yd8ydw26XvwXkLrx9POLqKQjmAw4b0e1/checkout"
 			  },
 			  "currency": "KRW",
-			  "totalAmount": %s,
+			  "totalAmount": $totalAmount},
 			  "balanceAmount": 1000,
 			  "suppliedAmount": 909,
 			  "vat": 91,
@@ -80,29 +73,29 @@ public class Util {
 			  "method": "카드",
 			  "version": "2022-11-16"
 			}
-			""".formatted(paymentKey, uuid, totalAmount);
-		return objectMapper.convertValue(objectMapper.readTree(bodyString), Map.class);
-	}
+			
+			""".trimIndent()
+        return objectMapper.convertValue(objectMapper.readTree(bodyString), Map::class.java) as Map<String?, Any?>
+    }
 
-	@PersistenceContext
-	private EntityManager entityManager;
+//    @PersistenceContext
+//    lateinit var entityManager: EntityManager
 
-	@Transactional
-	public void truncateAllTables() {
-		// 외래키 제약조건 비활성화
-		entityManager.createNativeQuery("SET REFERENTIAL_INTEGRITY FALSE").executeUpdate();
-
-		// PUBLIC 스키마에 있는 모든 테이블 이름 조회 (H2의 기본 스키마는 PUBLIC)
-		List<String> tableNames = entityManager.createNativeQuery(
-				"SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA='PUBLIC'")
-			.getResultList();
-
-		// 각 테이블을 TRUNCATE
-		for (String tableName : tableNames) {
-			entityManager.createNativeQuery("TRUNCATE TABLE " + tableName).executeUpdate();
-		}
-
-		// 외래키 제약조건 재활성화
-		entityManager.createNativeQuery("SET REFERENTIAL_INTEGRITY TRUE").executeUpdate();
-	}
+//    fun truncateAllTables() {
+//        // 외래키 제약조건 비활성화
+//        entityManager.createNativeQuery("SET REFERENTIAL_INTEGRITY FALSE").executeUpdate()
+//
+//        // PUBLIC 스키마에 있는 모든 테이블 이름 조회 (H2의 기본 스키마는 PUBLIC)
+//        val tableNames = entityManager
+//            .createNativeQuery("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA='PUBLIC'")
+//            .resultList as List<String>
+//
+//        // 각 테이블을 TRUNCATE
+//        tableNames.forEach { tableName ->
+//            entityManager.createNativeQuery("TRUNCATE TABLE $tableName").executeUpdate()
+//        }
+//
+//        // 외래키 제약조건 재활성화
+//        entityManager.createNativeQuery("SET REFERENTIAL_INTEGRITY TRUE").executeUpdate()
+//    }
 }

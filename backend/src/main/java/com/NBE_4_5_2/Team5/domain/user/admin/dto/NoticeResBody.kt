@@ -11,7 +11,7 @@ data class NoticeResBody(
 	val createdAt: LocalDateTime
 ) {
     companion object {
-        @JvmStatic
+        
 		fun of(saved: NoticePost): NoticeResBody {
             return NoticeResBody(
                 saved.id, saved.title, saved.content,

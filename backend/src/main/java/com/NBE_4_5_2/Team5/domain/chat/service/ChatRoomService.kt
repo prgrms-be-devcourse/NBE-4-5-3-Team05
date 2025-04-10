@@ -42,7 +42,7 @@ class ChatRoomService {
     }
 
     // roomId로 조회
-    fun findByRoomId(roomId: String): ChatRoom {
+    fun findBy_roomId(roomId: String): ChatRoom {
         val chatRoom = hashOpsChatRoom[CHAT_ROOMS, roomId]
             ?: throw ServiceException("404", "존재하지 않는 채팅방")
         return chatRoom
@@ -50,7 +50,7 @@ class ChatRoomService {
 
     // 채팅방 반환(검증 포함)
     fun getRoomByRoomId(roomId: String, username: String): ChatRoom {
-        val chatRoom = findByRoomId(roomId)
+        val chatRoom = findBy_roomId(roomId)
         if (!canAccess(roomId, username)) {
             throw ForbiddenAccessException("405", "접근 권한 없는 채팅방")
         }
@@ -90,7 +90,7 @@ class ChatRoomService {
 
     // 접근 검증
     fun canAccess(roomId: String, username: String?): Boolean {
-        val chatRoom = findByRoomId(roomId)
+        val chatRoom = findBy_roomId(roomId)
         if (chatRoom.roomId == roomId) {
             return chatRoom.getSender() == username || chatRoom.getReceiver() == username // 접근 허용
         }
@@ -99,7 +99,7 @@ class ChatRoomService {
 
     // 논리적 삭제 여부 검증
     fun getDeleteStatus(roomId: String, username: String): Boolean {
-        val chatRoom = findByRoomId(roomId)
+        val chatRoom = findBy_roomId(roomId)
         return chatRoom.getDeleteStatus(username)
     }
 
@@ -128,7 +128,7 @@ class ChatRoomService {
             throw ForbiddenAccessException("405", "접근 권한 없는 채팅방")
         }
 
-        val messages = chatMessageRepository.findByRoomId(roomId)
+        val messages = chatMessageRepository.findBy_roomId(roomId)
             .stream() // 삭제되지 않은 메세지만
             .filter { message: ChatMessage -> !message.getDeleteStatus(username)!! }
             .collect(Collectors.toList())
@@ -137,7 +137,7 @@ class ChatRoomService {
     }
 
     fun deleteMessage(roomId: String, username: String) {
-        val messages = chatMessageRepository.findByRoomId(roomId)
+        val messages = chatMessageRepository.findBy_roomId(roomId)
         // 삭제
         messages.forEach(Consumer { message: ChatMessage ->
             message.setDeleteStatus(username, true)
@@ -150,7 +150,7 @@ class ChatRoomService {
             throw ForbiddenAccessException("405", "접근 권한 없는 채팅방")
         }
 
-        val chatRoom = findByRoomId(roomId)
+        val chatRoom = findBy_roomId(roomId)
         chatRoom.setDeleteStatus(username, true) // 논리적 삭제
         hashOpsChatRoom.put(CHAT_ROOMS, roomId, chatRoom) // redis에 업데이트
         deleteMessage(roomId, username) // 메세지 삭제
@@ -163,7 +163,7 @@ class ChatRoomService {
 
     // 양측에서 삭제됐는지 검증
     fun isAllDelete(roomId: String): Boolean {
-        val chatRoom = findByRoomId(roomId)
+        val chatRoom = findBy_roomId(roomId)
         val user1 = chatRoom.getSender()
         val user2 = chatRoom.getReceiver()
 
@@ -203,7 +203,7 @@ class ChatRoomService {
 
     // 현재 방에 참가중인 사용자 조회
     fun findOther(roomId: String, username: String?): String {
-        val chatRoom = findByRoomId(roomId)
+        val chatRoom = findBy_roomId(roomId)
         if (username == chatRoom.getSender()) {
             return chatRoom.getReceiver()
         } else if (username == chatRoom.getReceiver()) {

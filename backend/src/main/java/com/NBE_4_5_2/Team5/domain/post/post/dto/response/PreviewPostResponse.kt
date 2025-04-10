@@ -24,7 +24,7 @@ data class PreviewPostResponse(
 ) {
 
     companion object {
-        @JvmStatic
+        
         fun fromEntity(post: ProductPost): PreviewPostResponse {
             return PreviewPostResponse(
                 id = post.id,
@@ -44,7 +44,7 @@ data class PreviewPostResponse(
             )
         }
 
-        @JvmStatic
+        
         fun fromEntityWithLikeCount(post: ProductPost, likedCount: Int): PreviewPostResponse {
             val thumbNail = post.imageUrls
                 .takeIf { it.isNotBlank() }

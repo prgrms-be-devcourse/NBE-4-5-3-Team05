@@ -5,9 +5,9 @@ import com.NBE_4_5_2.Team5.domain.user.user.dto.UserDto
 import com.NBE_4_5_2.Team5.domain.user.user.dto.UserUpdateRequest
 import com.NBE_4_5_2.Team5.domain.user.user.service.UserAuthService
 import com.NBE_4_5_2.Team5.domain.user.user.service.UserService
-import com.NBE_4_5_2.Team5.global.Rq
+import com.NBE_4_5_2.Team5.global.rq.Rq
 import com.NBE_4_5_2.Team5.global.dto.Empty
-import com.NBE_4_5_2.Team5.global.dto.RsData
+import com.NBE_4_5_2.Team5.global.response.RsData
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -37,13 +37,13 @@ class UserController(
     }
 
 
-    @JvmRecord
+    
     data class LoginUserReqBody(
         @field:NotBlank(message = "아이디는 필수 입력값입니다.") val username: String,
         @field:NotBlank(message = "비밀번호는 필수 입력값입니다.") val password: String
     )
 
-    @JvmRecord
+    
     data class LoginUserResBody(val accessToken: String, val refreshToken: String, val item: UserDto)
 
     @Operation(summary = "로그인", description = "사용자가 로그인합니다.")
@@ -88,7 +88,7 @@ class UserController(
     }
 
 
-    @JvmRecord
+    
     data class RefreshUserReqBody(
         @field:NotBlank(message = "refreshToken을 입력해주세요.") val refreshToken: String
     )
@@ -132,7 +132,7 @@ class UserController(
     }
 
 
-    @JvmRecord
+    
     data class EmailUserReqBody(
         @field:Email(message = "올바른 이메일 형식이 아닙니다.") val email: String
     )
@@ -146,7 +146,7 @@ class UserController(
         return RsData("200-1", "이메일이 발송되었습니다.")
     }
 
-    @JvmRecord
+    
     data class VerifyCodeUserReqBody(val email: String, val code: String)
 
     @Operation(summary = "이메일 인증 코드 검증", description = "사용자가 입력한 인증 코드를 검증합니다.")
