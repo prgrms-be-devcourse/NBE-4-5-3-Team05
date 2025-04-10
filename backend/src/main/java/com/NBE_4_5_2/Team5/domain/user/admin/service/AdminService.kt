@@ -46,6 +46,22 @@ class AdminService(
         private const val BAN_DURATION_WEIGHT = 7
     }
 
+    fun signUpSuperAdmin(username: String, password: String, nickname: String, email: String): User {
+        return User(
+            username,
+            passwordEncoder.encode(password),
+            email,
+            nickname,
+            "addr",
+            "url",
+            Role.SUPER_ADMIN
+        )
+            .let {
+                userService.deleteAuthenticationCode(it.email)
+                userRepository.save(it)
+            }
+    }
+
 
     fun signUpAdmin(username: String, password: String, nickname: String, email: String): User {
         return User(
@@ -109,6 +125,8 @@ class AdminService(
         get() = userService.userIdentity
 
     private fun isAdmin(admin: User) {
+        if(admin.role == Role.SUPER_ADMIN) return
+
         if (admin.role != Role.ADMIN) {
             throw WrongRoleException(HttpStatus.BAD_REQUEST.toString(), "관리자만 작성할 수 있는 글입니다.")
         }

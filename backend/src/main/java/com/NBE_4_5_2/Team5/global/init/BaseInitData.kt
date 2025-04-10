@@ -1,6 +1,5 @@
 package com.NBE_4_5_2.Team5.global.init
 
-import com.NBE_4_5_2.Team5.domain.notification.entity.Notification
 import com.NBE_4_5_2.Team5.domain.post.category.entity.Category
 import com.NBE_4_5_2.Team5.domain.post.category.repository.CategoryRepository
 import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductCategory
@@ -19,7 +18,6 @@ import com.NBE_4_5_2.Team5.domain.user.user.service.UserService
 import com.NBE_4_5_2.Team5.domain.user.user.service.email.EmailService
 import com.NBE_4_5_2.Team5.global.aspect.product.ProductMetaDataNames
 import com.NBE_4_5_2.Team5.infrastructure.kafka.KafkaConsumer
-import com.NBE_4_5_2.Team5.infrastructure.kafka.KafkaNotificationProducerService
 import jakarta.transaction.Transactional
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -29,8 +27,6 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Lazy
 import org.springframework.context.annotation.Profile
 import org.springframework.core.annotation.Order
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter
-import java.io.IOException
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
@@ -86,19 +82,20 @@ class BaseInitData(
     @Order(6)
     fun applicationRunner6(): ApplicationRunner =
         ApplicationRunner { _ -> self.metadata() }
-    fun metadata(){
-        if(productMetadataRepository.findByName(ProductMetaDataNames.PRODUCT_TOTAL_COUNT)!=null)
-        productMetadataRepository.save(ProductMetadata(ProductMetaDataNames.PRODUCT_TOTAL_COUNT, "0"))
+
+    fun metadata() {
+        if (productMetadataRepository.findByName(ProductMetaDataNames.PRODUCT_TOTAL_COUNT) != null)
+            productMetadataRepository.save(ProductMetadata(ProductMetaDataNames.PRODUCT_TOTAL_COUNT, "0"))
     }
 
     fun noticePing() {
         val executor = Executors.newSingleThreadScheduledExecutor()
 
         executor.scheduleAtFixedRate({
-            try{
+            try {
                 kafkaConsumer.ping()
 
-            }catch (e:Throwable){
+            } catch (e: Throwable) {
 
             }
 
@@ -113,6 +110,7 @@ class BaseInitData(
         emailService.saveAuthenticationCode("user2@gmail.com", "verified")
         emailService.saveAuthenticationCode("user3@gmail.com", "verified")
         emailService.saveAuthenticationCode("user4@gmail.com", "verified")
+        emailService.saveAuthenticationCode("admin1@gmail.com", "verified")
         emailService.saveAuthenticationCode("admin2@gmail.com", "verified")
 
         val baseUrl =
@@ -126,6 +124,7 @@ class BaseInitData(
         userService.createUser("user2", "user21234@", "user2@gmail.com", "user2", "서울시 강서구", imageUrl)
         userService.createUser("user3", "user31234@", "user3@gmail.com", "user3", "서울시 광진구", imageUrl)
 
+        adminService.signUpSuperAdmin("admin1", "password1", "admin1", "admin1@gmail.com")
         adminService.signUpAdmin("admin2", "password2", "admin2", "admin2@gmail.com")
         adminService.signUpAdmin("user4", "user41234@", "admin4", "user4@gmail.com")
     }
