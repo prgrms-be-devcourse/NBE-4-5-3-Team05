@@ -247,11 +247,8 @@ class ProductPostService(
 
         // 거리계산 필터링
         val filterPosts = posts.filter { post ->
-            println("게시글 번호: ${post.id}")
-            println("게시글 위치!!!!!: lat = ${post.latitude}, lng = ${post.longitude}")
             val distance = haversine(lat,lng,post.latitude,post.longitude)
             post.distance = distance
-            println("거리!!!!!: $distance")
             distance <= radius
         }
 
