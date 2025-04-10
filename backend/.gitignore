@@ -67,7 +67,6 @@ Thumbs.db
 ehthumbs.db
 
 ### 🐳 Docker 관련 ###
-docker-compose.yml
 Dockerfile
 .dockerignore
 
@@ -79,6 +78,7 @@ gradle
 # Generated OpenAPI Files
 apiV1.json
 frontend/src/lib/backend/api/schema.d.ts
+apiV1.json
 /application.pid
 src/main/resources/application-mysql.yml
 generated/

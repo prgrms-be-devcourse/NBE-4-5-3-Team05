@@ -1,5 +1,6 @@
 package com.NBE_4_5_2.Team5.domain.payment.service
 
+import com.NBE_4_5_2.Team5.domain.notification.entity.Notification
 import com.NBE_4_5_2.Team5.domain.payment.dto.PaymentDto
 import com.NBE_4_5_2.Team5.domain.payment.dto.PaymentMetaData
 import com.NBE_4_5_2.Team5.domain.payment.entity.Payment
@@ -12,8 +13,8 @@ import com.NBE_4_5_2.Team5.domain.user.user.service.UserService
 import com.NBE_4_5_2.Team5.global.exception.payment.PaymentChargeException
 import com.NBE_4_5_2.Team5.global.exception.payment.PaymentNotFoundException
 import com.NBE_4_5_2.Team5.global.exception.post.product.ProductPostNotFoundException
+import com.NBE_4_5_2.Team5.infrastructure.kafka.KafkaNotificationProducerService
 import jakarta.validation.constraints.NotNull
-import lombok.RequiredArgsConstructor
 import lombok.extern.slf4j.Slf4j
 import org.hibernate.query.sqm.tree.SqmNode.log
 import org.springframework.stereotype.Service
@@ -29,6 +30,7 @@ class PaymentService(
     private val userService: UserService,
     private val userRepository: UserRepository,
     private val productPostRepository: ProductPostRepository,
+    private val kafkaNotificationProducerService: KafkaNotificationProducerService,
 ) {
     private val loggedInUser: User
         get() = userService.userIdentity
@@ -67,12 +69,16 @@ class PaymentService(
             -1 * product.productPrice,
             PaymentStatus.DONE
         )
+            .apply{
+                updatePaymentKey(productId)
+            }
 
-        purchasedPayment.updatePaymentKey(productId)
+        kafkaNotificationProducerService.sendMessage(
+            Notification(product.writer.id, false, "내 상품 ${product.productName}이 구매되었습니다.")
+        )
 
-        val saved = paymentRepository.save(purchasedPayment)
-
-        return PaymentDto.of(saved)
+        return paymentRepository.save(purchasedPayment)
+            .let { PaymentDto.of(it) }
     }
 
     fun requestCharge(id: @NotNull String, paymentKey:  String, amount: @NotNull Int) {

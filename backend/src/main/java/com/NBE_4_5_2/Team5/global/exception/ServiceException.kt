@@ -1,7 +1,7 @@
 package com.NBE_4_5_2.Team5.global.exception
 
 import com.NBE_4_5_2.Team5.global.dto.Empty
-import com.NBE_4_5_2.Team5.global.dto.RsData
+import com.NBE_4_5_2.Team5.global.response.RsData
 
 open class ServiceException(
     private val _code: String,

@@ -1,5 +1,6 @@
 package com.NBE_4_5_2.Team5.domain.post.comment.service
 
+import com.NBE_4_5_2.Team5.domain.notification.entity.Notification
 import com.NBE_4_5_2.Team5.domain.post.comment.dto.CommentDto
 import com.NBE_4_5_2.Team5.domain.post.comment.entity.Comment
 import com.NBE_4_5_2.Team5.domain.post.comment.repository.CommentRepository
@@ -7,6 +8,7 @@ import com.NBE_4_5_2.Team5.domain.post.post.repository.ProductPostRepository
 import com.NBE_4_5_2.Team5.domain.user.user.entity.User
 import com.NBE_4_5_2.Team5.domain.user.user.service.UserService
 import com.NBE_4_5_2.Team5.global.exception.post.product.ProductPostNotFoundException
+import com.NBE_4_5_2.Team5.infrastructure.kafka.KafkaNotificationProducerService
 import jakarta.persistence.EntityNotFoundException
 import lombok.RequiredArgsConstructor
 import org.springframework.data.domain.Pageable
@@ -20,6 +22,7 @@ class CommentService(
     private val userService: UserService,
     private val productPostRepository: ProductPostRepository,
     private val commentRepository: CommentRepository,
+    private val notificationProducerService: KafkaNotificationProducerService
 ) {
 
     @Transactional
@@ -32,6 +35,14 @@ class CommentService(
                 )
             }
             .let {
+                notificationProducerService.sendMessage(
+                    Notification(
+                        it.writer.id,
+                        false,
+                        "글 ${it.productName}에 새 댓글이 달렸습니다."
+
+                    )
+                )
                 Comment(
                     content,
                     it,

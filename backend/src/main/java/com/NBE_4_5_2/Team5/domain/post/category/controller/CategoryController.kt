@@ -2,7 +2,7 @@ package com.NBE_4_5_2.Team5.domain.post.category.controller
 
 import com.NBE_4_5_2.Team5.domain.post.category.entity.Category
 import com.NBE_4_5_2.Team5.domain.post.category.service.CategoryService
-import com.NBE_4_5_2.Team5.global.dto.RsData
+import com.NBE_4_5_2.Team5.global.response.RsData
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import lombok.RequiredArgsConstructor
