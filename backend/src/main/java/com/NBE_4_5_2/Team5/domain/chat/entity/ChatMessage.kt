@@ -25,17 +25,18 @@ class ChatMessage (
     private var _message: String="",
     @Column(name = "image")
     @JsonProperty("image")
-    private val _image: String="",
+    private var _image: String="",
     @Column(name = "user_count")
     private var _userCount: Long=0,
     @Column(name = "latitude")
     @JsonProperty("latitude")
-    private val _latitude: Float=0.0f,
+    private var _latitude: Float=0.0f,
     @Column(name = "longitude")
     @JsonProperty("longitude")
     private val _longitude: Float=0.0f,
     @Column(name = "productStatus")
     private var _productStatus: ProductStatus = ProductStatus.AVAILABLE         // todo: 일단 초기값 설정인데 이게 맞는지 모르겠음
+
 ) {
     @Id
     @Column(name = "message_id")
