@@ -8,8 +8,9 @@ import client from "@/lib/client";
 import { LoginMemberContext } from "@/app/stores/auth/loginMemberStore";
 import Comments from "./_pages/comments";
 import { Button } from "@/components/ui/button";
-import { faComment } from "@fortawesome/free-solid-svg-icons";
+import { faComment, faMapMarkerAlt } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import TradeLocationModal from "@/components/TradeLocationModal"; // 경로는 실제 파일 위치에 맞게 조정
 
 type ProductPostResponse = components["schemas"]["ProductPostResponse"];
 type PreviewPostResponse = components["schemas"]["PreviewPostResponse"];
@@ -18,7 +19,6 @@ type StatusType = "AVAILABLE" | "RESERVED" | "PURCHASED";
 export default function PostDetailPage() {
   const { postId } = useParams<{ postId: string }>();
   const router = useRouter();
-  // LoginMemberContext를 useContext로 직접 읽어옵니다.
   const { isLogin, loginMember } = useContext(LoginMemberContext);
 
   const [post, setPost] = useState<ProductPostResponse | null>(null);
@@ -28,12 +28,13 @@ export default function PostDetailPage() {
   const [liked, setLiked] = useState<boolean>(false);
   const [purchased, setPurchased] = useState<boolean>(false);
   const [purchaseLoading, setPurchasedLoading] = useState<boolean>(false);
-
-  // 상태 변경 로딩 여부
   const [statusLoading, setStatusLoading] = useState<boolean>(false);
   const [comments, setComments] = useState<
     components["schemas"]["CommentDto"][]
   >([]);
+
+  // 거래위치 모달 열림 상태
+  const [tradeModalOpen, setTradeModalOpen] = useState<boolean>(false);
 
   const statusLabels: Record<StatusType, string> = {
     AVAILABLE: "판매중",
@@ -138,7 +139,6 @@ export default function PostDetailPage() {
 
   // 구매 여부 확인 (로그인 정보가 있을 때만 확인)
   const checkPurchased = async () => {
-    // 로그인 정보가 없으면 바로 return
     if (!loginMember.id) return;
     try {
       const result = await client.GET("/api/payments", {
@@ -254,11 +254,9 @@ export default function PostDetailPage() {
     }
   };
 
-  // 수정하기 버튼 핸들러 (작성자와 로그인된 회원의 id 비교)
+  // 수정하기 버튼 핸들러
   const handleEdit = () => {
     if (!post) return;
-    console.log("로그인된 회원:", loginMember);
-    console.log("게시글 작성자:", post.writerId);
     if (post.writerId !== loginMember.id) {
       alert("작성자만 수정할 수 있습니다.");
       return;
@@ -269,7 +267,6 @@ export default function PostDetailPage() {
   // 게시글 삭제 핸들러
   const handleDelete = async () => {
     if (!post) return;
-    // 작성자 확인
     if (post.writerId !== loginMember.id) {
       alert("작성자만 삭제할 수 있습니다.");
       return;
@@ -297,41 +294,7 @@ export default function PostDetailPage() {
   if (error) return <div className="p-4 text-red-500">{error}</div>;
   if (!post) return <div className="p-4">게시글 정보를 찾을 수 없습니다.</div>;
 
-  const handleCreateChatRoom = async () => {
-    const isLoggedIn = await checkLoginStatus();
-    if (!isLoggedIn) {
-      alert("먼저 로그인을 해주세요.");
-      router.push("/user/login");
-      return;
-    }
-
-    try {
-      const createResponse = await client.POST("/api/chat/room", {
-        params: {
-          query: {
-            postId: postId, // 현재 게시글 ID 전송
-          },
-        },
-        credentials: "include",
-      });
-
-      if (createResponse.error) {
-        console.error("채팅방 생성 오류:", createResponse.error.message);
-        alert("채팅방 생성에 실패했습니다.");
-        return;
-      }
-
-      // 채팅방 생성 성공
-      const chatRoomId = createResponse.data.data.roomId; // 생성된 채팅방 ID
-      console.log("채팅방 생성 성공, ID:", chatRoomId);
-      router.push(`/chat/${chatRoomId}`); // 생성된 채팅방으로 이동
-    } catch (error) {
-      console.error("채팅방 생성 중 오류 발생:", error);
-      alert("채팅방 생성 중 오류가 발생했습니다.");
-    }
-  };
-
-  // 이미지 URL들을 소문자와 trim을 적용해 유효한 값만 필터링
+  // 이미지 URL 처리 (소문자, trim 적용)
   const images = post.imageUrls
     ? post.imageUrls
         .split(",")
@@ -339,8 +302,11 @@ export default function PostDetailPage() {
         .filter((url) => url && url.toLowerCase() !== "null")
     : [];
 
+  // 거래 위치 정보 : post.location 이 있다면 사용하고, 없을 경우 "등록된 주소 없음"으로 처리
+  const tradeLocation = (post as any).location || "등록된 주소 없음";
+
   return (
-    <div className="p-4  w-full">
+    <div className="p-4 w-full">
       <div className="bg-gray-800 text-white p-4 rounded mb-4">
         <h1 className="text-2xl font-bold">길게 볼 장터</h1>
       </div>
@@ -368,16 +334,60 @@ export default function PostDetailPage() {
           <ul className="space-y-1">
             <li>작성자 닉네임: {post.writerName}</li>
           </ul>
-          <div className="mt-4">
+          <div className="mt-4 flex flex-col gap-2">
             {isLogin && (
-              <Button
-                variant="outline"
-                onClick={handleCreateChatRoom}
-                className="rounded-full bg-yellow-400 text-black py-2 px-4 border border-black-700 hover:bg-yellow-300"
-              >
-                <FontAwesomeIcon icon={faComment} className="mr-2" />
-                채팅
-              </Button>
+              <>
+                <Button
+                  variant="outline"
+                  onClick={async () => {
+                    // 채팅방 생성 처리
+                    const isLoggedIn = await checkLoginStatus();
+                    if (!isLoggedIn) {
+                      alert("먼저 로그인을 해주세요.");
+                      router.push("/user/login");
+                      return;
+                    }
+                    try {
+                      const createResponse = await client.POST(
+                        "/api/chat/room",
+                        {
+                          params: {
+                            query: {
+                              postId: postId,
+                            },
+                          },
+                          credentials: "include",
+                        }
+                      );
+                      if (createResponse.error) {
+                        console.error(
+                          "채팅방 생성 오류:",
+                          createResponse.error.message
+                        );
+                        alert("채팅방 생성에 실패했습니다.");
+                        return;
+                      }
+                      const chatRoomId = createResponse.data.data.roomId;
+                      router.push(`/chat/${chatRoomId}`);
+                    } catch (error) {
+                      console.error("채팅방 생성 중 오류 발생:", error);
+                      alert("채팅방 생성 중 오류가 발생했습니다.");
+                    }
+                  }}
+                  className="rounded-full bg-yellow-400 text-black py-2 px-4 border border-black-700 hover:bg-yellow-300"
+                >
+                  <FontAwesomeIcon icon={faComment} className="mr-2" />
+                  채팅
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setTradeModalOpen(true)}
+                  className="rounded-full bg-blue-200 text-blue-900 py-2 px-4 hover:bg-blue-300"
+                >
+                  <FontAwesomeIcon icon={faMapMarkerAlt} className="mr-2" />
+                  거래위치 보기
+                </Button>
+              </>
             )}
           </div>
         </div>
@@ -408,7 +418,13 @@ export default function PostDetailPage() {
             <strong>가격:</strong> {post.productPrice}원
           </div>
           <div>
-            <strong>위치:</strong> 위도 {post.latitude}, 경도 {post.longitude}
+            <strong>거래 위치:</strong> {tradeLocation}
+          </div>
+          <div>
+            <strong>위도:</strong> {post.latitude}
+          </div>
+          <div>
+            <strong>경도:</strong> {post.longitude}
           </div>
         </div>
         <hr className="my-2" />
@@ -439,7 +455,6 @@ export default function PostDetailPage() {
       {/* 상태 변경 & 액션 버튼 영역 */}
       <div className="bg-gray-50 p-6 rounded-lg shadow mb-10">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-          {/* 왼쪽: 상품 상태 변경 */}
           {post.writerId === loginMember.id && (
             <div className="w-full md:w-auto">
               <h3 className="text-lg font-semibold mb-2">상품 상태 변경</h3>
@@ -483,7 +498,6 @@ export default function PostDetailPage() {
             </div>
           )}
 
-          {/* 오른쪽: 액션 버튼들 */}
           {isLogin && (
             <div className="flex flex-wrap gap-3 justify-end w-full md:w-auto">
               <Button
@@ -496,13 +510,13 @@ export default function PostDetailPage() {
               <Button
                 disabled={purchaseLoading || purchased}
                 onClick={handlePurchase}
-                className="px-4 py-2  bg-gray-700 text-white rounded"
+                className="px-4 py-2 bg-gray-700 text-white rounded"
               >
                 {purchased
                   ? "구매 완료"
                   : purchaseLoading
-                    ? "처리 중..."
-                    : "구매하기"}
+                  ? "처리 중..."
+                  : "구매하기"}
               </Button>
               {loginMember.id === post.writerId && (
                 <>
@@ -525,7 +539,6 @@ export default function PostDetailPage() {
         </div>
       </div>
 
-      {/* 댓글 섹션 (명확하게 구분) */}
       {isLogin && (
         <div className="w-full border-t pt-6 mt-10">
           <h3 className="text-xl font-bold mb-4">댓글</h3>
@@ -536,6 +549,17 @@ export default function PostDetailPage() {
             loginMember={loginMember}
           />
         </div>
+      )}
+
+      {/* 거래 위치 모달 (열림 상태에 따라 렌더링) */}
+      {tradeModalOpen && (
+        <TradeLocationModal
+          lat={post.latitude}
+          lng={post.longitude}
+          zoom={16} // 필요에 따라 줌 레벨 조정
+          address={(post as any).location || "등록된 주소 없음"}
+          onClose={() => setTradeModalOpen(false)}
+        />
       )}
     </div>
   );

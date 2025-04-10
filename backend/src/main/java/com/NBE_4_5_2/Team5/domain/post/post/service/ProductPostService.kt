@@ -45,7 +45,8 @@ class ProductPostService(
             body.content,
             imageUrlStr,
             body.latitude,
-            body.longitude
+            body.longitude,
+            body.location
         )
 
         // 상품글에 카테고리 체크 및 추가
@@ -154,6 +155,7 @@ class ProductPostService(
         body.latitude?.let { post.latitude = it }
         body.longitude?.let { post.longitude = it }
         body.status?.let { post.status = it }
+        body.location?.let { post.location = it }
 
         body.categoryIds?.let {
             val categories = categoryRepository.findAllById(it)
