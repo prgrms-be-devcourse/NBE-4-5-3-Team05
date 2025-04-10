@@ -337,48 +337,51 @@ export default function PostDetailPage() {
           <div className="mt-4 flex flex-col gap-2">
             {isLogin && (
               <>
-                <Button
-                  variant="outline"
-                  onClick={async () => {
-                    // 채팅방 생성 처리
-                    const isLoggedIn = await checkLoginStatus();
-                    if (!isLoggedIn) {
-                      alert("먼저 로그인을 해주세요.");
-                      router.push("/user/login");
-                      return;
-                    }
-                    try {
-                      const createResponse = await client.POST(
-                        "/api/chat/room",
-                        {
-                          params: {
-                            query: {
-                              postId: postId,
-                            },
-                          },
-                          credentials: "include",
-                        }
-                      );
-                      if (createResponse.error) {
-                        console.error(
-                          "채팅방 생성 오류:",
-                          createResponse.error.message
-                        );
-                        alert("채팅방 생성에 실패했습니다.");
+                {loginMember.id != post.writerId && (
+                  <Button
+                    variant="outline"
+                    onClick={async () => {
+                      // 채팅방 생성 처리
+                      const isLoggedIn = await checkLoginStatus();
+                      if (!isLoggedIn) {
+                        alert("먼저 로그인을 해주세요.");
+                        router.push("/user/login");
                         return;
                       }
-                      const chatRoomId = createResponse.data.data.roomId;
-                      router.push(`/chat/${chatRoomId}`);
-                    } catch (error) {
-                      console.error("채팅방 생성 중 오류 발생:", error);
-                      alert("채팅방 생성 중 오류가 발생했습니다.");
-                    }
-                  }}
-                  className="rounded-full bg-yellow-400 text-black py-2 px-4 border border-black-700 hover:bg-yellow-300"
-                >
-                  <FontAwesomeIcon icon={faComment} className="mr-2" />
-                  채팅
-                </Button>
+                      try {
+                        const createResponse = await client.POST(
+                          "/api/chat/room",
+                          {
+                            params: {
+                              query: {
+                                postId: postId,
+                              },
+                            },
+                            credentials: "include",
+                          }
+                        );
+                        if (createResponse.error) {
+                          console.error(
+                            "채팅방 생성 오류:",
+                            createResponse.error.message
+                          );
+                          alert("채팅방 생성에 실패했습니다.");
+                          return;
+                        }
+                        const chatRoomId = createResponse.data.data.roomId;
+                        router.push(`/chat/${chatRoomId}`);
+                      } catch (error) {
+                        console.error("채팅방 생성 중 오류 발생:", error);
+                        alert("채팅방 생성 중 오류가 발생했습니다.");
+                      }
+                    }}
+                    className="rounded-full bg-yellow-400 text-black py-2 px-4 border border-black-700 hover:bg-yellow-300"
+                  >
+                    <FontAwesomeIcon icon={faComment} className="mr-2" />
+                    채팅
+                  </Button>
+                )}
+
                 <Button
                   variant="outline"
                   onClick={() => setTradeModalOpen(true)}
