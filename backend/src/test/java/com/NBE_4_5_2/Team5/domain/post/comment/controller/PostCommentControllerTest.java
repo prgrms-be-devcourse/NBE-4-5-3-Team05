@@ -65,7 +65,7 @@ class PostCommentControllerTest {
                 "url");
 
         ProductPost productPost = productPostRepository.save(
-                new ProductPost(author, "name", 5000, "title", "content", "url", 50F, 50F)
+                new ProductPost(author, "name", 5000, "title", "content", "url", 50F, 50F,"거래위치")
         );
 
         Map<String, Cookie> cookieMap = login(author.getUsername(), "password");
@@ -98,7 +98,7 @@ class PostCommentControllerTest {
                 "url");
 
         ProductPost productPost = productPostRepository.save(
-                new ProductPost(author, "name", 5000, "title", "content", "url", 50F, 50F)
+                new ProductPost(author, "name", 5000, "title", "content", "url", 50F, 50F,"거래위치")
         );
 
         Map<String, Cookie> cookieMap = login(author.getUsername(), "password");
@@ -160,7 +160,7 @@ class PostCommentControllerTest {
                 "address", "url");
 
         ProductPost productPost = productPostRepository.save(
-                new ProductPost(author, "name", 5000, "title", "content", "url", 50F, 50F)
+                new ProductPost(author, "name", 5000, "title", "content", "url", 50F, 50F,"거래위치")
         );
 
         Map<String, Cookie> cookieMap = login(author.getUsername(), "password");

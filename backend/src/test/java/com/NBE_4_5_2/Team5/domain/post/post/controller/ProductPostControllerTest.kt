@@ -76,7 +76,8 @@ class ProductPostControllerTest {
               ],
               "latitude": 37.5665,
               "longitude": 126.9780,
-              "categoryIds": [1, 3, 5]
+              "categoryIds": [1, 3, 5],
+              "location": "거래위치"
             }
         """.trimIndent()
 
@@ -237,7 +238,8 @@ class ProductPostControllerTest {
             "테스트 내용",
             "https://example.com/1.jpg",
             37.5f,
-            127.0f
+            127.0f,
+            "주소 1"
         )
         return productPostRepository.save(post)
     }
