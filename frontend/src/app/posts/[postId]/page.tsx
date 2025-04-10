@@ -500,7 +500,6 @@ export default function PostDetailPage() {
 
           {isLogin && (
             <div className="flex flex-wrap gap-3 justify-end w-full md:w-auto">
-<<<<<<< HEAD
               {/* ✅ 작성자 본인이 아닌 경우에만 찜/구매 표시 */}
               {loginMember.id !== post.writerId && (
                 <>
@@ -524,9 +523,8 @@ export default function PostDetailPage() {
                   </Button>
                 </>
               )}
-
               {/* ✅ 작성자 본인일 때 수정/삭제 버튼 */}
-=======
+              =======
               <Button
                 disabled={likeLoading || liked}
                 onClick={handleLike}
@@ -542,10 +540,9 @@ export default function PostDetailPage() {
                 {purchased
                   ? "구매 완료"
                   : purchaseLoading
-                  ? "처리 중..."
-                  : "구매하기"}
+                    ? "처리 중..."
+                    : "구매하기"}
               </Button>
->>>>>>> develop
               {loginMember.id === post.writerId && (
                 <>
                   <Button
@@ -574,6 +571,7 @@ export default function PostDetailPage() {
             postId={post.id!}
             initialComments={comments}
             loadMoreComments={loadComments}
+            loginMember={loginMember}
           />
         </div>
       )}
