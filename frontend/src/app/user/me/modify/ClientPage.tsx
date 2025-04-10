@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import client from "@/lib/client";
 import { useRouter } from "next/navigation";
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
+import MapComponent from "@/components/MapComponent";
 
 export default function ClientPage() {
   const router = useRouter();
@@ -22,6 +23,94 @@ export default function ClientPage() {
   const [codeStatus, setCodeStatus] = useState("");
   const [codeStatusColor, setCodeStatusColor] = useState("text-red-500");
 
+  // 위치 관리
+  const [latitude, setLatitude] = useState(0);
+  const [longitude, setLongitude] = useState(0);
+  const [zoom, setZoom] = useState(18);
+  const [locationStatus, setLocationStatus] = useState("");
+  const [mapVisible, setMapVisible] = useState(false);
+  const [address, setAddress] = useState("");
+
+  useEffect(() => {
+    // 초기 사용자 위치 설정 (0,0)
+    setLatitude(loginMember.latitude || 0);
+    setLongitude(loginMember.longitude || 0);
+
+    const getCurrentPosition = () => {
+      navigator.geolocation.getCurrentPosition((position) => {
+        setLatitude(position.coords.latitude);
+        setLongitude(position.coords.longitude);
+      });
+    };
+    
+    getCurrentPosition();
+  }, [loginMember]);
+
+  const fetchAddressFromCoordinates = async (lat:any, lng:any) => {
+    if(lat==0 || lng==0){
+      return "주소를 입력해주세요" ;
+    }
+    try {
+      const response = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`);
+      const data = await response.json();
+      
+      if (data && data.display_name) {
+        setAddress(data.display_name); // 주소를 상태에 저장
+        return data.display_name;
+      } else {
+        setAddress("주소를 찾을 수 없습니다.");
+        return "주소를 찾을 수 없습니다.";
+      }
+    } catch (error) {
+      console.error("주소를 가져오는 데 오류 발생:", error);
+      setAddress("주소를 가져오는 데 오류 발생");
+      throw new Error("주소를 가져오는 데 오류 발생");
+    }
+  };
+
+  const registerLocation = async (lat:any, lng:any) => {
+    // if (lat === 0 && lng === 0) {
+    //     alert("위치 정보를 가져오지 못했습니다.");
+    //     return;
+    // }
+
+    try {
+      const response = await client.PUT("/api/users/me/location", {
+        body: { latitude: lat, longitude: lng },
+        credentials: "include",
+      });
+      
+      if (response.error) {
+        setLocationStatus("위치 등록에 실패했습니다.");
+        return;
+      }
+      
+      const user = response.data.data; // 서버에서 받은 사용자 정보
+      setLatitude(user.latitude);  // 서버에서 받은 위도
+      setLongitude(user.longitude); // 서버에서 받은 경도
+      setLocationStatus("위치가 성공적으로 등록되었습니다.");
+      const new_address = await fetchAddressFromCoordinates(user.latitude, user.longitude); // 주소 패치
+      setMapVisible(false); // 위치 등록 후 지도 닫기
+
+      const updateUserResponse = await client.PUT("/api/users/me", {
+        body: {
+          emial: loginMember.email,
+          nickname: loginMember.nickname,
+          address: new_address, // 위도 경도로 얻은 새 주소
+          profileUrl: loginMember.profileUrl,
+        },
+        credentials: "include",
+      });
+      console.log("새로얻은 주소: ",new_address);
+
+    } catch (error) {
+        console.error("위치 등록 중 오류 발생:", error);
+        setLocationStatus("위치 등록에 실패했습니다.");
+    }
+  };
+
+
+  
   function handleEmailChange(e: React.ChangeEvent<HTMLInputElement>) {
     const newEmail = e.target.value;
     setEmail(newEmail);
@@ -100,14 +189,14 @@ export default function ClientPage() {
     console.log(formData);
     const email = formData.email.value;
     const nickname = formData.nickname.value;
-    const address = formData.address.value;
+    const _address = address || loginMember.address;
     const profileUrl = formData.profileUrl.value;
 
     const response = await client.PUT("/api/users/me", {
       body: {
         email,
         nickname,
-        address,
+        address:_address,
         profileUrl,
       },
       credentials: "include",
@@ -119,6 +208,7 @@ export default function ClientPage() {
       return;
     }
 
+    console.log("서버에 전송하는 주소: ",_address);
     alert("사용자 정보가 성공적으로 수정되었습니다.");
     setLoginMember(response.data.data);
     router.push("/user/me");
@@ -129,6 +219,41 @@ export default function ClientPage() {
       <div className="flex h-full w-full justify-center">
         <div className="flex flex-col gap-2">
           <h2 className="text-xl font-bold text-center">회원 정보 수정</h2>
+
+          <Button onClick={() => {
+              setMapVisible(true); // 지도를 표시
+          }} className="mt-4">
+              위치 등록
+          </Button>
+
+
+          {mapVisible && (
+              <MapComponent
+                  currentPos={{ lat: latitude, lng: longitude, zoom }}
+                  onLocationSelect={(lat, lng) => {
+                      setLatitude(lat);
+                      setLongitude(lng);
+                      registerLocation(lat, lng); // 핀 클릭 시 위치 등록
+                  }}
+              />
+          )}
+
+          {locationStatus && <h2>{locationStatus}</h2>}
+          
+          {latitude == 0 && longitude == 0 && (
+            <h3 className="text-lg">위치를 등록해 주세요</h3>
+          )}
+            
+          {latitude !== 0 && longitude !== 0 && (
+            <div className="mt-4">
+              <h3 className="text-lg">위치:</h3>
+              <p>위도: {latitude}</p>
+              <p>경도: {longitude}</p>
+              {address && <p>주소: {address}</p>} {/* 주소 표시 */}
+            </div>
+          )}
+
+
           <form onSubmit={updateInfo} className="flex flex-col gap-2">
             <div className="flex flex-col gap-1">
               <label
@@ -208,7 +333,7 @@ export default function ClientPage() {
                 defaultValue={loginMember.nickname}
               />
             </div>
-            <div>
+            {/* <div>
               <label
                 htmlFor="address"
                 className="block text-sm font-medium text-gray-700"
@@ -222,7 +347,7 @@ export default function ClientPage() {
                 className="border-2 border-black w-[500px]"
                 defaultValue={loginMember.address}
               />
-            </div>
+            </div> */}
             <div>
               <label
                 htmlFor="profileUrl"

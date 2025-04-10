@@ -63,7 +63,6 @@ class ChatRoomControllerTest {
         }
         sender = loginedUser.nickname
         token = userService.generateAuthTokenAsString(loginedUser)
-        println("토큰1: $token")
 
         // 포스트 ID 설정
         val post = productPostRepository.findAll().stream()
@@ -82,10 +81,7 @@ class ChatRoomControllerTest {
                 .header("Authorization", "Bearer $token")
                 .contentType(MediaType.APPLICATION_JSON)
         )
-            .andDo(MockMvcResultHandlers.print()) // 요청의 Content-Type
         roomId = JsonPath.read(action.andReturn().response.contentAsString, "$.data.roomId")
-        println("sender: $sender")
-        println("roomId: $roomId")
         return roomId
     }
 
@@ -103,7 +99,6 @@ class ChatRoomControllerTest {
                     .header("Authorization", "Bearer $token")
                     .contentType(MediaType.APPLICATION_JSON)
             )
-                .andDo(MockMvcResultHandlers.print())
         }
     }
 
@@ -121,7 +116,6 @@ class ChatRoomControllerTest {
                 .header("Authorization", "Bearer $token")
                 .contentType(MediaType.APPLICATION_JSON)
         )
-            .andDo(MockMvcResultHandlers.print()) // 요청의 Content-Type
 
         // Then
         action.andExpect(MockMvcResultMatchers.status().isOk())
@@ -131,11 +125,7 @@ class ChatRoomControllerTest {
             .andExpect(MockMvcResultMatchers.jsonPath("$.data.sender").value(sender))
             .andExpect(MockMvcResultMatchers.jsonPath("$.data.receiver").value(receiver))
 
-        println("sender: $sender")
-        println("receiver: $receiver")
         roomId = JsonPath.read(action.andReturn().response.contentAsString, "$.data.roomId")
-        println("roomId: $roomId")
-        println("채팅방 생성테스트 완료")
     }
 
     @Throws(Exception::class)
@@ -147,7 +137,7 @@ class ChatRoomControllerTest {
             MockMvcRequestBuilders.get("/api/chat/rooms")
                 .header("Authorization", "Bearer $token")
                 .contentType(MediaType.APPLICATION_JSON)
-        ).andDo(MockMvcResultHandlers.print())
+        )
 
         // Then
         action.andExpect(MockMvcResultMatchers.status().isOk())
@@ -164,9 +154,6 @@ class ChatRoomControllerTest {
             action.andReturn().response.contentAsString,
             "$.data[0].other"
         )
-        println("roomId: $roomId")
-        println("other: $other")
-        println("receiver: $receiver")
     }
 
     @Throws(Exception::class)
@@ -181,7 +168,7 @@ class ChatRoomControllerTest {
             MockMvcRequestBuilders.get("/api/chat/rooms")
                 .header("Authorization", "Bearer $token")
                 .contentType(MediaType.APPLICATION_JSON)
-        ).andDo(MockMvcResultHandlers.print())
+        )
 
         // Then
         action.andExpect(MockMvcResultMatchers.status().isNotFound())
@@ -206,14 +193,12 @@ class ChatRoomControllerTest {
                 .header("Authorization", "Bearer $token")
                 .contentType(MediaType.APPLICATION_JSON)
         )
-            .andDo(MockMvcResultHandlers.print())
 
         val getAction = mvc.perform(
             MockMvcRequestBuilders.get("/api/chat/rooms")
                 .header("Authorization", "Bearer $token")
                 .contentType(MediaType.APPLICATION_JSON)
         )
-            .andDo(MockMvcResultHandlers.print())
 
 
         // Then
@@ -243,7 +228,6 @@ class ChatRoomControllerTest {
         val chatRoomList = chatRoomService.findRoomByUser(sender)
         roomId = chatRoomList[0].roomId
         receiver = chatRoomList[0].getReceiver()
-        println("receiver1: $receiver")
 
         // When: 검색 요청
         val action = mvc.perform(
@@ -252,7 +236,6 @@ class ChatRoomControllerTest {
                 .header("Authorization", "Bearer $token")
                 .contentType(MediaType.APPLICATION_JSON)
         )
-            .andDo(MockMvcResultHandlers.print())
 
         // Then: 검색 요청 결과 검증
         action.andExpect(MockMvcResultMatchers.status().isOk())
@@ -260,8 +243,6 @@ class ChatRoomControllerTest {
             .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("success"))
             .andExpect(MockMvcResultMatchers.jsonPath("$.data").isNotEmpty())
             .andExpect(MockMvcResultMatchers.jsonPath("$.data.roomId").value(roomId)) // 정확한 roomId를 반환하는지 검증
-        println("receiver: $receiver")
-        println("roomId: $roomId")
         deleteAll() // 초기화
     }
 
@@ -274,8 +255,6 @@ class ChatRoomControllerTest {
         val chatRoomList = chatRoomService.findRoomByUser(sender)
         roomId = chatRoomList[0].roomId
         receiver = chatRoomList[0].getReceiver()
-        println("roomId: $roomId")
-        println("receiver: $receiver")
         deleteAll() // 채팅방 삭제
 
         // When: 검색 요청
@@ -285,7 +264,6 @@ class ChatRoomControllerTest {
                 .header("Authorization", "Bearer $token")
                 .contentType(MediaType.APPLICATION_JSON)
         )
-            .andDo(MockMvcResultHandlers.print())
 
         // Then: 검색 요청 결과 검증
         action.andExpect(MockMvcResultMatchers.status().isNotFound())
@@ -300,14 +278,12 @@ class ChatRoomControllerTest {
     fun testRoomByRoomId() {
         // Given
         roomId = setUpChatRoom()
-        println("검색전, roomId: $roomId")
         // When
         val action = mvc.perform(
             MockMvcRequestBuilders.get("/api/chat/room/$roomId")
                 .header("Authorization", "Bearer $token")
                 .contentType(MediaType.APPLICATION_JSON)
-        ).andDo(MockMvcResultHandlers.print())
-
+        )
         // Then
         action.andExpect(MockMvcResultMatchers.status().isOk())
             .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("200"))
@@ -328,8 +304,7 @@ class ChatRoomControllerTest {
             MockMvcRequestBuilders.get("/api/chat/room/$roomId")
                 .header("Authorization", "Bearer $token")
                 .contentType(MediaType.APPLICATION_JSON)
-        ).andDo(MockMvcResultHandlers.print())
-
+        )
         // Then
         action.andExpect(MockMvcResultMatchers.status().isNotFound())
             .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("404"))
@@ -350,7 +325,7 @@ class ChatRoomControllerTest {
                 .param("roomId", roomId)
                 .header("Authorization", "Bearer $token")
                 .contentType(MediaType.APPLICATION_JSON)
-        ).andDo(MockMvcResultHandlers.print())
+        )
 
         // Then
         action.andExpect(MockMvcResultMatchers.status().isOk())
@@ -373,7 +348,6 @@ class ChatRoomControllerTest {
             )
         }
         val token2 = userService.generateAuthTokenAsString(loginedUser2)
-        println("토큰: $token2")
 
         // When
         val action = mvc.perform(
@@ -382,7 +356,6 @@ class ChatRoomControllerTest {
                 .header("Authorization", "Bearer $token2")
                 .contentType(MediaType.APPLICATION_JSON)
         )
-            .andDo(MockMvcResultHandlers.print())
 
         // Then
         action.andExpect(MockMvcResultMatchers.status().isMethodNotAllowed())
@@ -403,14 +376,12 @@ class ChatRoomControllerTest {
                 .header("Authorization", "Bearer $token")
                 .contentType(MediaType.APPLICATION_JSON)
         )
-            .andDo(MockMvcResultHandlers.print())
         // 채팅방 조회
         val getAction = mvc.perform(
             MockMvcRequestBuilders.get("/api/chat/rooms")
                 .header("Authorization", "Bearer $token")
                 .contentType(MediaType.APPLICATION_JSON)
         )
-            .andDo(MockMvcResultHandlers.print())
 
         // Then
         action.andExpect(MockMvcResultMatchers.status().isOk())

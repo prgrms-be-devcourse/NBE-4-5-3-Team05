@@ -2,6 +2,7 @@ package com.NBE_4_5_2.Team5.global.standard.util
 
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.security.Keys
 import java.util.*
@@ -62,6 +63,14 @@ class Ut {
                 .build()
                 .parseSignedClaims(jwtStr)
                 .payload
+        }
+    }
+
+    object Notification {
+        private val objectMapper = ObjectMapper()
+
+        fun parse(message: String): com.NBE_4_5_2.Team5.domain.notification.entity.Notification {
+            return objectMapper.readValue<com.NBE_4_5_2.Team5.domain.notification.entity.Notification>(message);
         }
     }
 }

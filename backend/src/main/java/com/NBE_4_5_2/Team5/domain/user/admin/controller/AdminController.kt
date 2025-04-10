@@ -30,7 +30,7 @@ class AdminController(
     private val adminService: AdminService
 ) {
 
-    @JvmRecord
+    
     data class NoticeReqBody(
         @Parameter(
             description = "공지사항 제목",
@@ -62,7 +62,7 @@ class AdminController(
         return RsData("200-1", "공지사항 등록 성공.", data)
     }
 
-    @JvmRecord
+    
     data class BanReqBody(val reason: @NotEmpty String)
 
     @Operation(summary = "유저 정지", description = "특정 유저를 정지시킵니다.")
@@ -150,7 +150,7 @@ class AdminController(
         return RsData("200-1", "공지사항 리스트 조회 성공.", notices)
     }
 
-    @JvmRecord
+    
     data class UpdateNoticeReq(val title: String, val content: String)
 
     @Operation(summary = "공지사항 수정", description = "기존 공지사항을 수정합니다.")

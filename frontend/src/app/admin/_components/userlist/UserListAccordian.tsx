@@ -36,14 +36,11 @@ export default function UserListAccordian({
   };
 
   const doUnBan = async (item: UserListItem) => {
-    const response = await client.POST("/api/admin/users/{user-id}/ban", {
+    const response = await client.DELETE("/api/admin/users/{user-id}/ban", {
       params: {
         path: {
           "user-id": item.id!,
         },
-      },
-      body: {
-        reason: reason,
       },
       credentials: "include",
     });

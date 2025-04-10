@@ -10,6 +10,12 @@ import {
   LoginMemberContext,
   useLoginMember,
 } from "./stores/auth/loginMemberStore";
+import { ToastContainer, toast } from "react-toastify";
+import {
+  EventSourceProvider,
+  useEventSource,
+} from "./stores/notification/notificationSessionStore";
+import ToastNotification from "@/components/notification/ToastNotification";
 
 export default function ClientLayout({
   children,
@@ -79,6 +85,9 @@ export default function ClientLayout({
 
   return (
     <LoginMemberContext.Provider value={loginMemberContextValue}>
+      <EventSourceProvider>
+        <ToastNotification />
+      </EventSourceProvider>
       <header className="flex justify-between">
         <Link href="/" className="flex items-center gap-2">
           <Button>

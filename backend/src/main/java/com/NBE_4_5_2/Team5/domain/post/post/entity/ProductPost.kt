@@ -89,7 +89,7 @@ class ProductPost() : BaseTime() {
     }
 
     companion object {
-        @JvmStatic
+        
         fun create(
             writer: User,
             productName: String,

@@ -3,12 +3,11 @@ package com.NBE_4_5_2.Team5.domain.post.comment.controller
 import com.NBE_4_5_2.Team5.domain.post.comment.dto.CommentDto
 import com.NBE_4_5_2.Team5.domain.post.comment.service.CommentService
 import com.NBE_4_5_2.Team5.domain.user.user.dto.UserDto
-import com.NBE_4_5_2.Team5.global.dto.RsData
+import com.NBE_4_5_2.Team5.global.response.RsData
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
-import lombok.RequiredArgsConstructor
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Slice
 import org.springframework.security.access.prepost.PreAuthorize
@@ -21,10 +20,10 @@ class PostCommentController(
     private val commentService: CommentService
 
 ) {
-    @JvmRecord
+    
     data class WriteCommentResBody(val id: String, val content: String, val author: UserDto)
 
-    @JvmRecord
+    
     data class WriteCommentReqBody(
         @Parameter(description = "댓글 내용") @Parameter(
             description = "댓글 내용"
@@ -47,10 +46,10 @@ class PostCommentController(
         )
     }
 
-    @JvmRecord
+    
     data class UpdateCommentResBody(val content: String, val author: UserDto)
 
-    @JvmRecord
+    
     data class UpdateCommentReqBody(val content: String)
 
     @Operation(summary = "댓글 수정", description = "댓글 내용을 수정합니다.")
