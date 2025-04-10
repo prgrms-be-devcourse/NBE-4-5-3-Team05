@@ -306,4 +306,44 @@ internal class AdminControllerTest(
             .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("204-1"))
             .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("게시글 삭제 성공."))
     }
+
+    @Test
+    @Throws(Exception::class)
+    fun signUpAdminBySuperAdmin() {
+        //given
+        // 메인 관리자로 로그인
+        val cookieMap = login("admin1", "password1")
+        userService.saveAuthenticationCode("admin3@gmail.com", "verify") // 이메일 인증이 완료되었다 가정
+
+        //when
+        val result = mockMvc.perform(
+            MockMvcRequestBuilders.delete("/api/admin/signup")
+                .content(
+                    """
+				{
+					"username": "admin3",
+                    "password": "admin3@",
+                    "nickname": "관리자3",
+                    "email": "admin3@gmail.com"
+				}
+				""".trimIndent()
+                )
+                .contentType("application/json")
+                .characterEncoding("utf-8")
+                .cookie(cookieMap["accessToken"], cookieMap["refreshToken"])
+                .cookie(cookieMap["accessToken"], cookieMap["refreshToken"])
+        )
+
+        // then
+
+        result
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("200-1"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("관리자 회원가입 성공."))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.data.username").value("admin3"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.data.nickname").value("관리자3"))
+            .andExpect(MockMvcResultMatchers.jsonPath("$.data.email").value("admin3@gmail.com"))
+    }
+
+
 }

@@ -178,7 +178,11 @@ class User() : BaseTime() {
         get() = memberAuthoritiesAsString.map { SimpleGrantedAuthority(it) }
 
     val memberAuthoritiesAsString: List<String>
-        get() = if (isAdmin) listOf("ROLE_ADMIN") else emptyList()
+        get() = when (role) {
+            Role.SUPER_ADMIN -> listOf("ROLE_SUPER_ADMIN", "ROLE_ADMIN")
+            Role.ADMIN -> listOf("ROLE_ADMIN")
+            else -> emptyList()
+        }
 
     fun addWrittenPost(saved: ProductPost) {
         purchasedProducts.add(saved)

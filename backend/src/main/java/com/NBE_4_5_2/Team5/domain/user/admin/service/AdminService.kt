@@ -13,6 +13,7 @@ import com.NBE_4_5_2.Team5.domain.user.user.entity.Role
 import com.NBE_4_5_2.Team5.domain.user.user.entity.User
 import com.NBE_4_5_2.Team5.domain.user.user.repository.UserRepository
 import com.NBE_4_5_2.Team5.domain.user.user.service.UserService
+import com.NBE_4_5_2.Team5.domain.user.user.service.UserValidator
 import com.NBE_4_5_2.Team5.global.exception.notice.NoticeNotFoundException
 import com.NBE_4_5_2.Team5.global.exception.security.WrongRoleException
 import jakarta.persistence.EntityNotFoundException
@@ -34,6 +35,7 @@ import java.util.stream.Collectors
 @RequiredArgsConstructor
 @Transactional
 class AdminService(
+    private val userValidator: UserValidator,
     private val banListRepository: BanListRepository,
     private val userRepository: UserRepository,
     private val noticePostRepository: NoticePostRepository,
@@ -46,6 +48,7 @@ class AdminService(
         private const val BAN_DURATION_WEIGHT = 7
     }
 
+    @Transactional
     fun signUpSuperAdmin(username: String, password: String, nickname: String, email: String): User {
         return User(
             username,
@@ -62,8 +65,11 @@ class AdminService(
             }
     }
 
-
+    @Transactional
     fun signUpAdmin(username: String, password: String, nickname: String, email: String): User {
+
+        userService.checkDuplicateAndEmail(username, nickname, email)
+
         return User(
             username,
             passwordEncoder.encode(password),
@@ -74,7 +80,6 @@ class AdminService(
             Role.ADMIN
         )
             .let {
-                userService.deleteAuthenticationCode(it.email)
                 userRepository.save(it)
             }
     }
