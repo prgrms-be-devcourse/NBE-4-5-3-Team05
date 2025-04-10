@@ -48,7 +48,6 @@ class ChatService(
             chatRoom.setDeleteStatus(receiver, false)
             hashOpsChatRoom.put(CHAT_ROOMS, chatRoom.roomId, chatRoom) // 레디스 업데이트
         }
-        println(receiver + "의 삭제 여부: " + chatRoom.getDeleteStatus(receiver))
 
         if (ChatMessage.MessageType.TALK == chatMessage.getType()) {
             // redis로 메세지 발송

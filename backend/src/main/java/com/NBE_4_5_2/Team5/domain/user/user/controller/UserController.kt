@@ -1,5 +1,6 @@
 package com.NBE_4_5_2.Team5.domain.user.user.controller
 
+import com.NBE_4_5_2.Team5.domain.user.user.dto.LocationRequest
 import com.NBE_4_5_2.Team5.domain.user.user.dto.SignUpUserReqBody
 import com.NBE_4_5_2.Team5.domain.user.user.dto.UserDto
 import com.NBE_4_5_2.Team5.domain.user.user.dto.UserUpdateRequest
@@ -115,6 +116,14 @@ class UserController(
         return RsData("200", "사용자 정보가 성공적으로 수정되었습니다.", updatedUser)
     }
 
+    @Operation(summary = "위치 등록", description = "현재 위치를 기반으로하여 프로필에 위치를 등록합니다.")
+    @PutMapping("/me/location")
+    fun registerLocation(@RequestBody @Valid locationRequest: LocationRequest): RsData<UserDto> {
+        val userIdentity = userAuthService.userIdentity
+        val user = userAuthService.getRealActor(userIdentity)
+        val updateUser = userService.registerLocation(user,locationRequest)
+        return RsData("200", "위치가 등록되었습니다.", updateUser);
+    }
 
     @Operation(summary = "회원 탈퇴", description = "현재 로그인된 사용자의 계정을 삭제합니다.")
     @SecurityRequirement(name = "cookieAuth")
@@ -158,4 +167,6 @@ class UserController(
 
         return RsData("200-1", "이메일이 인증에 성공했습니다.")
     }
+
+
 }

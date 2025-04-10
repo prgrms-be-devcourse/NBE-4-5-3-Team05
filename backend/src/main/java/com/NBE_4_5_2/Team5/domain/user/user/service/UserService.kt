@@ -1,6 +1,7 @@
 package com.NBE_4_5_2.Team5.domain.user.user.service
 
 import com.NBE_4_5_2.Team5.domain.user.user.dto.AuthToken
+import com.NBE_4_5_2.Team5.domain.user.user.dto.LocationRequest
 import com.NBE_4_5_2.Team5.domain.user.user.dto.UserDto
 import com.NBE_4_5_2.Team5.domain.user.user.dto.UserDto.Companion.fromEntity
 import com.NBE_4_5_2.Team5.domain.user.user.dto.UserUpdateRequest
@@ -61,7 +62,13 @@ class UserService(
      * @return 검증된 User 객체
      */
     fun loginUser(username: String, password: String): User {
-        return userValidator.credentials(username, password)
+        val user = userValidator.credentials(username, password)
+
+        if (user.blocked) {
+            throw ServiceException("403-1", "정지된 사용자입니다. 관리자에게 문의해주세요.")
+        }
+
+        return user
     }
 
     /**
@@ -211,6 +218,23 @@ class UserService(
             )
         }
 
+    // 위치 등록
+    @Transactional
+    fun registerLocation(user: User, locationRequest: LocationRequest): UserDto {
+        val optionalUser = userRepository.findByUsername(user.username)
+            .orElseThrow{UserNotFoundException("404","유저를 찾을 수 없습니다")}
+
+        return optionalUser.apply {
+            latitude = locationRequest.latitude
+            longitude = locationRequest.longitude
+        } . let {
+            userRepository.save(optionalUser)
+        } . run {
+            fromEntity(optionalUser)
+        }
+    }
+
+
     // 내 프로필 수정
     @Transactional
     fun updateMyProfile(user: User, updateRequest: UserUpdateRequest): UserDto {
@@ -242,6 +266,7 @@ class UserService(
             user.email = updateRequest.email
         }
 
+        userRepository.save(user)   // 저장
         return fromEntity(user)
     }
 

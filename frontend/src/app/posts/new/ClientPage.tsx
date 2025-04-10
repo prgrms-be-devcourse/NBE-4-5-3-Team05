@@ -5,9 +5,10 @@ import { useRouter } from "next/navigation";
 import type { components } from "@/lib/backend/apiV1/schema";
 import client from "@/lib/client";
 import fileUploadClient from "@/lib/fileUploadClient";
-import MapPopup from "@/components/MapPopup"; // MapPopup 임포트
+import MapPopup from "@/components/MapPopup";
 
 type Category = components["schemas"]["Category"];
+type ProductPostWriteForm = components["schemas"]["ProductPostWriteForm"];
 
 export default function PostCreatePage() {
   const router = useRouter();
@@ -16,7 +17,8 @@ export default function PostCreatePage() {
   const [productName, setProductName] = useState("");
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("");
+  // 체크박스로 다중 선택한 카테고리 ID 배열 상태 (문자열 배열로 관리)
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [price, setPrice] = useState<number | "">("");
   // 거래 위치(주소)는 검색 후 업데이트되며, 수동 수정도 가능
   const [location, setLocation] = useState("");
@@ -27,14 +29,14 @@ export default function PostCreatePage() {
   const [categories, setCategories] = useState<Category[]>([]);
   // 지도 팝업 열림 상태 관리
   const [isMapOpen, setIsMapOpen] = useState(false);
-  // MapPopup에 전달할 현재 지도 위치 (초기값은 서울 대신 사용자의 위치로 업데이트)
+  // MapPopup에 전달할 현재 지도 위치 (초기값은 사용자의 위치로 업데이트)
   const [mapCurrentPos, setMapCurrentPos] = useState({
     lat: 37.5665,
     lng: 126.978,
     zoom: 12,
   });
 
-  // 컴포넌트가 마운트될 때 사용자의 위치를 가져와 디폴트 위치로 설정
+  // 컴포넌트가 마운트될 때 사용자의 현재 위치를 기본 지도 위치로 설정
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -54,7 +56,7 @@ export default function PostCreatePage() {
     }
   }, []);
 
-  // AWS S3 업로드 API 호출 함수
+  // AWS S3 파일 업로드 함수
   const uploadFile = async (file: File): Promise<string> => {
     const formData = new FormData();
     formData.append("file", file);
@@ -84,6 +86,17 @@ export default function PostCreatePage() {
     fetchCategories();
   }, []);
 
+  // 체크박스 변경 핸들러
+  const handleCheckboxChange = (catId: string) => {
+    setSelectedCategories((prev) => {
+      if (prev.includes(catId)) {
+        return prev.filter((id) => id !== catId);
+      } else {
+        return [...prev, catId];
+      }
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -91,8 +104,8 @@ export default function PostCreatePage() {
       alert("물품 이름을 입력해주세요.");
       return;
     }
-    if (!selectedCategory) {
-      alert("카테고리를 선택해주세요.");
+    if (selectedCategories.length === 0) {
+      alert("카테고리를 하나 이상 선택해주세요.");
       return;
     }
     if (!title.trim()) {
@@ -126,17 +139,18 @@ export default function PostCreatePage() {
         Array.from(selectedFiles).map((file) => uploadFile(file))
       );
     }
-    const categoryIds = [Number(selectedCategory)];
 
-    const data = {
+    const data: ProductPostWriteForm = {
       productName,
       productPrice: Number(price),
       title,
       content,
-      categoryIds,
+      // 선택한 카테고리 id 배열을 숫자 배열로 변환
+      categoryIds: selectedCategories.map(Number),
       imageUrlList: uploadedUrls,
       latitude: Number(latitude),
       longitude: Number(longitude),
+      location,
     };
 
     const result = await client.POST("/api/posts", {
@@ -182,7 +196,7 @@ export default function PostCreatePage() {
       onSubmit={handleSubmit}
       className="flex space-x-4 p-4 w-full flex-1 relative"
     >
-      {/* 왼쪽 영역 */}
+      {/* 왼쪽 영역: 물품 이름, 게시글 제목, 본문 */}
       <div className="w-2/3">
         <h1 className="text-2xl font-bold mb-4">판매 게시글 작성</h1>
         <div className="mb-4">
@@ -216,22 +230,27 @@ export default function PostCreatePage() {
         </div>
       </div>
 
-      {/* 오른쪽 영역 */}
+      {/* 오른쪽 영역: 카테고리, 가격, 거래 위치, 위도/경도, 파일 업로드, 제출 버튼 */}
       <div className="w-1/3">
         <div className="mb-4">
-          <label className="block mb-1 font-semibold">카테고리</label>
-          <select
-            className="border w-full p-2"
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-          >
-            <option value="">카테고리 선택</option>
+          <label className="block mb-1 font-semibold">
+            카테고리 (여러 개 선택 가능)
+          </label>
+          <div className="border p-2 h-48 overflow-y-auto">
             {categories.map((cat) => (
-              <option key={cat.id!} value={cat.id!}>
-                {cat.name}
-              </option>
+              <div key={cat.id} className="flex items-center mb-1">
+                <input
+                  type="checkbox"
+                  id={`cat-${cat.id}`}
+                  value={cat.id}
+                  checked={selectedCategories.includes(String(cat.id))}
+                  onChange={() => handleCheckboxChange(String(cat.id))}
+                  className="mr-2"
+                />
+                <label htmlFor={`cat-${cat.id}`}>{cat.name}</label>
+              </div>
             ))}
-          </select>
+          </div>
         </div>
         <div className="mb-4">
           <label className="block mb-1 font-semibold">가격</label>

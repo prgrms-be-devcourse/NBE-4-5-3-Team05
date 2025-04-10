@@ -54,7 +54,8 @@ class ProductPostServiceTest {
             categoryIds,
             listOf("http://localhost/images/test.jpg"),
             37.5f,
-            127.0f
+            127.0f,
+            "거래위치"
         )
 
         val response = productPostService.write(testUser, form)
