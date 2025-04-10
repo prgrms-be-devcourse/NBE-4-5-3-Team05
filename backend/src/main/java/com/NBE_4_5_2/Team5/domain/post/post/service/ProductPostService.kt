@@ -64,21 +64,37 @@ class ProductPostService(
     }
 
     @Transactional
-    fun getPosts(page: Int, pageSize: Int, keyword: String, sort: String): PageDto<PreviewPostResponse> {
+    fun getPosts(
+        page: Int,
+        pageSize: Int,
+        keyword: String,
+        sort: String,
+        minPrice: Int,
+        maxPrice: Int,
+        categoryIds: List<Long>
+    ): PageDto<PreviewPostResponse> {
         val sortDirection = if (sort.equals("asc", ignoreCase = true)) Sort.Direction.ASC else Sort.Direction.DESC
-
         val pageable = PageRequest.of(
             page - 1, pageSize,
             Sort.by(sortDirection, "createdDate")
         )
 
-        val postPage = if (keyword.isBlank()) {
-            productPostRepository.findAllWithCategories(pageable)
+        val resultPage = if (keyword.isBlank()) {
+            if (categoryIds.isEmpty()) {
+                productPostRepository.findAllWithPrice(minPrice, maxPrice, pageable)
+            } else {
+                productPostRepository.findAllWithFilters(minPrice, maxPrice, categoryIds, categoryIds.size.toLong(), pageable)
+            }
         } else {
-            productPostRepository.findByTitleLike("%$keyword%", pageable)
+            if (categoryIds.isEmpty()) {
+                productPostRepository.findByKeywordWithPrice("%$keyword%", minPrice, maxPrice, pageable)
+            } else {
+                productPostRepository.findByKeywordWithFilters("%$keyword%", minPrice, maxPrice, categoryIds, categoryIds.size.toLong(), pageable)
+            }
         }
 
-        val mappedPosts = postPage.map { post ->
+
+        val mappedPosts = resultPage.map { post ->
             val likedCount = likedPostRepository.countByProductPostId(post.id)
             PreviewPostResponse.fromEntityWithLikeCount(post, likedCount)
         }

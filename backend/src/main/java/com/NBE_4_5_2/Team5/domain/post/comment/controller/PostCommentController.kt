@@ -38,12 +38,12 @@ class PostCommentController(
     fun writeComment(
         @Parameter(description = "작성할 상품 게시글 id") @PathVariable(name = "post-id") postId: String,
         @RequestBody body: WriteCommentReqBody
-    ): RsData<WriteCommentResBody> {
+    ): RsData<CommentDto> {
         val commentDto = commentService.writeComment(postId, body.content)
 
         return RsData(
             "200-1", "댓글 작성 성공.",
-            WriteCommentResBody(commentDto.id, commentDto.content, commentDto.author)
+            commentDto
         )
     }
 

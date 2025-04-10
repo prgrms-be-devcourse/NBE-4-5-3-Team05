@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.EntityGraph
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
+import org.springframework.data.repository.query.Param
 import org.springframework.lang.NonNull
 import org.springframework.stereotype.Repository
 import java.util.*
@@ -46,4 +47,63 @@ interface ProductPostRepository : JpaRepository<ProductPost, String> {
     fun findByIdIn(postIds: List<String>): List<ProductPost>
 
     fun findByWriterAndStatus(writer: User, status: ProductStatus, pageable: Pageable): Page<ProductPost>
+
+    @Query(
+        """
+    SELECT DISTINCT p FROM ProductPost p
+    WHERE p.productPrice >= :minPrice AND p.productPrice <= :maxPrice
+"""
+    )
+    fun findAllWithPrice(
+        @Param("minPrice") minPrice: Int,
+        @Param("maxPrice") maxPrice: Int,
+        pageable: Pageable
+    ): Page<ProductPost>
+
+    @Query("""
+    SELECT p FROM ProductPost p
+    JOIN p.productCategories pc
+    WHERE p.productPrice >= :minPrice AND p.productPrice <= :maxPrice
+    GROUP BY p
+    HAVING COUNT(DISTINCT CASE WHEN pc.category.id IN :categoryIds THEN pc.category.id END) = :categoryCount
+""")
+    fun findAllWithFilters(
+        @Param("minPrice") minPrice: Int,
+        @Param("maxPrice") maxPrice: Int,
+        @Param("categoryIds") categoryIds: List<Long>,
+        @Param("categoryCount") categoryCount: Long,
+        pageable: Pageable
+    ): Page<ProductPost>
+
+    @Query(
+        """
+    SELECT DISTINCT p FROM ProductPost p
+    WHERE p.title LIKE :keyword
+      AND p.productPrice >= :minPrice
+      AND p.productPrice <= :maxPrice
+"""
+    )
+    fun findByKeywordWithPrice(
+        @Param("keyword") keyword: String,
+        @Param("minPrice") minPrice: Int,
+        @Param("maxPrice") maxPrice: Int,
+        pageable: Pageable
+    ): Page<ProductPost>
+
+    @Query("""
+    SELECT p FROM ProductPost p
+    JOIN p.productCategories pc
+    WHERE p.title LIKE :keyword
+    AND p.productPrice >= :minPrice AND p.productPrice <= :maxPrice
+    GROUP BY p
+    HAVING COUNT(DISTINCT CASE WHEN pc.category.id IN :categoryIds THEN pc.category.id END) = :categoryCount
+""")
+    fun findByKeywordWithFilters(
+        @Param("keyword") keyword: String,
+        @Param("minPrice") minPrice: Int,
+        @Param("maxPrice") maxPrice: Int,
+        @Param("categoryIds") categoryIds: List<Long>,
+        @Param("categoryCount") categoryCount: Long,
+        pageable: Pageable
+    ): Page<ProductPost>
 }
