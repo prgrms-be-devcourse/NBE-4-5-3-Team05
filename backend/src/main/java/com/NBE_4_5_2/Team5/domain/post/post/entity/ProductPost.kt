@@ -12,6 +12,10 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener
 import java.util.*
 
 @Entity
+@Table(name = "ProductPost", indexes = [
+    Index(name = "idx_productpost_created_at_id", columnList = "created_at, id"),
+    Index(name = "idx_productpost_productprice", columnList = "productPrice, id")
+])
 @EntityListeners(AuditingEntityListener::class)
 class ProductPost() : BaseTime() {
 
