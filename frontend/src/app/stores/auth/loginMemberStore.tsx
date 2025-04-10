@@ -37,6 +37,8 @@ function createEmptyMember(): Member {
     modifiedAt: "",
     blocked: false,
     blockedCount: 0,
+    longitude: 0,
+    latitude: 0,
   };
 }
 
