@@ -979,17 +979,20 @@ export interface components {
             data: components["schemas"]["PaymentDto"];
         };
         ChatRoom: {
-            id?: string;
-            roomId?: string;
-            name?: string;
-            sender?: string;
-            receiver?: string;
-            client?: string;
+            sender: string;
+            receiver: string;
+            id: string;
+            roomId: string;
+            name: string;
+            client: string;
             /** Format: int64 */
-            userCount?: number;
-            lastMessage?: string;
-            lastTimestamp?: string;
-            isDelete?: {
+            userCount: number;
+            lastMessage: string;
+            lastTimestamp: string;
+            isDelete: {
+                [key: string]: boolean;
+            };
+            delete?: {
                 [key: string]: boolean;
             };
         };
@@ -1073,11 +1076,11 @@ export interface components {
             /** Format: int64 */
             offset?: number;
             sort?: components["schemas"]["SortObject"];
+            paged?: boolean;
             /** Format: int32 */
             pageSize?: number;
             /** Format: int32 */
             pageNumber?: number;
-            paged?: boolean;
             unpaged?: boolean;
         };
         RsDataSliceCommentDto: {
@@ -1130,8 +1133,8 @@ export interface components {
             data: components["schemas"]["PaymentMetaData"];
         };
         AccessProvider: {
-            name?: string;
-            token?: string;
+            name: string;
+            token: string;
         };
         RsDataAccessProvider: {
             code: string;
@@ -1139,16 +1142,16 @@ export interface components {
             data: components["schemas"]["AccessProvider"];
         };
         ChatRoomDto: {
-            postId?: string;
-            roomId?: string;
-            name?: string;
+            id: string;
+            roomId: string;
+            name: string;
             /** Format: int64 */
-            userCount?: number;
-            lastMessage?: string;
+            userCount: number;
+            lastMessage: string;
             /** @enum {string} */
-            messageType?: "ENTER" | "QUIT" | "TALK" | "IMAGE" | "LOCATION";
-            lastTimestamp?: string;
-            other?: string;
+            messageType: "ENTER" | "QUIT" | "TALK" | "IMAGE" | "LOCATION";
+            lastTimestamp: string;
+            other: string;
         };
         RsDataChatRoomDto: {
             code: string;
@@ -1161,17 +1164,17 @@ export interface components {
             data: components["schemas"]["ChatRoomDto"][];
         };
         MessageDto: {
-            messageId?: string;
-            sender?: string;
-            message?: string;
-            image?: string;
-            /** Format: double */
-            latitude?: number;
-            /** Format: double */
-            longitude?: number;
-            timestamp?: string;
-            lastMessage?: string;
-            lastTimestamp?: string;
+            messageId: string;
+            sender: string;
+            message: string;
+            image: string;
+            /** Format: float */
+            latitude: number;
+            /** Format: float */
+            longitude: number;
+            timestamp: string;
+            lastMessage: string;
+            lastTimestamp: string;
         };
         RsDataListMessageDto: {
             code: string;
