@@ -523,26 +523,6 @@ export default function PostDetailPage() {
                   </Button>
                 </>
               )}
-              {/* ✅ 작성자 본인일 때 수정/삭제 버튼 */}
-              =======
-              <Button
-                disabled={likeLoading || liked}
-                onClick={handleLike}
-                className="px-4 py-2 bg-gray-700 text-white rounded"
-              >
-                {liked ? "찜 완료" : likeLoading ? "처리 중..." : "찜하기"}
-              </Button>
-              <Button
-                disabled={purchaseLoading || purchased}
-                onClick={handlePurchase}
-                className="px-4 py-2 bg-gray-700 text-white rounded"
-              >
-                {purchased
-                  ? "구매 완료"
-                  : purchaseLoading
-                    ? "처리 중..."
-                    : "구매하기"}
-              </Button>
               {loginMember.id === post.writerId && (
                 <>
                   <Button
