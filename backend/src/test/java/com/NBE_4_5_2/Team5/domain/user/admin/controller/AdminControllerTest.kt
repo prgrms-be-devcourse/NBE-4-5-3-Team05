@@ -10,15 +10,18 @@ import com.NBE_4_5_2.Team5.global.exception.user.AdminNotFoundException
 import com.fasterxml.jackson.databind.ObjectMapper
 import jakarta.servlet.http.Cookie
 import org.assertj.core.api.Assertions.*
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers
+import org.springframework.test.web.servlet.ResultActions
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
+import org.springframework.test.web.servlet.result.*
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers.print
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
+import java.nio.charset.StandardCharsets
 import java.util.*
 
 @SpringBootTest
@@ -55,7 +58,7 @@ internal class AdminControllerTest(
         // when
         // API 호출
         val perform = mockMvc.perform(
-            MockMvcRequestBuilders.post("/api/admin/notices")
+            post("/api/admin/notices")
                 .content(
                     """
 				{
@@ -78,21 +81,21 @@ internal class AdminControllerTest(
 
         // then
         perform
-            .andExpect(MockMvcResultMatchers.status().isOk())
-            .andExpect(MockMvcResultMatchers.handler().handlerType(AdminController::class.java))
-            .andExpect(MockMvcResultMatchers.handler().methodName("writeNotice"))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("200-1"))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("공지사항 등록 성공."))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.data.id").value(notice.id))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.data.title").value(notice.title))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.data.content").value(notice.content))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.data.admin.id").value(admin.id))
+            .andExpect(status().isOk())
+            .andExpect(handler().handlerType(AdminController::class.java))
+            .andExpect(handler().methodName("writeNotice"))
+            .andExpect(jsonPath("$.code").value("200-1"))
+            .andExpect(jsonPath("$.message").value("공지사항 등록 성공."))
+            .andExpect(jsonPath("$.data.id").value(notice.id))
+            .andExpect(jsonPath("$.data.title").value(notice.title))
+            .andExpect(jsonPath("$.data.content").value(notice.content))
+            .andExpect(jsonPath("$.data.admin.id").value(admin.id))
     }
 
     @Throws(Exception::class)
     private fun login(username: String, password: String): Map<String, Cookie> {
         val cookies = mockMvc.perform(
-            MockMvcRequestBuilders.post("/api/users/login")
+            post("/api/users/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(
                     """
@@ -103,7 +106,7 @@ internal class AdminControllerTest(
 					""".trimIndent()
                 )
         )
-            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(status().isOk())
             .andReturn().response.cookies
 
         val cookieMap: MutableMap<String, Cookie> = HashMap()
@@ -127,7 +130,7 @@ internal class AdminControllerTest(
             .orElseThrow { RuntimeException() }
 
         val perform = mockMvc.perform(
-            MockMvcRequestBuilders.post("/api/admin/users/${user.id}/ban")
+            post("/api/admin/users/${user.id}/ban")
                 .content(
                     """
 				{
@@ -148,15 +151,15 @@ internal class AdminControllerTest(
         val foundedUser = userService.getUserByUsername("user1")
 
         perform
-            .andExpect(MockMvcResultMatchers.status().isOk())
-            .andExpect(MockMvcResultMatchers.handler().handlerType(AdminController::class.java))
-            .andExpect(MockMvcResultMatchers.handler().methodName("banUser"))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("200-1"))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("유저 정지 성공"))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.data.banListId").value(banList.id))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.data.reason").value(banList.reason))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.data.userId").value(banList.bannedUser.id))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.data.banCount").value(foundedUser.get().blockedCount))
+            .andExpect(status().isOk())
+            .andExpect(handler().handlerType(AdminController::class.java))
+            .andExpect(handler().methodName("banUser"))
+            .andExpect(jsonPath("$.code").value("200-1"))
+            .andExpect(jsonPath("$.message").value("유저 정지 성공"))
+            .andExpect(jsonPath("$.data.banListId").value(banList.id))
+            .andExpect(jsonPath("$.data.reason").value(banList.reason))
+            .andExpect(jsonPath("$.data.userId").value(banList.bannedUser.id))
+            .andExpect(jsonPath("$.data.banCount").value(foundedUser.get().blockedCount))
         assertThat(foundedUser.get().blocked).isTrue()
         assertThat(foundedUser.get().blockedCount).isEqualTo(1)
     }
@@ -174,7 +177,7 @@ internal class AdminControllerTest(
             .items[0].id
 
         val result = mockMvc.perform(
-            MockMvcRequestBuilders.delete("/api/admin/posts/$id")
+            delete("/api/admin/posts/$id")
                 .cookie(cookieMap["accessToken"], cookieMap["refreshToken"])
         )
 
@@ -185,9 +188,9 @@ internal class AdminControllerTest(
             .isInstanceOf(ProductPostNotFoundException::class.java)
 
         result
-            .andExpect(MockMvcResultMatchers.status().isNoContent)
-            .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("204-1"))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("게시글 삭제 성공."))
+            .andExpect(status().isNoContent)
+            .andExpect(jsonPath("$.code").value("204-1"))
+            .andExpect(jsonPath("$.message").value("게시글 삭제 성공."))
     }
 
     @Test
@@ -200,7 +203,7 @@ internal class AdminControllerTest(
         // when
         // API 호출
         val perform = mockMvc.perform(
-            MockMvcRequestBuilders.post("/api/admin/notices")
+            post("/api/admin/notices")
                 .content(
                     """
 				{
@@ -223,13 +226,13 @@ internal class AdminControllerTest(
 
         // then
         perform
-            .andExpect(MockMvcResultMatchers.status().isOk())
-            .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("200-1"))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("공지사항 등록 성공."))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.data.id").value(notice.id))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.data.title").value(notice.title))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.data.content").value(notice.content))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.data.admin.id").value(admin.id))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.code").value("200-1"))
+            .andExpect(jsonPath("$.message").value("공지사항 등록 성공."))
+            .andExpect(jsonPath("$.data.id").value(notice.id))
+            .andExpect(jsonPath("$.data.title").value(notice.title))
+            .andExpect(jsonPath("$.data.content").value(notice.content))
+            .andExpect(jsonPath("$.data.admin.id").value(admin.id))
     }
 
     @Test
@@ -245,7 +248,7 @@ internal class AdminControllerTest(
             .orElseThrow { RuntimeException() }
 
         val perform = mockMvc.perform(
-            MockMvcRequestBuilders.post("/api/admin/users/${user.id}/ban")
+            post("/api/admin/users/${user.id}/ban")
                 .content(
                     """
 				{
@@ -266,15 +269,15 @@ internal class AdminControllerTest(
         val foundedUser = userService.getUserByUsername("user1")
 
         perform
-            .andExpect(MockMvcResultMatchers.status().isOk())
-            .andExpect(MockMvcResultMatchers.handler().handlerType(AdminController::class.java))
-            .andExpect(MockMvcResultMatchers.handler().methodName("banUser"))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("200-1"))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("유저 정지 성공"))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.data.banListId").value(banList.id))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.data.reason").value(banList.reason))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.data.userId").value(banList.bannedUser.id))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.data.banCount").value(foundedUser.get().blockedCount))
+            .andExpect(status().isOk())
+            .andExpect(handler().handlerType(AdminController::class.java))
+            .andExpect(handler().methodName("banUser"))
+            .andExpect(jsonPath("$.code").value("200-1"))
+            .andExpect(jsonPath("$.message").value("유저 정지 성공"))
+            .andExpect(jsonPath("$.data.banListId").value(banList.id))
+            .andExpect(jsonPath("$.data.reason").value(banList.reason))
+            .andExpect(jsonPath("$.data.userId").value(banList.bannedUser.id))
+            .andExpect(jsonPath("$.data.banCount").value(foundedUser.get().blockedCount))
         assertThat(foundedUser.get().blocked).isTrue()
         assertThat(foundedUser.get().blockedCount).isEqualTo(1)
     }
@@ -292,7 +295,7 @@ internal class AdminControllerTest(
             .items[0].id
 
         val result = mockMvc.perform(
-            MockMvcRequestBuilders.delete("/api/admin/posts/$id")
+            delete("/api/admin/posts/$id")
                 .cookie(cookieMap["accessToken"], cookieMap["refreshToken"])
         )
 
@@ -303,9 +306,9 @@ internal class AdminControllerTest(
             .isInstanceOf(ProductPostNotFoundException::class.java)
 
         result
-            .andExpect(MockMvcResultMatchers.status().isNoContent)
-            .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("204-1"))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("게시글 삭제 성공."))
+            .andExpect(status().isNoContent)
+            .andExpect(jsonPath("$.code").value("204-1"))
+            .andExpect(jsonPath("$.message").value("게시글 삭제 성공."))
     }
 
     @Test
@@ -318,7 +321,7 @@ internal class AdminControllerTest(
 
         //when
         val result = mockMvc.perform(
-            MockMvcRequestBuilders.post("/api/admin/signup")
+            post("/api/admin/signup")
                 .content(
                     """
 				{
@@ -336,12 +339,12 @@ internal class AdminControllerTest(
 
         // then
         result
-            .andExpect(MockMvcResultMatchers.status().isOk())
-            .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("200-1"))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("관리자 회원가입 성공."))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.data.username").value("admin3"))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.data.nickname").value("관리자3"))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.data.email").value("admin3@gmail.com"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.code").value("200-1"))
+            .andExpect(jsonPath("$.message").value("관리자 회원가입 성공."))
+            .andExpect(jsonPath("$.data.username").value("admin3"))
+            .andExpect(jsonPath("$.data.nickname").value("관리자3"))
+            .andExpect(jsonPath("$.data.email").value("admin3@gmail.com"))
     }
 
     @Test
@@ -354,7 +357,7 @@ internal class AdminControllerTest(
 
         // when: 인증이 완료되지 않은 이메일로 관리자 회원가입 시도
         val result = mockMvc.perform(
-            MockMvcRequestBuilders.post("/api/admin/signup")
+            post("/api/admin/signup")
                 .content(
                     """
                 {
@@ -371,9 +374,9 @@ internal class AdminControllerTest(
         )
 
         // then: 이메일 인증 미완료 오류
-        result.andExpect(MockMvcResultMatchers.status().isConflict)
-            .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("409"))
-            .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("이메일 인증이 완료되지 않았습니다. 인증 후 다시 시도해주세요."))
+        result.andExpect(status().isConflict)
+            .andExpect(jsonPath("$.code").value("409"))
+            .andExpect(jsonPath("$.message").value("이메일 인증이 완료되지 않았습니다. 인증 후 다시 시도해주세요."))
     }
 
     @Test
@@ -398,7 +401,7 @@ internal class AdminControllerTest(
 
         // when: 잘못된 입력값으로 관리자 회원가입 시도
         val result = mockMvc.perform(
-            MockMvcRequestBuilders.post("/api/admin/signup")
+            post("/api/admin/signup")
                 .content(invalidContent)
                 .contentType("application/json")
                 .characterEncoding("utf-8")
@@ -407,10 +410,10 @@ internal class AdminControllerTest(
 
         // then: 유효성 검증 실패로 400 Bad Request 발생
         result
-            .andExpect(MockMvcResultMatchers.status().isBadRequest())
-            .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("400-1"))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.code").value("400-1"))
             .andExpect(
-                MockMvcResultMatchers.jsonPath("$.message").value(
+                jsonPath("$.message").value(
                     """
                         email : 올바른 이메일 형식이 아닙니다.
                         nickname : 닉네임은 2~20자 사이여야 합니다.
@@ -431,7 +434,7 @@ internal class AdminControllerTest(
 
         // 삭제 대상 관리자 신규 생성
         val signupResult = mockMvc.perform(
-            MockMvcRequestBuilders.post("/api/admin/signup")
+            post("/api/admin/signup")
                 .content(
                     """
                     {
@@ -452,7 +455,7 @@ internal class AdminControllerTest(
 
         // when: 생성된 관리자 계정을 삭제 요청합니다.
         val deleteResult = mockMvc.perform(
-            MockMvcRequestBuilders.delete("/api/admin/$newAdminId")
+            delete("/api/admin/$newAdminId")
                 .cookie(cookieMap["accessToken"], cookieMap["refreshToken"])
         ).andReturn()
 
@@ -467,4 +470,84 @@ internal class AdminControllerTest(
         assertThat(json.get("message").asText()).isEqualTo("관리자 삭제 성공.")
         assertThat(deleteResult.response.status).isEqualTo(200)
     }
+
+    @Throws(Exception::class)
+    private fun createAdminRequest(
+        username: String,
+        password: String,
+        email: String,
+        nickname: String,
+        cookieMap: Map<String, Cookie>
+    ): ResultActions {
+        return mockMvc.perform(
+            post("/api/admin/signup")
+                .content(
+                    """
+                {
+                  "username": "$username",
+                  "password": "$password",
+                  "nickname": "$nickname",
+                  "email": "$email"
+                }
+                """.trimIndent()
+                )
+                .contentType(MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
+                .cookie(cookieMap["accessToken"], cookieMap["refreshToken"])
+        ).andDo(print())
+    }
+
+
+    @Test
+    @Throws(Exception::class)
+    fun getAdminListBySuperAdmin() {
+        // given
+        // SUPER_ADMIN 계정으로 로그인 (admin1, password1)
+        val cookieMap = login("admin1", "password1")
+
+        // 테스트를 위해 신규 관리자 계정을 생성합니다.
+        userService.saveAuthenticationCode("adminA@gmail.com", "verified")
+        userService.saveAuthenticationCode("adminB@gmail.com", "verified")
+        userService.saveAuthenticationCode("adminC@gmail.com", "verified")
+
+        // 생성할 관리자 3명의 데이터
+        val adminData = listOf(
+            Triple("adminA", "adminA@", "adminA@gmail.com") to "관리자 A",
+            Triple("adminB", "adminB@", "adminB@gmail.com") to "관리자 B",
+            Triple("adminC", "adminC@", "adminC@gmail.com") to "관리자 C"
+        )
+
+        // 각 관리자 생성 요청 실행 (쿠키 정보를 함께 전달)
+        adminData.forEach { (credentials, nickname) ->
+            val (username, password, email) = credentials
+            createAdminRequest(username, password, email, nickname, cookieMap)
+                .andExpect(status().isOk)
+                .andExpect(jsonPath("$.code").value("200-1"))
+                .andExpect(jsonPath("$.message").value("관리자 회원가입 성공."))
+        }
+
+        // when: 관리자 리스트 조회 API 호출 (페이지 0, 사이즈 10)
+        val mvcResult = mockMvc.perform(
+            get("/api/admin/admins")
+                .param("page", "0")
+                .param("size", "10")
+                .cookie(cookieMap["accessToken"], cookieMap["refreshToken"])
+        ).andReturn()
+
+        // then: 응답 JSON 검증
+        val json = objectMapper.readTree(mvcResult.response.contentAsString)
+        assertThat(json.get("code").asText()).isEqualTo("200-1")
+        assertThat(json.get("message").asText()).isEqualTo("관리자 리스트 조회 성공.")
+
+        val dataNode = json.get("data")
+        assertThat(dataNode.get("content").isArray()).isTrue
+        assertThat(dataNode.get("content").size()).isGreaterThanOrEqualTo(1)
+
+        dataNode.get("content").forEach { adminNode ->
+            val role = adminNode.get("role").asText()
+            assertThat(role.equals("ADMIN", ignoreCase = true) || role.equals("SUPER_ADMIN", ignoreCase = true))
+                .withFailMessage("관리자 리스트 항목의 role이 ADMIN 또는 SUPER_ADMIN 이어야 합니다. 현재 role: $role")
+                .isTrue
+        }
+    }
+
 }
