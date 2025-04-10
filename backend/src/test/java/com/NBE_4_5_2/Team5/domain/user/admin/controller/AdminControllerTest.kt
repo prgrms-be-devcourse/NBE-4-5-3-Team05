@@ -6,9 +6,10 @@ import com.NBE_4_5_2.Team5.domain.user.admin.service.AdminService
 import com.NBE_4_5_2.Team5.domain.user.user.service.UserService
 import com.NBE_4_5_2.Team5.global.config.BaseTestConfig
 import com.NBE_4_5_2.Team5.global.exception.post.product.ProductPostNotFoundException
+import com.NBE_4_5_2.Team5.global.exception.user.AdminNotFoundException
 import com.fasterxml.jackson.databind.ObjectMapper
 import jakarta.servlet.http.Cookie
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
@@ -156,8 +157,8 @@ internal class AdminControllerTest(
             .andExpect(MockMvcResultMatchers.jsonPath("$.data.reason").value(banList.reason))
             .andExpect(MockMvcResultMatchers.jsonPath("$.data.userId").value(banList.bannedUser.id))
             .andExpect(MockMvcResultMatchers.jsonPath("$.data.banCount").value(foundedUser.get().blockedCount))
-        Assertions.assertThat(foundedUser.get().blocked).isTrue()
-        Assertions.assertThat(foundedUser.get().blockedCount).isEqualTo(1)
+        assertThat(foundedUser.get().blocked).isTrue()
+        assertThat(foundedUser.get().blockedCount).isEqualTo(1)
     }
 
     @Test
@@ -180,7 +181,7 @@ internal class AdminControllerTest(
         // then
 
         // 삭제된 product post 조회 시 오류 발생해야 한다.
-        Assertions.assertThatThrownBy { productPostService.getPost(id) }
+        assertThatThrownBy { productPostService.getPost(id) }
             .isInstanceOf(ProductPostNotFoundException::class.java)
 
         result
@@ -274,8 +275,8 @@ internal class AdminControllerTest(
             .andExpect(MockMvcResultMatchers.jsonPath("$.data.reason").value(banList.reason))
             .andExpect(MockMvcResultMatchers.jsonPath("$.data.userId").value(banList.bannedUser.id))
             .andExpect(MockMvcResultMatchers.jsonPath("$.data.banCount").value(foundedUser.get().blockedCount))
-        Assertions.assertThat(foundedUser.get().blocked).isTrue()
-        Assertions.assertThat(foundedUser.get().blockedCount).isEqualTo(1)
+        assertThat(foundedUser.get().blocked).isTrue()
+        assertThat(foundedUser.get().blockedCount).isEqualTo(1)
     }
 
     @Test
@@ -298,7 +299,7 @@ internal class AdminControllerTest(
         // then
 
         // 삭제된 product post 조회 시 오류 발생해야 한다.
-        Assertions.assertThatThrownBy { productPostService.getPost(id) }
+        assertThatThrownBy { productPostService.getPost(id) }
             .isInstanceOf(ProductPostNotFoundException::class.java)
 
         result
@@ -381,10 +382,10 @@ internal class AdminControllerTest(
         // given
         // 메인 관리자로 로그인 (SUPER_ADMIN 권한)
         val cookieMap = login("admin1", "password1")
-        val username: String = "admin!@#" // 특수문자 포함되어 유효성 검증에 실패
-        val password: String = "admin3@"
-        val nickname: String = "1" // 닉네임이 2글자 미만
-        val email: String = "invalid-email" // 올바른 이메일 형식 아님
+        val username = "admin!@#" // 특수문자 포함되어 유효성 검증에 실패
+        val password = "admin3@"
+        val nickname = "1" // 닉네임이 2글자 미만
+        val email = "invalid-email" // 올바른 이메일 형식 아님
 
         val invalidContent = """
         {
@@ -419,5 +420,51 @@ internal class AdminControllerTest(
             )
     }
 
+    @Test
+    @Throws(Exception::class)
+    fun deleteAdminBySuperAdmin() {
+        // given
+        // SUPER_ADMIN 로그인
+        val cookieMap = login("admin1", "password1")
 
+        userService.saveAuthenticationCode("adminToDelete@gmail.com", "verified")
+
+        // 삭제 대상 관리자 신규 생성
+        val signupResult = mockMvc.perform(
+            MockMvcRequestBuilders.post("/api/admin/signup")
+                .content(
+                    """
+                    {
+                        "username": "adminToDelete",
+                        "password": "adminToDelete@",
+                        "nickname": "삭제대상관리자",
+                        "email": "adminToDelete@gmail.com"
+                    }
+                    """.trimIndent()
+                )
+                .contentType(MediaType.APPLICATION_JSON)
+                .characterEncoding("utf-8")
+                .cookie(cookieMap["accessToken"], cookieMap["refreshToken"])
+        ).andReturn()
+
+        val newAdminId = objectMapper.readTree(signupResult.response.contentAsString)
+            .get("data").get("id").asText()
+
+        // when: 생성된 관리자 계정을 삭제 요청합니다.
+        val deleteResult = mockMvc.perform(
+            MockMvcRequestBuilders.delete("/api/admin/$newAdminId")
+                .cookie(cookieMap["accessToken"], cookieMap["refreshToken"])
+        ).andReturn()
+
+        // then: 삭제 후 해당 관리자 계정을 조회하면 AdminNotFoundException 발생
+        assertThatThrownBy {
+            userService.getUserByUsername("adminToDelete")
+                .orElseThrow { AdminNotFoundException("404", "관리자를 찾을 수 없습니다") }
+        }.isInstanceOf(AdminNotFoundException::class.java)
+
+        val json = objectMapper.readTree(deleteResult.response.contentAsString)
+        assertThat(json.get("code").asText()).isEqualTo("200-1")
+        assertThat(json.get("message").asText()).isEqualTo("관리자 삭제 성공.")
+        assertThat(deleteResult.response.status).isEqualTo(200)
+    }
 }
