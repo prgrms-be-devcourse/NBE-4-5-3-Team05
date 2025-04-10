@@ -128,6 +128,7 @@ class BaseInitData(
         for (i in 1..50) {
             val writer = users[(i - 1) % users.size]
             val imageUrl = baseUrl + "default" + ".jpg"
+            val defaultLocation = "주소 $i"
             posts.add(
                 ProductPost.create(
                     writer,
@@ -137,7 +138,8 @@ class BaseInitData(
                     "이것은 테스트 상품 $i 입니다.",
                     imageUrl,
                     37.5f + (i % 10) * 0.01f,
-                    127.0f + (i % 10) * 0.01f
+                    127.0f + (i % 10) * 0.01f,
+                    defaultLocation // 거래 위치 값 추가
                 )
             )
         }

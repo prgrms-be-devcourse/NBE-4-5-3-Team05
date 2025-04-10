@@ -56,6 +56,9 @@ class ProductPost() : BaseTime() {
     @Column(nullable = false)
     var longitude: Float = 0f
 
+    @Column(nullable = false)
+    lateinit var location:String // 거래위치 추가
+
     @OneToMany(mappedBy = "productPost", cascade = [CascadeType.ALL], orphanRemoval = true)
     val productCategories: MutableList<ProductCategory> = mutableListOf()
 
@@ -70,7 +73,8 @@ class ProductPost() : BaseTime() {
         content: String,
         imageUrls: String,
         latitude: Float,
-        longitude: Float
+        longitude: Float,
+        location: String // 거래위치
     ) : this() {
         this.writer = writer
         this.productName = productName
@@ -80,6 +84,7 @@ class ProductPost() : BaseTime() {
         this.imageUrls = imageUrls
         this.latitude = latitude
         this.longitude = longitude
+        this.location = location
         setCreateDateNow();
     }
 
@@ -93,9 +98,10 @@ class ProductPost() : BaseTime() {
             content: String,
             imageUrls: String,
             latitude: Float,
-            longitude: Float
+            longitude: Float,
+            location: String // 거래위치
         ): ProductPost {
-            return ProductPost(writer, productName, productPrice, title, content, imageUrls, latitude, longitude)
+            return ProductPost(writer, productName, productPrice, title, content, imageUrls, latitude, longitude,location)
         }
     }
 

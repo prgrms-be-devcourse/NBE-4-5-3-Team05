@@ -833,6 +833,7 @@ export interface components {
             longitude?: number;
             /** @enum {string} */
             status?: "RESERVED" | "AVAILABLE" | "PURCHASED";
+            location?: string;
         };
         ProductPostResponse: {
             id: string;
@@ -848,6 +849,7 @@ export interface components {
             latitude: number;
             /** Format: float */
             longitude: number;
+            location: string;
             categories: string[];
             /** Format: date-time */
             createdAt: string;
@@ -943,6 +945,7 @@ export interface components {
             latitude: number;
             /** Format: float */
             longitude: number;
+            location: string;
         };
         WriteCommentReqBody: {
             content: string;
@@ -979,17 +982,20 @@ export interface components {
             data: components["schemas"]["PaymentDto"];
         };
         ChatRoom: {
-            id?: string;
-            roomId?: string;
-            name?: string;
-            sender?: string;
-            receiver?: string;
-            client?: string;
+            sender: string;
+            receiver: string;
+            id: string;
+            roomId: string;
+            name: string;
+            client: string;
             /** Format: int64 */
-            userCount?: number;
-            lastMessage?: string;
-            lastTimestamp?: string;
-            isDelete?: {
+            userCount: number;
+            lastMessage: string;
+            lastTimestamp: string;
+            isDelete: {
+                [key: string]: boolean;
+            };
+            delete?: {
                 [key: string]: boolean;
             };
         };
@@ -1075,9 +1081,9 @@ export interface components {
             sort?: components["schemas"]["SortObject"];
             /** Format: int32 */
             pageSize?: number;
+            paged?: boolean;
             /** Format: int32 */
             pageNumber?: number;
-            paged?: boolean;
             unpaged?: boolean;
         };
         RsDataSliceCommentDto: {
@@ -1086,23 +1092,23 @@ export interface components {
             data: components["schemas"]["SliceCommentDto"];
         };
         SliceCommentDto: {
-            first?: boolean;
-            last?: boolean;
             /** Format: int32 */
             size?: number;
             content?: components["schemas"]["CommentDto"][];
             /** Format: int32 */
             number?: number;
             sort?: components["schemas"]["SortObject"];
-            pageable?: components["schemas"]["PageableObject"];
+            first?: boolean;
+            last?: boolean;
             /** Format: int32 */
             numberOfElements?: number;
+            pageable?: components["schemas"]["PageableObject"];
             empty?: boolean;
         };
         SortObject: {
             empty?: boolean;
-            unsorted?: boolean;
             sorted?: boolean;
+            unsorted?: boolean;
         };
         RsDataListPreviewPostResponse: {
             code: string;
@@ -1130,8 +1136,8 @@ export interface components {
             data: components["schemas"]["PaymentMetaData"];
         };
         AccessProvider: {
-            name?: string;
-            token?: string;
+            name: string;
+            token: string;
         };
         RsDataAccessProvider: {
             code: string;
@@ -1139,16 +1145,16 @@ export interface components {
             data: components["schemas"]["AccessProvider"];
         };
         ChatRoomDto: {
-            postId?: string;
-            roomId?: string;
-            name?: string;
+            id: string;
+            roomId: string;
+            name: string;
             /** Format: int64 */
-            userCount?: number;
-            lastMessage?: string;
+            userCount: number;
+            lastMessage: string;
             /** @enum {string} */
-            messageType?: "ENTER" | "QUIT" | "TALK" | "IMAGE" | "LOCATION";
-            lastTimestamp?: string;
-            other?: string;
+            messageType: "ENTER" | "QUIT" | "TALK" | "IMAGE" | "LOCATION";
+            lastTimestamp: string;
+            other: string;
         };
         RsDataChatRoomDto: {
             code: string;
@@ -1161,17 +1167,17 @@ export interface components {
             data: components["schemas"]["ChatRoomDto"][];
         };
         MessageDto: {
-            messageId?: string;
-            sender?: string;
-            message?: string;
-            image?: string;
-            /** Format: double */
-            latitude?: number;
-            /** Format: double */
-            longitude?: number;
-            timestamp?: string;
-            lastMessage?: string;
-            lastTimestamp?: string;
+            messageId: string;
+            sender: string;
+            message: string;
+            image: string;
+            /** Format: float */
+            latitude: number;
+            /** Format: float */
+            longitude: number;
+            timestamp: string;
+            lastMessage: string;
+            lastTimestamp: string;
         };
         RsDataListMessageDto: {
             code: string;
@@ -1193,17 +1199,17 @@ export interface components {
             totalElements?: number;
             /** Format: int32 */
             totalPages?: number;
-            first?: boolean;
-            last?: boolean;
             /** Format: int32 */
             size?: number;
             content?: components["schemas"]["UserDto"][];
             /** Format: int32 */
             number?: number;
             sort?: components["schemas"]["SortObject"];
-            pageable?: components["schemas"]["PageableObject"];
+            first?: boolean;
+            last?: boolean;
             /** Format: int32 */
             numberOfElements?: number;
+            pageable?: components["schemas"]["PageableObject"];
             empty?: boolean;
         };
         RsDataPageUserDto: {
@@ -1216,17 +1222,17 @@ export interface components {
             totalElements?: number;
             /** Format: int32 */
             totalPages?: number;
-            first?: boolean;
-            last?: boolean;
             /** Format: int32 */
             size?: number;
             content?: components["schemas"]["NoticeResBody"][];
             /** Format: int32 */
             number?: number;
             sort?: components["schemas"]["SortObject"];
-            pageable?: components["schemas"]["PageableObject"];
+            first?: boolean;
+            last?: boolean;
             /** Format: int32 */
             numberOfElements?: number;
+            pageable?: components["schemas"]["PageableObject"];
             empty?: boolean;
         };
         RsDataPageNoticeResBody: {

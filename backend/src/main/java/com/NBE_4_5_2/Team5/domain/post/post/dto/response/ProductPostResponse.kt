@@ -15,6 +15,7 @@ class ProductPostResponse(
     val imageUrls: String,
     val latitude: Float,
     val longitude: Float,
+    val location: String, // 거래위치 (추가)
     val categories: List<String>,
     val createdAt: LocalDateTime, // 생성일
     val modifiedAt: LocalDateTime, // 수정일
@@ -37,6 +38,7 @@ class ProductPostResponse(
                 post.imageUrls,
                 post.latitude,
                 post.longitude,
+                post.location,
                 post.productCategories.map { it.category?.name ?: "" },
                 post.createdDate,
                 post.modifiedDate,
@@ -60,6 +62,7 @@ class ProductPostResponse(
                 post.imageUrls,
                 post.latitude,
                 post.longitude,
+                post.location,
                 post.productCategories.map { it.category?.name ?: "" },
                 post.createdDate,
                 post.modifiedDate,

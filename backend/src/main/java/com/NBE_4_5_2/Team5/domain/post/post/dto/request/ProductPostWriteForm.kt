@@ -25,5 +25,8 @@ data class ProductPostWriteForm(
 	val latitude: Float,
 
 	@Parameter(description = "경도")
-	val longitude: Float
+	val longitude: Float,
+
+	@Parameter(description = "거래 위치(주소)")
+	val location: String
 )
