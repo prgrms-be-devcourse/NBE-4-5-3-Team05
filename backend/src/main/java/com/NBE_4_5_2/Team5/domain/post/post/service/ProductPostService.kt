@@ -76,7 +76,7 @@ class ProductPostService(
         val sortDirection = if (sort.equals("asc", ignoreCase = true)) Sort.Direction.ASC else Sort.Direction.DESC
         val pageable = PageRequest.of(
             page - 1, pageSize,
-            Sort.by(sortDirection, "createdDate")
+            Sort.by(sortDirection, "created_at")
         )
 
         val resultPage = if (keyword.isBlank()) {
@@ -106,7 +106,7 @@ class ProductPostService(
         actor: User, page: Int, pageSize: Int, sort: String, status: ProductStatus?
     ): PageDto<PreviewPostResponse> {
         val sortDirection = if (sort.equals("asc", ignoreCase = true)) Sort.Direction.ASC else Sort.Direction.DESC
-        val pageable = PageRequest.of(page - 1, pageSize, Sort.by(sortDirection, "createdDate"))
+        val pageable = PageRequest.of(page - 1, pageSize, Sort.by(sortDirection, "created_at"))
 
         val postPage = if (status != null) {
             productPostRepository.findByWriterAndStatus(actor, status, pageable)
