@@ -32,6 +32,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/users/me/location": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * 위치 등록
+         * @description 현재 위치를 기반으로하여 프로필에 위치를 등록합니다.
+         */
+        put: operations["registerLocation"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/posts/{post-id}/comments/{comment-id}": {
         parameters: {
             query?: never;
@@ -822,6 +842,16 @@ export interface components {
             blocked: boolean;
             /** Format: int32 */
             blockedCount: number;
+            /** Format: float */
+            latitude: number;
+            /** Format: float */
+            longitude: number;
+        };
+        LocationRequest: {
+            /** Format: float */
+            latitude: number;
+            /** Format: float */
+            longitude: number;
         };
         UpdateCommentReqBody: {
             content: string;
@@ -1092,11 +1122,10 @@ export interface components {
             /** Format: int64 */
             offset?: number;
             sort?: components["schemas"]["SortObject"];
-            paged?: boolean;
-            /** Format: int32 */
-            pageSize?: number;
             /** Format: int32 */
             pageNumber?: number;
+            /** Format: int32 */
+            pageSize?: number;
             paged?: boolean;
             unpaged?: boolean;
         };
@@ -1215,10 +1244,10 @@ export interface components {
             data: components["schemas"]["Category"][];
         };
         PageUserDto: {
-            /** Format: int64 */
-            totalElements?: number;
             /** Format: int32 */
             totalPages?: number;
+            /** Format: int64 */
+            totalElements?: number;
             first?: boolean;
             last?: boolean;
             /** Format: int32 */
@@ -1238,10 +1267,10 @@ export interface components {
             data: components["schemas"]["PageUserDto"];
         };
         PageNoticeResBody: {
-            /** Format: int64 */
-            totalElements?: number;
             /** Format: int32 */
             totalPages?: number;
+            /** Format: int64 */
+            totalElements?: number;
             first?: boolean;
             last?: boolean;
             /** Format: int32 */
@@ -1357,6 +1386,39 @@ export interface operations {
                 };
                 content: {
                     "application/json;charset=UTF-8": components["schemas"]["RsDataEmpty"];
+                };
+            };
+            /** @description Internal Server Error */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataVoid"];
+                };
+            };
+        };
+    };
+    registerLocation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LocationRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json;charset=UTF-8": components["schemas"]["RsDataUserDto"];
                 };
             };
             /** @description Internal Server Error */
