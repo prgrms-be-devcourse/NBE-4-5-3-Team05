@@ -10,6 +10,7 @@ import com.NBE_4_5_2.Team5.domain.user.user.entity.User
 import com.NBE_4_5_2.Team5.domain.user.user.repository.UserRepository
 import com.NBE_4_5_2.Team5.domain.user.user.service.email.EmailService
 import com.NBE_4_5_2.Team5.global.Rq
+import com.NBE_4_5_2.Team5.global.dto.RsData
 import com.NBE_4_5_2.Team5.global.exception.ServiceException
 import com.NBE_4_5_2.Team5.global.exception.security.AuthenticationNotValidException
 import com.NBE_4_5_2.Team5.global.exception.security.TokenNotFoundException
@@ -61,7 +62,13 @@ class UserService(
      * @return 검증된 User 객체
      */
     fun loginUser(username: String, password: String): User {
-        return userValidator.credentials(username, password)
+        val user = userValidator.credentials(username, password)
+
+        if (user.blocked) {
+            throw ServiceException("403-1", "정지된 사용자입니다. 관리자에게 문의해주세요.")
+        }
+
+        return user
     }
 
     /**
