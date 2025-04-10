@@ -4,27 +4,40 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import jakarta.persistence.ElementCollection
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
+import jakarta.persistence.*
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
 
 @Entity
 class ChatMessage (
+    @Enumerated(EnumType.STRING)
+    @Column(name="type")
     private var _type: MessageType = MessageType.TALK,
+    @Column(name="room_id")
     private var _roomId: String="",
+    @Column(name = "sender")
     private var _sender: String="",
+    @Column(name = "receiver")
     private val _receiver: String="",
+    @Column(name = "message")
     private var _message: String="",
+    @Column(name = "image")
     @JsonProperty("image")
-    private var _image: String="",
+    private val _image: String="",
+    @Column(name = "user_count")
     private var _userCount: Long=0,
+    @Column(name = "latitude")
     @JsonProperty("latitude")
-    private var _latitude: Float=0.0f,
+    private val _latitude: Float=0.0f,
+    @Column(name = "longitude")
     @JsonProperty("longitude")
-    private var _longitude: Float=0.0f
+    private val _longitude: Float=0.0f
 ) {
     @Id
+    @Column(name = "message_id")
     private val _messageId = UUID.randomUUID().toString()
+    @Column(name = "timestamp")
     private var _timestamp: String = formatTimestamp(LocalDateTime.now())
 
     @ElementCollection

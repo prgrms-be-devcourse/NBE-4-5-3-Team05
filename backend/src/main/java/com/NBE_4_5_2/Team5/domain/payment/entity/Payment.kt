@@ -9,13 +9,17 @@ import java.util.*
 @Entity
 class Payment(
     @Id
-    @Column(updatable = false, nullable = false)
+    @Column(updatable = false, nullable = false, name = "id")
     private var _id: String = "payment-" + UUID.randomUUID(),
+    @Column(name = "payment_key")
     private var _paymentKey: String? = null,
     @ManyToOne
+    @JoinColumn(name="buyer_id")
     private var _buyer: User,
+    @Column(name="total_price")
     private var _totalPrice: Int = 0,
     @Enumerated(EnumType.STRING)
+    @Column(name = "status")
     private var _status: PaymentStatus = PaymentStatus.IN_PROGRESS
 ) : BaseTime() {
 
