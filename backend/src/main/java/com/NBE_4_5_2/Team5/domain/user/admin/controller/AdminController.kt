@@ -211,4 +211,15 @@ class AdminController(
         )
         return RsData("200-1", "관리자 회원가입 성공.", UserDto(newAdmin))
     }
+
+    @Operation(summary = "관리자 삭제", description = "superadmin 권한으로 특정 admin 계정을 삭제합니다.")
+    @ApiResponses(value = [ApiResponse(responseCode = "204", description = "관리자 삭제 성공")])
+    @SecurityRequirement(name = "cookieAuth")
+    @PreAuthorize("isAuthenticated()")
+    @DeleteMapping("/{adminId}")
+    fun deleteAdmin(@PathVariable adminId: String): RsData<Void> {
+
+        adminService.deleteAdmin(adminId)
+        return RsData("200-1", "관리자 삭제 성공.")
+    }
 }
