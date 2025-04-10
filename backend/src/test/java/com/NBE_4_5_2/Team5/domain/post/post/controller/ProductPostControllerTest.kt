@@ -240,7 +240,8 @@ class ProductPostControllerTest {
             "https://example.com/1.jpg",
             37.5f,
             127.0f,
-            "거래위치"
+            "거래위치",
+            0.0
         )
         return productPostRepository.save(post)
     }

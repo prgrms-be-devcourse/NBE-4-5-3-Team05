@@ -81,7 +81,8 @@ class ProductPost() : BaseTime() {
         imageUrls: String,
         latitude: Float,
         longitude: Float,
-        location: String // 거래위치
+        location: String, // 거래위치
+        distance: Double,
     ) : this() {
         this.writer = writer
         this.productName = productName
@@ -92,6 +93,7 @@ class ProductPost() : BaseTime() {
         this.latitude = latitude
         this.longitude = longitude
         this.location = location
+        this.distance = distance
         setCreateDateNow()
     }
 
@@ -106,9 +108,10 @@ class ProductPost() : BaseTime() {
             imageUrls: String,
             latitude: Float,
             longitude: Float,
-            location: String // 거래위치
+            location: String, // 거래위치
+            distance: Double
         ): ProductPost {
-            return ProductPost(writer, productName, productPrice, title, content, imageUrls, latitude, longitude,location)
+            return ProductPost(writer, productName, productPrice, title, content, imageUrls, latitude, longitude,location, distance)
         }
     }
 

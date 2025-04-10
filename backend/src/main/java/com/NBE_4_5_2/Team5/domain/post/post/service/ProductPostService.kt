@@ -51,7 +51,8 @@ class ProductPostService(
             imageUrlStr,
             body.latitude,
             body.longitude,
-            body.location
+            body.location,
+            0.0
         )
 
         // 상품글에 카테고리 체크 및 추가
