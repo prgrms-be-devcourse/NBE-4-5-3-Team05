@@ -119,7 +119,7 @@ class BaseInitData(
 
         val baseUrl =
             if (serverHost.startsWith("backend.nbe-4-5-5-team5.shop"))
-                "https://%s/images".formatted(serverHost)
+                "https://${serverHost}/images"
             else
                 "http://localhost:8080/images/"
         val imageUrl = baseUrl + "default_profile" + ".jpg" // 하나의 이미지만 사용
@@ -209,7 +209,7 @@ class BaseInitData(
         // 관리자 계정 우선, 없으면 첫 번째 유저
         val users = userRepository.findAll()
         val adminUser: User = users
-            .firstOrNull { it.role == Role.ADMIN }
+            .firstOrNull { it.role == Role.ADMIN || it.role == Role.SUPER_ADMIN }
             ?: users.firstOrNull()
             ?: return  // 유저 자체가 하나도 없으면 초기화 스킵
 

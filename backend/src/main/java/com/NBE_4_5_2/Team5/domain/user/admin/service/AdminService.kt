@@ -13,13 +13,11 @@ import com.NBE_4_5_2.Team5.domain.user.user.entity.Role
 import com.NBE_4_5_2.Team5.domain.user.user.entity.User
 import com.NBE_4_5_2.Team5.domain.user.user.repository.UserRepository
 import com.NBE_4_5_2.Team5.domain.user.user.service.UserService
-import com.NBE_4_5_2.Team5.domain.user.user.service.UserValidator
 import com.NBE_4_5_2.Team5.global.exception.notice.NoticeNotFoundException
 import com.NBE_4_5_2.Team5.global.exception.security.WrongRoleException
 import com.NBE_4_5_2.Team5.global.exception.user.AdminNotFoundException
 import jakarta.persistence.EntityNotFoundException
 import jakarta.validation.constraints.NotEmpty
-import lombok.RequiredArgsConstructor
 import lombok.extern.slf4j.Slf4j
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -33,10 +31,8 @@ import java.util.stream.Collectors
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 @Transactional
 class AdminService(
-    private val userValidator: UserValidator,
     private val banListRepository: BanListRepository,
     private val userRepository: UserRepository,
     private val noticePostRepository: NoticePostRepository,
@@ -84,6 +80,16 @@ class AdminService(
             .let {
                 userRepository.save(it)
             }
+    }
+
+    @Transactional(readOnly = true)
+    fun getAdmins(pageable: Pageable): Page<UserDto> {
+        isSuperAdmin(loggedInUser)
+
+        val adminRoles = listOf(Role.ADMIN)
+        val adminPage: Page<User> = userRepository.findAllByRoleIn(adminRoles, pageable)
+
+        return adminPage.map { user -> UserDto(user) }
     }
 
     @Transactional

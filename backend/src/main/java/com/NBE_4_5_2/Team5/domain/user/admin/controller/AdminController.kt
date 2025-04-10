@@ -222,4 +222,14 @@ class AdminController(
         adminService.deleteAdmin(adminId)
         return RsData("200-1", "관리자 삭제 성공.")
     }
+
+    @Operation(summary = "관리자 리스트 조회", description = "등록된 관리자 리스트를 조회합니다.")
+    @ApiResponses(value = [ApiResponse(responseCode = "200", description = "관리자 리스트 조회 성공")])
+    @SecurityRequirement(name = "cookieAuth")
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/admins")
+    fun getAdminList(@PageableDefault(size = 10, page = 0) pageable: Pageable): RsData<Page<UserDto>> {
+        val admins: Page<UserDto> = adminService.getAdmins(pageable)
+        return RsData("200-1", "관리자 리스트 조회 성공.", admins)
+    }
 }
