@@ -5,7 +5,6 @@ import com.NBE_4_5_2.Team5.domain.chat.entity.ChatRoom
 import com.NBE_4_5_2.Team5.domain.chat.repository.ChatMessageRepository
 import jakarta.annotation.Resource
 import jakarta.transaction.Transactional
-import lombok.RequiredArgsConstructor
 import org.springframework.data.redis.core.HashOperations
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.data.redis.listener.ChannelTopic
@@ -40,7 +39,7 @@ class ChatService(
     @Transactional
     fun sendChatMessage(chatMessage: ChatMessage) {
         chatMessage.setUserCount(chatRoomService.getUserCount(chatMessage.getRoomId()))
-        val chatRoom = chatRoomService.findByRoomId(chatMessage.getRoomId())
+        val chatRoom = chatRoomService.findBy_roomId(chatMessage.getRoomId())
         val receiver = chatRoomService.findOther(chatRoom.roomId, chatMessage.getSender())
 
         // 수신자가 채팅방 삭제한 상태
@@ -49,7 +48,6 @@ class ChatService(
             chatRoom.setDeleteStatus(receiver, false)
             hashOpsChatRoom.put(CHAT_ROOMS, chatRoom.roomId, chatRoom) // 레디스 업데이트
         }
-        println(receiver + "의 삭제 여부: " + chatRoom.getDeleteStatus(receiver))
 
         if (ChatMessage.MessageType.TALK == chatMessage.getType()) {
             // redis로 메세지 발송
@@ -107,6 +105,7 @@ class ChatService(
             objectRedisTemplate.convertAndSend(channelTopic.topic, message)
             hashOpsChatRoom.put(CHAT_ROOMS, chatRoom.roomId, chatRoom) // 레디스에 업데이트
             chatMessageRepository.save(message)
+
         }
     }
 }

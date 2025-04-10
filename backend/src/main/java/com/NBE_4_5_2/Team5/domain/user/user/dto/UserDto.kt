@@ -16,7 +16,9 @@ class UserDto(
     var createdAt: LocalDateTime,
     var modifiedAt: LocalDateTime,
     var blocked: Boolean,
-    var blockedCount: Int
+    var blockedCount: Int,
+    var latitude: Float,
+    var longitude: Float,
 ){
     constructor(admin: User) : this(
         id = admin.id,
@@ -30,11 +32,12 @@ class UserDto(
         createdAt = admin.createdDate,
         modifiedAt = admin.modifiedDate,
         blocked = admin.blocked,
-        blockedCount = admin.blockedCount
+        blockedCount = admin.blockedCount,
+        latitude = admin.latitude,
+        longitude = admin.longitude,
     )
 
     companion object {
-        @JvmStatic // TODO: 코틀린 변환 완료 후 제거
         fun fromEntity(user: User): UserDto {
             return UserDto(user)
         }

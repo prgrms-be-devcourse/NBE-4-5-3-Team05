@@ -7,6 +7,7 @@ import com.NBE_4_5_2.Team5.global.exception.security.ForbiddenAccessException
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
+import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import org.hibernate.Hibernate
 import java.util.*
@@ -19,9 +20,11 @@ class Comment() : BaseTime() {
     var id: String = "comment-" + UUID.randomUUID()
 
     @ManyToOne
+    @JoinColumn(name="target_id")
     lateinit var target: ProductPost
 
     @ManyToOne
+    @JoinColumn(name = "author_id")
     lateinit var author: User
 
     lateinit var content: String

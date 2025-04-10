@@ -1,13 +1,14 @@
 package com.NBE_4_5_2.Team5.domain.user.user.controller
 
+import com.NBE_4_5_2.Team5.domain.user.user.dto.LocationRequest
 import com.NBE_4_5_2.Team5.domain.user.user.dto.SignUpUserReqBody
 import com.NBE_4_5_2.Team5.domain.user.user.dto.UserDto
 import com.NBE_4_5_2.Team5.domain.user.user.dto.UserUpdateRequest
 import com.NBE_4_5_2.Team5.domain.user.user.service.UserAuthService
 import com.NBE_4_5_2.Team5.domain.user.user.service.UserService
-import com.NBE_4_5_2.Team5.global.Rq
+import com.NBE_4_5_2.Team5.global.rq.Rq
 import com.NBE_4_5_2.Team5.global.dto.Empty
-import com.NBE_4_5_2.Team5.global.dto.RsData
+import com.NBE_4_5_2.Team5.global.response.RsData
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -37,13 +38,13 @@ class UserController(
     }
 
 
-    @JvmRecord
+    
     data class LoginUserReqBody(
         @field:NotBlank(message = "아이디는 필수 입력값입니다.") val username: String,
         @field:NotBlank(message = "비밀번호는 필수 입력값입니다.") val password: String
     )
 
-    @JvmRecord
+    
     data class LoginUserResBody(val accessToken: String, val refreshToken: String, val item: UserDto)
 
     @Operation(summary = "로그인", description = "사용자가 로그인합니다.")
@@ -88,7 +89,7 @@ class UserController(
     }
 
 
-    @JvmRecord
+    
     data class RefreshUserReqBody(
         @field:NotBlank(message = "refreshToken을 입력해주세요.") val refreshToken: String
     )
@@ -115,6 +116,14 @@ class UserController(
         return RsData("200", "사용자 정보가 성공적으로 수정되었습니다.", updatedUser)
     }
 
+    @Operation(summary = "위치 등록", description = "현재 위치를 기반으로하여 프로필에 위치를 등록합니다.")
+    @PutMapping("/me/location")
+    fun registerLocation(@RequestBody @Valid locationRequest: LocationRequest): RsData<UserDto> {
+        val userIdentity = userAuthService.userIdentity
+        val user = userAuthService.getRealActor(userIdentity)
+        val updateUser = userService.registerLocation(user,locationRequest)
+        return RsData("200", "위치가 등록되었습니다.", updateUser);
+    }
 
     @Operation(summary = "회원 탈퇴", description = "현재 로그인된 사용자의 계정을 삭제합니다.")
     @SecurityRequirement(name = "cookieAuth")
@@ -132,7 +141,7 @@ class UserController(
     }
 
 
-    @JvmRecord
+    
     data class EmailUserReqBody(
         @field:Email(message = "올바른 이메일 형식이 아닙니다.") val email: String
     )
@@ -146,7 +155,7 @@ class UserController(
         return RsData("200-1", "이메일이 발송되었습니다.")
     }
 
-    @JvmRecord
+    
     data class VerifyCodeUserReqBody(val email: String, val code: String)
 
     @Operation(summary = "이메일 인증 코드 검증", description = "사용자가 입력한 인증 코드를 검증합니다.")
@@ -158,4 +167,6 @@ class UserController(
 
         return RsData("200-1", "이메일이 인증에 성공했습니다.")
     }
+
+
 }

@@ -16,7 +16,7 @@ class LikedPost(
 ) : BaseLongIdEntity() {
 
     companion object {
-        @JvmStatic
+        
         fun of(userId: String, productPostId: String): LikedPost {
             return LikedPost(userId, productPostId)
         }
