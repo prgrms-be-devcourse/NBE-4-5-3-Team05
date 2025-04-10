@@ -41,6 +41,7 @@ export default function TradeLocationModal({
   address,
   onClose,
 }: TradeLocationModalProps) {
+  const effectiveZoom = zoom < 18 ? 18 : zoom;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
       <div className="relative bg-white rounded shadow-lg w-[90%] max-w-3xl h-[70%]">
@@ -58,7 +59,7 @@ export default function TradeLocationModal({
         <div className="flex-grow relative" style={{ height: "100%" }}>
           <MapContainer
             center={[lat, lng]}
-            zoom={zoom}
+            zoom={effectiveZoom}
             style={{ width: "100%", height: "100%" }}
           >
             <TileLayer
