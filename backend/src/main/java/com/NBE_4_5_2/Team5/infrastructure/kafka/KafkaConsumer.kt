@@ -54,6 +54,7 @@ class KafkaConsumer(
                         emitter.send(
                             SseEmitter.event()
                                 .comment("ping")
+//                                .data("ping")
                         )
 
 
@@ -72,7 +73,6 @@ class KafkaConsumer(
         synchronized(emitters) {
             val iterator = emitters.entries
                 .stream().map { entry: Map.Entry<String, SseEmitter> -> entry.value }.iterator()
-            notificationRepository.save(notification);
             if (notification.global) {
                 while (iterator.hasNext()) {
                     val emitter = iterator.next()
@@ -96,6 +96,7 @@ class KafkaConsumer(
                             .data(notification.content?:"")
                     )
                 } catch (e: Exception) {
+                    e.printStackTrace()
                     // 전송 실패 시 emitter 제거
                     iterator.remove()
                 }
