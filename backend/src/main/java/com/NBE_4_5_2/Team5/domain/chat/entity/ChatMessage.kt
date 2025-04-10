@@ -24,7 +24,7 @@ class ChatMessage (
     private var _message: String="",
     @Column(name = "image")
     @JsonProperty("image")
-    private val _image: String="",
+    private var _image: String="",
     @Column(name = "user_count")
     private var _userCount: Long=0,
     @Column(name = "latitude")
