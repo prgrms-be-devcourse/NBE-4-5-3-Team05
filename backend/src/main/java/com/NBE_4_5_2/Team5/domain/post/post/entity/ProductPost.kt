@@ -63,6 +63,9 @@ class ProductPost() : BaseTime() {
     @Column(nullable = false)
     lateinit var location:String // 거래위치 추가
 
+    @Column(nullable = false)
+    var distance: Double = 0.0
+
     @OneToMany(mappedBy = "productPost", cascade = [CascadeType.ALL], orphanRemoval = true)
     val productCategories: MutableList<ProductCategory> = mutableListOf()
 
@@ -89,7 +92,7 @@ class ProductPost() : BaseTime() {
         this.latitude = latitude
         this.longitude = longitude
         this.location = location
-        setCreateDateNow();
+        setCreateDateNow()
     }
 
     companion object {

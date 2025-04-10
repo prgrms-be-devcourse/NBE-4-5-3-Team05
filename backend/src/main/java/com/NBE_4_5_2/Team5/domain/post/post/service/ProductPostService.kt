@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.NBE_4_5_2.Team5.domain.post.category.repository.CategoryRepository;
 import com.NBE_4_5_2.Team5.domain.post.post.dto.request.ProductPostModifyForm;
 import com.NBE_4_5_2.Team5.domain.post.post.dto.request.ProductPostWriteForm;
+import com.NBE_4_5_2.Team5.domain.post.post.dto.response.LocationResponse
 import com.NBE_4_5_2.Team5.domain.post.post.dto.response.PreviewPostResponse;
 import com.NBE_4_5_2.Team5.domain.post.post.dto.response.ProductPostResponse;
 import com.NBE_4_5_2.Team5.domain.post.post.enums.ProductStatus;
@@ -23,6 +24,10 @@ import com.NBE_4_5_2.Team5.global.exception.post.category.CategoryNotFoundExcept
 import com.NBE_4_5_2.Team5.global.exception.post.product.ProductPostNotFoundException;
 import com.NBE_4_5_2.Team5.global.exception.post.product.PurchasedProductException;
 import com.NBE_4_5_2.Team5.global.exception.security.ForbiddenAccessException;
+import kotlin.math.atan2
+import kotlin.math.cos
+import kotlin.math.sin
+import kotlin.math.sqrt
 
 
 @Service
@@ -233,4 +238,60 @@ class ProductPostService(
         productPost.updateStatus(status)
     }
 
+    @Transactional(readOnly = true)
+    fun getPostByLocation(lat: Float, lng: Float, sort: String, radius:Double, page: Int, pageSize: Int): PageDto<LocationResponse> {
+        val sortDirection = if (sort.equals("asc", ignoreCase = true)) Sort.Direction.ASC else Sort.Direction.DESC
+        val pageable = PageRequest.of(page - 1, pageSize, Sort.by(sortDirection, "createdDate"))
+        val posts = productPostRepository.findAll()
+
+        // 거리계산 필터링
+        val filterPosts = posts.filter { post ->
+            println("게시글 번호: ${post.id}")
+            println("게시글 위치!!!!!: lat = ${post.latitude}, lng = ${post.longitude}")
+            val distance = haversine(lat,lng,post.latitude,post.longitude)
+            post.distance = distance
+            println("거리!!!!!: $distance")
+            distance <= radius
+        }
+
+
+        // 페이징
+        val start = pageable.pageSize * pageable.pageNumber
+        val end = Math.min(start + pageable.pageSize, filterPosts.size)
+        val pagedPosts = filterPosts.subList(start, end)
+
+        val mappedPosts = pagedPosts.map { LocationResponse.fromEntity(it) }
+
+        return PageDto(
+            items = mappedPosts,
+            totalPages = (filterPosts.size + pageSize - 1) / pageSize, // 전체 페이지 수
+            totalItems = filterPosts.size, // 전체 게시글 수
+            currentPageNo = page, // 현재 페이지 번호
+            pageSize = pageSize // 페이지 크기
+        )
+    }
+
+    // 대충 거리 계산하는 알고리즘(단위는 km)
+    private fun haversine(lat: Float, lng: Float, postLat: Float, postLng: Float): Double {
+        val R = 6371.0 // 지구 반지름 (km)
+
+        // 위도와 경도를 라디안으로 변환
+        val latRad = Math.toRadians(lat.toDouble())
+        val lngRad = Math.toRadians(lng.toDouble())
+        val postLatRad = Math.toRadians(postLat.toDouble())
+        val postLngRad = Math.toRadians(postLng.toDouble())
+
+        // 위도와 경도의 차이 계산
+        val dLat = postLatRad - latRad
+        val dLng = postLngRad - lngRad
+
+        // Haversine 공식 계산
+        val a = sin(dLat / 2) * sin(dLat / 2) +
+                cos(latRad) * cos(postLatRad) *
+                sin(dLng / 2) * sin(dLng / 2)
+        val c = 2 * atan2(sqrt(a), sqrt(1 - a))
+
+        // 거리 계산
+        return R * c
+    }
 }
