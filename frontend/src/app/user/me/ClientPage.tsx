@@ -14,7 +14,8 @@ export default function ClientPage() {
     <div className="flex flex-col items-center p-6 w-full">
       <h2 className="text-2xl font-bold mb-4">내 정보 조회</h2>
 
-      <div className="flex flex-col md:flex-row border p-6 rounded-md w-full max-w-xl shadow-lg">
+      {/* 회원 정보 영역의 최대 너비를 늘려 넉넉하게 표시 */}
+      <div className="flex flex-col md:flex-row border p-6 rounded-md w-full max-w-5xl shadow-lg">
         {/* 왼쪽: 프로필 사진 (정사각형, 크게) */}
         <div className="flex-shrink-0 flex items-center justify-center mb-4 md:mb-0 md:mr-6">
           {loginMember.profileUrl ? (
@@ -30,8 +31,8 @@ export default function ClientPage() {
           )}
         </div>
 
-        {/* 오른쪽: 회원 정보 */}
-        <div className="flex flex-col justify-center">
+        {/* 오른쪽: 회원 정보 영역 (flex-grow 추가로 공간 활용) */}
+        <div className="flex flex-col justify-center flex-grow">
           <div className="mb-2">
             <strong>아이디:</strong> {loginMember.username}
           </div>
@@ -61,7 +62,7 @@ export default function ClientPage() {
 
       {/* 지도 영역 */}
       {(loginMember.latitude !== 0 || loginMember.longitude !== 0) && (
-        <div className="mt-4 w-full max-w-xl" style={{ height: "350px" }}>
+        <div className="mt-4 w-full max-w-5xl" style={{ height: "350px" }}>
           <h1 className="text-lg mb-2">Map</h1>
           <MapComponent
             currentPos={{

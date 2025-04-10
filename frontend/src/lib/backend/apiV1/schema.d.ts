@@ -1030,8 +1030,10 @@ export interface components {
         ChatRoom: {
             sender: string;
             receiver: string;
+            postId?: string;
             id: string;
             roomId: string;
+            writer?: string;
             name: string;
             client: string;
             /** Format: int64 */
@@ -1153,8 +1155,8 @@ export interface components {
         };
         SortObject: {
             empty?: boolean;
-            unsorted?: boolean;
             sorted?: boolean;
+            unsorted?: boolean;
         };
         RsDataListPreviewPostResponse: {
             code: string;
@@ -1197,12 +1199,14 @@ export interface components {
         ChatRoomDto: {
             id: string;
             roomId: string;
+            postId?: string;
+            writer?: string;
             name: string;
             /** Format: int64 */
             userCount: number;
             lastMessage: string;
             /** @enum {string} */
-            messageType: "ENTER" | "QUIT" | "TALK" | "IMAGE" | "LOCATION";
+            messageType: "ENTER" | "QUIT" | "TALK" | "IMAGE" | "LOCATION" | "STATUS";
             lastTimestamp: string;
             other: string;
         };
@@ -1229,7 +1233,7 @@ export interface components {
             lastMessage: string;
             lastTimestamp: string;
             /** @enum {string} */
-            type: "ENTER" | "QUIT" | "TALK" | "IMAGE" | "LOCATION";
+            type: "ENTER" | "QUIT" | "TALK" | "IMAGE" | "LOCATION" | "STATUS";
         };
         RsDataListMessageDto: {
             code: string;
@@ -1247,10 +1251,10 @@ export interface components {
             data: components["schemas"]["Category"][];
         };
         PageUserDto: {
-            /** Format: int64 */
-            totalElements?: number;
             /** Format: int32 */
             totalPages?: number;
+            /** Format: int64 */
+            totalElements?: number;
             /** Format: int32 */
             size?: number;
             content?: components["schemas"]["UserDto"][];
@@ -1270,10 +1274,10 @@ export interface components {
             data: components["schemas"]["PageUserDto"];
         };
         PageNoticeResBody: {
-            /** Format: int64 */
-            totalElements?: number;
             /** Format: int32 */
             totalPages?: number;
+            /** Format: int64 */
+            totalElements?: number;
             /** Format: int32 */
             size?: number;
             content?: components["schemas"]["NoticeResBody"][];
