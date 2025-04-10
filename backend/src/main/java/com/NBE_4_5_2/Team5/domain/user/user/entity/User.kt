@@ -64,15 +64,17 @@ class User() : BaseTime() {
     var latitude: Float = 0.0F
     var longitude: Float = 0.0F
 
-    constructor(id: String, username: String, nickname: String, role: Role): this() {
+    constructor(id: String, username: String, nickname: String, role: Role) : this() {
         this.id = id
         this.username = username
         this.nickname = nickname
         this.role = role
     }
 
-    constructor(username: String, password: String, email: String, nickname: String,
-                address: String, profileUrl: String, role: Role): this() {
+    constructor(
+        username: String, password: String, email: String, nickname: String,
+        address: String, profileUrl: String, role: Role
+    ) : this() {
         this.username = username
         this.password = password
         this.email = email
@@ -101,12 +103,12 @@ class User() : BaseTime() {
 
     fun ban() {
         this.blocked = true
-        this.blockedCount ++
+        this.blockedCount++
     }
 
     fun unBan() {
         if (!blocked) return
-        blocked = false
+        this.blocked = false
     }
 
     /**

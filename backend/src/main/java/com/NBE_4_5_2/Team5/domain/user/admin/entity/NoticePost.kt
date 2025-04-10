@@ -10,11 +10,14 @@ import java.util.*
 @Table(name = "notice_post")
 class NoticePost(
     @Id
-    @Column(updatable = false, nullable = false)
+    @Column(updatable = false, nullable = false, name = "id")
     private var _id: String = "npost-" + UUID.randomUUID(),
     @ManyToOne
+    @JoinColumn(name = "admin_id")
     private var _admin: User,
+    @Column(name = "title")
     private var _title: String,
+    @Column(name = "content")
     private var _content: String
 ) : BaseTime() {
     val id:String
