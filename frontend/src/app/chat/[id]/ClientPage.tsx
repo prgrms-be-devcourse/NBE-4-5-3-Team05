@@ -375,8 +375,8 @@ export default function ClientPage({
                   <div className=" h-[30vh] w-[30vh]">
                     <MapComponent
                       currentPos={{
-                        lat: message.latitude!,
-                        lng: message.longitude!,
+                        lat: message.latitude,
+                        lng: message.longitude,
                         zoom: 18,
                       }}
                       onLocationSelect={() => {}}

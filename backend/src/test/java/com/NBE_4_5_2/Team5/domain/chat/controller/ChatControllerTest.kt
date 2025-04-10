@@ -93,8 +93,6 @@ internal class ChatControllerTest {
         token = userService.generateAuthTokenAsString(loginedUser)
         val param = token.split(" ".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
         accessToken = param[1]
-        println("accessToken: $accessToken")
-        println("토큰1: $token")
     }
 
     @DisplayName("셋업_ 게시글,유저")
@@ -109,8 +107,6 @@ internal class ChatControllerTest {
         token = userService.generateAuthTokenAsString(loginedUser)
         val param = token.split(" ".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
         accessToken = param[1]
-        println("accessToken: $accessToken")
-        println("토큰1: $token")
 
         // 포스트 ID 설정
         val post = productPostRepository.findAll().stream()
@@ -129,10 +125,7 @@ internal class ChatControllerTest {
                 .header("Authorization", "Bearer $token")
                 .contentType(MediaType.APPLICATION_JSON)
         )
-            .andDo(MockMvcResultHandlers.print()) // 요청의 Content-Type
         val roomId = JsonPath.read<String>(action.andReturn().response.contentAsString, "$.data.roomId")
-        println("sender: $sender")
-        println("임시 roomId: $roomId")
         return roomId
     }
 
@@ -182,7 +175,6 @@ internal class ChatControllerTest {
 
             override fun handleFrame(headers: StompHeaders, payload: Any?) {
                 val message = payload as ChatMessage?
-                println("Received message: " + message!!.getMessage())
             }
         })
 
@@ -193,14 +185,12 @@ internal class ChatControllerTest {
             1, userCount,
             "구독 실패\nDestination: $destination\nuserCount: $userCount"
         )
-        println("채팅방 구독 요청이 완료되었습니다. Destination: $destination")
     }
 
     @DisplayName("셋업 _ 연결해제")
     @Throws(Exception::class)
     fun setUp_DisConnect() {
         stompSession!!.disconnect()
-        println("종료")
     }
 
     @DisplayName("셋업 - 메세지 전송")
@@ -234,7 +224,6 @@ internal class ChatControllerTest {
                 .header("Authorization", "Bearer $token")
                 .contentType(MediaType.APPLICATION_JSON)
         )
-            .andDo(MockMvcResultHandlers.print())
     }
 
     //
@@ -246,7 +235,6 @@ internal class ChatControllerTest {
     fun webSocketConnection() {
         // Given
         if (::stompSession.isInitialized && stompSession.isConnected) {
-            println("연결해제")
             setUp_DisConnect()
         }
         // URL
@@ -278,7 +266,6 @@ internal class ChatControllerTest {
         // Then
         Assertions.assertNotNull(stompSession, "WebSocket 연결이 실패했습니다.")
         Assertions.assertTrue(stompSession.isConnected(), "WebSocket 연결이 활성화되지 않았습니다.")
-        println("WebSocket 연결 상태: " + stompSession.isConnected())
         // 연결 해제
         setUp_DisConnect()
     }
@@ -294,25 +281,19 @@ internal class ChatControllerTest {
         Assertions.assertNotNull(stompSession, "Given: 웹소켓이 연결되지 않음")
         Assertions.assertTrue(stompSession.isConnected, "Given: 웹소켓이 연결되지 않음")
         Assertions.assertEquals(1, userCount, "Given: 구독 실패")
-        println("종료 전, userCount: $userCount")
 
         // When
         stompSession.disconnect()
-        println("종료")
         Thread.sleep(100) // 비동기 처리 대기
 
         // Then
         Assertions.assertFalse(stompSession.isConnected, "WebSocket 연결이 끊기지 않았습니다.")
         userCount = chatRoomService.getUserCount(roomId)
         Assertions.assertEquals(0, userCount, "채팅방 인원수가 감소되지 않았습니다.")
-        println("종료 후, userCount: $userCount")
 
         // 세션 정보 삭제 확인
         val sessionId = stompSession.sessionId
         Assertions.assertNull(chatRoomService.getUserEnterRoomId(sessionId), "세션 정보가 삭제되지 않았습니다.")
-
-        // 로그 출력
-        println("STOMP DISCONNECT 테스트 완료. 세션 ID: $sessionId")
     }
 
     @Test
@@ -327,14 +308,13 @@ internal class ChatControllerTest {
         val destination = "/sub/chat/room/$roomId"
 
         // When
-        stompSession!!.subscribe(destination, object : StompFrameHandler {
+        stompSession.subscribe(destination, object : StompFrameHandler {
             override fun getPayloadType(headers: StompHeaders): Type {
                 return ChatMessage::class.java
             }
 
             override fun handleFrame(headers: StompHeaders, payload: Any?) {
                 val message = payload as ChatMessage?
-                println("Received message: " + message!!.getMessage())
             }
         })
 
@@ -345,7 +325,6 @@ internal class ChatControllerTest {
             1, userCount,
             "구독 실패\nDestination: $destination\nuserCount: $userCount"
         )
-        println("채팅방 구독 요청이 완료되었습니다. Destination: $destination")
         // 연결 해제
         setUp_DisConnect()
     }
@@ -382,7 +361,6 @@ internal class ChatControllerTest {
         Assertions.assertFalse(messages.isEmpty(), "메세지가 전송되지 않았습니다.")
         val lastMessage = messages[messages.size - 1]
         Assertions.assertEquals(content, lastMessage.getMessage(), "메세지 내용이 일치하지 않습니다.")
-        println("messages: " + lastMessage.getMessage())
 
         setUp_DeleteRoom() // 채팅방 비우기
         setUp_DisConnect() // 연결 해제
@@ -404,7 +382,7 @@ internal class ChatControllerTest {
                 .param("roomId", roomId)
                 .header("Authorization", "Bearer $token")
                 .contentType(MediaType.APPLICATION_JSON)
-        ).andDo(MockMvcResultHandlers.print())
+        )
 
         // Then
         val result = action.andExpect(MockMvcResultMatchers.status().isOk())
@@ -416,8 +394,6 @@ internal class ChatControllerTest {
         val responseContent = result.response.contentAsString
         val messages = JsonPath.read<List<String>>(responseContent, "$.data[*].message")
         val data = JsonPath.read<List<String>>(responseContent, "$.data[*]")
-        println("메세지 리스트: $messages")
-        println("================== data ==================\n$data")
         setUp_DisConnect() // 연결 해제
         setUp_DeleteRoom() // 채팅방 비우기
     }
@@ -437,7 +413,7 @@ internal class ChatControllerTest {
                 .param("roomId", roomId)
                 .header("Authorization", "Bearer $token")
                 .contentType(MediaType.APPLICATION_JSON)
-        ).andDo(MockMvcResultHandlers.print())
+        )
 
         var result = action.andExpect(MockMvcResultMatchers.status().isOk())
             .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("200"))
@@ -447,7 +423,6 @@ internal class ChatControllerTest {
 
         var responseContent = result.response.contentAsString
         var data = JsonPath.read<List<String>>(responseContent, "$.data[*]")
-        println("================== 삭제 전 ==================\n$data")
 
         // When
         // 삭제
@@ -457,7 +432,7 @@ internal class ChatControllerTest {
                 .param("roomId", roomId)
                 .header("Authorization", "Bearer $token")
                 .contentType(MediaType.APPLICATION_JSON)
-        ).andDo(MockMvcResultHandlers.print())
+        )
 
         result = action.andExpect(MockMvcResultMatchers.status().isOk())
             .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("200"))
@@ -467,7 +442,6 @@ internal class ChatControllerTest {
 
         responseContent = result.response.contentAsString
         data = JsonPath.read<List<String>>(responseContent, "$.data[*]")
-        println("================== 삭제 후 원래 계정 ==================\n$data")
 
         // 반대쪽 계정 로그인
         receiver = sender
@@ -478,8 +452,7 @@ internal class ChatControllerTest {
                 .param("roomId", roomId)
                 .header("Authorization", "Bearer $token")
                 .contentType(MediaType.APPLICATION_JSON)
-        ).andDo(MockMvcResultHandlers.print())
-
+        )
         // Then
         result = action.andExpect(MockMvcResultMatchers.status().isOk())
             .andExpect(MockMvcResultMatchers.jsonPath("$.code").value("200"))
@@ -489,7 +462,6 @@ internal class ChatControllerTest {
 
         responseContent = result.response.contentAsString
         data = JsonPath.read<List<String>>(responseContent, "$.data[*]")
-        println("================== 새로운 계정 ==================\n$data")
         setUp_DisConnect() // 연결 해제
         setUp_DeleteRoom() // 채팅방 비우기
     }

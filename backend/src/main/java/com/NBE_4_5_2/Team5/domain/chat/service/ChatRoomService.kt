@@ -65,7 +65,6 @@ class ChatRoomService {
     // 채팅방 생성
     fun createChatRoom(sender: String, receiver: String): ChatRoom {
         var roomId = findByRoomIdByUsers(sender, receiver)
-        println("roomId = $roomId")
         // 방이 이미 존재
         if (roomId != null) {
             val chatRoom = getRoomByRoomId(roomId, receiver)
@@ -157,7 +156,6 @@ class ChatRoomService {
         // 양측에서 모두 삭제했을 경우
         if (isAllDelete(roomId)) {
             hashOpsChatRoom.delete(CHAT_ROOMS, roomId) // redis에서 삭제
-            println("완전 삭제")
         }
     }
 
