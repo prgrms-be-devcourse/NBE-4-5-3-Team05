@@ -14,6 +14,18 @@ spring:
   jackson:
     serialization:
       fail-on-empty-beans: false
+  kafka:
+    consumer:
+      group-id: sse-demo-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "com.NBE_4_5_2.Team5.domain.notification.entity"
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
 
   output:
     ansi:

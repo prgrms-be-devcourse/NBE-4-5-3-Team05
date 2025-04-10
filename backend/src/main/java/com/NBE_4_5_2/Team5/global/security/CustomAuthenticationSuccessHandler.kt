@@ -2,7 +2,7 @@ package com.NBE_4_5_2.Team5.global.security
 
 import com.NBE_4_5_2.Team5.domain.user.user.service.UserAuthService
 import com.NBE_4_5_2.Team5.domain.user.user.service.UserService
-import com.NBE_4_5_2.Team5.global.Rq
+import com.NBE_4_5_2.Team5.global.rq.Rq
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.security.core.Authentication
