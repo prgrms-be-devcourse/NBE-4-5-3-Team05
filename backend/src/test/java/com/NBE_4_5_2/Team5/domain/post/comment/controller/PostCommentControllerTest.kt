@@ -73,7 +73,7 @@ class PostCommentControllerTest {
         )
 
         val productPost: ProductPost = productPostRepository.save(
-            ProductPost(author, "name", 5000, "title", "content", "url", 50F, 50F,"거래위치")
+            ProductPost(author, "name", 5000, "title", "content", "url", 50F, 50F,"거래위치",0.0)
         )
 
         val cookieMap: Map<String, Cookie> = login(author.username, "password")
@@ -115,7 +115,7 @@ class PostCommentControllerTest {
         )
 
         val productPost: ProductPost = productPostRepository.save(
-            ProductPost(author, "name", 5000, "title", "content", "url", 50F, 50F,"거래위치")
+            ProductPost(author, "name", 5000, "title", "content", "url", 50F, 50F,"거래위치",0.0)
         )
 
         val cookieMap: Map<String, Cookie> = login(author.username, "password")
@@ -174,7 +174,7 @@ class PostCommentControllerTest {
         )
 
         val productPost: ProductPost = productPostRepository.save(
-            ProductPost(author, "name", 5000, "title", "content", "url", 50F, 50F,"거래위치")
+            ProductPost(author, "name", 5000, "title", "content", "url", 50F, 50F,"거래위치",0.0)
         )
 
         val cookieMap: Map<String, Cookie> = login(author.username, "password")

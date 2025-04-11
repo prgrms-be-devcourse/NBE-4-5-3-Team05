@@ -12,6 +12,7 @@ import { components } from "@/lib/backend/apiV1/schema";
 import { faComment, faBars } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import ScrollToTopButton from "@/components/posts/ScrollToTopButton";
+import LocationSection from "@/components/posts/LocationSection";
 
 // API 응답으로 받아올 카테고리 타입
 type Category = {
@@ -231,6 +232,7 @@ export default function ClientPage() {
         )}
       </section>
 
+
       {/* 최근 본 상품 섹션 */}
       <section className="rounded-xl shadow-md p-6 bg-white mb-6">
         <Button className="flex justify-start text-lg font-bold mb-4">
@@ -243,6 +245,12 @@ export default function ClientPage() {
       <section className="rounded-xl shadow-md p-6 bg-white mb-6">
         <RecentlyUploadedSection />
       </section>
+
+      {/* 위치 기반 게시글 섹션 */}
+      <section className="rounded-xl shadow-md p-6 bg-white mb-6">
+        {isLogin && <LocationSection isLogin={isLogin} />}
+      </section>
+
 
       {/* 우측 하단에 Top 버튼 */}
       <ScrollToTopButton />
