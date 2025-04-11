@@ -15,9 +15,9 @@ import com.NBE_4_5_2.Team5.domain.user.user.repository.UserRepository
 import com.NBE_4_5_2.Team5.domain.user.user.service.UserService
 import com.NBE_4_5_2.Team5.global.exception.notice.NoticeNotFoundException
 import com.NBE_4_5_2.Team5.global.exception.security.WrongRoleException
+import com.NBE_4_5_2.Team5.global.exception.user.AdminNotFoundException
 import jakarta.persistence.EntityNotFoundException
 import jakarta.validation.constraints.NotEmpty
-import lombok.RequiredArgsConstructor
 import lombok.extern.slf4j.Slf4j
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -31,7 +31,6 @@ import java.util.stream.Collectors
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 @Transactional
 class AdminService(
     private val banListRepository: BanListRepository,
@@ -46,8 +45,29 @@ class AdminService(
         private const val BAN_DURATION_WEIGHT = 7
     }
 
+    @Transactional
+    fun signUpSuperAdmin(username: String, password: String, nickname: String, email: String): User {
+        return User(
+            username,
+            passwordEncoder.encode(password),
+            email,
+            nickname,
+            "addr",
+            "url",
+            Role.SUPER_ADMIN
+        )
+            .let {
+                userService.deleteAuthenticationCode(it.email)
+                userRepository.save(it)
+            }
+    }
 
+    @Transactional
     fun signUpAdmin(username: String, password: String, nickname: String, email: String): User {
+
+        isSuperAdmin(loggedInUser)
+        userService.checkDuplicateAndEmail(username, nickname, email)
+
         return User(
             username,
             passwordEncoder.encode(password),
@@ -58,10 +78,31 @@ class AdminService(
             Role.ADMIN
         )
             .let {
-                userService.deleteAuthenticationCode(it.email)
                 userRepository.save(it)
             }
     }
+
+    @Transactional(readOnly = true)
+    fun getAdmins(pageable: Pageable): Page<UserDto> {
+        isSuperAdmin(loggedInUser)
+
+        val adminRoles = listOf(Role.ADMIN)
+        val adminPage: Page<User> = userRepository.findAllByRoleIn(adminRoles, pageable)
+
+        return adminPage.map { user -> UserDto(user) }
+    }
+
+    @Transactional
+    fun deleteAdmin(adminId: String) {
+
+        isSuperAdmin(loggedInUser)
+
+        val admin = userRepository.findById(adminId)
+            .orElseThrow { AdminNotFoundException("404","관리자를 찾을 수 없습니다") }
+
+        userRepository.delete(admin)
+    }
+
 
     fun writeNotice(title: @NotEmpty String, content: @NotEmpty String): NoticeResBody {
         isAdmin(loggedInUser)
@@ -109,8 +150,16 @@ class AdminService(
         get() = userService.userIdentity
 
     private fun isAdmin(admin: User) {
+        if(admin.role == Role.SUPER_ADMIN) return
+
         if (admin.role != Role.ADMIN) {
             throw WrongRoleException(HttpStatus.BAD_REQUEST.toString(), "관리자만 작성할 수 있는 글입니다.")
+        }
+    }
+
+    private fun isSuperAdmin(admin: User) {
+        if (admin.role != Role.SUPER_ADMIN) {
+            throw WrongRoleException(HttpStatus.BAD_REQUEST.toString(), "메인 관리자만 접근할 수 있습니다.")
         }
     }
 
@@ -191,6 +240,5 @@ class AdminService(
                 NoticeResBody.of(it)
             }
     }
-
 
 }

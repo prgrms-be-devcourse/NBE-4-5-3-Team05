@@ -30,6 +30,7 @@ export default function ClientLayout({
     removeLoginMember,
     isLoginMemberPending,
     isAdmin,
+    isSuperAdmin,
     setNoLoginMember,
   } = useLoginMember();
 
@@ -45,6 +46,7 @@ export default function ClientLayout({
     isLogin,
     isLoginMemberPending,
     isAdmin,
+    isSuperAdmin,
     setNoLoginMember,
   };
 

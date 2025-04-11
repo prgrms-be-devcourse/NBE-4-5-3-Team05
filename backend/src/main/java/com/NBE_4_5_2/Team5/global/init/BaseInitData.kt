@@ -1,6 +1,5 @@
 package com.NBE_4_5_2.Team5.global.init
 
-import com.NBE_4_5_2.Team5.domain.notification.entity.Notification
 import com.NBE_4_5_2.Team5.domain.post.category.entity.Category
 import com.NBE_4_5_2.Team5.domain.post.category.repository.CategoryRepository
 import com.NBE_4_5_2.Team5.domain.post.post.entity.ProductCategory
@@ -15,11 +14,11 @@ import com.NBE_4_5_2.Team5.domain.user.admin.service.AdminService
 import com.NBE_4_5_2.Team5.domain.user.user.entity.Role
 import com.NBE_4_5_2.Team5.domain.user.user.entity.User
 import com.NBE_4_5_2.Team5.domain.user.user.repository.UserRepository
+import com.NBE_4_5_2.Team5.domain.user.user.service.UserAuthService
 import com.NBE_4_5_2.Team5.domain.user.user.service.UserService
 import com.NBE_4_5_2.Team5.domain.user.user.service.email.EmailService
 import com.NBE_4_5_2.Team5.global.aspect.product.ProductMetaDataNames
 import com.NBE_4_5_2.Team5.infrastructure.kafka.KafkaConsumer
-import com.NBE_4_5_2.Team5.infrastructure.kafka.KafkaNotificationProducerService
 import jakarta.transaction.Transactional
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -29,8 +28,6 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Lazy
 import org.springframework.context.annotation.Profile
 import org.springframework.core.annotation.Order
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter
-import java.io.IOException
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
@@ -50,6 +47,9 @@ class BaseInitData(
     @Value("\${custom.server.host}")
     private val serverHost: String
 ) {
+    @Autowired
+    private lateinit var userAuthService: UserAuthService
+
     @Autowired
     private lateinit var productMetadataRepository: ProductMetadataRepository
 
@@ -86,19 +86,20 @@ class BaseInitData(
     @Order(6)
     fun applicationRunner6(): ApplicationRunner =
         ApplicationRunner { _ -> self.metadata() }
-    fun metadata(){
-        if(productMetadataRepository.findByName(ProductMetaDataNames.PRODUCT_TOTAL_COUNT)!=null)
-        productMetadataRepository.save(ProductMetadata(ProductMetaDataNames.PRODUCT_TOTAL_COUNT, "0"))
+
+    fun metadata() {
+        if (productMetadataRepository.findByName(ProductMetaDataNames.PRODUCT_TOTAL_COUNT) != null)
+            productMetadataRepository.save(ProductMetadata(ProductMetaDataNames.PRODUCT_TOTAL_COUNT, "0"))
     }
 
     fun noticePing() {
         val executor = Executors.newSingleThreadScheduledExecutor()
 
         executor.scheduleAtFixedRate({
-            try{
+            try {
                 kafkaConsumer.ping()
 
-            }catch (e:Throwable){
+            } catch (e: Throwable) {
 
             }
 
@@ -113,11 +114,12 @@ class BaseInitData(
         emailService.saveAuthenticationCode("user2@gmail.com", "verified")
         emailService.saveAuthenticationCode("user3@gmail.com", "verified")
         emailService.saveAuthenticationCode("user4@gmail.com", "verified")
+        emailService.saveAuthenticationCode("admin1@gmail.com", "verified")
         emailService.saveAuthenticationCode("admin2@gmail.com", "verified")
 
         val baseUrl =
             if (serverHost.startsWith("backend.nbe-4-5-5-team5.shop"))
-                "https://%s/images".formatted(serverHost)
+                "https://${serverHost}/images"
             else
                 "http://localhost:8080/images/"
         val imageUrl = baseUrl + "default_profile" + ".jpg" // 하나의 이미지만 사용
@@ -126,8 +128,12 @@ class BaseInitData(
         userService.createUser("user2", "user21234@", "user2@gmail.com", "user2", "서울시 강서구", imageUrl)
         userService.createUser("user3", "user31234@", "user3@gmail.com", "user3", "서울시 광진구", imageUrl)
 
+        val superAdmin = adminService.signUpSuperAdmin("admin1", "password1", "admin1", "admin1@gmail.com")
+
+        userAuthService.setLogin(superAdmin)
         adminService.signUpAdmin("admin2", "password2", "admin2", "admin2@gmail.com")
         adminService.signUpAdmin("user4", "user41234@", "admin4", "user4@gmail.com")
+        userAuthService.setLogout()
     }
 
     @Transactional
@@ -204,7 +210,7 @@ class BaseInitData(
         // 관리자 계정 우선, 없으면 첫 번째 유저
         val users = userRepository.findAll()
         val adminUser: User = users
-            .firstOrNull { it.role == Role.ADMIN }
+            .firstOrNull { it.role == Role.ADMIN || it.role == Role.SUPER_ADMIN }
             ?: users.firstOrNull()
             ?: return  // 유저 자체가 하나도 없으면 초기화 스킵
 

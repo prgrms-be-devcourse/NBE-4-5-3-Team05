@@ -13,7 +13,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
-import jakarta.validation.constraints.NotEmpty
+import jakarta.validation.constraints.*
 import lombok.RequiredArgsConstructor
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -30,7 +30,7 @@ class AdminController(
     private val adminService: AdminService
 ) {
 
-    
+
     data class NoticeReqBody(
         @Parameter(
             description = "공지사항 제목",
@@ -62,7 +62,7 @@ class AdminController(
         return RsData("200-1", "공지사항 등록 성공.", data)
     }
 
-    
+
     data class BanReqBody(val reason: @NotEmpty String)
 
     @Operation(summary = "유저 정지", description = "특정 유저를 정지시킵니다.")
@@ -150,7 +150,7 @@ class AdminController(
         return RsData("200-1", "공지사항 리스트 조회 성공.", notices)
     }
 
-    
+
     data class UpdateNoticeReq(val title: String, val content: String)
 
     @Operation(summary = "공지사항 수정", description = "기존 공지사항을 수정합니다.")
@@ -182,5 +182,54 @@ class AdminController(
         val noticeDto: NoticeResBody = adminService.getNotice(noticeId)
 
         return RsData("200-1", "공지사항 조회 성공.", noticeDto)
+    }
+
+    data class SignUpAdminReqBody(
+        @field:Pattern(regexp = "^[a-zA-Z0-9]+$", message = "아이디는 영문과 숫자만 사용할 수 있습니다.")
+        @field:Size(min = 4, max = 20, message = "아이디는 4~20자 사이여야 합니다.")
+        val username:  String,
+        val password:  String,
+        @field:Size(min = 2, max = 20, message = "닉네임은 2~20자 사이여야 합니다.")
+        val nickname:  String,
+        @field:NotBlank(message = "이메일은 필수 입력값입니다.")
+        @field:Email(message = "올바른 이메일 형식이 아닙니다.")
+        val email: String
+    )
+
+    @Operation(summary = "관리자 회원가입", description = "superadmin 권한으로 새로운 admin 계정을 생성합니다.")
+    @ApiResponses(value = [ApiResponse(responseCode = "200", description = "관리자 회원가입 성공")])
+    @SecurityRequirement(name = "cookieAuth")
+    @PreAuthorize("isAuthenticated()")
+    @PostMapping("/signup")
+    fun signUpAdmin(@RequestBody @Valid body: SignUpAdminReqBody): RsData<UserDto> {
+
+        val newAdmin = adminService.signUpAdmin(
+            body.username,
+            body.password,
+            body.nickname,
+            body.email
+        )
+        return RsData("200-1", "관리자 회원가입 성공.", UserDto(newAdmin))
+    }
+
+    @Operation(summary = "관리자 삭제", description = "superadmin 권한으로 특정 admin 계정을 삭제합니다.")
+    @ApiResponses(value = [ApiResponse(responseCode = "204", description = "관리자 삭제 성공")])
+    @SecurityRequirement(name = "cookieAuth")
+    @PreAuthorize("isAuthenticated()")
+    @DeleteMapping("/{adminId}")
+    fun deleteAdmin(@PathVariable adminId: String): RsData<Void> {
+
+        adminService.deleteAdmin(adminId)
+        return RsData("200-1", "관리자 삭제 성공.")
+    }
+
+    @Operation(summary = "관리자 리스트 조회", description = "등록된 관리자 리스트를 조회합니다.")
+    @ApiResponses(value = [ApiResponse(responseCode = "200", description = "관리자 리스트 조회 성공")])
+    @SecurityRequirement(name = "cookieAuth")
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/admins")
+    fun getAdminList(@PageableDefault(size = 10, page = 0) pageable: Pageable): RsData<Page<UserDto>> {
+        val admins: Page<UserDto> = adminService.getAdmins(pageable)
+        return RsData("200-1", "관리자 리스트 조회 성공.", admins)
     }
 }

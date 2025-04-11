@@ -21,6 +21,10 @@ class UserAuthService(
             UsernamePasswordAuthenticationToken(user, null, user.authorities)
     }
 
+    fun setLogout() {
+        SecurityContextHolder.clearContext()
+    }
+
     fun getRealActor(actor: User): User {
         return userService.getUserById(actor.id).get()
     }

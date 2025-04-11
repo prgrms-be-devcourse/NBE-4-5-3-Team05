@@ -401,7 +401,9 @@ class ChatRoomControllerTest {
                 "User not found"
             )
         }
-        org.junit.jupiter.api.Assertions.assertEquals(Role.ADMIN, admin.role)
+        org.junit.jupiter.api.Assertions.assertTrue(
+            admin.role == Role.ADMIN || admin.role == Role.SUPER_ADMIN
+        )
     } // Given
     // When
     // Then

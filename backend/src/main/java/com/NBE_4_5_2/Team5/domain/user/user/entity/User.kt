@@ -59,7 +59,7 @@ class User() : BaseTime() {
     val wroteComments: MutableList<Comment> = mutableListOf()
 
     val isAdmin: Boolean
-        get() = role == Role.ADMIN
+        get() = role == Role.ADMIN || role == Role.SUPER_ADMIN
 
     var latitude: Float = 0.0F
     var longitude: Float = 0.0F
@@ -178,7 +178,11 @@ class User() : BaseTime() {
         get() = memberAuthoritiesAsString.map { SimpleGrantedAuthority(it) }
 
     val memberAuthoritiesAsString: List<String>
-        get() = if (isAdmin) listOf("ROLE_ADMIN") else emptyList()
+        get() = when (role) {
+            Role.SUPER_ADMIN -> listOf("ROLE_SUPER_ADMIN", "ROLE_ADMIN")
+            Role.ADMIN -> listOf("ROLE_ADMIN")
+            else -> emptyList()
+        }
 
     fun addWrittenPost(saved: ProductPost) {
         purchasedProducts.add(saved)

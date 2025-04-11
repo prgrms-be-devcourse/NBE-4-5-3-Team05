@@ -10,11 +10,11 @@ import com.NBE_4_5_2.Team5.domain.user.user.entity.Role
 import com.NBE_4_5_2.Team5.domain.user.user.entity.User
 import com.NBE_4_5_2.Team5.domain.user.user.repository.UserRepository
 import com.NBE_4_5_2.Team5.domain.user.user.service.email.EmailService
-import com.NBE_4_5_2.Team5.global.rq.Rq
 import com.NBE_4_5_2.Team5.global.exception.ServiceException
 import com.NBE_4_5_2.Team5.global.exception.security.AuthenticationNotValidException
 import com.NBE_4_5_2.Team5.global.exception.security.TokenNotFoundException
 import com.NBE_4_5_2.Team5.global.exception.user.UserNotFoundException
+import com.NBE_4_5_2.Team5.global.rq.Rq
 import com.NBE_4_5_2.Team5.global.security.SecurityUser
 import jakarta.transaction.Transactional
 import org.springframework.security.authentication.AnonymousAuthenticationToken
@@ -303,8 +303,20 @@ class UserService(
             ?: throw ServiceException("400-1", "인증코드가 틀렸습니다.")
     }
 
+    /**
+     * 요청 이메일을 key 값으로 인증 코드를 redis에 저장
+     * */
+    fun saveAuthenticationCode(email: String, code: String) {
+        emailService.saveAuthenticationCode(email, code)
+    }
+
     // 관리자 유저 한명 반환
     val adminUsers: User
         get() = userRepository.findAllByRole(Role.ADMIN)
             .firstOrNull() ?: throw UserNotFoundException("404", "관리자 유저가 없습니다.")
+
+    fun checkDuplicateAndEmail(username: String, nickname: String, email: String) {
+        userValidator.duplicate(username, nickname)
+        userValidator.emailVerified(email)
+    }
 }
