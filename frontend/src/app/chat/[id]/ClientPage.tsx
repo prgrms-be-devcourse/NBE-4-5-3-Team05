@@ -51,6 +51,7 @@ export default function ClientPage({
   const [stompClient, setStompClient] = useState<any>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<null | HTMLDivElement>(null);
+  const [selectedStatus, setSelectedStatus] = useState<string>("");
 
   const [isOpen, setIsOpen] = useState(false);
 
@@ -149,12 +150,21 @@ export default function ClientPage({
   }, []);
 
   const handleStatusChangeAndSend = (status: string) => {
-    handleSendStatus(status);
+    setSelectedStatus(status); // 상태 업데이트
+    handleSendStatus(status); // 상태 전송
   };
 
+  // 게시글 상태 변경
+  const handleStatusChange = (status: string) => {
+    setSelectedStatus(status);
+  };
 
   const handleSendStatus = (status: string) => {
-
+    if (!status) {
+      alert("상태를 선택하세요.");
+      return;
+    }
+  
     if (!stompClient) {
       alert("WebSocket 연결이 되어 있지 않습니다.");
       return;
@@ -173,8 +183,7 @@ export default function ClientPage({
       JSON.stringify(message)
     );
     console.log("전송할 메시지 (JSON 직렬화):", JSON.stringify(message));
-    console.log("업데트 상태",message.productStatus);
-    // alert("상태가 변경되었습니다!");
+    console.log("업데이트 상태:", status);
   };
 
 

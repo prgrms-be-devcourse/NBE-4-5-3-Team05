@@ -187,7 +187,8 @@ class BaseInitData(
                     imageUrl,
                     37.5f + (i % 10) * 0.01f,
                     127.0f + (i % 10) * 0.01f,
-                    defaultLocation // 거래 위치 값 추가
+                    defaultLocation, // 거래 위치 값 추가
+                    0.0
                 )
             )
         }
