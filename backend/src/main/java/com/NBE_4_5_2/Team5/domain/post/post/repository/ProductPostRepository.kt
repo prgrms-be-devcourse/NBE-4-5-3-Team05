@@ -52,6 +52,13 @@ interface ProductPostRepository : JpaRepository<ProductPost, String> {
         """
     SELECT DISTINCT p FROM ProductPost p
     WHERE p.productPrice >= :minPrice AND p.productPrice <= :maxPrice
+""", countQuery = """
+    SELECT count( p) 
+    FROM
+        ProductPost p 
+    WHERE
+        p.productPrice >= :minPrice 
+        AND p.productPrice <= :maxPrice
 """
     )
     fun findAllWithPrice(
@@ -60,12 +67,38 @@ interface ProductPostRepository : JpaRepository<ProductPost, String> {
         pageable: Pageable
     ): Page<ProductPost>
 
-    @Query("""
-    SELECT p FROM ProductPost p
-    JOIN p.productCategories pc
-    WHERE p.productPrice >= :minPrice AND p.productPrice <= :maxPrice
-    GROUP BY p
-    HAVING COUNT(DISTINCT CASE WHEN pc.category.id IN :categoryIds THEN pc.category.id END) = :categoryCount
+//    """
+//    SELECT p FROM ProductPost p
+//    JOIN p.productCategories pc
+//    WHERE p.productPrice >= :minPrice AND p.productPrice <= :maxPrice
+//    GROUP BY p
+//    HAVING COUNT(DISTINCT CASE WHEN pc.category.id IN :categoryIds THEN pc.category.id END) = :categoryCount
+//"""
+
+    @Query(
+        """
+            SELECT p 
+FROM ProductPost p 
+WHERE  p.productPrice BETWEEN :minPrice AND :maxPrice 
+ AND p.id IN (
+    SELECT pp.id 
+    FROM ProductPost pp 
+    JOIN pp.productCategories pc 
+    WHERE pp.productPrice BETWEEN :minPrice AND :maxPrice 
+    AND pc.category.id IN :categoryIds
+    GROUP BY pp.id
+    HAVING COUNT(DISTINCT pc.category.id) = :categoryCount
+)
+ORDER BY p.createdDate DESC
+        """
+        ,
+        countQuery = """
+    SELECT count( p) 
+    FROM
+        ProductPost p 
+    WHERE
+        p.productPrice >= :minPrice 
+        AND p.productPrice <= :maxPrice
 """)
     fun findAllWithFilters(
         @Param("minPrice") minPrice: Int,
@@ -81,6 +114,13 @@ interface ProductPostRepository : JpaRepository<ProductPost, String> {
     WHERE p.title LIKE :keyword
       AND p.productPrice >= :minPrice
       AND p.productPrice <= :maxPrice
+""", countQuery = """
+    SELECT count( p) 
+    FROM
+        ProductPost p 
+    WHERE p.title LIKE :keyword
+        AND p.productPrice >= :minPrice 
+        AND p.productPrice <= :maxPrice
 """
     )
     fun findByKeywordWithPrice(

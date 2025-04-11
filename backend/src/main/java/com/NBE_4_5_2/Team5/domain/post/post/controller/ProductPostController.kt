@@ -2,6 +2,7 @@ package com.NBE_4_5_2.Team5.domain.post.post.controller
 
 import com.NBE_4_5_2.Team5.domain.post.post.dto.request.ProductPostModifyForm
 import com.NBE_4_5_2.Team5.domain.post.post.dto.request.ProductPostWriteForm
+import com.NBE_4_5_2.Team5.domain.post.post.dto.response.LocationResponse
 import com.NBE_4_5_2.Team5.domain.post.post.dto.response.PreviewPostResponse
 import com.NBE_4_5_2.Team5.domain.post.post.dto.response.ProductPostResponse
 import com.NBE_4_5_2.Team5.domain.post.post.enums.ProductStatus
@@ -180,4 +181,24 @@ class ProductPostController(
         val favorites = productPostService.getMyFavorites(actor, page, pageSize)
         return RsData("200", "내가 찜한 내역 조회 성공", favorites)
     }
+
+    @Operation(summary = "위치 기반 게시글 조회", description = "가까운 거리에 있는 게시글을 조회합니다.")
+    @SecurityRequirement(name = "cookieAuth")
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/location")
+    fun getLocation(
+        @RequestParam(defaultValue = "1") page: Int,
+        @RequestParam(defaultValue = "10") pageSize: Int,
+        @RequestParam(defaultValue = "desc") sort: String,
+        @RequestParam(defaultValue = "15") radius: Double,
+    ): RsData<PageDto<LocationResponse>> {
+        val userIdentity = userAuthService.userIdentity
+        val user = userAuthService.getRealActor(userIdentity)
+        val lat = user.latitude
+        val lng = user.longitude
+
+        val locations = productPostService.getPostByLocation(lat, lng,sort, radius, page, pageSize)
+        return RsData("200","위치 기반 조회 성공", locations)
+    }
+
 }
