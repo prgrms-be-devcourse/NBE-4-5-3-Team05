@@ -64,6 +64,8 @@ class ChatController(
                 ChatRoomDto(
                     chatRoom.id,
                     chatRoom.roomId,
+                    chatRoom.getPostId(),
+                    chatRoom.writer,
                     chatRoom.name,
                     chatRoom.userCount,
                     chatRoom.lastMessage,

@@ -15,6 +15,7 @@ import {
   faRightFromBracket,
   faBars,
   faTrash,
+  faArrowsRotate,
 } from "@fortawesome/free-solid-svg-icons";
 import {
   DropdownMenu,
@@ -146,6 +147,37 @@ export default function ClientPage({
   useEffect(() => {
     getCurrentPosition();
   }, []);
+
+  const handleStatusChangeAndSend = (status: string) => {
+    handleSendStatus(status);
+  };
+
+
+  const handleSendStatus = (status: string) => {
+
+    if (!stompClient) {
+      alert("WebSocket 연결이 되어 있지 않습니다.");
+      return;
+    }
+
+    const message = {
+      roomId,
+      sender: userNickname,
+      type: "STATUS",
+      productStatus: status,
+    };
+
+    stompClient.send(
+      "/pub/chat/message",
+      { token: accessToken },
+      JSON.stringify(message)
+    );
+    console.log("전송할 메시지 (JSON 직렬화):", JSON.stringify(message));
+    console.log("업데트 상태",message.productStatus);
+    // alert("상태가 변경되었습니다!");
+  };
+
+
 
   useEffect(() => {
     scrollToBottomWithOffset(50);
@@ -307,6 +339,7 @@ export default function ClientPage({
       alert("이미지 업로드에 실패했습니다.");
     }
   };
+  
 
   return (
     <div className="flex flex-col h-screen w-full">
@@ -501,8 +534,42 @@ export default function ClientPage({
               <FontAwesomeIcon icon={faImage} className="mr-2" />
               사진
             </DropdownMenuItem>
+            {chatRoom.writer === userNickname && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <DropdownMenuItem className="flex items-center">
+                    <FontAwesomeIcon icon={faArrowsRotate} className="mr-2" />
+                    상태 변경
+                  </DropdownMenuItem>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  className="w-48 bg-white border border-gray-300 shadow-lg rounded-md"
+                >
+                  <DropdownMenuItem
+                    onClick={() => handleStatusChangeAndSend("PURCHASED")}
+                    className="flex items-center"
+                  >
+                    판매완료
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => handleStatusChangeAndSend("AVAILABLE")}
+                    className="flex items-center"
+                  >
+                    판매중
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => handleStatusChangeAndSend("RESERVED")}
+                    className="flex items-center"
+                  >
+                    예약중
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
+            
+
         <Textarea
           value={inputMessage}
           onChange={handleInputChange}
@@ -518,6 +585,8 @@ export default function ClientPage({
           <FontAwesomeIcon icon={faArrowRight} />
         </Button>
       </footer>
+
+      
     </div>
   );
 }

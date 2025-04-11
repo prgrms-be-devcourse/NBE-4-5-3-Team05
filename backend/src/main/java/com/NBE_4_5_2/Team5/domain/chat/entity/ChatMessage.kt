@@ -1,6 +1,7 @@
 package com.NBE_4_5_2.Team5.domain.chat.entity
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import com.NBE_4_5_2.Team5.domain.post.post.enums.ProductStatus
 import jakarta.persistence.ElementCollection
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
@@ -32,7 +33,10 @@ class ChatMessage (
     private var _latitude: Float=0.0f,
     @Column(name = "longitude")
     @JsonProperty("longitude")
-    private var _longitude: Float=0.0f
+    private val _longitude: Float=0.0f,
+    @Column(name = "productStatus")
+    private var _productStatus: ProductStatus = ProductStatus.AVAILABLE         // todo: 일단 초기값 설정인데 이게 맞는지 모르겠음
+
 ) {
     @Id
     @Column(name = "message_id")
@@ -91,6 +95,12 @@ class ChatMessage (
     fun getLongitude(): Float {
         return _longitude
     }
+    fun getProductStatus(): ProductStatus {
+        return _productStatus
+    }
+    fun setProductStatus(value: ProductStatus) {
+        _productStatus=value
+    }
 
     init {
         deleteStatus[_sender] = false
@@ -99,7 +109,7 @@ class ChatMessage (
 
     // 메시지 타입 : 입장, 퇴장, 채팅, 이미지 추가
     enum class MessageType {
-        ENTER, QUIT, TALK, IMAGE, LOCATION
+        ENTER, QUIT, TALK, IMAGE, LOCATION, STATUS
     }
 
     companion object{

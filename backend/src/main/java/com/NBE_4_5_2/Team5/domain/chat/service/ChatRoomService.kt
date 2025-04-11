@@ -63,21 +63,22 @@ class ChatRoomService {
     }
 
     // 채팅방 생성
-    fun createChatRoom(sender: String, receiver: String): ChatRoom {
+    fun createChatRoom(sender: String, receiver: String, postId: String?,writer: String?): ChatRoom {
         var roomId = findByRoomIdByUsers(sender, receiver)
         // 방이 이미 존재
         if (roomId != null) {
             val chatRoom = getRoomByRoomId(roomId, receiver)
             // 삭제 취소
             chatRoom.setDeleteStatus(sender, false)
-            hashOpsChatRoom!!.put(CHAT_ROOMS, roomId, chatRoom) // redis에 업데이트
+            hashOpsChatRoom.put(CHAT_ROOMS, roomId, chatRoom) // redis에 업데이트
             return chatRoom
         } else {
             // 새로운 roomId 할당
             roomId = UUID.randomUUID().toString()
-            val chatRoom = ChatRoom(sender, receiver)
+            val chatRoom = ChatRoom(sender, receiver,postId)
             chatRoom.roomId = roomId
-            hashOpsChatRoom!!.put(CHAT_ROOMS, roomId, chatRoom) // redis에 저장(sender)
+            chatRoom.writer = writer
+            hashOpsChatRoom.put(CHAT_ROOMS, roomId, chatRoom) // redis에 저장(sender)
 
             // 채팅방에 참가하는 유저의 세션 ID와 방 ID 매핑을 저장
             setUserEnterInfo(sender, roomId + "_" + sender) // 발신자 추가
