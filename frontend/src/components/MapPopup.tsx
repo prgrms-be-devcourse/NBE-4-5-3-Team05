@@ -1,15 +1,20 @@
+// MapPopup.tsx
 "use client";
 
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faTimes } from "@fortawesome/free-solid-svg-icons";
 import MapWithMarkers from "./MapComponent";
 
+// 검색 결과 타입 정의
 interface SearchResult {
   lat: string;
   lon: string;
   display_name: string;
 }
 
-interface MapPopupProps {
+// MapPopupProps 인터페이스: 초기 위치, 위치 선택 콜백, 모달 닫기 콜백
+export interface MapPopupProps {
   currentPos: { lat: number; lng: number; zoom: number };
   onLocationSelect: (
     lat: number,
@@ -20,22 +25,27 @@ interface MapPopupProps {
   onClose: () => void;
 }
 
-export default function MapPopup({
+/**
+ * MapPopup 컴포넌트는 검색어 입력, 검색 결과 리스트, 지도 표시 기능을 포함합니다.
+ * 사용자가 검색 결과를 클릭하면 해당 좌표와 최대 확대(zoom=18) 상태로 마커를 찍고,
+ * "선택 완료" 버튼 클릭 시 부모로 좌표와 주소를 전달합니다.
+ */
+const MapPopup: React.FC<MapPopupProps> = ({
   currentPos,
   onLocationSelect,
   onClose,
-}: MapPopupProps) {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
-  // 선택한 좌표, 줌, 그리고 주소를 state에 저장
+}) => {
+  const [searchQuery, setSearchQuery] = useState(""); // 검색어 상태
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([]); // 검색 결과 목록
   const [selectedPos, setSelectedPos] = useState<{
     lat: number;
     lng: number;
     zoom: number;
     address: string;
   } | null>(null);
+  const [loadingLocation, setLoadingLocation] = useState(false); // 역지오코딩 로딩 상태
 
-  // 검색 API 호출 (OpenStreetMap Nominatim 사용)
+  // 검색 API 호출: Nominatim API 사용
   const handleSearch = async () => {
     if (!searchQuery) return;
     try {
@@ -45,7 +55,7 @@ export default function MapPopup({
         )}`
       );
       const results: SearchResult[] = await response.json();
-      if (results && results.length > 0) {
+      if (results.length > 0) {
         setSearchResults(results);
       } else {
         alert("검색 결과가 없습니다.");
@@ -57,30 +67,39 @@ export default function MapPopup({
     }
   };
 
-  // 검색 결과 항목 클릭 시, state에 좌표와 address 저장(줌은 16으로 지정)
+  // 검색 결과 클릭 시 호출: 선택된 좌표를 최대 확대 줌(18)으로 설정
   const handleResultClick = (result: SearchResult) => {
     const lat = parseFloat(result.lat);
     const lng = parseFloat(result.lon);
-    setSelectedPos({ lat, lng, zoom: 16, address: result.display_name });
+    const desiredZoom = 18; // 최대 확대 줌값으로 설정
+    setSelectedPos({
+      lat,
+      lng,
+      zoom: desiredZoom,
+      address: result.display_name,
+    });
   };
 
-  // 지도 클릭 시 호출되는 함수: reverse geocoding 수행하여 주소 가져오기
+  // 지도 클릭 시 reverse geocoding 호출: 선택된 좌표를 업데이트
   const handleMapClick = async (lat: number, lng: number, zoom: number) => {
+    setLoadingLocation(true);
     try {
       const response = await fetch(
         `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`
       );
       const data = await response.json();
-      const address = data && data.display_name ? data.display_name : "";
+      const address = data?.display_name || "";
       setSelectedPos({ lat, lng, zoom, address });
     } catch (error) {
       console.error("Reverse geocoding 오류:", error);
       setSelectedPos({ lat, lng, zoom, address: "" });
+    } finally {
+      setLoadingLocation(false);
     }
   };
 
-  // "선택 완료" 버튼 클릭 시 부모로 좌표와 address 전달 후 팝업 종료
-  const handleConfirm = () => {
+  // 선택 완료 버튼 클릭: 선택된 좌표와 주소를 부모 컴포넌트에 전달하고 모달 닫기
+  const handleConfirm = useCallback(() => {
     if (selectedPos) {
       onLocationSelect(
         selectedPos.lat,
@@ -92,11 +111,21 @@ export default function MapPopup({
     } else {
       alert("좌표를 먼저 선택해 주세요.");
     }
-  };
+  }, [selectedPos, onLocationSelect, onClose]);
 
   return (
-    <div className="absolute top-0 left-0 right-0 bottom-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
+    <div className="absolute inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
       <div className="bg-white p-4 rounded shadow-lg w-[80%] h-[80%] relative flex flex-col">
+        {/* 모달 헤더 */}
+        <div className="flex justify-between items-center p-4 border-b">
+          <h2 className="text-lg font-bold">거래 위치 보기</h2>
+          <button
+            onClick={onClose}
+            className="text-gray-600 hover:text-gray-800"
+          >
+            <FontAwesomeIcon icon={faTimes} size="lg" />
+          </button>
+        </div>
         {/* 검색 영역 */}
         <div className="mb-4">
           <div className="flex items-center">
@@ -106,6 +135,13 @@ export default function MapPopup({
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="장소 검색..."
               className="border p-2 flex-grow"
+              // 엔터키로 검색하면 폼 제출을 막고 handleSearch 호출
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  handleSearch();
+                }
+              }}
             />
             <button
               type="button"
@@ -122,7 +158,6 @@ export default function MapPopup({
               닫기
             </button>
           </div>
-          {/* 검색 결과 리스트 */}
           {searchResults.length > 0 && (
             <div className="mt-2 max-h-40 overflow-y-auto border p-2">
               {searchResults.map((result, idx) => (
@@ -137,9 +172,8 @@ export default function MapPopup({
             </div>
           )}
         </div>
-
         {/* 지도 영역 */}
-        <div className="flex-grow">
+        <div className="flex-grow relative" style={{ height: "100%" }}>
           <MapWithMarkers
             currentPos={
               selectedPos
@@ -151,23 +185,27 @@ export default function MapPopup({
                 : currentPos
             }
             onLocationSelect={(lat, lng, zoom) => {
-              // 지도 클릭 시 reverse geocoding을 수행하여 주소를 업데이트
               handleMapClick(lat, lng, zoom);
             }}
           />
         </div>
-
-        {/* 선택 완료 버튼 */}
+        {/* 하단 영역 */}
         <div className="mt-4 flex justify-end">
-          <button
-            type="button"
-            onClick={handleConfirm}
-            className="bg-green-500 text-white p-2 rounded"
-          >
-            선택 완료
-          </button>
+          {loadingLocation ? (
+            <div>로딩중...</div>
+          ) : (
+            <button
+              type="button"
+              onClick={handleConfirm}
+              className="bg-green-500 text-white p-2 rounded"
+            >
+              선택 완료
+            </button>
+          )}
         </div>
       </div>
     </div>
   );
-}
+};
+
+export default MapPopup;

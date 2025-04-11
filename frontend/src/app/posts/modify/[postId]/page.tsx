@@ -1,12 +1,17 @@
+// PostModifyPage.tsx
 "use client";
 
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
+import Image from "next/image";
 import type { components } from "@/lib/backend/apiV1/schema";
 import client from "@/lib/client";
 import fileUploadClient from "@/lib/fileUploadClient";
 import { LoginMemberContext } from "@/app/stores/auth/loginMemberStore";
-import MapPopup from "@/components/MapPopup"; // PostCreatePage와 동일한 MapPopup 사용
+import MapPopup, { MapPopupProps } from "@/components/MapPopup";
+import { Button } from "@/components/ui/button";
+import { faComment, faMapMarkerAlt } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 type Category = components["schemas"]["Category"];
 type ProductPostResponse = components["schemas"]["ProductPostResponse"];
@@ -33,9 +38,8 @@ export default function PostModifyPage() {
   const [error, setError] = useState<string>("");
   const [status, setStatus] = useState<StatusType>("AVAILABLE");
 
-  // 지도 팝업 열림 상태
+  // 지도 팝업 열림 상태 및 초기 지도 위치 (수정 시 기존 데이터를 활용)
   const [isMapOpen, setIsMapOpen] = useState(false);
-  // MapPopup에 전달할 현재 지도 위치 (초기값은 기본값)
   const [mapCurrentPos, setMapCurrentPos] = useState({
     lat: 37.5665,
     lng: 126.978,
@@ -96,8 +100,6 @@ export default function PostModifyPage() {
         setPrice(postData.productPrice ?? "");
         setLatitude(postData.latitude ?? "");
         setLongitude(postData.longitude ?? "");
-        // 거래 위치는 수정 시 사용자가 다시 입력하거나 선택하게 할 수도 있음.
-        // 기존 데이터가 있다면 넣어둡니다.
         setLocation((postData as any).location ?? "");
         if (postData.imageUrls) {
           const imgs = postData.imageUrls
@@ -107,11 +109,11 @@ export default function PostModifyPage() {
           setInitialImageUrls(imgs);
         }
         setStatus(postData.status ?? "AVAILABLE");
-        // 지도 초기 위치로 기존 좌표 사용
+        // 지도 초기 위치: 게시글의 좌표와, 수정 시 최대 확대 상태(zoom=18)로 변경
         setMapCurrentPos({
           lat: postData.latitude,
           lng: postData.longitude,
-          zoom: 16,
+          zoom: 18,
         });
       }
     } catch (err) {
@@ -173,7 +175,7 @@ export default function PostModifyPage() {
     }
   };
 
-  // MapPopup에서 위치 선택 시 상태 업데이트 함수
+  // MapPopup에서 위치 선택 시 호출되어 좌표, 주소 및 줌 값을 업데이트
   const handleLocationSelect = (
     lat: number,
     lng: number,
@@ -186,7 +188,6 @@ export default function PostModifyPage() {
     setMapCurrentPos({ lat, lng, zoom });
   };
 
-  // 모달 열기/닫기 함수
   const openMap = () => setIsMapOpen(true);
   const closeMap = () => setIsMapOpen(false);
 
@@ -198,6 +199,12 @@ export default function PostModifyPage() {
   if (loading) return <div className="p-4">로딩 중...</div>;
   if (error) return <div className="p-4 text-red-500">{error}</div>;
 
+  // 이미지 URL 처리: 첫 번째 이미지는 메인, 나머지는 추가 사진으로 사용
+  const images = initialImageUrls.length > 0 ? initialImageUrls : [];
+
+  // 거래 위치 정보: post.location이 있으면 사용, 없으면 "등록된 주소 없음"
+  const tradeLocation = location || "등록된 주소 없음";
+
   return (
     <div className="p-4 w-full">
       <h1 className="text-2xl font-bold mb-4">판매글 수정</h1>
@@ -205,7 +212,7 @@ export default function PostModifyPage() {
         onSubmit={handleSubmit}
         className="flex space-x-4 p-4 w-full flex-1"
       >
-        {/* 왼쪽 영역: 물품 이름, 제목, 본문 */}
+        {/* 왼쪽 영역: 물품 이름, 제목, 본문, 판매 상태 */}
         <div className="w-2/3 space-y-4">
           <div>
             <label className="block mb-1 font-semibold">물품 이름</label>
