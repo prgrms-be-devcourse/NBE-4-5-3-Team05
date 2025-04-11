@@ -117,12 +117,12 @@ class EmailService(
      * @throws ServiceException 반송 이메일이 확인된 경우 "이메일 발송에 실패했습니다." 메시지와 함께 예외 발생
      */
     fun checkBouncedEmail(email: String) {
-        bouncedEmailService.checkBouncedEmail(email)
-            .takeIf { !it }
-            .also {
-                redisTemplate.delete(createEmailKey(email))
-                throw ServiceException("404-1", "존재하지않는 이메일입니다.")
-            }
+        val isExistEmail = bouncedEmailService.checkBouncedEmail(email)
+
+        if (!isExistEmail) {
+            redisTemplate.delete(createEmailKey(email))
+            throw ServiceException("404-1", "존재하지않는 이메일입니다.")
+        }
     }
 
     /**

@@ -4,6 +4,7 @@ import { LoginMemberContext } from "@/app/stores/auth/loginMemberStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import client from "@/lib/client";
+import fileUploadClient from "@/lib/fileUploadClient";
 import { useRouter } from "next/navigation";
 import { useState, useContext, useEffect } from "react";
 import MapComponent from "@/components/MapComponent";
@@ -22,6 +23,9 @@ export default function ClientPage() {
   const [emailStatusColor, setEmailStatusColor] = useState("text-red-500");
   const [codeStatus, setCodeStatus] = useState("");
   const [codeStatusColor, setCodeStatusColor] = useState("text-red-500");
+  const [selectedProfileFile, setSelectedProfileFile] = useState<File | null>(
+    null
+  );
 
   // 위치 관리
     const [latitude, setLatitude] = useState(0);
@@ -42,18 +46,20 @@ export default function ClientPage() {
         setLongitude(position.coords.longitude);
       });
     };
-    
+
     getCurrentPosition();
   }, [loginMember]);
 
-  const fetchAddressFromCoordinates = async (lat:any, lng:any) => {
-    if(lat==0 || lng==0){
-      return "주소를 입력해주세요" ;
+  const fetchAddressFromCoordinates = async (lat: number, lng: number) => {
+    if (lat === 0 || lng === 0) {
+      return "주소를 입력해주세요";
     }
     try {
-      const response = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`);
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`
+      );
       const data = await response.json();
-      
+
       if (data && data.display_name) {
         setAddress(data.display_name); // 주소를 상태에 저장
         return data.display_name;
@@ -68,52 +74,52 @@ export default function ClientPage() {
     }
   };
 
-  const registerLocation = async (lat:any, lng:any) => {
-    // if (lat === 0 && lng === 0) {
-    //     alert("위치 정보를 가져오지 못했습니다.");
-    //     return;
-    // }
-
+  const registerLocation = async (lat: number, lng: number) => {
     try {
       const response = await client.PUT("/api/users/me/location", {
         body: { latitude: lat, longitude: lng },
         credentials: "include",
       });
-      
+
       if (response.error) {
         setLocationStatus("위치 등록에 실패했습니다.");
         return;
       }
-      
+
       const user = response.data.data; // 서버에서 받은 사용자 정보
-      setLatitude(user.latitude);  // 서버에서 받은 위도
-      setLongitude(user.longitude); // 서버에서 받은 경도
+      setLatitude(user.latitude);
+      setLongitude(user.longitude);
       setLocationStatus("위치가 성공적으로 등록되었습니다.");
-      const new_address = await fetchAddressFromCoordinates(user.latitude, user.longitude); // 주소 패치
+      const new_address = await fetchAddressFromCoordinates(
+        user.latitude,
+        user.longitude
+      );
       setMapVisible(false); // 위치 등록 후 지도 닫기
 
-      const updateUserResponse = await client.PUT("/api/users/me", {
+      await client.PUT("/api/users/me", {
         body: {
-          emial: loginMember.email,
+          email: loginMember.email,
           nickname: loginMember.nickname,
-          address: new_address, // 위도 경도로 얻은 새 주소
+          address: new_address,
           profileUrl: loginMember.profileUrl,
         },
         credentials: "include",
       });
-      console.log("새로얻은 주소: ",new_address);
-
+      console.log("새로얻은 주소: ", new_address);
     } catch (error) {
-        console.error("위치 등록 중 오류 발생:", error);
-        setLocationStatus("위치 등록에 실패했습니다.");
+      console.error("위치 등록 중 오류 발생:", error);
+      setLocationStatus("위치 등록에 실패했습니다.");
     }
   };
 
-
-  
   function handleEmailChange(e: React.ChangeEvent<HTMLInputElement>) {
     const newEmail = e.target.value;
     setEmail(newEmail);
+
+    // 이메일을 수정할 때 지도 창이 열려있다면 닫기
+    if (mapVisible) {
+      setMapVisible(false);
+    }
 
     if (newEmail === loginMember.email) {
       // 기존 이메일로 돌아가면 인증 필요 없음
@@ -175,7 +181,28 @@ export default function ClientPage() {
     setCodeStatus("이메일 인증이 완료되었습니다.");
     setCodeStatusColor("text-blue-500");
     setIsEmailVerified(true);
+
+    // 인증 코드를 입력할 때 지도 창이 열려 있다면 닫기
+    if (mapVisible) {
+      setMapVisible(false);
+    }
   }
+
+  // 파일 업로드 함수
+  const uploadFile = async (file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append("file", file);
+    const response = await fileUploadClient.POST("/api/uploadFile", {
+      body: formData as any,
+      rawBody: true,
+      credentials: "include",
+      headers: {},
+    });
+    if (response.error) {
+      console.error("파일 업로드 실패", response.error);
+    }
+    return response.data as string;
+  };
 
   async function updateInfo(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -185,86 +212,118 @@ export default function ClientPage() {
       return;
     }
 
-    const formData = e.target as HTMLFormElement;
-    console.log(formData);
-    const email = formData.email.value;
-    const nickname = formData.nickname.value;
+    const form = e.target as HTMLFormElement;
+    const emailVal = form.email.value;
+    const nickname = form.nickname.value;
     const _address = address || loginMember.address;
-    const profileUrl = formData.profileUrl.value;
-
+    let profileUrl = loginMember.profileUrl;
+    if (selectedProfileFile) {
+      try {
+        profileUrl = await uploadFile(selectedProfileFile);
+      } catch (error: any) {
+        alert("파일 업로드 중 오류가 발생했습니다: " + error.message);
+        return;
+      }
+    }
     const response = await client.PUT("/api/users/me", {
       body: {
-        email,
+        email: emailVal,
         nickname,
-        address:_address,
+        address: _address,
         profileUrl,
       },
       credentials: "include",
     });
-
     if (response.error) {
       alert(response.error.message);
       router.push("/user/login");
       return;
     }
-
-    console.log("서버에 전송하는 주소: ",_address);
+    console.log("서버에 전송하는 주소: ", _address);
     alert("사용자 정보가 성공적으로 수정되었습니다.");
     setLoginMember(response.data.data);
     router.push("/user/me");
   }
 
+  function handleProfileFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    if (e.target.files && e.target.files.length > 0) {
+      setSelectedProfileFile(e.target.files[0]);
+    }
+  }
+
   return (
-    <>
-      <div className="flex h-full w-full justify-center">
-        <div className="flex flex-col gap-2">
-          <h2 className="text-xl font-bold text-center">회원 정보 수정</h2>
-
-          <Button onClick={() => {
-              setMapVisible(true); // 지도를 표시
-          }} className="mt-4">
-              위치 등록
-          </Button>
-
-
-          {mapVisible && (
-              <MapComponent
-                  currentPos={{ lat: latitude, lng: longitude, zoom }}
-                  onLocationSelect={(lat, lng) => {
-                      setLatitude(lat);
-                      setLongitude(lng);
-                      registerLocation(lat, lng); // 핀 클릭 시 위치 등록
-                  }}
+    <div className="flex h-full w-full justify-center p-6">
+      <div className="flex flex-col gap-4 w-full max-w-3xl">
+        <h2 className="text-xl font-bold text-center">회원 정보 수정</h2>
+        <Button onClick={() => setMapVisible(true)} className="mt-4">
+          위치 등록
+        </Button>
+        {mapVisible && (
+          // 지도 영역을 고정된 높이로 감싸서 다른 입력 UI에 영향을 받지 않도록 함.
+          <div style={{ height: "400px", width: "100%" }}>
+            <MapComponent
+              currentPos={{ lat: latitude, lng: longitude, zoom }}
+              onLocationSelect={(lat, lng) => {
+                setLatitude(lat);
+                setLongitude(lng);
+                registerLocation(lat, lng);
+              }}
+            />
+          </div>
+        )}
+        {locationStatus && <h2>{locationStatus}</h2>}
+        {latitude === 0 && longitude === 0 && (
+          <h3 className="text-lg">위치를 등록해 주세요</h3>
+        )}
+        {latitude !== 0 && longitude !== 0 && (
+          <div className="mt-4">
+            <h3 className="text-lg">위치:</h3>
+            <p>위도: {latitude}</p>
+            <p>경도: {longitude}</p>
+            {address && <p>주소: {address}</p>}
+          </div>
+        )}
+        {/* 두 컬럼 레이아웃: 왼쪽은 프로필 사진 영역, 오른쪽은 나머지 입력 필드 */}
+        <form onSubmit={updateInfo} className="flex flex-col md:flex-row gap-4">
+          {/* 왼쪽 컬럼: 프로필 사진 및 사진 변경 버튼 */}
+          <div className="flex flex-col items-center md:w-1/3">
+            <img
+              src={
+                selectedProfileFile
+                  ? URL.createObjectURL(selectedProfileFile)
+                  : loginMember.profileUrl
+              }
+              alt="프로필 사진 미리보기"
+              className="w-32 h-32 object-cover border rounded"
+            />
+            <div className="mt-2">
+              <input
+                id="profileFile"
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleProfileFileChange}
               />
-          )}
-
-          {locationStatus && <h2>{locationStatus}</h2>}
-          
-          {latitude == 0 && longitude == 0 && (
-            <h3 className="text-lg">위치를 등록해 주세요</h3>
-          )}
-            
-          {latitude !== 0 && longitude !== 0 && (
-            <div className="mt-4">
-              <h3 className="text-lg">위치:</h3>
-              <p>위도: {latitude}</p>
-              <p>경도: {longitude}</p>
-              {address && <p>주소: {address}</p>} {/* 주소 표시 */}
+              <label
+                htmlFor="profileFile"
+                className="cursor-pointer inline-block px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded"
+              >
+                사진 변경
+              </label>
             </div>
-          )}
-
-
-          <form onSubmit={updateInfo} className="flex flex-col gap-2">
+          </div>
+          {/* 오른쪽 컬럼: 나머지 입력 필드 */}
+          <div className="flex flex-col gap-4 md:w-2/3">
             <div className="flex flex-col gap-1">
               <label
                 htmlFor="email"
                 className="block text-sm font-medium text-gray-700"
               >
-                {" "}
                 이메일:
               </label>
               <div className="flex gap-2 items-center">
                 <Input
+                  id="email"
                   type="email"
                   name="email"
                   placeholder="이메일"
@@ -300,9 +359,14 @@ export default function ClientPage() {
                 <Input
                   type="text"
                   placeholder="인증 코드"
-                  className="border-2 border-black flex-grow"
+                  className="border-2 border-black flex-grow p-2 text-base"
                   value={emailCode}
-                  onChange={(e) => setEmailCode(e.target.value)}
+                  onChange={(e) => {
+                    if (mapVisible) {
+                      setMapVisible(false);
+                    }
+                    setEmailCode(e.target.value);
+                  }}
                 />
                 <Button
                   type="button"
@@ -322,62 +386,28 @@ export default function ClientPage() {
                 htmlFor="nickname"
                 className="block text-sm font-medium text-gray-700"
               >
-                {" "}
                 닉네임:
               </label>
               <Input
+                id="nickname"
                 type="text"
                 name="nickname"
                 placeholder="닉네임"
                 className="border-2 border-black"
                 defaultValue={loginMember.nickname}
-              />
-            </div>
-            {/* <div>
-              <label
-                htmlFor="address"
-                className="block text-sm font-medium text-gray-700"
-              >
-                주소:
-              </label>
-              <Input
-                type="text"
-                name="address"
-                placeholder="주소"
-                className="border-2 border-black w-[500px]"
-                defaultValue={loginMember.address}
-              />
-            </div> */}
-            <div>
-              <label
-                htmlFor="profileUrl"
-                className="block text-sm font-medium text-gray-700"
-              >
-                프로필URL:
-              </label>
-              <Input
-                type="url"
-                name="profileUrl"
-                placeholder="프로필URL"
-                className="border-2 border-black w-[500px]"
-                defaultValue={loginMember.profileUrl}
+                required
               />
             </div>
 
             <Button
               type="submit"
-              className={`p-2 mt-4 ${
-                isEmailVerified
-                  ? "bg-blue-500 text-white"
-                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
-              }`}
-              disabled={!isEmailVerified}
+              className="w-full bg-blue-500 text-white py-3"
             >
               수정
             </Button>
-          </form>
-        </div>
+          </div>
+        </form>
       </div>
-    </>
+    </div>
   );
 }
