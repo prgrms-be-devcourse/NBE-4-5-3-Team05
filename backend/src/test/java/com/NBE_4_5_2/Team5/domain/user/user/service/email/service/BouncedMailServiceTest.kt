@@ -44,7 +44,7 @@ class BouncedMailServiceTest {
         mockMessage = mock(Message::class.java)  // Message 목 객체 생성
         spyService = spy(bouncedEmailService)     // 부분 모킹을 위한 스파이 객체 생성
 
-        doReturn(mockFolder).`when`(spyService).emailFolder // getEmailFolder() 호출 시 가짜 폴더 반환
+        doReturn(mockFolder).`when`(spyService).getEmailFolder() // getEmailFolder() 호출 시 가짜 폴더 반환
         `when`(mockFolder.messages).thenReturn(arrayOf(mockMessage))  // 폴더의 메시지 배열 반환 설정
         doReturn(LocalDateTime.now().minusSeconds(10)).`when`(spyService).getMessageTime(mockMessage)  // getMessageTime() 호출 시 현재 시간에서 10초 전 반환
         `when`(pop3.untilTime).thenReturn(120)  // pop3.getUntilTime() 호출 시 120초 반환
