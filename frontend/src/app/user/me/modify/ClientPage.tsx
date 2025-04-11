@@ -24,12 +24,12 @@ export default function ClientPage() {
   const [codeStatusColor, setCodeStatusColor] = useState("text-red-500");
 
   // 위치 관리
-  const [latitude, setLatitude] = useState(0);
-  const [longitude, setLongitude] = useState(0);
-  const [zoom, setZoom] = useState(18);
-  const [locationStatus, setLocationStatus] = useState("");
-  const [mapVisible, setMapVisible] = useState(false);
-  const [address, setAddress] = useState("");
+    const [latitude, setLatitude] = useState(0);
+    const [longitude, setLongitude] = useState(0);
+    const [zoom, setZoom] = useState(18);
+    const [locationStatus, setLocationStatus] = useState("");
+    const [mapVisible, setMapVisible] = useState(false);
+    const [address, setAddress] = useState("");
 
   useEffect(() => {
     // 초기 사용자 위치 설정 (0,0)

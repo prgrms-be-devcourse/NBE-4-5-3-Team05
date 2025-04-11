@@ -33,7 +33,7 @@ class ChatMessage (
     private var _latitude: Float=0.0f,
     @Column(name = "longitude")
     @JsonProperty("longitude")
-    private val _longitude: Float=0.0f,
+    private var _longitude: Float=0.0f,
     @Column(name = "productStatus")
     private var _productStatus: ProductStatus = ProductStatus.AVAILABLE         // todo: 일단 초기값 설정인데 이게 맞는지 모르겠음
 
